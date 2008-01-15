@@ -43,7 +43,6 @@ HEADERS += src/CActionManager.h \
     src/SpellsDialog.h \
     src/defines.h \
     src/exits.h \
-    src/finddialog.h \
     src/mainwindow.h \
     src/proxy.h \
     src/renderer.h \
@@ -71,7 +70,6 @@ HEADERS += src/CActionManager.h \
     src/SpellsDialog.h \
     src/defines.h \
     src/exits.h \
-    src/finddialog.h \
     src/mainwindow.h \
     src/renderer.h \
     src/userfunc.h \
@@ -95,7 +93,6 @@ SOURCES += src/CActionManager.cpp \
     src/SpellsDialog.cpp \
     src/configurator.cpp \
     src/exits.cpp \
-    src/finddialog.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/proxy.cpp \
@@ -123,7 +120,6 @@ SOURCES += src/CActionManager.cpp \
     src/SpellsDialog.cpp \
     src/configurator.cpp \
     src/exits.cpp \
-    src/finddialog.cpp \
     src/mainwindow.cpp \
     src/renderer.cpp \
     src/userfunc.cpp \
