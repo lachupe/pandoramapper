@@ -5,8 +5,8 @@ CONFIG += qt \
     opengl \
     warn_on \
     thread
-CONFIG += debug
-CONFIG -= debug
+#CONFIG += debug
+CONFIG += release
 QT += xml \
     opengl \
     gui \
@@ -16,13 +16,7 @@ FORMS += src/configedit.ui \
     src/logdialog.ui \
     src/movementdialog.ui \
     src/roomedit.ui \
-    src/spellsdialog.ui \
-    src/configedit.ui \
-    src/finddialog.ui \
-    src/logdialog.ui \
-    src/movementdialog.ui \
-    src/roomedit.ui \
-    src/spellsdialog.ui
+    src/spellsdialog.ui 
 HEADERS += src/CActionManager.h \
     src/CConfigurator.h \
     src/CDispatcher.h \
@@ -48,7 +42,8 @@ HEADERS += src/CActionManager.h \
     src/renderer.h \
     src/userfunc.h \
     src/utils.h \
-    src/xml2.h 
+    src/xml2.h \
+    src/finddialog.h
 SOURCES += src/CActionManager.cpp \
     src/CDispatcher.cpp \
     src/CEngine.cpp \
@@ -73,32 +68,8 @@ SOURCES += src/CActionManager.cpp \
     src/renderer.cpp \
     src/userfunc.cpp \
     src/utils.cpp \
-    src/xml2.cpp \
-    src/CTree.cpp \
-    src/CStacksManager.cpp \
-    src/CRoomManager.cpp \
-    src/CFrustum.cpp \
-    src/proxy.cpp \
-    src/CEngine.cpp \
-    src/CDispatcher.cpp \
-    src/main.cpp \
-    src/CActionManager.cpp \
-    src/CLogDialog.cpp \
-    src/CMovementDialog.cpp \
-    src/CRoom.cpp \
-    src/CSelectionManager.cpp \
-    src/CSquare.cpp \
-    src/ConfigWidget.cpp \
-    src/Regions.cpp \
-    src/RoomEditDialog.cpp \
-    src/SpellsDialog.cpp \
-    src/configurator.cpp \
-    src/exits.cpp \
-    src/mainwindow.cpp \
-    src/renderer.cpp \
-    src/userfunc.cpp \
-    src/utils.cpp \
-    src/finddialog.cpp
+    src/finddialog.cpp \
+    src/xml2.cpp
 TARGET = pandora
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 win32:LIBS += -lwsock32
