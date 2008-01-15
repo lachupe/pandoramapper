@@ -48,33 +48,7 @@ HEADERS += src/CActionManager.h \
     src/renderer.h \
     src/userfunc.h \
     src/utils.h \
-    src/xml2.h \
-    src/CConfigurator.h \
-    src/CTree.h \
-    src/CStacksManager.h \
-    src/CRegion.h \
-    src/CRoomManager.h \
-    src/proxy.h \
-    src/CEngine.h \
-    src/CDispatcher.h \
-    src/CFrustum.h \
-    src/CActionManager.h \
-    src/CEvent.h \
-    src/CLogDialog.h \
-    src/CMovementDialog.h \
-    src/CRoom.h \
-    src/CSelectionManager.h \
-    src/CSquare.h \
-    src/ConfigWidget.h \
-    src/RoomEditDialog.h \
-    src/SpellsDialog.h \
-    src/defines.h \
-    src/exits.h \
-    src/mainwindow.h \
-    src/renderer.h \
-    src/userfunc.h \
-    src/utils.h \
-    src/xml2.h
+    src/xml2.h 
 SOURCES += src/CActionManager.cpp \
     src/CDispatcher.cpp \
     src/CEngine.cpp \
@@ -124,7 +98,7 @@ SOURCES += src/CActionManager.cpp \
     src/renderer.cpp \
     src/userfunc.cpp \
     src/utils.cpp \
-    src/xml2.cpp
+    src/finddialog.cpp
 TARGET = pandora
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 win32:LIBS += -lwsock32

@@ -1,6 +1,6 @@
 #include <QtGui>
 #include "finddialog.h"
-#include "Map.h"
+#include "CRoomManager.h"
 #include "renderer.h"
 #include "mainwindow.h"
 

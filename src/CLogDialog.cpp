@@ -3,7 +3,7 @@
 
 #include "CConfigurator.h"
 #include "CMovementDialog.h"
-#include "Map.h"
+#include "CRoomManager.h"
 #include "utils.h"
 #include "CStacksManager.h"
 #include "defines.h"
