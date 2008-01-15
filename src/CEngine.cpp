@@ -343,6 +343,10 @@ void CEngine::updateRegions()
         r = stacker.first();
         
         last_region = r->getRegion();
+        // If this room was JUST added, it has no region set.
+        if (last_region == NULL) {
+        	return; // probably it needs some heavier work ...region settings might not work correct 
+        }
         
         if (last_region != users_region && conf->get_regions_auto_replace() == false) {
             send_to_user("--[ Moved to another region: new region %s\r\n", (const char *)  last_region->getName() );

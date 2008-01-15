@@ -5,8 +5,8 @@ CONFIG += qt \
     opengl \
     warn_on \
     thread
-#CONFIG += debug
-CONFIG += release
+CONFIG += debug
+#CONFIG += release
 QT += xml \
     opengl \
     gui \
