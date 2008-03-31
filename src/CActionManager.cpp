@@ -25,9 +25,9 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     parent = parentWindow;
 
     /* creating actions and connecting them here */
-    newAct = new QAction(tr("&New"), this);
+    newAct = new QAction(tr("&Close"), this);
     newAct->setShortcut(tr("Ctrl+N"));
-    newAct->setStatusTip(tr("Create a new map"));
+    newAct->setStatusTip(tr("Close current map"));
     connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));    
     
     openAct = new QAction(tr("&Load..."), this);
@@ -362,7 +362,34 @@ void CActionManager::always_on_top(bool set_on_top)
 
 void CActionManager::newFile()
 {
+	// creates a new map. 
+	// by now - just clears the existing one.
+
+	if (conf->get_data_mod()) {
+	        switch(QMessageBox::information(parent, "Pandora",
+                    "The map contains unsaved changes\n"
+                    "Do you want to save the changes before exiting?",
+                    "&Save", "&Discard", "Cancel",
+                    0,      // Enter == button 0
+                    2)) { // Escape == button 2
+        case 0: // Save clicked or Alt+S pressed or Enter pressed.
+            save();
+            break;
+        case 1: // Discard clicked or Alt+D pressed
+            // don't save but exit
+            break;
+        case 2: // Cancel clicked or Escape pressed
+            return;// don't exit
+            break;
+        }    
     
+    } 
+
+	Map.reinit();  /* this one reinits Ctree structure also */
+	stacker.reset();  /* resetting stacks */
+	engine->clear();
+	engine->setMapping(false);
+	toggle_renderer_reaction();
 }
 
 
@@ -446,8 +473,8 @@ void CActionManager::reload()
 
 void CActionManager::quit()
 {
-    if (conf->get_data_mod()) {
-        switch(QMessageBox::information(parent, "Pandora",
+	if (conf->get_data_mod()) {
+	        switch(QMessageBox::information(parent, "Pandora",
                                         "The map contains unsaved changes\n"
                                         "Do you want to save the changes before exiting?",
                                         "&Save", "&Discard", "Cancel",

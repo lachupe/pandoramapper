@@ -601,6 +601,8 @@ void CMainWindow::setToolMode(ToolMode mode)
 #if QT_VERSION >= 0x040200
         renderer->setCursor(Qt::OpenHandCursor);
 #endif
+        // make sure it's off
+        mouseState.RightButtonPressed = false;
         break;
     case DeleteMode:
         actionManager->deleteToolAct->setChecked(true);

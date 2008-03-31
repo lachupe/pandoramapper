@@ -295,6 +295,9 @@ void CRoomManager::smallDeleteRoom(CRoom *r)
 void CRoomManager::removeFromPlane(CRoom *room)
 {
     CPlane *p;
+   
+    if (planes == NULL)
+    	return;
     
     p = planes;
     while (p->z != room->getZ()) {

@@ -2,12 +2,12 @@
   <localport port="3000">
   <remotehost hostname="129.241.210.221" port="443">
   <basefile filename="database/mume.xml">
-  <GLvisibility textures="100" details="100" shownotes="OFF" layers="7">
+  <GLvisibility textures="100" details="100" shownotes="ON" layers="7">
   <analyzers exits="OFF"  terrain="ON">
   <engineflags briefmode="ON" automerge="ON"  angrylinker="ON" duallinker="ON">
   <regionsflags displayinrenderer="OFF" showinfo="ON">
   <guisettings always_on_top="ON">
-  <window x="847" y="49" height="341" width="428">
+  <window x="841" y="49" height="341" width="428">
   <rendererangles anglex="-17.000000" angley="16.000000" anglez="0.000000">
   <rendererpositions userx="0.000000" usery="0.000000" userz="-19.000000">
   <refresh auto="ON" roomnamequote="10" descquote="10">

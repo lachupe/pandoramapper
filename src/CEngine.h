@@ -22,7 +22,8 @@ Q_OBJECT
     QByteArray last_desc;
     QByteArray last_exits;
     QByteArray last_prompt;
-    char last_terrain;
+    char 	   last_terrain;	
+    QByteArray last_movement;
   
     PipeManager  eventPipe;
     Event        event;
@@ -60,7 +61,8 @@ public:
     QByteArray getExits() { return last_exits; }
     QByteArray getPrompt() { return last_prompt; }
     char getTerrain() { return last_terrain; }
-
+    QByteArray getLastMovement() { return last_movement; }
+    
     void setRoomname(QByteArray s) { last_name = s; }
     void setDesc(QByteArray s) { last_desc = s; }
     void setExits(QByteArray s) { last_exits = s; }

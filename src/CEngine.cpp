@@ -270,7 +270,8 @@ void CEngine::parseEvent()
 
 
     if (event.movement == true) {
-        if (event.dir =="")
+        last_movement = event.dir;
+    	if (event.dir =="") 
             tryAllDirs();
         else 
             tryDir();        
@@ -706,6 +707,7 @@ void CEngine::clear()
     last_terrain = 0;
     last_prompt.clear();
     last_prompt = "-->";
+    last_movement = "";
     
     set_users_region(Map.getRegionByName("default"));
     set_last_region(Map.getRegionByName("default"));

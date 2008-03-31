@@ -16,6 +16,19 @@ class QFont;
 
 #define MAXHITS 200
 
+
+// temporary storage for a billboard text
+class Billboard {
+	
+public:
+	Billboard(GLfloat _x, GLfloat _y, GLfloat _z, QString _text):x(_x),y(_y),z(_z),text(_text) {} 
+
+	GLfloat 	x;
+	GLfloat 	y;
+	GLfloat 	z;
+	QString text;
+};
+
 class RendererWidget : public QGLWidget
 {
     Q_OBJECT
@@ -26,10 +39,12 @@ class RendererWidget : public QGLWidget
     int           cury;
     int           curz;			/* current rooms position */ 
     CFrustum       frustum;
-    QFont         textFont;
+//    QFont         textFont;
     
     int           lowerZ;
     int           upperZ;
+    
+    QList< Billboard * > billboards;
 
     unsigned int last_drawn_marker;
     unsigned int last_drawn_trail;
@@ -50,6 +65,7 @@ class RendererWidget : public QGLWidget
     void setupNewBaseCoordinates();
 
     void draw();
+    void drawCone();
 
 public:
     GLfloat       angley;
