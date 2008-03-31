@@ -8,6 +8,7 @@
 
 #include <QVector>
 #include <QObject>
+#include <QMutex>
 
 class CPlane;
 class CSquare;
@@ -18,13 +19,15 @@ class CSquare;
 class CRoomManager : public QObject {
 	Q_OBJECT
 	
-    QList<CRegion *>    regions;
+	bool loadingMap;
+	QList<CRegion *>    regions;
 public:
     QVector<CRoom *> rooms;   		/* rooms */
     CRoom *ids[MAX_ROOMS];	/* array of pointers */
     CSelectionManager   selections;
     
-    
+
+    bool isLoadingMap() { return loadingMap; }
     unsigned int size()  { return rooms.size(); }
     unsigned int next_free; 	/* next free id */
     

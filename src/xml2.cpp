@@ -69,6 +69,7 @@ void CRoomManager::loadMap( QString filename)
       return;
   }
 
+  loadingMap = true;
 
   unsigned int currentMaximum = 22000;
   QProgressDialog progress("Loading the database...", "Abort Loading", 0, currentMaximum, renderer_window);
@@ -111,6 +112,8 @@ void CRoomManager::loadMap( QString filename)
   }
 	  
   delete handler;
+  
+  loadingMap = false;
   return;
 }
 

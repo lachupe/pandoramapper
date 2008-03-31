@@ -136,13 +136,16 @@ void RendererWidget::resizeGL( int width, int height )
 
 void RendererWidget::paintGL()
 {
+    if (Map.isLoadingMap() == true)
+    	return;
+
     print_debug(DEBUG_RENDERER, "in paintGL()");
+    
     QTime t;
     t.start();
     
     display();
     draw();
-    
     
     print_debug(DEBUG_RENDERER, "Rendering's done. Time elapsed %d ms\r\n", t.elapsed());
 }
