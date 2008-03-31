@@ -431,11 +431,11 @@ void CActionManager::open()
                     "XML files (*.xml)");    
   char data[MAX_STR_LEN];
     
+  print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));
   strcpy(data, qPrintable(s));
     
   if (!s.isEmpty()) { 
     usercmd_mload(0, 0,  data, data);  
-    QMessageBox::information(parent, "Pandora", "Loaded!\n", QMessageBox::Ok);
   }  
 }
 

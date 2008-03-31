@@ -7,6 +7,7 @@
 #include "CSelectionManager.h"
 
 #include <QVector>
+#include <QObject>
 
 class CPlane;
 class CSquare;
@@ -14,8 +15,9 @@ class CSquare;
 
 #define MAX_ROOMS       30000		/* maximal amount of rooms */
 
-class CRoomManager {
-
+class CRoomManager : public QObject {
+	Q_OBJECT
+	
     QList<CRegion *>    regions;
 public:
     QVector<CRoom *> rooms;   		/* rooms */
@@ -35,6 +37,7 @@ public:
     void          expandPlane(CPlane *plane, CRoom *room);
     
     CRoomManager();
+    virtual ~CRoomManager();
     void init();
     void reinit();			/* reinitializer/utilizer */
     
@@ -70,6 +73,14 @@ public:
     QList<int> searchDescs(QString s, Qt::CaseSensitivity cs);
     QList<int> searchNotes(QString s, Qt::CaseSensitivity cs);
     QList<int> searchExits(QString s, Qt::CaseSensitivity cs);
+
+    
+    void loadMap(QString filename);
+    void saveMap(QString filename);
+public slots:
+
+signals:
+
 };
 
 extern class CRoomManager Map;/* room manager */

@@ -8,6 +8,8 @@
 #include <QFile>
 #include <QXmlDefaultHandler>
 #include <QString>
+#include <QProgressDialog>
+#include <QMessageBox>
 
 #include "defines.h"
 
@@ -16,6 +18,7 @@
 #include "CRoomManager.h"
 #include "utils.h"
 #include "CDispatcher.h"
+#include "mainwindow.h"
 
 
 #define XML_ROOMNAME    (1 << 0)
@@ -25,16 +28,21 @@
 class StructureParser: public QXmlDefaultHandler
 {
 public:
-  StructureParser();
+  StructureParser(QProgressDialog *progress, unsigned int& currentMaximum);
   bool characters(const QString& ch);
     
   bool startElement( const QString&, const QString&, const QString& ,
 		     const QXmlAttributes& );
   bool endElement( const QString&, const QString&, const QString& );
+
 private:
   /* some flags */
   int flag;
   bool readingRegion;
+  bool abortLoading;
+  
+  QProgressDialog *progress;
+  unsigned int currentMaximum;
 
   char data[MAX_DATA_LEN];
   QString s;
@@ -49,7 +57,7 @@ private:
 
 
 
-void xml_readbase( QString filename)
+void CRoomManager::loadMap( QString filename)
 {
   QFile xmlFile( filename);
   QXmlInputSource source( &xmlFile );
@@ -62,7 +70,12 @@ void xml_readbase( QString filename)
   }
 
 
-  StructureParser * handler = new StructureParser();
+  unsigned int currentMaximum = 22000;
+  QProgressDialog progress("Loading the database...", "Abort Loading", 0, currentMaximum, renderer_window);
+  progress.setWindowModality(Qt::WindowModal);
+  progress.show();
+  
+  StructureParser * handler = new StructureParser(&progress, currentMaximum);
   reader.setContentHandler( handler );
     
 	
@@ -71,27 +84,43 @@ void xml_readbase( QString filename)
   fflush(stdout);
   reader.parse( source );
   
-  // Now fix the preloaded ID' in exits 
-  
-  for (unsigned int i = 0; i < Map.size(); i++) {
-        CRoom *r = Map.rooms[i];
-        for (int exit = 0; exit <= 5; exit++)
-            if (r->exits[ exit ] > 0)
-                r->exits[exit] = Map.getRoom( (unsigned long) r->exits[exit] );
+  if (progress.wasCanceled()) {
+	  print_debug(DEBUG_XML, "Loading was canceled");
+	  Map.reinit();
+  } else {
+	  progress.setLabelText("Preparing the loaded database");
+	  progress.setMaximum(Map.size());
+	  progress.setValue(0);
+	  
+	  for (unsigned int i = 0; i < Map.size(); i++) {
+		  	progress.setValue(i);
+	
+		  	if (progress.wasCanceled()) {
+		  		Map.reinit();
+		  		break;
+		  	}
+	
+		  	CRoom *r = Map.rooms[i];
+	        for (int exit = 0; exit <= 5; exit++)
+	            if (r->exits[ exit ] > 0)
+	                r->exits[exit] = Map.getRoom( (unsigned long) r->exits[exit] );
+	  }
+	  progress.setValue(Map.size());
+	  
+	  print_debug(DEBUG_XML, "done.");
   }
-
-  
-  print_debug(DEBUG_XML, "done.");
-
-
+	  
+  delete handler;
   return;
 }
 
 
-StructureParser::StructureParser()
-  : QXmlDefaultHandler()
+StructureParser::StructureParser(QProgressDialog *progress, unsigned int& currentMaximum): 
+	QXmlDefaultHandler(), progress(progress), currentMaximum(currentMaximum)
 {
+//	currentMaximum = _currentMaximum;
     readingRegion = false;
+    abortLoading = false;
 }
 
 
@@ -99,6 +128,12 @@ bool StructureParser::endElement( const QString& , const QString& , const QStrin
 {
   if (qName == "room") {
       Map.addRoomNonsorted(r);	/* tada! */
+      
+      if (r->id > currentMaximum) {
+    	  currentMaximum = r->id;
+    	  progress->setMaximum(currentMaximum);
+      }
+      progress->setValue( Map.size() );
   }  
   if (qName == "region" && readingRegion)  {
       Map.addRegion( region );
@@ -107,11 +142,17 @@ bool StructureParser::endElement( const QString& , const QString& , const QStrin
   }        
   flag = 0;    
     
+  if (progress->wasCanceled()) 
+	  abortLoading = true;
+  
   return TRUE;
 }
 
 bool StructureParser::characters( const QString& ch)
 {
+	if (abortLoading)
+		return TRUE;
+	
   if (ch == NULL || ch == "")
     return TRUE;
     
@@ -130,6 +171,9 @@ bool StructureParser::startElement( const QString& , const QString& ,
                                     const QString& qName, 
                                     const QXmlAttributes& attributes)
 {
+	if (abortLoading)
+		return TRUE;
+	
     if (readingRegion == true) {
         if (qName == "alias") {
             QByteArray alias, door;
@@ -210,13 +254,20 @@ bool StructureParser::startElement( const QString& , const QString& ,
      readingRegion = true;
      s = attributes.value("name");
      region->setName(s.toAscii());
-  }   
+  } else if (qName == "map") {
+	  s = attributes.value("rooms");
+	  if (s.isEmpty()) {
+		  progress->setMaximum( currentMaximum );
+	  } else {
+		  progress->setMaximum( s.toInt() );
+	  }
+  }
   
   return TRUE;
 }
 
 /* plain text file alike writing */
-void xml_writebase(QString filename)
+void CRoomManager::saveMap(QString filename)
 {
   FILE *f;
   CRoom *p;
@@ -232,12 +283,14 @@ void xml_writebase(QString filename)
     return;
   }
 
-  
+
+  QProgressDialog progress("Saving the database...", "Abort Saving", 0, Map.size(), renderer_window);
+  progress.setWindowModality(Qt::WindowModal);
+  progress.show();
 
   fprintf(f, "<map>\n");
   
-  
-  
+
   {
         // SAVE REGIONS DATA
         CRegion    *region;
@@ -269,6 +322,12 @@ void xml_writebase(QString filename)
   
   
     for (z = 0; z < Map.size(); z++) {
+    	
+  	  	progress.setValue(z);
+
+        if (progress.wasCanceled()) 
+             break;
+
         p = Map.rooms[z];
     
         fprintf(f,  "  <room id=\"%i\" x=\"%i\" y=\"%i\" z=\"%i\" "
@@ -308,6 +367,7 @@ void xml_writebase(QString filename)
         fprintf(f,  "  </room>\n");
  
   }
+  progress.setValue(Map.size());
 
   fprintf(f, "</map>\r\n");
   fflush(f);

@@ -74,10 +74,10 @@ TARGET = release/pandora
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 win32:LIBS += -lwsock32
 unix:LIBS += -lm
-!debug:unix:QMAKE_POST_LINK = strip \
-    $(TARGET)
-SVN_REVISION = $$system("svn info | grep Revision | sed s/Revision:\ //")
-!isEmpty(SVN_REVISION):DEFINES += SVN_REVISION=108
+#!debug:unix:QMAKE_POST_LINK = strip \
+#    $(TARGET)
+#SVN_REVISION = $$system("svn info | grep Revision | sed s/Revision:\ //")
+#!isEmpty(SVN_REVISION):DEFINES += SVN_REVISION=108
 
 # CFLAGS_VAR = $$system(pkg-config --cflags OGRE)
 # CLIBS_VAR = $$system(pkg-config --libs OGRE)

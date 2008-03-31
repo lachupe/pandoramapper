@@ -19,7 +19,22 @@
 
 class CRoomManager Map;
 
+CRoomManager::~CRoomManager()
+{
+	
+}
 
+//
+//void CRoomManager::loadMap(QString filename)
+//{
+//	xmlReadMap(filename);
+//}
+//
+//void CRoomManager::saveMap(QString filename)
+//{
+//	xmlWriteMap(filename);
+//}
+//
 
 /*------------ merge_rooms ------------------------- */
 int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)

@@ -3,9 +3,9 @@
 /* buffered reading from file */
 
 
-void xml_writebase(QString filename);
+//void xmlWriteMap(QString filename);
 
 /* Loads a char, returns char struct or NULL */
-void xml_readbase(QString filename);
+//void xmlReadMap(QString filename);
 
 #endif

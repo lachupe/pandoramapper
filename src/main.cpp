@@ -27,6 +27,7 @@
 #include "proxy.h"
 #include "utils.h"
 #include "CEngine.h"
+#include "userfunc.h"
 
 
 #ifdef Q_OS_MACX
@@ -214,10 +215,10 @@ int main(int argc, char *argv[])
     engine = new CEngine();
     proxy = new Proxy();  
 
-    splash->showMessage("Loading the database, please wait...");
-    print_debug(DEBUG_SYSTEM, "Loading the database ... ");
-    xml_readbase( conf->get_base_file() );
-    print_debug(DEBUG_SYSTEM, "Successfuly loaded %i rooms!", Map.size());
+    //splash->showMessage("Loading the database, please wait...");
+    //print_debug(DEBUG_SYSTEM, "Loading the database ... ");
+    //xml_readbase( conf->get_base_file() );
+    //print_debug(DEBUG_SYSTEM, "Successfuly loaded %i rooms!", Map.size());
 
     /* special init for the mud emulation */
     if (mud_emulation) {
@@ -257,10 +258,11 @@ int main(int argc, char *argv[])
 
 
     QGLFormat f;
-    f.setDoubleBuffer( TRUE );
-    f.setDirectRendering( TRUE );
-    f.setRgba( TRUE );
-    f.setDepth( TRUE );
+    //f.setDoubleBuffer( true );
+    f.setDirectRendering( true );
+    f.setRgba( true );
+    f.setDepth( true );
+    f.setSampleBuffers( true );
 
     QGLFormat::setDefaultFormat( f );
 
@@ -275,6 +277,8 @@ int main(int argc, char *argv[])
     proxy->start();
     QObject::connect(proxy, SIGNAL(startEngine()), engine, SLOT(slotRunEngine()), Qt::QueuedConnection );
     QObject::connect(proxy, SIGNAL(startRenderer()), renderer_window->renderer, SLOT(display()), Qt::QueuedConnection);
+
+    userland_parser->parse_user_input_line("mload");
 
     return app.exec();
 }

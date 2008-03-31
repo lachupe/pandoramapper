@@ -1339,7 +1339,8 @@ USERCMD(usercmd_msave)
   p = skip_spaces(line);
   if (!*p) {
     /* no arguments */
-    xml_writebase( conf->get_base_file() );
+    //xml_writebase( conf->get_base_file() );
+    Map.saveMap(conf->get_base_file() );
     send_to_user("--[Pandora: Saved...\r\n");
     conf->set_data_mod(false);
 
@@ -1347,9 +1348,11 @@ USERCMD(usercmd_msave)
     SEND_PROMPT;
     return USER_PARSE_SKIP;
   } else {
-    p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
+    //p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
 
-    xml_writebase(arg);
+    //xml_writebase(arg);
+    Map.saveMap( p );
+        
     send_to_user("--[Pandora: Saved to %s...\r\n", arg);
     
     conf->set_data_mod(false);
@@ -1388,12 +1391,16 @@ USERCMD(usercmd_mload)
     send_to_user(" * Loading the file %s from the disk...\r\n", 
                   (const char *) conf->get_base_file()  );
       
-    xml_readbase( conf->get_base_file() );
+    //xml_readbase( conf->get_base_file() );
+    Map.loadMap( conf->get_base_file() );
+    
   } else {
-    p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
+    //p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
 
     send_to_user(" * Loading the base %s from the disk...\r\n", arg);
-    xml_readbase(arg);
+    //xml_readbase(arg);
+    Map.loadMap( p );
+        
   }  
 
 
