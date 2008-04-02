@@ -8,7 +8,9 @@
 
 #include <QVector>
 #include <QObject>
+#include <QThread>
 #include <QMutex>
+#include <QMutexLocker>
 
 class CPlane;
 class CSquare;
@@ -18,44 +20,64 @@ class CSquare;
 
 class CRoomManager : public QObject {
 	Q_OBJECT
+	QMutex 	*mapLock;
 	
-	bool loadingMap;
 	QList<CRegion *>    regions;
-public:
     QVector<CRoom *> rooms;   		/* rooms */
     CRoom *ids[MAX_ROOMS];	/* array of pointers */
-    CSelectionManager   selections;
-    
 
-    bool isLoadingMap() { return loadingMap; }
-    unsigned int size()  { return rooms.size(); }
-    unsigned int next_free; 	/* next free id */
-    
-    unsigned int oneway_room_id;
-    
-    /* plane support */  
     CPlane        *planes;        /* planes/levels of the map, sorted by the Z coordinate, lower at first */
-    void          addToPlane(CRoom *room);
-    void          removeFromPlane(CRoom *room);
-    void          expandPlane(CPlane *plane, CRoom *room);
-    
+
+public:
     CRoomManager();
     virtual ~CRoomManager();
     void init();
     void reinit();			/* reinitializer/utilizer */
+    void lock() { 
+    //	printf("Locking\r\n"); 
+    	mapLock->lock(); 
+    //	printf("Locked!\r\n");
+    }
+    void unlock() { 
+    //	printf("Unlocking...\r\n"); 
+    	mapLock->unlock(); 
+    //	printf("Unlocked!\r\n");
+    }
+    
+    // make sure you LOCK before you use those lists ... !
+    QVector<CRoom *> getRooms() { return rooms; }
+    CPlane* getPlanes() { return planes; }
+    
+    unsigned int next_free; 	/* next free id */
+    unsigned int oneway_room_id;
+
+    unsigned int size()  { return rooms.size(); }
+    
+
+    CSelectionManager   selections;
+
+    /* plane support */  
+    void          addToPlane(CRoom *room);
+    void          removeFromPlane(CRoom *room);
+    void          expandPlane(CPlane *plane, CRoom *room);
+    
     
     void addRoomNonsorted(CRoom *room);   /* use only at loading */
     void addRoom(CRoom *room);
     
-    
     inline CRoom * getRoom(unsigned int id)        { 
-            if (id < MAX_ROOMS) 
-                return ids[id]; 
-            else 
-                return NULL; 
+    	QMutexLocker locker(mapLock);
+
+   	    if (id < MAX_ROOMS) 
+            return ids[id]; 
+        else 
+            return NULL; 
     }
 
-    inline QByteArray getName(unsigned int id)  { if (ids[id]) return (*(ids[id])).getName(); return "";}
+    inline QByteArray getName(unsigned int id)  {
+    	QMutexLocker locker(mapLock);
+    	if (ids[id]) return (*(ids[id])).getName(); return "";
+    }
         
     int tryMergeRooms(CRoom *room, CRoom *copy, int j);
 
@@ -68,7 +90,6 @@ public:
     
     QList<CRegion *> getAllRegions();
     
-    
     void deleteRoom(CRoom *r, int mode);  /* user interface function */
     void smallDeleteRoom(CRoom *r);  /* user interface function */
 
@@ -80,10 +101,6 @@ public:
     
     void loadMap(QString filename);
     void saveMap(QString filename);
-public slots:
-
-signals:
-
 };
 
 extern class CRoomManager Map;/* room manager */

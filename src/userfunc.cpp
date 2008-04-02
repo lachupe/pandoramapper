@@ -1465,8 +1465,11 @@ USERCMD(usercmd_mmerge)
 
     id = 0;
     
+    // yet again, sensitive!
+    Map.lock();
+    QVector<CRoom *> rooms = Map.getRooms();
     for (i = 0; i < Map.size(); i++) {
-        t = Map.rooms[i];
+        t = rooms[i];
         if (engine->addedroom->id == t->id || t->isDescSet() == false || t->isNameSet() == false ) {
           continue;
         }
@@ -1477,7 +1480,8 @@ USERCMD(usercmd_mmerge)
             break;
         }	
     }
-
+    Map.unlock();
+    
     if (id == 0) {
       send_to_user("--[ No matching room found.\r\n");
       SEND_PROMPT;

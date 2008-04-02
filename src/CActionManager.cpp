@@ -703,7 +703,8 @@ void CActionManager::publish_map()
         }
         stacker.swap();
     }
-    
+
+    Map.lock();
     // delete all unreached rooms    
     for (i = 0; i < MAX_ROOMS; i++) {
         r = Map.getRoom( i );
@@ -717,10 +718,13 @@ void CActionManager::publish_map()
         }
         
     }
+    Map.unlock();
     
+    Map.lock();
+    QVector<CRoom *> rooms = Map.getRooms();
     // roll over all still accessible rooms and delete the secret doors if they are still left in the database
     for (i = 0; i < Map.size(); i++) {
-        r = Map.rooms[i];
+        r = rooms[i];
         if (r) {
             for (z = 0; z <= 5; z++) {
                 if ( r->isDoorSecret(z) == true ) {
@@ -731,6 +735,7 @@ void CActionManager::publish_map()
         }
         
     }
+    Map.unlock();
 
     print_debug(DEBUG_INTERFACE && DEBUG_ROOMS,"Finished removing secrets from the map!\r\n");
     //    QMessageBox::information(parent, "Removing secrets...", "Done!\n", QMessageBox::Ok);

@@ -15,6 +15,7 @@
 #include "CConfigurator.h"
 #include "utils.h"
 #include "CEngine.h"
+#include "CGroup.h"
 //#include "renderer.h"
 
 class Cconfigurator *conf;
@@ -79,6 +80,13 @@ Cconfigurator::Cconfigurator()
     sectors.push_back(first);
     
     spells_pattern = "Affected by:";
+    
+    // group Manager
+    groupManagerState = CGroupCommunicator::Off;
+    groupManagerLocalPort = 4243;
+    groupManagerRemotePort = 4243;
+    groupManagerHost = "localhost";
+    groupManagerCharName = "Aza";
 }
 
 
@@ -481,6 +489,24 @@ int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
   fprintf(f, "  <guisettings always_on_top=\"%s\">\r\n", 
                   ON_OFF(get_always_on_top()) );
 
+  QString grpManager;
+  switch (getGroupManagerState()) {
+	case CGroupCommunicator::Client :
+		grpManager += "Client";
+		break;
+	case CGroupCommunicator::Server :
+		grpManager += "Server";
+		break;
+	default:
+		grpManager += "Off";
+		break;
+  }
+  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" localPort=\"%i\" remotePort=\"%i\">\r\n", 
+                  (const char *) grpManager.toAscii(), (const char *) getGroupManagerHost(),
+                  (const char *) getGroupManagerCharName(), 
+                  getGroupManagerLocalPort(), getGroupManagerRemotePort() );
+
+  
   QRect window = renderer_window->geometry(); 
   fprintf(f, "  <window x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n",
             window.x(), window.y(), window.height(), window.width() );                 
@@ -660,6 +686,28 @@ bool ConfigParser::startElement( const QString& , const QString& ,
                     ON_OFF(conf->get_exits_check() ), ON_OFF(conf->get_terrain_check()) );
         
         return TRUE;
+    } else if (qName == "groupManager") {
+    	s = attributes.value("state");
+    	if (s == "Server") {
+    		conf->setGroupManagerState(CGroupCommunicator::Server);
+    	} else if (s == "Client") {
+    		conf->setGroupManagerState(CGroupCommunicator::Client);
+    	} else 
+    		conf->setGroupManagerState(CGroupCommunicator::Off);
+        
+    	s = attributes.value("host");
+        conf->setGroupManagerHost(s.toAscii());
+
+    	s = attributes.value("charName");
+        conf->setGroupManagerCharName(s.toAscii());
+
+        s = attributes.value("localPort");
+        conf->setGroupManagerLocalPort(s.toInt() );
+
+        s = attributes.value("remotePort");
+        conf->setGroupManagerRemotePort(s.toInt() );
+
+
     } else if (qName == "guisettings") {
         if (attributes.length() < 1) {
             print_debug(DEBUG_CONFIG, "(guisettings token) Not enough attributes in XML file!");

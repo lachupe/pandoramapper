@@ -164,6 +164,11 @@ CMainWindow::CMainWindow(QWidget *parent)
     actionManager->disable_online_actions();
     connect(conf, SIGNAL(configurationChanged()),
             actionManager, SLOT(updateActionsSettings() ), Qt::QueuedConnection);
+    
+    conf->setGroupManagerState(CGroupCommunicator::Server);
+    conf->setGroupManagerLocalPort(4243);
+    groupManager = new CGroup(conf->getGroupManagerCharName(), this);
+    
 }
 
 

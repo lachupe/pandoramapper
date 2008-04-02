@@ -136,9 +136,6 @@ void RendererWidget::resizeGL( int width, int height )
 
 void RendererWidget::paintGL()
 {
-    if (Map.isLoadingMap() == true)
-    	return;
-
     print_debug(DEBUG_RENDERER, "in paintGL()");
     
     QTime t;
@@ -710,7 +707,11 @@ void RendererWidget::draw(void)
     glColor4f(0.1, 0.8, 0.8, 0.4);
     colour[0] = 0.1; colour[1] = 0.8; colour[2] = 0.8; colour[3] = 0.4; 
 
-    plane = Map.planes;
+    
+    // Way too sensitive application. No changes should be allowed while drawing!
+    // LOCK IT 
+    Map.lock();
+    plane = Map.getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
             plane = plane->next;
@@ -734,7 +735,8 @@ void RendererWidget::draw(void)
         glDrawCSquare(plane->squares, GL_RENDER);
         plane = plane->next;
     }
-    
+    Map.unlock();
+
     
 //    print_debug(DEBUG_RENDERER, "Drawn %i rooms, after dot elimination %i, %i square frustum checks done", 
 //            rooms_drawn_csquare, rooms_drawn_total, square_frustum_checks);
@@ -815,7 +817,9 @@ void RendererWidget::renderPickupObjects()
     upperZ -= (1 - visibleLayers % 2) << 1; 
 //    print_debug(DEBUG_RENDERER, "drawing %i rooms", Map.size());
 
-    plane = Map.planes;
+    // Sensitive ! lock for WRITE!
+    Map.lock();
+    plane = Map.getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
             plane = plane->next;
@@ -829,7 +833,7 @@ void RendererWidget::renderPickupObjects()
         glDrawCSquare(plane->squares, GL_SELECT);
         plane = plane->next;
     }
-    
+    Map.unlock();
 }
 
 

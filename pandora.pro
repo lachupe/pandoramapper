@@ -6,7 +6,8 @@ CONFIG += qt \
     warn_on \
     thread
 CONFIG += debug
-#CONFIG += release
+
+# CONFIG += release
 QT += xml \
     opengl \
     gui \
@@ -16,8 +17,12 @@ FORMS += src/configedit.ui \
     src/logdialog.ui \
     src/movementdialog.ui \
     src/roomedit.ui \
-    src/spellsdialog.ui 
-HEADERS += src/CActionManager.h \
+    src/spellsdialog.ui
+HEADERS += src/CGroupCommunicator.h \
+    src/CGroupClient.h \
+    src/CGroupServer.h \
+    src/CGroup.h \
+    src/CActionManager.h \
     src/CConfigurator.h \
     src/CDispatcher.h \
     src/CEngine.h \
@@ -44,7 +49,11 @@ HEADERS += src/CActionManager.h \
     src/utils.h \
     src/xml2.h \
     src/finddialog.h
-SOURCES += src/CActionManager.cpp \
+SOURCES += src/CGroupCommunicator.cpp \
+    src/CGroupClient.cpp \
+    src/CGroupServer.cpp \
+    src/CGroup.cpp \
+    src/CActionManager.cpp \
     src/CDispatcher.cpp \
     src/CEngine.cpp \
     src/CFrustum.cpp \
@@ -74,11 +83,11 @@ TARGET = release/pandora
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 win32:LIBS += -lwsock32
 unix:LIBS += -lm
-#!debug:unix:QMAKE_POST_LINK = strip \
-#    $(TARGET)
-#SVN_REVISION = $$system("svn info | grep Revision | sed s/Revision:\ //")
-#!isEmpty(SVN_REVISION):DEFINES += SVN_REVISION=108
 
+# !debug:unix:QMAKE_POST_LINK = strip \
+# $(TARGET)
+# SVN_REVISION = $$system("svn info | grep Revision | sed s/Revision:\ //")
+# !isEmpty(SVN_REVISION):DEFINES += SVN_REVISION=108
 # CFLAGS_VAR = $$system(pkg-config --cflags OGRE)
 # CLIBS_VAR = $$system(pkg-config --libs OGRE)
 QMAKE_CXXFLAGS_RELEASE += -O2 \

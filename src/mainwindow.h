@@ -19,9 +19,11 @@ class CMovementDialog;
 class CLogDialog;
 class FindDialog;
 
+#include "CGroup.h"
 
 void toggle_renderer_reaction();
 void notify_analyzer();
+
 
 class CMainWindow : public QMainWindow
 {
@@ -52,6 +54,7 @@ class CMainWindow : public QMainWindow
         DeleteMode
     };
 
+    CGroup *groupManager;
 
 public:
     CMainWindow(QWidget *parent = 0);

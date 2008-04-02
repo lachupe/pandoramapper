@@ -95,6 +95,14 @@ class Cconfigurator : public QObject {
     
     bool selectOAnyLayer;
 
+    // groupManager settings
+    int  groupManagerState;
+    int	 groupManagerLocalPort;
+    int	 groupManagerRemotePort;
+    QByteArray groupManagerHost;
+    QByteArray groupManagerCharName;
+    
+    
 public:
 
     /* spells */
@@ -103,6 +111,19 @@ public:
     void add_spell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon);
     void add_spell(TSpell s);
     QString spell_up_for(unsigned int p);
+
+    // group Manager
+    int getGroupManagerState() { return groupManagerState; }
+    int getGroupManagerLocalPort() { return groupManagerLocalPort; }
+    int getGroupManagerRemotePort() { return groupManagerRemotePort; }
+    QByteArray getGroupManagerHost() { return groupManagerHost; }
+    QByteArray getGroupManagerCharName() { return groupManagerCharName; }
+                
+    void setGroupManagerState(int val) { groupManagerState = val; set_conf_mod(true); }
+    void setGroupManagerLocalPort(int val) { groupManagerLocalPort = val; set_conf_mod(true); }
+    void setGroupManagerRemotePort(int val) { groupManagerRemotePort = val; set_conf_mod(true); }
+    void setGroupManagerHost(QByteArray val) { groupManagerHost = val; set_conf_mod(true); }
+    void setGroupManagerCharName(QByteArray val) { groupManagerCharName = val; set_conf_mod(true); }
 
     /* texture and sectors stuff */
     vector<struct room_sectors_data> sectors;

@@ -418,9 +418,10 @@ int CEngine::checkRoomDesc()
           break;
       }
     
-    
+    Map.lock();
+    QVector<CRoom *> rooms = Map.getRooms();
     for (i = 0; i < Map.size(); i++) {
-        r = Map.rooms[i];
+        r = rooms[i];
         if (addedroom->id == r->id || r->getDesc() == "" || r->getName() == "") {
           continue;
         }
@@ -438,6 +439,7 @@ int CEngine::checkRoomDesc()
             }	
         }
     }
+    Map.unlock();
         
     /* if we are still here, then we didnt manage to merge the room */
     /* so put addedroom->id in stack */
@@ -549,11 +551,15 @@ void CEngine::angryLinker(CRoom *r)
     candidates[i] = 0;
   }
   z = 0;  
-  
-  
+
+  // if you are performing the full run over all rooms, it's better
+  // to lock the Map completely.
+  // else the other thread might delete the room you are examining at the moment!
+  Map.lock();
+  QVector<CRoom *> rooms = Map.getRooms();
   /* find the closest neighbours by coordinate */
   for (i = 0; i < Map.size(); i++) {
-      p = Map.rooms[i];  
+      p = rooms[i];  
   
     /* z-axis: up and down exits */
     if (p->getZ() != r->getZ()) {
@@ -642,6 +648,7 @@ void CEngine::angryLinker(CRoom *r)
 
   
   }
+  Map.unlock();
   
   print_debug(DEBUG_ROOMS, "candidates gathered");
     
