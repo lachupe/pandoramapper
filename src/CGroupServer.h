@@ -1,7 +1,7 @@
 #ifndef CGROUPSERVER_H_
 #define CGROUPSERVER_H_
 
-#include <QVector>
+#include <QList>
 #include <QTcpServer>
 
 #include "CGroupClient.h"
@@ -11,7 +11,7 @@ class CGroupServer: public QTcpServer
 {
 	Q_OBJECT
 	
-	QVector<CGroupClient *> connections;
+	QList<CGroupClient *> connections;
 public:
 	CGroupServer(int localPort, QObject *parent);
 	virtual ~CGroupServer();
@@ -20,7 +20,8 @@ public:
 protected:
     void incomingConnection(int socketDescriptor);
     
-private slots:
+public slots:
+	void connectionClosed(CGroupClient *connection);
 
 signals:
 	void failedToStart();

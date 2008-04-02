@@ -2,7 +2,7 @@
 #define CGROUP_H_
 
 #include <QObject>
-
+#include <QString>
 #include "CGroupCommunicator.h"
 
 
@@ -20,6 +20,13 @@ public:
 	
 	QByteArray getName() { return name; }
 	void changeType(int newState);
+	
+public slots:
+	void connectionRefused(QString message);
+	void connectionFailed(QString message);
+	void connectionClosed(QString message);
+	void connectionError(QString message);
+
 };
 
 #endif /*CGROUP_H_*/

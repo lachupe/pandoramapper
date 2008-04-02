@@ -39,9 +39,10 @@ struct boolean_struct {
 #define DEBUG_XML               (1 << 11)
 #define DEBUG_INTERFACE         (1 << 12)
 #define DEBUG_SPELLS            (1 << 13)
+#define DEBUG_GROUP             (1 << 14)
 
 /* special flag */
-#define DEBUG_TOUSER            (1 << 14)       /* send the message to user also */
+#define DEBUG_TOUSER            (1 << 15)       /* send the message to user also */
 
 
 extern const char * exitnames[];

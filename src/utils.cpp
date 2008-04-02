@@ -34,6 +34,7 @@ struct debug_data_struct debug_data[] = {
   {"xml", "xml", "XML module messages",  DEBUG_XML, 0},
   {"interface", "Interface", "Qt windowing interface",  DEBUG_INTERFACE, 0},
   {"spells", "Spells", "Spells timers messages",  DEBUG_SPELLS, 0},
+  {"group", "GroupManager", "Group Manager messages",  DEBUG_GROUP, 1},
 
   
   {NULL, NULL, NULL, 0, 0}

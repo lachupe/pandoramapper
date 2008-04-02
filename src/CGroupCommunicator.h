@@ -22,6 +22,8 @@ class CGroupCommunicator : public QObject
 	
 	
 	QObject *peer;	// server or client
+	CGroup *getGroup() { return (CGroup *) parent(); }
+	void connectionClosed(CGroupClient *connection);
 public:
 	enum States { Server, Client, Off };
 
@@ -32,6 +34,7 @@ public:
 
 public slots:
 	void connectionStateChanged(CGroupClient *connection);
+	void errorInConnection(CGroupClient *connection);
 
 };
 
