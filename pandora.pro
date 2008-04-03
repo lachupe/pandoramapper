@@ -18,8 +18,7 @@ FORMS += src/configedit.ui \
     src/movementdialog.ui \
     src/roomedit.ui \
     src/spellsdialog.ui
-HEADERS += src/CGroupChar.h \
-    src/CGroupCommunicator.h \
+HEADERS += src/CGroupCommunicator.h \
     src/CGroupClient.h \
     src/CGroupServer.h \
     src/CGroup.h \
@@ -50,8 +49,7 @@ HEADERS += src/CGroupChar.h \
     src/utils.h \
     src/xml2.h \
     src/finddialog.h
-SOURCES += src/CGroupChar.cpp \
-    src/CGroupCommunicator.cpp \
+SOURCES += src/CGroupCommunicator.cpp \
     src/CGroupClient.cpp \
     src/CGroupServer.cpp \
     src/CGroup.cpp \

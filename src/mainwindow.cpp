@@ -165,10 +165,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     connect(conf, SIGNAL(configurationChanged()),
             actionManager, SLOT(updateActionsSettings() ), Qt::QueuedConnection);
     
-    conf->setGroupManagerState(CGroupCommunicator::Server);
-    conf->setGroupManagerLocalPort(4243);
     groupManager = new CGroup(conf->getGroupManagerCharName(), this);
-    
 }
 
 

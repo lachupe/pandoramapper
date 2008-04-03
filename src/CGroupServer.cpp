@@ -25,8 +25,10 @@ void CGroupServer::incomingConnection(int socketDescriptor)
 	print_debug(DEBUG_GROUP, "Incoming connection");
 	// connect the client straight to the Communicator, as he handles all the state changes 
 	// data transfers and similar.
-	CGroupClient *client = new CGroupClient(socketDescriptor, parent());
+	CGroupClient *client = new CGroupClient(parent());
 	addClient(client);
+	
+	client->setSocket(socketDescriptor);
 }
 
 void CGroupServer::addClient(CGroupClient *client)

@@ -20,7 +20,7 @@ class CGroupCommunicator : public QObject
 	Q_OBJECT
 	int type;
 	
-	enum Messages { ACK, REQ_LOGIN, DATA_LOGIN, REQ_INFO, CHAR_DATA };
+	enum Messages { ACK, REQ_LOGIN, REQ_INFO, DATA_LOGIN, DATA_INFO };
 	
 	QObject *peer;	// server or client
 	CGroup *getGroup() { return (CGroup *) parent(); }
@@ -28,8 +28,16 @@ class CGroupCommunicator : public QObject
 	void connectionEstablished(CGroupClient *connection);
 	void connecting(CGroupClient *connection);
 	QByteArray formMessageBlock(int message, QByteArray data);
-	void sendMessage(CGroupClient *connection, int message, QByteArray data);
+	void sendMessage(CGroupClient *connection, int message, QByteArray data = "");
 	
+	void sendLoginInformation(CGroupClient *connection);
+	void parseLoginInformation(CGroupClient *connection, QByteArray data);
+	void sendGroupInformation(CGroupClient *connection);
+	void parseGroupInformation(CGroupClient *connection, QByteArray data);
+	
+	void userLoggedOn(CGroupClient *conn);
+	void userLoggedOff(CGroupClient *conn);
+		
 	void retrieveDataClient(CGroupClient *connection);
 	void retrieveDataServer(CGroupClient *connection);
 public:

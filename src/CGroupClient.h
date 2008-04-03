@@ -13,14 +13,18 @@ class CGroupClient : public QTcpSocket
 	int  protocolState;
 	
 	CGroupCommunicator* getParent() { return (CGroupCommunicator *) parent(); }
-public:
-	enum ConnectionStates { Closed, Connecting, Connected, Logged, Quiting};
-	enum ProtocolStates { Idle, AwaitingAck, AwaitingData }; 
+	void linkSignals();
 	
-	CGroupClient(int socketDescriptor, QObject *parent);
+public:
+	enum ConnectionStates { Closed, Connecting, Connected, Quiting};
+	enum ProtocolStates { Idle, AwaitingLogin, AwaitingInfo, Logged }; 
+	
+	CGroupClient(QObject *parent);
 	CGroupClient(QByteArray host, int remotePort, QObject *parent);
 	virtual ~CGroupClient();
 
+	void setSocket(int socketDescriptor);
+	
 	int getConnectionState() {return connectionState; }
 	void setConnectionState(int val);
 	void setProtocolState(int val);
@@ -28,6 +32,7 @@ public:
 		
 protected slots:
 	void lostConnection();
+	void connectionEstablished();
 	void errorHandler ( QAbstractSocket::SocketError socketError );
 	void stateChangedHandler ( QAbstractSocket::SocketState socketState );
 	void dataIncoming();
