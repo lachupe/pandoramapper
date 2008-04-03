@@ -3,6 +3,7 @@
 #include "CGroupCommunicator.h"
 
 
+#include "defines.h"
 
 #include "CConfigurator.h"
 #include "utils.h"
@@ -29,7 +30,9 @@ void CGroupCommunicator::changeType(int newState) {
 		return;
 
 	delete peer;
-	
+
+	type = newState;
+
 	print_debug(DEBUG_GROUP, "Changing the Type of the GroupManager: new Type %i.", newState);
 	switch (newState) {
 		case Server:
@@ -42,18 +45,16 @@ void CGroupCommunicator::changeType(int newState) {
 			break;
 	}
 	
-	type = newState;
 }
 
 void CGroupCommunicator::connectionStateChanged(CGroupClient *connection)
 {
 //	Closed, Connecting, Connected, Logged, Quiting
-	print_debug(DEBUG_GROUP, "CGroupMananger: connection state changed.");
+	print_debug(DEBUG_GROUP, "CGroupMananger: connection state changed. type: %i", type);
 	switch (connection->getConnectionState()) {
 		case CGroupClient::Connecting :
 			print_debug(DEBUG_GROUP, "Connecting to the remote host.");
 			connecting(connection);
-			connectionEstablished(connection);
 			break;
 		case CGroupClient::Connected :
 			print_debug(DEBUG_GROUP, "Connection established.");
@@ -76,6 +77,7 @@ void CGroupCommunicator::connectionStateChanged(CGroupClient *connection)
 
 void CGroupCommunicator::connecting(CGroupClient *connection)
 {
+	print_debug(DEBUG_GROUP, "CONNECTING. Type %i", type);
 	if (type == Client) {
 		
 	} else if (type == Server) {
@@ -85,19 +87,17 @@ void CGroupCommunicator::connecting(CGroupClient *connection)
 
 void CGroupCommunicator::connectionEstablished(CGroupClient *connection)
 {
-	print_debug(DEBUG_GROUP, "Connection established. Type %i", type);
 	if (type == Client) {
 		connection->setProtocolState(CGroupClient::AwaitingLogin);
 	} 
 	if (type == Server) {
-		sendMessage(connection, REQ_LOGIN);
 		connection->setProtocolState(CGroupClient::AwaitingLogin);
+		sendMessage(connection, REQ_LOGIN);
 	}
 }
 
 void CGroupCommunicator::connectionClosed(CGroupClient *connection)
 {
-	print_debug(DEBUG_GROUP, "Communicator::Connection closed");
 	if (type == Client) {
 		changeType(Off);
 	} else if (type == Server) {
@@ -119,10 +119,8 @@ void CGroupCommunicator::errorInConnection(CGroupClient *connection)
 					connection->peerPort() );
 			break;
 		case QAbstractSocket::RemoteHostClosedError:
-			
-			connectionClosed(connection);
-
-			//getGroup()->connectionRefused("Remote host closed the connection");
+			//connectionClosed(connection);
+			getGroup()->connectionError("Remote host closed the connection");
 			break;
 		case QAbstractSocket::HostNotFoundError:
 			str = "Host not found";
@@ -172,27 +170,32 @@ void CGroupCommunicator::serverStartupFailed()
 // the core of the protocol
 void CGroupCommunicator::incomingData(CGroupClient *connection)
 {
-	
 	if (type == Client)
 		retrieveDataClient(connection);
-	else if (type == Server)
+	if (type == Server)
 		retrieveDataServer(connection);
 }
 
 
-
+int CGroupCommunicator::decodeMessage(QByteArray data)
+{
+	QByteArray copy = data;
+	
+	copy.truncate(data.indexOf(' '));
+	
+	return copy.toInt();
+}
 
 // Client side of the communication protocol
 void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 {
 	QByteArray data;
 	int message;
-	
+
 	data = conn->readAll();
-	message = data[1];
-	
-	print_debug(DEBUG_GROUP, "Client side datagram arrived. Message : %i", message);
-	
+	print_debug(DEBUG_GROUP, "retrieveDataClient. Data: %s", (const char *) data);
+	message = decodeMessage(data);
+	print_debug(DEBUG_GROUP, "Datagram arrived. Message : %i", message);
 	
 	switch (conn->getConnectionState()) {
 		//Closed, Connecting, Connected, Quiting
@@ -210,7 +213,7 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
-					print_debug(DEBUG_GROUP, "(AwaitingInfo) Unexpected message marker. Trying to ignore.");
+					print_debug(DEBUG_GROUP, "(AwaitingLogin) Unexpected message marker. Trying to ignore.");
 				}
 				
 			} else if (conn->getProtocolState() == CGroupClient::AwaitingInfo) {
@@ -222,7 +225,7 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
-					print_debug(DEBUG_GROUP, "(AwaitingData) Unexpected message marker. Trying to ignore.");
+					print_debug(DEBUG_GROUP, "(AwaitingInfo) Unexpected message marker. Trying to ignore.");
 				}
 				
 			} else if (conn->getProtocolState() == CGroupClient::Logged) {
@@ -230,10 +233,15 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 				
 			} 
 			
+			break;
 		case CGroupClient::Closed:
+			print_debug(DEBUG_GROUP, "(Closed) Data arrival during wrong connection state.");
+			break;
 		case CGroupClient::Connecting:
+			print_debug(DEBUG_GROUP, "(Connecting) Data arrival during wrong connection state.");
+			break;
 		case CGroupClient::Quiting:
-			print_debug(DEBUG_GROUP, "Data arrival during wrong connection state.");
+			print_debug(DEBUG_GROUP, "(Quiting) Data arrival during wrong connection state.");
 			break;
 	}
 }
@@ -247,10 +255,9 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn)
 	int message;
 	
 	data = conn->readAll();
-	message = data[1];
-	
+	print_debug(DEBUG_GROUP, "retrieveDataServer. Data: %s", (const char *) data);
+	message = decodeMessage(data);
 	print_debug(DEBUG_GROUP, "Server side. Datagram arrived. Message : %i", message);
-	
 	
 	switch (conn->getConnectionState()) {
 		//Closed, Connecting, Connected, Quiting
@@ -267,24 +274,26 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn)
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
-					print_debug(DEBUG_GROUP, "Unexpected message marker. Trying to ignore.");
+					print_debug(DEBUG_GROUP, "(AwaitingLogin) Unexpected message marker. Trying to ignore.");
 				}
 			} else if (conn->getProtocolState() == CGroupClient::AwaitingInfo) {
 				// almost connected. awaiting full information about the connection
 				if (message == REQ_INFO) {
 					sendGroupInformation(conn);
-				} if (message == ACK) {
+				} else if (message == ACK) {
 					conn->setProtocolState(CGroupClient::Logged);
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
-					print_debug(DEBUG_GROUP, "Unexpected message marker. Trying to ignore.");
+					print_debug(DEBUG_GROUP, "(AwaitingInfo) Unexpected message marker. Trying to ignore.");
 				}
 				
 			} else if (conn->getProtocolState() == CGroupClient::Logged) {
 				// usual update situation. receive update, unpack, apply.
 				
 			} 
+			
+			break;
 			
 		case CGroupClient::Closed:
 			
@@ -356,7 +365,8 @@ void CGroupCommunicator::parseGroupInformation(CGroupClient *conn, QByteArray da
 QByteArray CGroupCommunicator::formMessageBlock(int message, QByteArray data)
 {
 	QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
+/*
+ *     QDataStream out(&block, QIODevice::WriteOnly);
 
     out.setVersion(QDataStream::Qt_4_0);	
     out << (quint16)0;
@@ -364,7 +374,11 @@ QByteArray CGroupCommunicator::formMessageBlock(int message, QByteArray data)
     out << data;
     out.device()->seek(0);
     out << (quint16)(block.size() - sizeof(quint16));	
+*/
+	char buffer[MAX_STR_LEN];
 
+	sprintf(buffer, "%i %s", message, (const char *) data);
+	block = buffer;
 	print_debug(DEBUG_GROUP, "Message: %s", (const char *) block);
 
     return block;

@@ -20,10 +20,13 @@ class CGroupCommunicator : public QObject
 	Q_OBJECT
 	int type;
 	
-	enum Messages { ACK, REQ_LOGIN, REQ_INFO, DATA_LOGIN, DATA_INFO };
+	enum Messages { NONE, ACK, REQ_LOGIN, REQ_INFO, DATA_LOGIN, DATA_INFO };
 	
 	QObject *peer;	// server or client
 	CGroup *getGroup() { return (CGroup *) parent(); }
+	int decodeMessage(QByteArray data);
+
+	
 	void connectionClosed(CGroupClient *connection);
 	void connectionEstablished(CGroupClient *connection);
 	void connecting(CGroupClient *connection);

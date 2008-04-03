@@ -34,7 +34,6 @@ protected slots:
 	void lostConnection();
 	void connectionEstablished();
 	void errorHandler ( QAbstractSocket::SocketError socketError );
-	void stateChangedHandler ( QAbstractSocket::SocketState socketState );
 	void dataIncoming();
 
 signals:
