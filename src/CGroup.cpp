@@ -1,4 +1,5 @@
 
+#include "utils.h"
 #include "CConfigurator.h"
 #include "CGroup.h"
 #include "CGroupCommunicator.h"
@@ -6,7 +7,7 @@
 CGroup::CGroup(QByteArray name, QObject *parent)
 : QObject(parent), name(name)
 {
-	printf("Starting up the GroupManager.\r\n");
+	print_debug(DEBUG_GROUP, "Starting up the GroupManager.\r\n");
 	network = new CGroupCommunicator(CGroupCommunicator::Off, this);
 	network->changeType(conf->getGroupManagerState());
 }
@@ -24,20 +25,25 @@ CGroup::~CGroup()
 
 void CGroup::connectionRefused(QString message)
 {
-	printf("Connection refused: %s\r\n", (const char *) message.toAscii());
+	print_debug(DEBUG_GROUP, "Connection refused: %s\r\n", (const char *) message.toAscii());
 }
 
 void CGroup::connectionFailed(QString message)
 {
-	printf("Failed to connect: %s\r\n", (const char *) message.toAscii());
+	print_debug(DEBUG_GROUP, "Failed to connect: %s\r\n", (const char *) message.toAscii());
 }
 
 void CGroup::connectionClosed(QString message)
 {
-	printf("Connection closed: %s\r\n", (const char *) message.toAscii());
+	print_debug(DEBUG_GROUP, "Connection closed: %s\r\n", (const char *) message.toAscii());
 }
 
 void CGroup::connectionError(QString message)
 {
-	printf("Connection closed: %s\r\n", (const char *) message.toAscii());
+	print_debug(DEBUG_GROUP, "Connection closed: %s\r\n", (const char *) message.toAscii());
+}
+
+void CGroup::serverStartupFailed(QString message)
+{
+	print_debug(DEBUG_GROUP, "Failed to start the Group server: %s\r\n", (const char *) message.toAscii());
 }

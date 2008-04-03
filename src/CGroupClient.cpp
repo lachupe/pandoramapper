@@ -8,6 +8,9 @@ CGroupClient::CGroupClient(QByteArray host, int remotePort, QObject *parent) :
 	QTcpSocket(parent)
 {
 	
+	setConnectionState(Connecting);
+	connectToHost(host, remotePort);
+	protocolState = Idle;
 }
 
 CGroupClient::CGroupClient(int socketDescriptor, QObject *parent) :
@@ -23,11 +26,25 @@ CGroupClient::CGroupClient(int socketDescriptor, QObject *parent) :
 	connect(this, SIGNAL(disconnected()), this, SLOT(lostConnection() ) );
 	connect(this, SIGNAL(error(QAbstractSocket::SocketError )), this, SLOT(errorHandler(QAbstractSocket::SocketError) ) );
 	connect(this, SIGNAL(stateChanged(QAbstractSocket::SocketError )), this, SLOT(stateChangedHandler(QAbstractSocket::SocketError) ) );
+	protocolState = Idle;
 }
 
 
+void CGroupClient::setProtocolState(int val)
+{
+	protocolState = val;
+}
+
+void CGroupClient::setConnectionState(int val) 
+{
+	connectionState = val;
+	getParent()->connectionStateChanged(this);
+}
+	
+
 CGroupClient::~CGroupClient()
 {
+	
 }
 
 void CGroupClient::lostConnection()
@@ -49,16 +66,16 @@ void CGroupClient::stateChangedHandler ( QAbstractSocket::SocketState socketStat
 	switch (state()) {
 		case QAbstractSocket::ConnectingState:
 		case QAbstractSocket::HostLookupState:
-			connectionState = Connecting;
+			setConnectionState(Connecting);
 			break;
 		case QAbstractSocket::ConnectedState:
-			connectionState = Connected;
+			setConnectionState(Connected);
 			break;
 		case QAbstractSocket::UnconnectedState:
-			connectionState = Closed;
+			setConnectionState(Closed);
 			break;
 		case QAbstractSocket::ClosingState:
-			connectionState = Quiting;
+			setConnectionState(Quiting);
 			break;
 		case QAbstractSocket::BoundState:
 		case QAbstractSocket::ListeningState:
@@ -66,14 +83,12 @@ void CGroupClient::stateChangedHandler ( QAbstractSocket::SocketState socketStat
 			// ignore ...
 			break;
 	}
-	CGroupCommunicator *comm = (CGroupCommunicator *)parent();
-	comm->errorInConnection(this);
 }
 
 void CGroupClient::dataIncoming()
 {
 	print_debug(DEBUG_GROUP, "Connection: %s. Remote IP: %s", (const char *) peerAddress().toString().toAscii());
-			
+	getParent()->incomingData(this);
 }
 
 

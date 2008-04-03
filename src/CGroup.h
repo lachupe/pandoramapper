@@ -26,6 +26,7 @@ public slots:
 	void connectionFailed(QString message);
 	void connectionClosed(QString message);
 	void connectionError(QString message);
+	void serverStartupFailed(QString message);
 
 };
 
