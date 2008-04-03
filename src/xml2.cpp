@@ -89,7 +89,6 @@ void CRoomManager::loadMap( QString filename)
 
   lock();
   reader.parse( source );
-  unlock();
 
   
   
@@ -101,7 +100,6 @@ void CRoomManager::loadMap( QString filename)
 	  progress.setMaximum(size());
 	  progress.setValue(0);
 
-	  lock();
 	  for (unsigned int i = 0; i < size(); i++) {
 		  	progress.setValue(i);
 	
@@ -116,11 +114,12 @@ void CRoomManager::loadMap( QString filename)
 	                r->exits[exit] = getRoom( (unsigned long) r->exits[exit] );
 	            }
 	  }
-	  unlock();
 	  progress.setValue(size());
 	  
 	  print_debug(DEBUG_XML, "done.");
   }
+
+  unlock();
 
   delete handler;
   return;
