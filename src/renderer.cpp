@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QDateTime>
 #include <QKeyEvent>
+#include <QTimer>
 
 #include "renderer.h"
 #include "CConfigurator.h"
@@ -137,7 +138,17 @@ void RendererWidget::resizeGL( int width, int height )
 void RendererWidget::paintGL()
 {
     print_debug(DEBUG_RENDERER, "in paintGL()");
-    
+
+    // just ignore the even it the system is blocking.
+    // supposedly the event will be repeated sometime later =)
+    // for OpenGL redraw this does not matter much
+    if (Map.tryLockForRead() == false) {
+    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
+    	QTimer::singleShot( 100, this, SLOT(paintGL()) );
+    	return;
+    } else 
+    	Map.unlock();
+
     QTime t;
     t.start();
     
@@ -710,7 +721,7 @@ void RendererWidget::draw(void)
     
     // Way too sensitive application. No changes should be allowed while drawing!
     // LOCK IT 
-    Map.lock();
+    Map.lockForRead();
     plane = Map.getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
@@ -818,7 +829,7 @@ void RendererWidget::renderPickupObjects()
 //    print_debug(DEBUG_RENDERER, "drawing %i rooms", Map.size());
 
     // Sensitive ! lock for WRITE!
-    Map.lock();
+    Map.lockForRead();
     plane = Map.getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {

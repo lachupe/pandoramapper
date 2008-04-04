@@ -255,8 +255,6 @@ int main(int argc, char *argv[])
 
     renderer_window = new CMainWindow( 0 );
 
-
-
     QGLFormat f;
     //f.setDoubleBuffer( true );
     f.setDirectRendering( true );

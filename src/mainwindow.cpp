@@ -371,11 +371,11 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
             break;				
 
          case Qt::Key_F12:
-	    hide_menu_action->setChecked(!hide_menu_action->isChecked());
-            hide_menu();
-            break;
+             hide_menu_action->setChecked(!hide_menu_action->isChecked());
+             hide_menu();
+             break;
          case Qt::Key_F11:
-	    hide_status_action->setChecked(!hide_status_action->isChecked());
+        	 hide_status_action->setChecked(!hide_status_action->isChecked());
             hide_status();
             break;				
          case Qt::Key_F10:

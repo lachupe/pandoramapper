@@ -73,6 +73,8 @@ void CRoomManager::loadMap( QString filename)
   // Most sensitive application :-)
   // lock for any writing/reading!
   
+  print_debug(DEBUG_ROOMS, "endElement : %i", QThread::currentThreadId() );
+
   
   unsigned int currentMaximum = 22000;
   QProgressDialog progress("Loading the database...", "Abort Loading", 0, currentMaximum, renderer_window);
@@ -87,7 +89,7 @@ void CRoomManager::loadMap( QString filename)
   print_debug(DEBUG_XML, "reading xml ...");
   fflush(stdout);
 
-  lock();
+  lockForWrite();
   reader.parse( source );
 
   
@@ -111,7 +113,7 @@ void CRoomManager::loadMap( QString filename)
 		  	CRoom *r = rooms[i];
 	        for (int exit = 0; exit <= 5; exit++)
 	            if (r->exits[ exit ] > 0) {
-	                r->exits[exit] = getRoom( (unsigned long) r->exits[exit] );
+	                r->exits[exit] = getRoomUnlocked( (unsigned long) r->exits[exit] );
 	            }
 	  }
 	  progress.setValue(size());
@@ -143,7 +145,8 @@ bool StructureParser::endElement( const QString& , const QString& , const QStrin
     	  currentMaximum = r->id;
     	  progress->setMaximum(currentMaximum);
       }
-      progress->setValue( parent->size() );
+	  unsigned int size = parent->size();
+	  progress->setValue( size );
   }  
   if (qName == "region" && readingRegion)  {
       parent->addRegion( region );
@@ -163,17 +166,17 @@ bool StructureParser::characters( const QString& ch)
 	if (abortLoading)
 		return TRUE;
 	
-  if (ch == NULL || ch == "")
-    return TRUE;
+    if (ch == NULL || ch == "")
+    	return TRUE;
     
-  if (flag == XML_ROOMNAME) {
-    r->setName(ch.toAscii());
-  } else if (flag == XML_DESC) {
-      r->setDesc(ch.toAscii());
-  } else if (flag == XML_NOTE) {
-      r->setNote(ch.toAscii());
-  }
-  return TRUE;
+    if (flag == XML_ROOMNAME) {
+    	r->setName(ch.toAscii());
+    } else if (flag == XML_DESC) {
+    	r->setDesc(ch.toAscii());
+    } else if (flag == XML_NOTE) {
+    	r->setNote(ch.toAscii());
+    }
+    return TRUE;
 } 
 
 
@@ -293,7 +296,7 @@ void CRoomManager::saveMap(QString filename)
     return;
   }
 
-  QMutexLocker locker(mapLock);
+  QReadLocker locker(&mapLock);
   
   QProgressDialog progress("Saving the database...", "Abort Saving", 0, size(), renderer_window);
   progress.setWindowModality(Qt::WindowModal);

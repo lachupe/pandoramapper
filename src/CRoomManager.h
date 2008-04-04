@@ -9,8 +9,10 @@
 #include <QVector>
 #include <QObject>
 #include <QThread>
-#include <QMutex>
-#include <QMutexLocker>
+#include <QReadWriteLock>
+#include <QReadLocker>
+#include <QWriteLocker>
+
 
 class CPlane;
 class CSquare;
@@ -20,7 +22,7 @@ class CSquare;
 
 class CRoomManager : public QObject {
 	Q_OBJECT
-	QMutex 	*mapLock;
+	QReadWriteLock mapLock;
 	
 	QList<CRegion *>    regions;
     QVector<CRoom *> rooms;   		/* rooms */
@@ -28,21 +30,42 @@ class CRoomManager : public QObject {
 
     CPlane        *planes;        /* planes/levels of the map, sorted by the Z coordinate, lower at first */
 
+    inline QByteArray getNameUnlocked(unsigned int id)  {
+    	if (ids[id]) return (*(ids[id])).getName(); return "";
+    }
+
+    inline CRoom * getRoomUnlocked(unsigned int id)        { 
+   	    if (id < MAX_ROOMS) 
+            return ids[id]; 
+        else 
+            return NULL; 
+    }
+
+    void deleteRoomUnlocked(CRoom *r, int mode);  /* user interface function */
+    void smallDeleteRoomUnlocked(CRoom *r);  /* user interface function */
+
 public:
     CRoomManager();
     virtual ~CRoomManager();
     void init();
     void reinit();			/* reinitializer/utilizer */
-    void lock() { 
+    void lockForRead() { 
     //	printf("Locking\r\n"); 
-    	mapLock->lock(); 
+    	mapLock.lockForRead(); 
+    //	printf("Locked!\r\n");
+    }
+    void lockForWrite() { 
+    //	printf("Locking\r\n"); 
+    	mapLock.lockForWrite(); 
     //	printf("Locked!\r\n");
     }
     void unlock() { 
     //	printf("Unlocking...\r\n"); 
-    	mapLock->unlock(); 
+    	mapLock.unlock(); 
     //	printf("Unlocked!\r\n");
     }
+    bool tryLockForRead() { return mapLock.tryLockForRead(); }
+    bool tryLockForWrite() { return mapLock.tryLockForRead(); }
     
     // make sure you LOCK before you use those lists ... !
     QVector<CRoom *> getRooms() { return rooms; }
@@ -62,21 +85,19 @@ public:
     void          expandPlane(CPlane *plane, CRoom *room);
     
     
-    void addRoomNonsorted(CRoom *room);   /* use only at loading */
     void addRoom(CRoom *room);
+    void addRoomNonsorted(CRoom *room);   /* use only at loading, it's unlocked! */
+
+    
     
     inline CRoom * getRoom(unsigned int id)        { 
-    	QMutexLocker locker(mapLock);
-
-   	    if (id < MAX_ROOMS) 
-            return ids[id]; 
-        else 
-            return NULL; 
+    	QReadLocker locker(&mapLock);
+    	return getRoomUnlocked(id);
     }
 
     inline QByteArray getName(unsigned int id)  {
-    	QMutexLocker locker(mapLock);
-    	if (ids[id]) return (*(ids[id])).getName(); return "";
+    	QReadLocker locker(&mapLock);
+    	return getNameUnlocked(id); // this GOT to be inlined!
     }
         
     int tryMergeRooms(CRoom *room, CRoom *copy, int j);
@@ -90,9 +111,9 @@ public:
     
     QList<CRegion *> getAllRegions();
     
-    void deleteRoom(CRoom *r, int mode);  /* user interface function */
-    void smallDeleteRoom(CRoom *r);  /* user interface function */
-
+    void deleteRoom(CRoom *r, int mode) { lockForWrite(); deleteRoomUnlocked(r, mode); unlock(); }  
+    void smallDeleteRoom(CRoom *r) { lockForWrite(); smallDeleteRoomUnlocked(r); unlock(); }    
+    
     QList<int> searchNames(QString s, Qt::CaseSensitivity cs);
     QList<int> searchDescs(QString s, Qt::CaseSensitivity cs);
     QList<int> searchNotes(QString s, Qt::CaseSensitivity cs);
@@ -101,6 +122,7 @@ public:
     
     void loadMap(QString filename);
     void saveMap(QString filename);
+    void clearAllSecrets();
 };
 
 extern class CRoomManager Map;/* room manager */

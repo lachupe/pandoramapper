@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <QMutex>
 #include <QTime>
+#include <QTimer>
 
 #include "CConfigurator.h"
 #include "defines.h"
@@ -199,6 +200,16 @@ void CEngine::slotRunEngine()
 {
     print_debug(DEBUG_ANALYZER, "In slotRunEngine");
 
+    // just ignore the even it the system is blocking.
+    // supposedly the event will be repeated sometime later =)
+    // for engine and userland redraw this does not matter much
+    if (Map.tryLockForRead() == false) {
+    	print_debug(DEBUG_GENERAL, "slotRunEngine tried to block the eventQueue. Delayed.");
+    	QTimer::singleShot( 50, this, SLOT(slotRunEngine()) );
+    	return;
+    } else 
+    	Map.unlock();
+    
     if (userland_parser->is_empty()) {
         print_debug(DEBUG_ANALYZER, "Calling the analyzer");
         exec();
@@ -418,7 +429,7 @@ int CEngine::checkRoomDesc()
           break;
       }
     
-    Map.lock();
+    Map.lockForRead();
     QVector<CRoom *> rooms = Map.getRooms();
     for (i = 0; i < Map.size(); i++) {
         r = rooms[i];
@@ -555,7 +566,9 @@ void CEngine::angryLinker(CRoom *r)
   // if you are performing the full run over all rooms, it's better
   // to lock the Map completely.
   // else the other thread might delete the room you are examining at the moment!
-  Map.lock();
+  Map.lockForWrite();
+  
+  
   QVector<CRoom *> rooms = Map.getRooms();
   /* find the closest neighbours by coordinate */
   for (i = 0; i < Map.size(); i++) {
@@ -617,7 +630,6 @@ void CEngine::angryLinker(CRoom *r)
       }
       
     }
-
     /* y-axis.  */
     if ((p->getX() == r->getX()) && (p->getZ() == r->getZ())) {
       
@@ -648,11 +660,9 @@ void CEngine::angryLinker(CRoom *r)
 
   
   }
-  Map.unlock();
   
   print_debug(DEBUG_ROOMS, "candidates gathered");
     
-
   /* ok, now we have candidates for linking - lets check directions and connections*/
   for (i=0; i <= 5; i++) {
     if (r->isExitUndefined(i) && candidates[i] != NULL)
@@ -677,6 +687,7 @@ void CEngine::angryLinker(CRoom *r)
       }
   }
   
+  Map.unlock();
 }
 
 

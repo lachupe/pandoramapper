@@ -1466,7 +1466,7 @@ USERCMD(usercmd_mmerge)
     id = 0;
     
     // yet again, sensitive!
-    Map.lock();
+    Map.lockForWrite();
     QVector<CRoom *> rooms = Map.getRooms();
     for (i = 0; i < Map.size(); i++) {
         t = rooms[i];

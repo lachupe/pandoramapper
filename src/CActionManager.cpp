@@ -676,10 +676,6 @@ void CActionManager::emulation_mode()
 
 void CActionManager::publish_map()
 {
-    bool mark[MAX_ROOMS];
-    CRoom *r;
-    unsigned int i;
-    unsigned int z;
 
     if (mappingAct->isChecked()) {
         emulationAct->setChecked(false); 
@@ -688,54 +684,7 @@ void CActionManager::publish_map()
         return;        
     }
 
-    // "wave" over all rooms reacheable over non-secret exits.         
-    memset(mark, 0, MAX_ROOMS);
-    stacker.reset();
-    stacker.put(1);
-    stacker.swap();
-    while (stacker.amount() != 0) {
-        for (i = 0; i < stacker.amount(); i++) {
-            r = stacker.get(i);
-            mark[r->id] = true;
-            for (z = 0; z <= 5; z++) 
-                if (r->isConnected(z) && mark[ r->exits[z]->id  ] != true  && r->isDoorSecret(z) != true  ) 
-                    stacker.put(r->exits[z]->id);
-        }
-        stacker.swap();
-    }
-
-    Map.lock();
-    // delete all unreached rooms    
-    for (i = 0; i < MAX_ROOMS; i++) {
-        r = Map.getRoom( i );
-        if (r == NULL)
-            continue;
-        if (r) {
-            if (mark[r->id] == false) {
-                Map.deleteRoom(r, 0);
-                continue;        
-            }
-        }
-        
-    }
-    Map.unlock();
-    
-    Map.lock();
-    QVector<CRoom *> rooms = Map.getRooms();
-    // roll over all still accessible rooms and delete the secret doors if they are still left in the database
-    for (i = 0; i < Map.size(); i++) {
-        r = rooms[i];
-        if (r) {
-            for (z = 0; z <= 5; z++) {
-                if ( r->isDoorSecret(z) == true ) {
-                    print_debug(DEBUG_ROOMS,"Secret door was still in database...\r\n");
-                    r->removeDoor(z);
-                }
-            }
-        }
-        
-    }
-    Map.unlock();
+    Map.clearAllSecrets();
 
     print_debug(DEBUG_INTERFACE && DEBUG_ROOMS,"Finished removing secrets from the map!\r\n");
     //    QMessageBox::information(parent, "Removing secrets...", "Done!\n", QMessageBox::Ok);

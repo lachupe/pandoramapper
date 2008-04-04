@@ -21,7 +21,6 @@ class CRoomManager Map;
 
 CRoomManager::~CRoomManager()
 {
-	delete mapLock;
 }
 
 //
@@ -36,13 +35,73 @@ CRoomManager::~CRoomManager()
 //}
 //
 
+
+void CRoomManager::clearAllSecrets()
+{
+    bool mark[MAX_ROOMS];
+    CRoom *r;
+    unsigned int i;
+    unsigned int z;
+
+    // "wave" over all rooms reacheable over non-secret exits.         
+    memset(mark, 0, MAX_ROOMS);
+    stacker.reset();
+    stacker.put(1);
+    stacker.swap();
+
+    
+    lockForWrite();
+    while (stacker.amount() != 0) {
+        for (i = 0; i < stacker.amount(); i++) {
+            r = stacker.get(i);
+            mark[r->id] = true;
+            for (z = 0; z <= 5; z++) 
+                if (r->isConnected(z) && mark[ r->exits[z]->id  ] != true  && r->isDoorSecret(z) != true  ) 
+                    stacker.put(r->exits[z]->id);
+        }
+        stacker.swap();
+    }
+
+    // delete all unreached rooms    
+    for (i = 0; i < MAX_ROOMS; i++) {
+        r = getRoomUnlocked( i );
+        if (r == NULL)
+            continue;
+        if (r) {
+            if (mark[r->id] == false) {
+                deleteRoomUnlocked(r, 0);
+                continue;        
+            }
+        }
+        
+    }
+
+    QVector<CRoom *> rooms = getRooms();
+    // roll over all still accessible rooms and delete the secret doors if they are still left in the database
+    for (i = 0; i < size(); i++) {
+        r = rooms[i];
+        if (r) {
+            for (z = 0; z <= 5; z++) {
+                if ( r->isDoorSecret(z) == true ) {
+                    print_debug(DEBUG_ROOMS,"Secret door was still in database...\r\n");
+                    r->removeDoor(z);
+                }
+            }
+        }
+        
+    }
+    
+    unlock();
+}
+
+
 /*------------ merge_rooms ------------------------- */
 int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
 {
   unsigned int i;
   CRoom *p;
   
-  QMutexLocker locker(mapLock);
+  QWriteLocker locker(&mapLock);
   
   if (j == -1) {
     /* oneway ?! */
@@ -53,7 +112,7 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
          if (p->isExitLeadingTo(i, copy) == true) 
              p->setExit(i, r);
      
-    smallDeleteRoom(copy);
+    smallDeleteRoomUnlocked(copy);
 
 
     stacker.put(r);
@@ -66,7 +125,7 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
     if (p->isExitLeadingTo( reversenum(j), copy) == true)
         p->setExit( reversenum(j), r);
         
-    smallDeleteRoom(copy);
+    smallDeleteRoomUnlocked(copy);
 
     stacker.put(r);
     return 1;
@@ -78,8 +137,6 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
 void CRoomManager::fixFreeRooms()
 {
     unsigned int i;
-
-    QMutexLocker locker(mapLock);
 
     for (i = 1; i < MAX_ROOMS; i++)
 	if (ids[i] == NULL) {
@@ -94,8 +151,6 @@ void CRoomManager::fixFreeRooms()
 /* ------------ addroom --------------*/
 void CRoomManager::addRoomNonsorted(CRoom *room)
 {
-	QMutexLocker locker(mapLock);
-
 	if (ids[room->id] != NULL) {
         print_debug(DEBUG_ROOMS, "Error while adding new element to database! This id already exists!\n");
         exit(1);
@@ -109,28 +164,27 @@ void CRoomManager::addRoomNonsorted(CRoom *room)
     NameMap.addName(room->getName(), room->id);	/* update name-searhing engine */
     
     
-    
     fixFreeRooms();
     addToPlane(room);
 }
 
 void CRoomManager::addRoom(CRoom *room)
 {
-  addRoomNonsorted(room);
+	QWriteLocker locker(&mapLock);
+	addRoomNonsorted(room);
 }
 /* ------------ addroom ENDS ---------- */
 
 /*------------- Constructor of the room manager ---------------*/
 CRoomManager::CRoomManager()
 {
-	mapLock = new QMutex(QMutex::Recursive);
 	init();
 }
 
 
 void CRoomManager::init()
 {
-	QMutexLocker locker(mapLock);
+	QWriteLocker locker(&mapLock);
 
     print_debug(DEBUG_ROOMS,"Roommanager INIT.\r\n");
 
@@ -158,7 +212,7 @@ void CRoomManager::init()
 
 CRegion *CRoomManager::getRegionByName(QByteArray name)
 {
-	QMutexLocker locker(mapLock);
+	// TODO: threadsafety the class regions QMutexLocker locker(mapLock);
 
 	CRegion    *region;
     for (int i=0; i < regions.size(); i++) {
@@ -172,8 +226,7 @@ CRegion *CRoomManager::getRegionByName(QByteArray name)
 bool CRoomManager::addRegion(QByteArray name)
 {
     CRegion    *region;
-
-	QMutexLocker locker(mapLock);
+	// TODO: threadsafety the class regions QMutexLocker locker(mapLock);
 
     if (getRegionByName(name) == false) {
         region = new CRegion();
@@ -188,7 +241,7 @@ bool CRoomManager::addRegion(QByteArray name)
 
 void CRoomManager::addRegion(CRegion *reg)
 {
-	QMutexLocker locker(mapLock);
+	// TODO: threadsafety the class regions QMutexLocker locker(mapLock);
 
 	if (reg != NULL) 
         regions.push_back(reg);
@@ -198,6 +251,7 @@ void CRoomManager::addRegion(CRegion *reg)
 void CRoomManager::sendRegionsList()
 {
     CRegion    *region;
+	// TODO: threadsafety the class regions QMutexLocker locker(mapLock);
 
     
     send_to_user( "Present regions: \r\n");
@@ -211,14 +265,15 @@ void CRoomManager::sendRegionsList()
 
 QList<CRegion *> CRoomManager::getAllRegions()
 {
-    return regions;
+	// TODO: threadsafety the class regions QMutexLocker locker(mapLock);
+	return regions;
 }
 
 
 /* -------------- reinit ---------------*/
 void CRoomManager::reinit()
 {
-	QMutexLocker locker(mapLock);
+	QWriteLocker locker(&mapLock);
 
 	next_free = 1;
     {
@@ -250,12 +305,10 @@ void CRoomManager::reinit()
 /* ------------ delete_room --------- */
 /* mode 0 - remove all links in other rooms together with exits and doors */
 /* mode 1 - keeps the doors and exits in other rooms, but mark them as undefined */
-void CRoomManager::deleteRoom(CRoom *r, int mode)
+void CRoomManager::deleteRoomUnlocked(CRoom *r, int mode)
 {
     int k;
     int i;
-    
-	QMutexLocker locker(mapLock);
     
     if (r->id == 1) {
 	print_debug(DEBUG_ROOMS,"Cant delete base room!\n");
@@ -273,19 +326,16 @@ void CRoomManager::deleteRoom(CRoom *r, int mode)
                 }
 	    }
 
-    smallDeleteRoom(r);
 }
 
 /* --------- _delete_room ENDS --------- */
 
 /* ------------ small_delete_room --------- */
-void CRoomManager::smallDeleteRoom(CRoom *r)
+void CRoomManager::smallDeleteRoomUnlocked(CRoom *r)
 {
-	QMutexLocker locker(mapLock);
-	
 	if (r->id == 1) {
-	print_debug(DEBUG_ROOMS,"ERROR (!!): Attempted to delete the base room!\n");
-	return;
+		print_debug(DEBUG_ROOMS,"ERROR (!!): Attempted to delete the base room!\n");
+		return;
     }
     removeFromPlane(r);
     stacker.removeRoom(r->id);
@@ -314,12 +364,15 @@ void CRoomManager::smallDeleteRoom(CRoom *r)
 }
 /* --------- small_delete_room ENDS --------- */
 
+// this function is only called as result of CRoom.setZ and 
+// addToPlace() functions. 
+// addToPlane is protected by CRoomManager locks 
+// CRoom.setZ() stays as open issue aswell as the whole
+// set of writing CRoom functions ...
 void CRoomManager::removeFromPlane(CRoom *room)
 {
     CPlane *p;
    
-	QMutexLocker locker(mapLock);
-
     if (planes == NULL)
     	return;
     
@@ -381,7 +434,8 @@ void  CRoomManager::addToPlane(CRoom *room)
 {
     CPlane *p, *prev, *tmp;
 
-	QMutexLocker locker(mapLock);
+    // is protected by CRoomManager locker
+    //	QMutexLocker locker(mapLock);
     
     
     if (planes == NULL) {
@@ -419,7 +473,7 @@ QList<int> CRoomManager::searchNames(QString s, Qt::CaseSensitivity cs)
 {
     QList<int> results;
 
-	QMutexLocker locker(mapLock);
+	QReadLocker locker(&mapLock);
 
     for (int i = 0; i < rooms.size(); i++) {
         if (QString(rooms[i]->getName()).contains(s, cs)) {
@@ -434,7 +488,7 @@ QList<int> CRoomManager::searchDescs(QString s, Qt::CaseSensitivity cs)
 {
     QList<int> results;
 
-    QMutexLocker locker(mapLock);
+    QReadLocker locker(&mapLock);
 
     for (int i = 0; i < rooms.size(); i++) {
         if (QString(rooms[i]->getDesc()).contains(s, cs)) {
@@ -449,7 +503,7 @@ QList<int> CRoomManager::searchNotes(QString s, Qt::CaseSensitivity cs)
 {
     QList<int> results;
 
-	QMutexLocker locker(mapLock);
+    QReadLocker locker(&mapLock);
 
 	for (int i = 0; i < rooms.size(); i++) {
         if (QString(rooms[i]->getNote()).contains(s, cs)) {
@@ -464,7 +518,7 @@ QList<int> CRoomManager::searchExits(QString s, Qt::CaseSensitivity cs)
 {
     QList<int> results;
 
-	QMutexLocker locker(mapLock);
+    QReadLocker locker(&mapLock);
 
     for (int i = 0; i < rooms.size(); i++) {
         for (int j = 0; j <= 5; j++) {
