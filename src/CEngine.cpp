@@ -411,8 +411,8 @@ int CEngine::checkRoomDesc()
 
     if (addedroom->getName().isEmpty()) {
         /* now thats sounds bad ... */
-        Map.deleteRoom(addedroom, 0);
         print_debug(DEBUG_ANALYZER, "ERROR: in check_description() - empty roomname in new room.\r\n");
+        Map.deleteRoom(addedroom, 0);
         return 0;
     }
 
@@ -429,7 +429,7 @@ int CEngine::checkRoomDesc()
           break;
       }
     
-    Map.lockForRead();
+    Map.lockForWrite();
     QVector<CRoom *> rooms = Map.getRooms();
     for (i = 0; i < Map.size(); i++) {
         r = rooms[i];

@@ -12,6 +12,7 @@ CGroup::CGroup(QByteArray name, QObject *parent)
 	ch = new CGroupChar;
 	
 	ch->setName(name);
+	ch->setPosition(1); // FIXME ... or does not really matter.
 	chars.append(ch);
 	self = ch;
 	
@@ -38,9 +39,13 @@ bool CGroup::addChar(QByteArray blob)
 	newChar = new CGroupChar;
 	newChar->updateFromBlob(blob);
 	if ( isNamePresent(newChar->getName()) == true ) {
+		print_debug(DEBUG_GROUP, "Adding new char FAILED. the name %s already existed.", 
+				(const char *) newChar->getName());
 		delete newChar;
 		return false;
 	} else {
+		print_debug(DEBUG_GROUP, "Added new char. Name %s", 
+				(const char *) newChar->getName());
 		chars.append(newChar);
 		return true;
 	}

@@ -101,6 +101,7 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
   unsigned int i;
   CRoom *p;
   
+  print_debug(DEBUG_ROOMS, "entering tryMergeRooms...");
   QWriteLocker locker(&mapLock);
   
   if (j == -1) {
@@ -170,8 +171,10 @@ void CRoomManager::addRoomNonsorted(CRoom *room)
 
 void CRoomManager::addRoom(CRoom *room)
 {
+	printf("TEST TEST... ADDING!\r\n");
 	QWriteLocker locker(&mapLock);
 	addRoomNonsorted(room);
+	printf("TEST TEST... ADDED!\r\n");
 }
 /* ------------ addroom ENDS ---------- */
 

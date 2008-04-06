@@ -28,8 +28,6 @@ class CGroupCommunicator : public QObject
 	
 	QObject *peer;	// server or client
 	CGroup *getGroup() { return (CGroup *) parent(); }
-	int decodeMessage(QByteArray data);
-
 	
 	void connectionClosed(CGroupClient *connection);
 	void connectionEstablished(CGroupClient *connection);
@@ -45,8 +43,8 @@ class CGroupCommunicator : public QObject
 	void userLoggedOn(CGroupClient *conn);
 	void userLoggedOff(CGroupClient *conn);
 		
-	void retrieveDataClient(CGroupClient *connection);
-	void retrieveDataServer(CGroupClient *connection);
+	void retrieveDataClient(CGroupClient *connection, int message, QByteArray data);
+	void retrieveDataServer(CGroupClient *connection, int message, QByteArray data);
 	
 public:
 	const static int version = 100; // Protocol version. Those must match!

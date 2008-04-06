@@ -1,4 +1,5 @@
 #include "CGroupChar.h"
+#include "utils.h"
 
 CGroupChar::CGroupChar()
 {
@@ -15,6 +16,8 @@ QByteArray CGroupChar::toBlob()
 	data = name;	// name
 	data += " ";
 	data += "14";	// ID
+	print_debug(DEBUG_GROUP, "New blob: %s", (const char *) data );
+	return data;
 }
 
 bool CGroupChar::updateFromBlob(QByteArray blob)
@@ -22,6 +25,8 @@ bool CGroupChar::updateFromBlob(QByteArray blob)
 	int index;
 	index = blob.indexOf(' ');
 	QByteArray tmp;
+
+	print_debug(DEBUG_GROUP, "Incoming blob: %s", (const char *) blob );
 
 	// first - simplify the array
 	blob.simplified();
@@ -34,5 +39,6 @@ bool CGroupChar::updateFromBlob(QByteArray blob)
 
 	// and the rest is the charname !
 	name = blob;
+	return true; // hrmpf!
 }
 

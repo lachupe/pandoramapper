@@ -29,7 +29,10 @@ void CGroupCommunicator::changeType(int newState) {
 	if (type == newState)
 		return;
 
-	delete peer;
+	if (type == Client) {
+		peer->deleteLater();
+	} else 
+		delete peer;
 
 	type = newState;
 
@@ -168,38 +171,43 @@ void CGroupCommunicator::serverStartupFailed()
 //
 
 // the core of the protocol
-void CGroupCommunicator::incomingData(CGroupClient *connection)
+void CGroupCommunicator::incomingData(CGroupClient *conn)
 {
-	if (type == Client)
-		retrieveDataClient(connection);
-	if (type == Server)
-		retrieveDataServer(connection);
-}
+	QByteArray data;
+	QByteArray blob;
+	int message;
+	int index;
 
+	while (conn->bytesAvailable()) {
+		data = conn->readLine();
+		print_debug(DEBUG_GROUP, "ReceivedData. [conn: %i, Data: %s]", 
+						(int) conn->socketDescriptor(),
+						(const char *) data);
 
-int CGroupCommunicator::decodeMessage(QByteArray data)
-{
-	QByteArray copy = data;
-	
-	copy.truncate(data.indexOf(' '));
-	
-	return copy.toInt();
+		index = data.indexOf(' ');
+		
+		QByteArray copy = data.left(index);
+		message = copy.toInt();
+
+		blob = data.right( data.size() - index - 1);
+		
+		print_debug(DEBUG_GROUP, "Datagram arrived. Message : %i, Blob: %s", message, (const char *) blob);
+
+		if (type == Client)
+			retrieveDataClient(conn, message, blob);
+		if (type == Server)
+			retrieveDataServer(conn, message, blob);
+
+	}
+
 }
 
 //
 // ******************** C L I E N T   S I D E ******************
 //
 // Client side of the communication protocol
-void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
+void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QByteArray data)
 {
-	QByteArray data;
-	int message;
-
-	data = conn->readAll();
-	print_debug(DEBUG_GROUP, "retrieveDataClient. Data: %s", (const char *) data);
-	message = decodeMessage(data);
-	print_debug(DEBUG_GROUP, "Datagram arrived. Message : %i", message);
-	
 	switch (conn->getConnectionState()) {
 		//Closed, Connecting, Connected, Quiting
 		case CGroupClient::Connected:
@@ -274,15 +282,8 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 // ******************** S E R V E R   S I D E ******************
 //
 // Server side of the communication protocol
-void CGroupCommunicator::retrieveDataServer(CGroupClient *conn)
+void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QByteArray data)
 {
-	QByteArray data;
-	int message;
-	
-	data = conn->readAll();
-	print_debug(DEBUG_GROUP, "retrieveDataServer. Data: %s", (const char *) data);
-	message = decodeMessage(data);
-	print_debug(DEBUG_GROUP, "Server side. Datagram arrived. Message : %i", message);
 	
 	switch (conn->getConnectionState()) {
 		//Closed, Connecting, Connected, Quiting
