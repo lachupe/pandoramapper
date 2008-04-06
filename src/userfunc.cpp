@@ -1370,10 +1370,7 @@ USERCMD(usercmd_mload)
   userfunc_print_debug;
 
   send_to_user("--[Pandora: Reloading the database ...\n");
-
-  send_to_user(" * Locking analyzer-thread...\r\n");
-
-  send_to_user(" * Re-initing roomer and namer classes...\r\n");
+  send_to_user(" * Clearing the database class...\r\n");
   Map.reinit();  /* this one reinits Ctree structure also */
   
   send_to_user(" * Resetting possibility stacks...\r\n");

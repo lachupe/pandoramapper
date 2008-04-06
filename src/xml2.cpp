@@ -85,11 +85,14 @@ void CRoomManager::loadMap( QString filename)
   StructureParser * handler = new StructureParser(&progress, currentMaximum, this);
   reader.setContentHandler( handler );
     
+  printf("LoadMap Thread ID: %i\r\n", (int) QThread::currentThreadId ());
     
   print_debug(DEBUG_XML, "reading xml ...");
   fflush(stdout);
 
+  printf("Before the lock.\r\n");
   lockForWrite();
+  printf("After the lock.\r\n");
   reader.parse( source );
 
   
@@ -302,7 +305,7 @@ void CRoomManager::saveMap(QString filename)
   progress.setWindowModality(Qt::WindowModal);
   progress.show();
 
-  fprintf(f, "<map>\n");
+  fprintf(f, "<map rooms=\"%i\">\n", size() );
   
 
   {

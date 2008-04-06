@@ -101,8 +101,11 @@ bool CRoomManager::isDuplicate(CRoom *addedroom)
     unsigned int i;
     int j;
 
+    printf("In isDuplicate check!");
     QWriteLocker locker(&mapLock);
 
+    
+    
     print_debug(DEBUG_ANALYZER, "Room-desc check for new room");
     
     j = -1;
@@ -126,7 +129,6 @@ bool CRoomManager::isDuplicate(CRoom *addedroom)
     if (addedroom->getName().isEmpty()) {
         /* now thats sounds bad ... */
         print_debug(DEBUG_ANALYZER, "ERROR: in check_description() - empty roomname in new room.\r\n");
-        deleteRoomUnlocked(addedroom, 0);
         return false;
     }
 
@@ -384,21 +386,22 @@ void CRoomManager::deleteRoomUnlocked(CRoom *r, int mode)
     int i;
     
     if (r->id == 1) {
-	print_debug(DEBUG_ROOMS,"Cant delete base room!\n");
-	return;
+    	print_debug(DEBUG_ROOMS,"Cant delete base room!\n");
+    	return;
     }
 
     /* have to do this because of possible oneways leading in */
     for (i = 0; i < rooms.size(); i++) 
-	for (k = 0; k <= 5; k++)
-	    if (rooms[i]->isExitLeadingTo(k, r) == true) {
+    	for (k = 0; k <= 5; k++)
+	    	if (rooms[i]->isExitLeadingTo(k, r) == true) {
                 if (mode == 0) {
                     rooms[i]->removeExit(k);
                 } else if (mode == 1) {
                     rooms[i]->setExitUndefined(k);
                 }
-	    }
+	    	}
 
+    smallDeleteRoomUnlocked(r);
 }
 
 /* --------- _delete_room ENDS --------- */

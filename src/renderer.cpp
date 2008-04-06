@@ -620,6 +620,8 @@ void RendererWidget::setupNewBaseCoordinates()
     int newX, newY, newZ;
     unsigned int i;
 
+    printf("setupNewbaseCoordinates Thread ID: %i\r\n", (int) QThread::currentThreadId ());
+
     print_debug(DEBUG_RENDERER, "calculating new Base coordinates");
 
     // in case we lost sync, stay at the last position 
@@ -685,6 +687,8 @@ void RendererWidget::draw(void)
     
     int z = 0;
     
+    printf("renderer Thread ID: %i\r\n", (int) QThread::currentThreadId ());
+
     print_debug(DEBUG_RENDERER, "in draw()");
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
