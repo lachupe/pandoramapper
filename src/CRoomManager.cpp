@@ -180,7 +180,7 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
     /* oneway ?! */
     print_debug(DEBUG_ROOMS, "fixing one way in previous room, repointing at merged room");
     
-     p = getRoom(oneway_room_id);
+     p = getRoomUnlocked(oneway_room_id);
      for (i = 0; i <= 5; i++)
          if (p->isExitLeadingTo(i, copy) == true) 
              p->setExit(i, r);
@@ -243,7 +243,6 @@ void CRoomManager::addRoomNonsorted(CRoom *room)
 
 void CRoomManager::addRoom(CRoom *room)
 {
-	printf("TEST TEST... ADDING!\r\n");
 	QWriteLocker locker(&mapLock);
 	addRoomNonsorted(room);
 	printf("TEST TEST... ADDED!\r\n");
