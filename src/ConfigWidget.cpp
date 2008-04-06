@@ -74,6 +74,8 @@ void ConfigWidget::run()
     lineEdit_visrange->setText(QString("%1").arg(conf->get_texture_vis()) );
     lineEdit_detrange->setText(QString("%1").arg(conf->get_details_vis()) );
     lineEdit_layers->setText(QString("%1").arg(conf->getVisibleLayers()) );
+    
+    misc_startupMode->setCurrentIndex(conf->get_startup_mode());
 }
 
 void ConfigWidget::autorefreshUpdated(bool state)
@@ -173,6 +175,9 @@ void ConfigWidget::accept()
     }
     if (conf->getVisibleLayers() != i)
         conf->setVisibleLayers(i);
+    
+    if (conf->get_startup_mode() != misc_startupMode->currentIndex() )
+        conf->set_startup_mode( misc_startupMode->currentIndex() );
 
     done(Accepted);
 }

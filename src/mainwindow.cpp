@@ -57,7 +57,8 @@ CMainWindow::CMainWindow(QWidget *parent)
     /* Enable mouse tracking to be able to show tooltips. */
     setMouseTracking(true);
 
-    setToolMode(SelectMode);
+    //setToolMode(SelectMode);
+    setToolMode(conf->get_startup_mode()?MoveMode:SelectMode);
 
     /* now building a menu and adding actions to menu */
     fileMenu = menuBar()->addMenu(tr("&File"));

@@ -72,6 +72,7 @@ class Cconfigurator : public QObject {
     bool show_regions_info;
     bool show_notes_renderer;
 
+    int startup_mode; /* 0 for select, 1 for move */
     
     int texture_visibilit_range;
     int details_visibility_range;
@@ -181,6 +182,9 @@ public:
     void set_regions_auto_replace(bool b);
     void set_display_regions_renderer(bool b);
     void set_show_regions_info(bool b);
+    
+    void set_startup_mode(int i);
+    int get_startup_mode();
     
     void set_show_notes_renderer(bool b);
     /*--*/

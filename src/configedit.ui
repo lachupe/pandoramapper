@@ -1,6 +1,14 @@
 <ui version="4.0" >
  <class>ConfigDialog</class>
  <widget class="QDialog" name="ConfigDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>479</width>
+    <height>287</height>
+   </rect>
+  </property>
   <property name="windowTitle" >
    <string>Dialog</string>
   </property>
@@ -63,6 +71,47 @@
           <string>NOTE: Changes to local port take place after restart!</string>
          </property>
         </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="mappingTab" >
+      <attribute name="title" >
+       <string>Mapping</string>
+      </attribute>
+      <layout class="QVBoxLayout" >
+       <item>
+        <widget class="QCheckBox" name="checkBox_angrylinker" >
+         <property name="text" >
+          <string>AngryLinker</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_automerge" >
+         <property name="text" >
+          <string>Automerge</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_duallinker" >
+         <property name="text" >
+          <string>Duallinker</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -130,47 +179,6 @@
         <spacer>
          <property name="orientation" >
           <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" >
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="mappingTab" >
-      <attribute name="title" >
-       <string>Mapping</string>
-      </attribute>
-      <layout class="QVBoxLayout" >
-       <item>
-        <widget class="QCheckBox" name="checkBox_angrylinker" >
-         <property name="text" >
-          <string>AngryLinker</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_automerge" >
-         <property name="text" >
-          <string>Automerge</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_duallinker" >
-         <property name="text" >
-          <string>Duallinker</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" >
           <size>
@@ -273,6 +281,44 @@
         </spacer>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="miscTab" >
+      <attribute name="title" >
+       <string>Misc.</string>
+      </attribute>
+      <widget class="QComboBox" name="misc_startupMode" >
+       <property name="geometry" >
+        <rect>
+         <x>120</x>
+         <y>20</y>
+         <width>131</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text" >
+         <string>Select mode</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Move mode</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QLabel" name="misc_startupModeLabel" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>111</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Startup Mode:</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>

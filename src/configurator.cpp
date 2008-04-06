@@ -87,6 +87,8 @@ Cconfigurator::Cconfigurator()
     groupManagerRemotePort = 4243;
     groupManagerHost = "localhost";
     groupManagerCharName = "Aza";
+
+    set_startup_mode(0);
 }
 
 
@@ -362,6 +364,16 @@ void Cconfigurator::set_desc_quote(int i)
     set_conf_mod(true);
 }
 
+void Cconfigurator::set_startup_mode(int i)
+{
+    startup_mode = i;
+    set_conf_mod(true);
+}
+
+int Cconfigurator::get_startup_mode()
+{
+    return startup_mode;
+}
 
 int Cconfigurator::load_texture(struct room_sectors_data *p)
 {
@@ -546,6 +558,7 @@ int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
       fprintf(f, "  <texture handle=\"%s\" file=\"%s\" pattern=\"%s\">\r\n",
                   (const char *) sectors[i].desc, 
                   (const char *) sectors[i].filename, qPrintable(ch));
+  
   }
   
   for (i = 0; i < spells.size(); i++) {
@@ -563,6 +576,8 @@ int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
       fprintf(f, "  <debug name=\"%s\"  state=\"%s\">\r\n", debug_data[i].name, ON_OFF(debug_data[i].state));
       i++;
   }
+
+  fprintf(f, "  <misc startupmode=\"%d\">\r\n", get_startup_mode());
 
   /* PUT ENGINE CONFIG SAVING THERE ! */
   
@@ -932,6 +947,15 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         conf->set_renderer_position(x,y,z);
             
         print_debug(DEBUG_CONFIG, "Loaded renderer shift : x %f, y %f, z %f",x, y, z);
+        return TRUE;
+    
+    } else if (qName == "misc") {
+        int startup_mode = 0;
+        startup_mode = attributes.value("startupmode").toInt();
+
+        conf->set_startup_mode(startup_mode);
+
+        print_debug(DEBUG_CONFIG, "Set startup mode: %d", startup_mode);
         return TRUE;
     }
 
