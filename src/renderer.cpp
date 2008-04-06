@@ -135,13 +135,33 @@ void RendererWidget::resizeGL( int width, int height )
 }
 
 
+void RendererWidget::display(void)
+{
+  if (redraw) {
+	  
+    if (Map.tryLockForRead() == false) {
+    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
+    	QTimer::singleShot( 100, this, SLOT(paintGL()) );
+    	return;
+    } else 
+    	Map.unlock();
+  
+    QTime t;
+    t.start();
+
+    
+    draw();
+    
+    
+    print_debug(DEBUG_RENDERER, "Rendering's done. Time elapsed %d ms", t.elapsed());
+  }  
+}
+
+
 void RendererWidget::paintGL()
 {
     print_debug(DEBUG_RENDERER, "in paintGL()");
 
-    // just ignore the even it the system is blocking.
-    // supposedly the event will be repeated sometime later =)
-    // for OpenGL redraw this does not matter much
     if (Map.tryLockForRead() == false) {
     	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
     	QTimer::singleShot( 100, this, SLOT(paintGL()) );
@@ -152,7 +172,7 @@ void RendererWidget::paintGL()
     QTime t;
     t.start();
     
-    display();
+    //display(); ?? 
     draw();
     
     print_debug(DEBUG_RENDERER, "Rendering's done. Time elapsed %d ms\r\n", t.elapsed());
@@ -778,20 +798,6 @@ void RendererWidget::draw(void)
 
     
     this->swapBuffers();
-}
-
-void RendererWidget::display(void)
-{
-  if (redraw) {
-    QTime t;
-    t.start();
-
-    
-    draw();
-    
-    
-    print_debug(DEBUG_RENDERER, "Rendering's done. Time elapsed %d ms", t.elapsed());
-  }  
 }
 
 

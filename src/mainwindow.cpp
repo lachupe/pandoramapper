@@ -388,7 +388,7 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
             break;
     }
     update_status_bar();
-    renderer->display();
+    renderer->paintGL();
     print_debug(DEBUG_INTERFACE, "Done processing events at keyEventPress\r\n");
 }
 
@@ -407,7 +407,15 @@ void CMainWindow::keyReleaseEvent( QKeyEvent *k )
 
 void CMainWindow::mousePressEvent( QMouseEvent *e )
 {
+    if (Map.tryLockForRead() == false) {
+    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
+    	QTimer::singleShot( 100, this, SLOT(mousePressEvent(e)) );
+    	return;
+    } else 
+    	Map.unlock();
 
+	
+	
     mouseState.oldPos = e->pos();
     mouseState.origPos = e->pos();
 
@@ -457,6 +465,14 @@ void CMainWindow::createContextMenu( QMouseEvent *e )
     QMenu menu(this);
     QString roomName;
 
+    if (Map.tryLockForRead() == false) {
+    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
+    	QTimer::singleShot( 100, this, SLOT(createContextMenu(e)) );
+    	return;
+    } else 
+    	Map.unlock();
+
+    
     if (renderer->doSelect( mousePosInRenderer( e->pos() ), id )) {
         roomName = Map.getRoom(id)->getName();
     } else {

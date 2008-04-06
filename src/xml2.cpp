@@ -124,6 +124,7 @@ void CRoomManager::loadMap( QString filename)
 	  print_debug(DEBUG_XML, "done.");
   }
 
+  printf("Before unlock!\r\n");
   unlock();
 
   delete handler;
