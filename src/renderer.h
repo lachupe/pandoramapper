@@ -94,7 +94,6 @@ public:
     
     void initializeGL();
     void resizeGL( int width, int height );
-    void paintGL();
     void changeUserLayerShift(int byValue) { userLayerShift += byValue; curz += byValue; }
     
     bool doSelect(QPoint pos, unsigned int &id);
@@ -102,6 +101,7 @@ public:
 
     
 public slots:
+	void paintGL();
     void display(void);
 };
 

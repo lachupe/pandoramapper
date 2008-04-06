@@ -186,6 +186,9 @@ int CGroupCommunicator::decodeMessage(QByteArray data)
 	return copy.toInt();
 }
 
+//
+// ******************** C L I E N T   S I D E ******************
+//
 // Client side of the communication protocol
 void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 {
@@ -210,6 +213,9 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 					// aha! logged on!
 					sendMessage(conn, REQ_INFO);
 					conn->setProtocolState(CGroupClient::AwaitingInfo);
+				} else if (message == STATE_KICKED) {
+					// woops
+					getGroup()->gotKicked(data);
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
@@ -218,10 +224,12 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 				
 			} else if (conn->getProtocolState() == CGroupClient::AwaitingInfo) {
 				// almost connected. awaiting full information about the connection
-				if (message == DATA_INFO) {
+				if (message == UPDATE_CHAR) {
 					parseGroupInformation(conn, data);
-					sendMessage(conn, ACK);
+				} else if (message == STATE_LOGGED) {
 					conn->setProtocolState(CGroupClient::Logged);
+				} else if (message == REQ_ACK) {
+					sendMessage(conn, ACK);
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
@@ -230,6 +238,22 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 				
 			} else if (conn->getProtocolState() == CGroupClient::Logged) {
 				// usual update situation. receive update, unpack, apply.
+				if (message == ADD_CHAR) {
+
+				} else if (message == REMOVE_CHAR) {
+					
+				} else if (message == UPDATE_CHAR) {
+					
+				} else if (message == GTELL) {
+					
+				} else if (message == REQ_ACK) {
+					sendMessage(conn, ACK);
+				} else {
+					// ERROR: unexpected message marker!
+					// try to ignore?
+					print_debug(DEBUG_GROUP, "(AwaitingInfo) Unexpected message marker. Trying to ignore.");
+				}
+				
 				
 			} 
 			
@@ -246,8 +270,9 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn)
 	}
 }
 
-
-
+//
+// ******************** S E R V E R   S I D E ******************
+//
 // Server side of the communication protocol
 void CGroupCommunicator::retrieveDataServer(CGroupClient *conn)
 {
@@ -264,32 +289,37 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn)
 		case CGroupClient::Connected:
 			// AwaitingLogin, AwaitingInfo, Logged 
 
+			// ---------------------- AwaitingLogin  --------------------
 			if (conn->getProtocolState() == CGroupClient::AwaitingLogin) {
 				// Login state. either REQ_LOGIN or ACK should come
-				if (message == DATA_LOGIN) {
+				if (message == UPDATE_CHAR) {
 					// aha! parse the data
-					parseLoginInformation(conn, data);
-					sendMessage(conn, ACK); 
 					conn->setProtocolState(CGroupClient::AwaitingInfo);
+					parseLoginInformation(conn, data);
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
 					print_debug(DEBUG_GROUP, "(AwaitingLogin) Unexpected message marker. Trying to ignore.");
 				}
+				// ---------------------- AwaitingInfo  --------------------
 			} else if (conn->getProtocolState() == CGroupClient::AwaitingInfo) {
 				// almost connected. awaiting full information about the connection
 				if (message == REQ_INFO) {
 					sendGroupInformation(conn);
+					sendMessage(conn, REQ_ACK);
 				} else if (message == ACK) {
 					conn->setProtocolState(CGroupClient::Logged);
+					sendMessage(conn, STATE_LOGGED);
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
 					print_debug(DEBUG_GROUP, "(AwaitingInfo) Unexpected message marker. Trying to ignore.");
 				}
 				
+				// ---------------------- LOGGED --------------------
 			} else if (conn->getProtocolState() == CGroupClient::Logged) {
 				// usual update situation. receive update, unpack, apply.
+				
 				
 			} 
 			
@@ -329,33 +359,43 @@ void CGroupCommunicator::sendLoginInformation(CGroupClient *conn)
 	QByteArray info;
 	
 	// temporary
-	info = "Login Information";
-	info += "Name" + getGroup()->getName();
-	sendMessage(conn, DATA_LOGIN, info);
+	
+	sendMessage(conn, UPDATE_CHAR, getGroup()->getLocalCharData() );
 }
 
 void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QByteArray data)
 {
-
-	// temporary
 	print_debug(DEBUG_GROUP, "Login Information arrived %s", (const char *) data);
+
+	if (getGroup()->addChar(data) == true) {
+		sendMessage(conn, ACK); 
+	} else {
+		sendMessage(conn, STATE_KICKED, "The name you picked is already present!");
+		conn->close();	// got to make sure this causes the connection closed signal ...
+	}
+	
+	
 }
 
 void CGroupCommunicator::sendGroupInformation(CGroupClient *conn)
 {
 	QByteArray info;
-	
-	// temporary
-	info = "Group Information";
-	info += "Aza 15000 Fine Cold Tired 100 10 40";
-	info += "Stolb 15000 Fine Cold Tired 100 10 40";
-	sendMessage(conn, DATA_INFO, info);
+
+	getGroup()->sendAllCharsData(conn);
+	sendMessage(conn, REQ_ACK);
 }
+
+void CGroupCommunicator::sendCharUpdate(CGroupClient *conn, QByteArray blob)
+{
+	sendMessage(conn, UPDATE_CHAR, blob);
+}
+
 
 void CGroupCommunicator::parseGroupInformation(CGroupClient *conn, QByteArray data)
 {
 	// temporary
-	print_debug(DEBUG_GROUP, "Login Information arrived %s", (const char *) data);
+	print_debug(DEBUG_GROUP, "Group Information arrived %s", (const char *) data);
+	getGroup()->addChar(data);
 }
 
 

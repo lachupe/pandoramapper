@@ -20,7 +20,11 @@ class CGroupCommunicator : public QObject
 	Q_OBJECT
 	int type;
 	
-	enum Messages { NONE, ACK, REQ_LOGIN, REQ_INFO, DATA_LOGIN, DATA_INFO };
+	enum Messages { NONE, ACK, 
+					REQ_ACK, REQ_LOGIN, REQ_INFO, 
+					GTELL, 
+					STATE_LOGGED, STATE_KICKED,
+					ADD_CHAR, REMOVE_CHAR, UPDATE_CHAR };
 	
 	QObject *peer;	// server or client
 	CGroup *getGroup() { return (CGroup *) parent(); }
@@ -32,7 +36,7 @@ class CGroupCommunicator : public QObject
 	void connecting(CGroupClient *connection);
 	QByteArray formMessageBlock(int message, QByteArray data);
 	void sendMessage(CGroupClient *connection, int message, QByteArray data = "");
-	
+
 	void sendLoginInformation(CGroupClient *connection);
 	void parseLoginInformation(CGroupClient *connection, QByteArray data);
 	void sendGroupInformation(CGroupClient *connection);
@@ -43,6 +47,7 @@ class CGroupCommunicator : public QObject
 		
 	void retrieveDataClient(CGroupClient *connection);
 	void retrieveDataServer(CGroupClient *connection);
+	
 public:
 	const static int version = 100; // Protocol version. Those must match!
 	enum States { Server, Client, Off };
@@ -52,6 +57,8 @@ public:
 	virtual ~CGroupCommunicator();
 	
 	void changeType(int newState);
+	void sendCharUpdate(CGroupClient *conn, QByteArray blob);
+
 
 public slots:
 	void connectionStateChanged(CGroupClient *connection);
