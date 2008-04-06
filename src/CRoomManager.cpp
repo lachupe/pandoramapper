@@ -95,6 +95,76 @@ void CRoomManager::clearAllSecrets()
 }
 
 
+bool CRoomManager::isDuplicate(CRoom *addedroom)
+{
+    CRoom *r;
+    unsigned int i;
+    int j;
+
+    QWriteLocker locker(&mapLock);
+
+    print_debug(DEBUG_ANALYZER, "Room-desc check for new room");
+    
+    j = -1;
+
+    if (addedroom == NULL) {
+        print_debug(DEBUG_ANALYZER, "Failure in check_desc function!\n");
+        return false;
+    }
+
+    if (conf->get_automerge() == false) {
+        print_debug(DEBUG_ANALYZER, "autodesc check if OFF - quiting this routine.\n");
+        stacker.put(addedroom);
+      
+        return false;
+    }
+    /* theory - new added room has only one exit dir defined - the one we came from */
+    /* so if we find same looking (name, desc) room in base with the same undefined */
+    /* exit as the defined exit in current room, we can merge them. */
+
+
+    if (addedroom->getName().isEmpty()) {
+        /* now thats sounds bad ... */
+        print_debug(DEBUG_ANALYZER, "ERROR: in check_description() - empty roomname in new room.\r\n");
+        deleteRoomUnlocked(addedroom, 0);
+        return false;
+    }
+
+        
+    if (addedroom->getDesc().isEmpty()) {
+        send_to_user("--[Pandora: Error, empty roomdesc in new added room.\r\n");
+        addedroom->setDesc("");
+    }
+
+    /* find the only defined exit in new room - the one we came from */
+    for (i = 0; i <= 5; i++)
+      if ( addedroom->isConnected(i) ) {
+          j = i;
+          break;
+      }
+    
+    for (i = 0; i < size(); i++) {
+        r = rooms[i];
+        if (addedroom->id == r->id || r->getDesc() == "" || r->getName() == "") {
+          continue;
+        }
+        
+        /* in this case we do an exact match for both roomname and description */
+        if (addedroom->getDesc() == r->getDesc()) 
+            if (addedroom->getName() == r->getName()) 
+              if (tryMergeRooms(r, addedroom, j)) 
+                return true;
+    }
+        
+    /* if we are still here, then we didnt manage to merge the room */
+    /* so put addedroom->id in stack */
+    print_debug(DEBUG_ANALYZER, "------- Returning with return 0\r\n");
+    stacker.put(engine->addedroom);
+    return false;
+}
+
+
+
 /*------------ merge_rooms ------------------------- */
 int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
 {

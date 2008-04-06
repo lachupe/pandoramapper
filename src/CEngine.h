@@ -52,7 +52,6 @@ public:
 
     void exec();       
     
-    int checkRoomDesc();
     void angryLinker(CRoom *r);
     void printStacks();
     

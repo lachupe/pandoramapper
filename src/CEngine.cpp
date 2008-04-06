@@ -383,82 +383,6 @@ void CEngine::updateRegions()
 }
 
 
-int CEngine::checkRoomDesc()
-{
-    CRoom *r;
-    unsigned int i;
-    int j;
-
-    print_debug(DEBUG_ANALYZER, "Room-desc check for new room");
-    
-    j = -1;
-
-    if (addedroom == NULL) {
-        print_debug(DEBUG_ANALYZER, "Failure in check_desc function!\n");
-        return 0;
-    }
-
-    if (conf->get_automerge() == false) {
-        print_debug(DEBUG_ANALYZER, "autodesc check if OFF - quiting this routine.\n");
-        stacker.put(addedroom);
-      
-        return 0;
-    }
-    /* theory - new added room has only one exit dir defined - the one we came from */
-    /* so if we find same looking (name, desc) room in base with the same undefined */
-    /* exit as the defined exit in current room, we can merge them. */
-
-
-    if (addedroom->getName().isEmpty()) {
-        /* now thats sounds bad ... */
-        print_debug(DEBUG_ANALYZER, "ERROR: in check_description() - empty roomname in new room.\r\n");
-        Map.deleteRoom(addedroom, 0);
-        return 0;
-    }
-
-        
-    if (addedroom->getDesc().isEmpty()) {
-        send_to_user("--[Pandora: Error, empty roomdesc in new added room.\r\n");
-        addedroom->setDesc("");
-    }
-
-    /* find the only defined exit in new room - the one we came from */
-    for (i = 0; i <= 5; i++)
-      if ( addedroom->isConnected(i) ) {
-          j = i;
-          break;
-      }
-    
-    Map.lockForWrite();
-    QVector<CRoom *> rooms = Map.getRooms();
-    for (i = 0; i < Map.size(); i++) {
-        r = rooms[i];
-        if (addedroom->id == r->id || r->getDesc() == "" || r->getName() == "") {
-          continue;
-        }
-        
-        /* in this case we do an exact match for both roomname and description */
-        if (addedroom->getDesc() == r->getDesc()) {
-            if (addedroom->getName() == r->getName()) {
-              if (Map.tryMergeRooms(r, addedroom, j)) {
-                send_to_user("--[Pandora: Twin rooms merged!\n");
-                send_to_user(last_prompt);
-                print_debug(DEBUG_ANALYZER, "Twins merged");
-                addedroom = NULL;
-                return 1;
-              }
-            }	
-        }
-    }
-    Map.unlock();
-        
-    /* if we are still here, then we didnt manage to merge the room */
-    /* so put addedroom->id in stack */
-    print_debug(DEBUG_ANALYZER, "------- Returning with return 0\r\n");
-    stacker.put(addedroom);
-    return 0;
-}
-
 // where from where to ... map it!
 void CEngine::mapCurrentRoom(CRoom *room, int dir)
 {
@@ -523,8 +447,14 @@ void CEngine::mapCurrentRoom(CRoom *room, int dir)
     Map.addRoom(addedroom);
     stacker.put(addedroom);
     
-    if (checkRoomDesc() != 1)
+    if (Map.isDuplicate(addedroom) == true) {
+    	resetAddedRoomVar();
+    	send_to_user("--[Pandora: Twin rooms merged!\n");
+    	send_to_user(last_prompt);
+    	print_debug(DEBUG_ANALYZER, "Twins merged");
+    } else {
         angryLinker(addedroom);
+    }
 
     print_debug(DEBUG_ANALYZER, "leaving mapCurrentRoom");
     

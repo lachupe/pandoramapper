@@ -101,6 +101,7 @@ public:
     }
         
     int tryMergeRooms(CRoom *room, CRoom *copy, int j);
+    bool isDuplicate(CRoom *addedroom);
 
     void fixFreeRooms();
     CRegion *getRegionByName(QByteArray name);
