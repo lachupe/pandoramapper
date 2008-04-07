@@ -13,6 +13,7 @@
 
 #include "defines.h"
 
+#include "xml2.h"
 
 #include "CConfigurator.h"
 #include "CRoomManager.h"
@@ -24,39 +25,6 @@
 #define XML_ROOMNAME    (1 << 0)
 #define XML_DESC        (1 << 1)
 #define XML_NOTE        (1 << 2)
-
-class StructureParser: public QXmlDefaultHandler
-{
-public:
-  StructureParser(QProgressDialog *progress, unsigned int& currentMaximum, CRoomManager *parent);
-  bool characters(const QString& ch);
-    
-  bool startElement( const QString&, const QString&, const QString& ,
-		     const QXmlAttributes& );
-  bool endElement( const QString&, const QString&, const QString& );
-
-private:
-  /* some flags */
-  int flag;
-  bool readingRegion;
-  bool abortLoading;
-  CRoomManager *parent;
-  
-  QProgressDialog *progress;
-  unsigned int currentMaximum;
-
-  char data[MAX_DATA_LEN];
-  QString s;
-
-
-  int i;
-  CRoom *r;
-  CRegion *region;
-    
-};
-
-
-
 
 void CRoomManager::loadMap( QString filename)
 {
@@ -94,7 +62,7 @@ void CRoomManager::loadMap( QString filename)
   reader.parse( source );
 
   
-  
+ 
   if (progress.wasCanceled()) {
 	  print_debug(DEBUG_XML, "Loading was canceled");
 	  reinit();
@@ -128,6 +96,8 @@ void CRoomManager::loadMap( QString filename)
   delete handler;
   return;
 }
+
+
 
 
 StructureParser::StructureParser(QProgressDialog *progress, unsigned int& currentMaximum, CRoomManager *parent): 
@@ -241,7 +211,15 @@ bool StructureParser::startElement( const QString& , const QString& ,
     flag = XML_DESC;
     return TRUE;
   } else if (qName == "note") {
-    flag = XML_NOTE;
+      if(attributes.count() > 0) {
+          r->setNoteColor(attributes.value("color").toAscii());
+      } else {
+          //QColor color = QColor(242, 128, 3, 255);
+          //printf("color: %s\n\r",(const char*)color.name().toAscii());
+          //r->setNoteColor(color);
+          r->setNoteColor("");
+      }
+      flag = XML_NOTE;
     return TRUE;
   } else if (qName == "room") {
       r = new CRoom;
@@ -355,7 +333,9 @@ void CRoomManager::saveMap(QString filename)
             
         fprintf(f, "    <roomname>%s</roomname>\n", (const char *) p->getName());
         fprintf(f, "    <desc>%s</desc>\n",  (const char *) p->getDesc() );
-        fprintf(f, "    <note>%s</note>\n",  (const char *) p->getNote() );
+        fprintf(f, "    <note color=\"%s\">%s</note>\n", 
+                (const char *) p->getNoteColor(), 
+                (const char *) p->getNote() );
             
         fprintf(f, "    <exits>\n");
     

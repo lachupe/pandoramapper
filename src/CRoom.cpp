@@ -238,6 +238,10 @@ QByteArray CRoom::getNote()
     return note;
 }
 
+
+void CRoom::setNoteColor(QByteArray color) { noteColor = color; }
+QByteArray CRoom::getNoteColor() { return noteColor; }
+
 void CRoom::setDesc(QByteArray newdesc)
 {
     desc = newdesc;
@@ -289,7 +293,6 @@ void CRoom::setNote(QByteArray newnote)
 {
     note = newnote;
 }
-
 
 void CRoom::setExit(int dir, CRoom *room)
 {

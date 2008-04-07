@@ -89,6 +89,7 @@ Cconfigurator::Cconfigurator()
     groupManagerCharName = "Aza";
 
     set_startup_mode(0);
+    set_note_color("#F28003");
 }
 
 
@@ -375,6 +376,19 @@ int Cconfigurator::get_startup_mode()
     return startup_mode;
 }
 
+// default color
+void Cconfigurator::set_note_color(QByteArray c)
+{
+    note_color = c;
+    set_conf_mod(true);
+}
+
+QByteArray Cconfigurator::get_note_color()
+{
+    return note_color;
+}
+
+
 int Cconfigurator::load_texture(struct room_sectors_data *p)
 {
     QImage tex1, buf1;
@@ -577,7 +591,8 @@ int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
       i++;
   }
 
-  fprintf(f, "  <misc startupmode=\"%d\">\r\n", get_startup_mode());
+  fprintf(f, "  <misc startupmode=\"%d\" notecolor=\"%s\n>\r\n", 
+          get_startup_mode(), get_note_color());
 
   /* PUT ENGINE CONFIG SAVING THERE ! */
   

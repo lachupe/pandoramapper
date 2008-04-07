@@ -14,6 +14,7 @@ public:
 public slots:
     virtual void accept();
     void autorefreshUpdated(bool);
+    virtual void selectNoteColor();
 };
 
 

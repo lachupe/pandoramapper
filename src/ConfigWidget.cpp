@@ -1,4 +1,5 @@
 #include <QMessageBox>
+#include <QColorDialog>
 
 #include "CConfigurator.h"
 #include "ConfigWidget.h"
@@ -180,5 +181,19 @@ void ConfigWidget::accept()
         conf->set_startup_mode( misc_startupMode->currentIndex() );
 
     done(Accepted);
+}
+
+void ConfigWidget::selectNoteColor() {
+    QColor color = QColorDialog::getColor(conf->get_note_color()==""?
+        QColor("#F28003"):QColor((const char*)conf->get_note_color()), this);
+    if (color.isValid()) {
+        conf->set_note_color((const char*)color.name().toAscii());
+        printf("color: %s",(const char*)color.name().toAscii());
+        /*
+        colorLabel->setText(color.name());
+        colorLabel->setPalette(QPalette(color));
+        colorLabel->setAutoFillBackground(true);
+        */
+    }
 }
 

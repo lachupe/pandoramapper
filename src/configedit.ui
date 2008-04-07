@@ -319,6 +319,19 @@
         <string>Startup Mode:</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="misc_noteColorButton" >
+       <property name="geometry" >
+        <rect>
+         <x>290</x>
+         <y>20</y>
+         <width>126</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Note color...</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>
@@ -405,6 +418,22 @@
     <hint type="destinationlabel" >
      <x>179</x>
      <y>282</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>misc_noteColorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>ConfigDialog</receiver>
+   <slot>selectNoteColor()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>362</x>
+     <y>75</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>239</x>
+     <y>143</y>
     </hint>
    </hints>
   </connection>

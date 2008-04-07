@@ -491,9 +491,21 @@ void RendererWidget::glDrawRoom(CRoom *p)
 
 
             if (conf->get_show_notes_renderer() == true && p->getNote().isEmpty() != true) {
+
+                QColor color;
+                if(p->getNoteColor() == "")
+                    color = QColor((QString)conf->get_note_color());
+                else 
+                    color = QColor((QString)p->getNoteColor());
+                                
+                double red = color.red()/255.;
+                double green = color.green()/255.;
+                double blue = color.blue()/255.;
+                double alpha = color.alpha()/255.;
+
+                glColor4f(red, green, blue, alpha);
             	
-                glColor4f( 0.95, 0.5, 0.01, 1.0); 
-            	renderText(dx, dy, dz + ROOM_SIZE / 2, p->getNote(), textFont);    
+                renderText(dx, dy, dz + ROOM_SIZE / 2, p->getNote(), textFont);    
                 billboards.append(new Billboard(dx, dy, dz + ROOM_SIZE / 2, p->getNote()) );
             }
 

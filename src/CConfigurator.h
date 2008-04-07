@@ -73,6 +73,7 @@ class Cconfigurator : public QObject {
     bool show_notes_renderer;
 
     int startup_mode; /* 0 for select, 1 for move */
+    QByteArray note_color;
     
     int texture_visibilit_range;
     int details_visibility_range;
@@ -185,6 +186,8 @@ public:
     
     void set_startup_mode(int i);
     int get_startup_mode();
+    void set_note_color(QByteArray c);
+    QByteArray get_note_color();
     
     void set_show_notes_renderer(bool b);
     /*--*/

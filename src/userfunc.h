@@ -39,6 +39,7 @@ USERCMD(usercmd_mdelete);
 USERCMD(usercmd_mrefresh);
 USERCMD(usercmd_maddroom);
 USERCMD(usercmd_mnote);
+USERCMD(usercmd_mnotecolor);
 USERCMD(usercmd_mregion);
 
 

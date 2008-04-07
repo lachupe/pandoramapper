@@ -53,6 +53,7 @@ class CRoom {
     unsigned int    flags;          
     QByteArray      name; 			/* POINTER to the room name */ 
     QByteArray      note; 			/* note, if needed, additional info etc */
+    QByteArray      noteColor;      /* note color in this room */
     QByteArray      desc;			/* descrition */
     char                  sector;                 /* terrain marker */ 		
                                         /* _no need to free this one_ */
@@ -80,6 +81,8 @@ public:
     char getTerrain();
     QByteArray getNote();
     
+    QByteArray getNoteColor();
+    void setNoteColor(QByteArray color);
     
     void setDesc(QByteArray newdesc);
     void setName(QByteArray newname);

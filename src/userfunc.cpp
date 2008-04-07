@@ -231,6 +231,14 @@ const struct user_command_type user_commands[] = {
     "   Usage: mnote <note>\r\n"
     "   Examples: mnote There is a huge nasty mob living in there! \r\n" 
     "Adds a note to the room.\r\n"},
+
+  {"mnotecolor",             usercmd_mnotecolor,   0,  USERCMD_FLAG_SYNC | USERCMD_FLAG_REDRAW,
+    "Change the note color of the room you are standing in.",
+    "   Usage: mnotecolor <color>\r\n"
+    "   Examples: mnotecolor red\r\n"
+    "             mnotecolor #ff0000\r\n"
+    "             mnotecolor slategrey\r\n"
+    "Changes the note color for the room.\r\n"},
   
   {"mexit",             usercmd_mdoor,   USER_DOOR_EXIT,     USERCMD_FLAG_SYNC | USERCMD_FLAG_REDRAW,
     "Add a nonsecret door",
@@ -735,6 +743,29 @@ USERCMD(usercmd_mnote)
   
   
   send_to_user("--[ Added.\r\n");
+  SEND_PROMPT;
+  return USER_PARSE_SKIP;
+}
+
+USERCMD(usercmd_mnotecolor)
+{
+  char *p;
+  CRoom *r;
+
+  userfunc_print_debug;
+  
+  r = stacker.first();
+
+  p = skip_spaces(line);
+  
+  QColor color = QColor(p);
+  if(color.isValid()) {
+    r->setNoteColor(p);
+    send_to_user("--[ Set note color.\r\n");
+  } else {
+    send_to_user("--[ Invalid color: %s!\r\n",line);
+  }
+
   SEND_PROMPT;
   return USER_PARSE_SKIP;
 }

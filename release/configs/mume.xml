@@ -7,9 +7,10 @@
   <engineflags briefmode="ON" automerge="ON"  angrylinker="ON" duallinker="ON">
   <regionsflags displayinrenderer="OFF" showinfo="ON">
   <guisettings always_on_top="ON">
-  <window x="841" y="49" height="341" width="428">
+  <groupManager state="Off" host="localhost" charName="Aza" localPort="4243" remotePort="4243">
+  <window x="4" y="61" height="968" width="1675">
   <rendererangles anglex="-17.000000" angley="16.000000" anglez="0.000000">
-  <rendererpositions userx="0.000000" usery="0.000000" userz="-19.000000">
+  <rendererpositions userx="-1.500016" usery="-1.900004" userz="-24.000000">
   <refresh auto="ON" roomnamequote="10" descquote="10">
   <texture handle="INDOORS" file="images/indoors.png" pattern="[">
   <texture handle="CITY" file="images/city.png" pattern="#">
@@ -55,4 +56,6 @@
   <debug name="xml"  state="ON">
   <debug name="interface"  state="ON">
   <debug name="spells"  state="ON">
+  <debug name="group"  state="ON">
+  <misc startupmode="1">
 </config>
