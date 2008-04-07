@@ -8,9 +8,9 @@
   <regionsflags displayinrenderer="OFF" showinfo="ON">
   <guisettings always_on_top="ON">
   <groupManager state="Off" host="localhost" charName="Aza" localPort="4243" remotePort="4243">
-  <window x="4" y="61" height="968" width="1675">
+  <window x="420" y="29" height="968" width="1675">
   <rendererangles anglex="-17.000000" angley="16.000000" anglez="0.000000">
-  <rendererpositions userx="-1.500016" usery="-1.900004" userz="-24.000000">
+  <rendererpositions userx="-4.600019" usery="-0.100004" userz="-24.000000">
   <refresh auto="ON" roomnamequote="10" descquote="10">
   <texture handle="INDOORS" file="images/indoors.png" pattern="[">
   <texture handle="CITY" file="images/city.png" pattern="#">
@@ -40,8 +40,6 @@
   <spell addon="NO" name="blindness" up="You have been blinded!" refresh="" down="You feel a cloak of blindness dissolve.">
   <spell addon="NO" name="nightvision" up="Your eyes tingle." refresh="" down="Your vision blurs.">
   <spell addon="NO" name="battleglory" up="Hearing the horn blow, you feel your urge to battle increase!" refresh="" down="You feel your newfound strength leaving you again.">
-  <spell addon="NO" name="breath of briskness" up="An energy begins to flow within your legs as your body becomes lighter." refresh="The energy in your legs is refreshed." down="Your legs feel heavier.">
-  <spell addon="NO" name="protection from evil" up="You have a righteous feeling!" refresh="You feel a renewed righteousness." down="You feel less righteous.">
   <debug name="general"  state="ON">
   <debug name="analyzer"  state="ON">
   <debug name="system"  state="ON">
@@ -49,13 +47,13 @@
   <debug name="dispatcher"  state="ON">
   <debug name="proxy"  state="ON">
   <debug name="renderer"  state="ON">
-  <debug name="roommanager"  state="ON">
+  <debug name="roommanager"  state="OFF">
   <debug name="stacks"  state="OFF">
   <debug name="tree"  state="OFF">
   <debug name="userfunc"  state="OFF">
-  <debug name="xml"  state="ON">
-  <debug name="interface"  state="ON">
-  <debug name="spells"  state="ON">
+  <debug name="xml"  state="OFF">
+  <debug name="interface"  state="OFF">
+  <debug name="spells"  state="OFF">
   <debug name="group"  state="ON">
-  <misc startupmode="1">
+  <misc startupmode="0" notecolor="#F28003">
 </config>

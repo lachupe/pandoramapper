@@ -591,8 +591,8 @@ int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
       i++;
   }
 
-  fprintf(f, "  <misc startupmode=\"%d\" notecolor=\"%s\n>\r\n", 
-          get_startup_mode(), get_note_color());
+  fprintf(f, "  <misc startupmode=\"%d\" notecolor=\"%s\">\r\n", 
+          get_startup_mode(), (const char*)get_note_color());
 
   /* PUT ENGINE CONFIG SAVING THERE ! */
   
@@ -967,10 +967,13 @@ bool ConfigParser::startElement( const QString& , const QString& ,
     } else if (qName == "misc") {
         int startup_mode = 0;
         startup_mode = attributes.value("startupmode").toInt();
-
         conf->set_startup_mode(startup_mode);
-
         print_debug(DEBUG_CONFIG, "Set startup mode: %d", startup_mode);
+        
+        QByteArray note_color = (QByteArray)attributes.value("notecolor").toAscii();
+        conf->set_note_color(note_color);
+        print_debug(DEBUG_CONFIG, "Set note color: %d", (const char*)note_color);
+
         return TRUE;
     }
 
