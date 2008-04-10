@@ -1,4 +1,6 @@
 #include <QDataStream>
+#include <QDomNode>
+#include <QTextStream>
 
 #include "CGroupCommunicator.h"
 
@@ -95,7 +97,7 @@ void CGroupCommunicator::connectionEstablished(CGroupClient *connection)
 	} 
 	if (type == Server) {
 		connection->setProtocolState(CGroupClient::AwaitingLogin);
-		sendMessage(connection, REQ_LOGIN);
+		sendMessage(connection, REQ_LOGIN, "TESTING");
 	}
 }
 
@@ -167,37 +169,93 @@ void CGroupCommunicator::serverStartupFailed()
 }
 
 //
-// COmmunication protocol switches and logic
+// Communication protocol switches and logic
 //
+
+//
+// Low level. Message forming and messaging
+//
+QByteArray CGroupCommunicator::formMessageBlock(int message, QDomNode data)
+{
+	QByteArray block;
+
+	QDomDocument doc("datagram");
+	QDomElement root = doc.createElement("datagram");
+	root.setAttribute("message", message );
+	doc.appendChild(root);
+	
+	
+	
+	root.appendChild( doc.importNode(data, true) );
+	
+	block = doc.toString().toAscii();
+	print_debug(DEBUG_GROUP, "Message: %s", (const char *) block);
+
+	return block;
+}
+
+void CGroupCommunicator::sendMessage(CGroupClient *connection, int message, QByteArray blob)
+{
+	
+	QDomDocument doc("datagram");
+	QDomElement root = doc.createElement("data");
+
+	QDomText t = doc.createTextNode("dataText");
+	t.setNodeValue(blob);
+	root.appendChild(t);
+	
+	sendMessage(connection, message, root);
+}
+
+void CGroupCommunicator::sendMessage(CGroupClient *connection, int message, QDomNode node)
+{
+	connection->write( formMessageBlock(message, node) );
+}
 
 // the core of the protocol
 void CGroupCommunicator::incomingData(CGroupClient *conn)
 {
-	QByteArray data;
-	QByteArray blob;
-	int message;
-	int index;
-
-	while (conn->bytesAvailable()) {
-		data = conn->readLine();
-		print_debug(DEBUG_GROUP, "ReceivedData. [conn: %i, Data: %s]", 
-						(int) conn->socketDescriptor(),
-						(const char *) data);
-
-		index = data.indexOf(' ');
+	QString data;
+	
+	data = conn->readAll();
 		
-		QByteArray copy = data.left(index);
-		message = copy.toInt();
+	print_debug(DEBUG_GROUP, "Raw data received: %s", (const char *) data.toAscii());
+	
+	QDomDocument doc("datagram");
+	if (!doc.setContent(data)) {
+		print_debug(DEBUG_GROUP, "Failed to set the Contect for the XML Parser");
+		return;
+	}
 
-		blob = data.right( data.size() - index - 1);
+	QDomNode n = doc.documentElement();
+	while(!n.isNull()) {
+		QDomElement e = n.toElement();
 		
-		print_debug(DEBUG_GROUP, "Datagram arrived. Message : %i, Blob: %s", message, (const char *) blob);
+	    print_debug(DEBUG_GROUP, "Cycle Element name: %s", (const char *) e.nodeName().toAscii());
+	    
+	    if (e.nodeName() == "datagram") {
+	    	int message;
+	    	QString blob;
+	    	QTextStream stream(&blob);
+	    	
+	    	
+	    	QDomElement dataElement = e.firstChildElement();
+	    	stream << dataElement;
+	    	//message = e.attributeNode()
+	    	
+	    	message = e.attribute("message").toInt();
+	    	
+	    	print_debug(DEBUG_GROUP, "Datagram arrived. Message : %i, Blob: %s", message, (const char *) blob.toAscii());
 
-		if (type == Client)
-			retrieveDataClient(conn, message, blob);
-		if (type == Server)
-			retrieveDataServer(conn, message, blob);
+	    	if (type == Client)
+				retrieveDataClient(conn, message, dataElement);
+			if (type == Server)
+				retrieveDataServer(conn, message, dataElement);
 
+	    }
+
+	    
+	    n = n.nextSibling();
 	}
 
 }
@@ -206,7 +264,7 @@ void CGroupCommunicator::incomingData(CGroupClient *conn)
 // ******************** C L I E N T   S I D E ******************
 //
 // Client side of the communication protocol
-void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QByteArray data)
+void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDomNode data)
 {
 	switch (conn->getConnectionState()) {
 		//Closed, Connecting, Connected, Quiting
@@ -223,7 +281,7 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QBy
 					conn->setProtocolState(CGroupClient::AwaitingInfo);
 				} else if (message == STATE_KICKED) {
 					// woops
-					getGroup()->gotKicked(data);
+					getGroup()->gotKicked( data.nodeValue() );
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
@@ -282,7 +340,7 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QBy
 // ******************** S E R V E R   S I D E ******************
 //
 // Server side of the communication protocol
-void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QByteArray data)
+void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QDomNode data)
 {
 	
 	switch (conn->getConnectionState()) {
@@ -357,25 +415,62 @@ void CGroupCommunicator::userLoggedOff(CGroupClient *conn)
 //
 void CGroupCommunicator::sendLoginInformation(CGroupClient *conn)
 {
-	QByteArray info;
+	QByteArray block;
+
+	QDomDocument doc("datagraminfo");
+
+	QDomElement root = doc.createElement("protocol");
+	root.setAttribute("version", protocolVersion );
+	doc.appendChild(root);
 	
-	// temporary
+	QDomElement dataElem = doc.createElement("data");
+	doc.appendChild(dataElem);
 	
-	sendMessage(conn, UPDATE_CHAR, getGroup()->getLocalCharData() );
+	QDomText t = doc.createTextNode("dataText");
+	t.setNodeValue(getGroup()->getLocalCharData());
+	dataElem.appendChild(t);
+
+//	block = doc.toString().toAscii();
+//	print_debug(DEBUG_GROUP, "Message: %s", (const char *) block);
+
+	sendMessage(conn, UPDATE_CHAR, root);
 }
 
-void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QByteArray data)
+void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QDomNode data)
 {
+	/*
 	print_debug(DEBUG_GROUP, "Login Information arrived %s", (const char *) data);
 
-	if (getGroup()->addChar(data) == true) {
-		sendMessage(conn, ACK); 
-	} else {
-		sendMessage(conn, STATE_KICKED, "The name you picked is already present!");
+	QByteArray sVer;
+	
+	int chars = data.size() - data.lastIndexOf(' ') - 1;
+	sVer = data.right( chars );
+	data.chop( chars + 1 );
+	int ver = sVer.toInt();
+	
+	print_debug(DEBUG_GROUP, "Client's protocol version : %s", (const char *) sVer);
+	
+
+	QByteArray kickMessage = "";
+	if (ver < protocolVersion) 
+		kickMessage = "Server uses newer version of the protocol. Please update.";
+
+	if (ver > protocolVersion) 
+		kickMessage = "Server uses older version of the protocol.";
+
+	if (getGroup()->addChar(data) == false)
+		kickMessage = "The name you picked is already present!";
+	
+
+	if (kickMessage != "") {
+		// kicked
+		sendMessage(conn, STATE_KICKED, kickMessage);
 		conn->close();	// got to make sure this causes the connection closed signal ...
+	} else {
+		sendMessage(conn, ACK); 
 	}
 	
-	
+	*/
 }
 
 void CGroupCommunicator::sendGroupInformation(CGroupClient *conn)
@@ -383,52 +478,21 @@ void CGroupCommunicator::sendGroupInformation(CGroupClient *conn)
 	QByteArray info;
 
 	getGroup()->sendAllCharsData(conn);
-	sendMessage(conn, REQ_ACK);
 }
 
-void CGroupCommunicator::sendCharUpdate(CGroupClient *conn, QByteArray blob)
+void CGroupCommunicator::sendCharUpdate(CGroupClient *conn, QDomNode blob)
 {
 	sendMessage(conn, UPDATE_CHAR, blob);
 }
 
 
-void CGroupCommunicator::parseGroupInformation(CGroupClient *conn, QByteArray data)
+void CGroupCommunicator::parseGroupInformation(CGroupClient *conn, QDomNode data)
 {
 	// temporary
+	/*
 	print_debug(DEBUG_GROUP, "Group Information arrived %s", (const char *) data);
 	getGroup()->addChar(data);
+	*/
 }
 
-
-//
-// Low level. Message forming and messaging
-//
-QByteArray CGroupCommunicator::formMessageBlock(int message, QByteArray data)
-{
-	QByteArray block;
-/*
- *     QDataStream out(&block, QIODevice::WriteOnly);
-
-    out.setVersion(QDataStream::Qt_4_0);	
-    out << (quint16)0;
-    out << message;
-    out << data;
-    out.device()->seek(0);
-    out << (quint16)(block.size() - sizeof(quint16));	
-*/
-	char buffer[MAX_STR_LEN];
-
-	sprintf(buffer, "%i %s", message, (const char *) data);
-	block = buffer;
-	print_debug(DEBUG_GROUP, "Message: %s", (const char *) block);
-
-    return block;
-}
-
-void CGroupCommunicator::sendMessage(CGroupClient *connection, int message, QByteArray data)
-{
-	print_debug(DEBUG_GROUP, "Sending message");
-	if (connection->write( formMessageBlock(message, data) ) == -1)
-		print_debug(DEBUG_GROUP, "Error at attempt of writing the data!");
-}
 

@@ -337,7 +337,7 @@ void RendererWidget::glDrawRoom(CRoom *p)
     float distance;
     bool details, texture;    
 
-    QFont textFont("Times", 15, QFont::Bold);
+    QFont textFont("Times", 12, QFont::Bold);
 
 
     rooms_drawn_csquare++;
@@ -474,10 +474,8 @@ void RendererWidget::glDrawRoom(CRoom *p)
                             info += alias;
                             info += "]";  
                         }
-                        // FIXME - removed the secret doors output!
                         renderText((dx + dx2) / 2, (dy + dy2) / 2 , (dz +dz)/2 + ROOM_SIZE / 2 , info, textFont); 
                     }
-                
                     glColor4f(1.0, 0.0, 0.0, colour[3] + 0.2);
                 }
             }
@@ -504,9 +502,9 @@ void RendererWidget::glDrawRoom(CRoom *p)
                 double alpha = color.alpha()/255.;
 
                 glColor4f(red, green, blue, alpha);
-            	
+
                 renderText(dx, dy, dz + ROOM_SIZE / 2, p->getNote(), textFont);    
-                billboards.append(new Billboard(dx, dy, dz + ROOM_SIZE / 2, p->getNote()) );
+//                billboards.append(new Billboard(dx, dy, dz + ROOM_SIZE / 2, p->getNote()) );
             }
 
 

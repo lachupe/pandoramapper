@@ -23,19 +23,6 @@ CRoomManager::~CRoomManager()
 {
 }
 
-//
-//void CRoomManager::loadMap(QString filename)
-//{
-//	xmlReadMap(filename);
-//}
-//
-//void CRoomManager::saveMap(QString filename)
-//{
-//	xmlWriteMap(filename);
-//}
-//
-
-
 void CRoomManager::clearAllSecrets()
 {
     bool mark[MAX_ROOMS];

@@ -521,9 +521,10 @@ USERCMD(usercmd_maddroom)
 
   r->id = Map.next_free;
   r->setName( engine->getRoomName() );
-  r->setDesc(engine->getDesc() );
-  r->setTerrain(engine->getTerrain() );
-  
+  r->setDesc( engine->getDesc() );
+  r->setTerrain( engine->getTerrain() );
+  r->setRegion( engine->get_users_region() );
+
   
   engine->addedroom = r;
   do_exits(engine->getExits());

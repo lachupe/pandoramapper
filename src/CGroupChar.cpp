@@ -29,7 +29,7 @@ bool CGroupChar::updateFromBlob(QByteArray blob)
 	print_debug(DEBUG_GROUP, "Incoming blob: %s", (const char *) blob );
 
 	// first - simplify the array
-	blob.simplified();
+	blob = blob.simplified();
 
 	// then take the ID
 	index = blob.lastIndexOf(' ');

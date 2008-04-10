@@ -92,8 +92,8 @@ CGroupChar* CGroup::getCharByName(QByteArray name)
 
 void CGroup::sendAllCharsData(CGroupClient *conn)
 {
-	for (int i = 0; i < chars.size(); i++)
-		network->sendCharUpdate(conn, chars[i]->toBlob());
+//	for (int i = 0; i < chars.size(); i++)
+//		network->sendCharUpdate(conn, chars[i]->toBlob());
 }
 
 

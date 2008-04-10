@@ -482,14 +482,14 @@ void CRoom::sendRoom()
     pos = 0;
     if (!(proxy->isMudEmulation() && conf->get_brief_mode() ) ) {
       for (i = 0; i <= strlen(desc); i++)
-	if (desc[i] == '|') {
-	    line[pos] = 0;
-	    send_to_user("%s\r\n", line);
-	    line[0] = 0;
-	    pos = 0;
-	} else {
-	    line[pos++] = desc[i];
-	}
+		if (desc[i] == '|') {
+		    line[pos] = 0;
+		    send_to_user("%s\r\n", line);
+		    line[0] = 0;
+		    pos = 0;
+		} else {
+		    line[pos++] = desc[i];
+		}
     }
     send_to_user(" note: %s\n", (const char *) note);
 
