@@ -12,13 +12,15 @@ QT += xml \
     opengl \
     gui \
     network
-FORMS += src/configedit.ui \
+FORMS += src/groupmanagersettings.ui \
+    src/configedit.ui \
     src/finddialog.ui \
     src/logdialog.ui \
     src/movementdialog.ui \
     src/roomedit.ui \
     src/spellsdialog.ui
-HEADERS += src/CGroupChar.h \
+HEADERS += src/CGroupSettingsDialog.h \
+    src/CGroupChar.h \
     src/CGroupCommunicator.h \
     src/CGroupClient.h \
     src/CGroupServer.h \
@@ -50,7 +52,8 @@ HEADERS += src/CGroupChar.h \
     src/utils.h \
     src/xml2.h \
     src/finddialog.h
-SOURCES += src/CGroupChar.cpp \
+SOURCES += src/CGroupSettingsDialog.cpp \
+    src/CGroupChar.cpp \
     src/CGroupCommunicator.cpp \
     src/CGroupClient.cpp \
     src/CGroupServer.cpp \

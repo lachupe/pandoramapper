@@ -32,13 +32,13 @@ CGroup::~CGroup()
 	delete network;
 }
 
-bool CGroup::addChar(QByteArray blob)
+bool CGroup::addChar(QDomNode node)
 {
 	CGroupChar *newChar;
 	
 	newChar = new CGroupChar;
-	newChar->updateFromBlob(blob);
-	if ( isNamePresent(newChar->getName()) == true ) {
+	newChar->updateFromXML(node);
+	if ( isNamePresent(newChar->getName()) == true || newChar->getName() == "") {
 		print_debug(DEBUG_GROUP, "Adding new char FAILED. the name %s already existed.", 
 				(const char *) newChar->getName());
 		delete newChar;
@@ -68,6 +68,16 @@ void CGroup::removeChar(QByteArray name)
 		}
 }
 
+void CGroup::removeChar(QDomNode node)
+{
+	QByteArray name = CGroupChar::getNameFromXML(node);
+	if (name == "")
+		return;
+	
+	removeChar(name);
+}
+
+
 bool CGroup::isNamePresent(QByteArray name)
 {
 
@@ -92,13 +102,21 @@ CGroupChar* CGroup::getCharByName(QByteArray name)
 
 void CGroup::sendAllCharsData(CGroupClient *conn)
 {
-//	for (int i = 0; i < chars.size(); i++)
-//		network->sendCharUpdate(conn, chars[i]->toBlob());
+	for (int i = 0; i < chars.size(); i++)
+		network->sendCharUpdate(conn, chars[i]->toXML());
 }
 
 
-void CGroup::updateChar(QByteArray blob)
+void CGroup::updateChar(QDomNode blob)
 {
+	CGroupChar *ch;
+	
+	
+	ch = getCharByName(CGroupChar::getNameFromXML(blob));
+	if (ch == NULL)
+		return;
+	
+	ch->updateFromXML(blob);
   // TODO: all teh shit here ...	
 }
 
@@ -128,8 +146,49 @@ void CGroup::serverStartupFailed(QString message)
 	print_debug(DEBUG_GROUP, "Failed to start the Group server: %s", (const char *) message.toAscii());
 }
 
-void CGroup::gotKicked(QString message)
+void CGroup::gotKicked(QDomNode message)
 {
-	print_debug(DEBUG_GROUP, "You got kicked! Reason : ", (const char *) message.toAscii());
 	
+	if (message.nodeName() != "data") {
+    	print_debug(DEBUG_GROUP, "Called gotKicked with wrong node. No data node.");
+		return;
+	}
+	
+	QDomNode e = message.firstChildElement();
+	
+	if (e.nodeName() != "text") {
+    	print_debug(DEBUG_GROUP, "Called gotKicked with wrong node. No text node.");
+		return;
+	}
+
+	QDomElement text = e.toElement();
+	print_debug(DEBUG_GROUP, "You got kicked! Reason [nodename %s] : %s", 
+			(const char *) text.nodeName().toAscii(), 
+			(const char *) text.text().toAscii());
 }
+
+void CGroup::gTellArrived(QDomNode node)
+{
+	
+	if (node.nodeName() != "data") {
+    	print_debug(DEBUG_GROUP, "Called gotKicked with wrong node. No data node.");
+		return;
+	}
+	
+	QDomNode e = node.firstChildElement();
+	
+	if (e.nodeName() != "gtell") {
+    	print_debug(DEBUG_GROUP, "Called gotKicked with wrong node. No text node.");
+		return;
+	}
+
+	QDomElement text = e.toElement();
+	print_debug(DEBUG_GROUP, "GTell Arrived : %s", (const char *) text.text().toAscii());
+}
+
+void CGroup::sendGTell(QByteArray tell)
+{
+	network->sendGTell(tell);
+}
+
+

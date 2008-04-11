@@ -441,15 +441,15 @@ QByteArray Cdispatcher::cutColours(QByteArray line)
 }
 
 #define SEND_EVENT_TO_ENGINE \
-                    {   \
-                    print_debug(DEBUG_DISPATCHER, " ---- sending event ---- "); \
-                    awaitingData = false;               \
-                    engine->addEvent(event);                            \
-                    event.clear();                  \
-                    notify_analyzer();      \
-                    xmlState = STATE_NORMAL;                       \
-                    print_debug(DEBUG_DISPATCHER, " ---- sent event ---- "); \
-                    }
+	{   \
+	    print_debug(DEBUG_DISPATCHER, " ---- sending event ---- "); \
+	    awaitingData = false;               \
+	    engine->addEvent(event);                            \
+	    event.clear();                  \
+	    notify_analyzer();      \
+	    xmlState = STATE_NORMAL;                       \
+	    print_debug(DEBUG_DISPATCHER, " ---- sent event ---- "); \
+    }
         
 
 int Cdispatcher::analyzeMudStream(ProxySocket &c) 
@@ -643,7 +643,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             
             }
           
-
+            // changes the Affected by: output.
             if (conf->spells_pattern == a_line) {
                 unsigned int spell;
                 QByteArray message = "Timers:";

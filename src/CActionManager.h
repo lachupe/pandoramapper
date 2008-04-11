@@ -57,6 +57,11 @@ public:
     QAction       *aboutAct;
     
     QAction       *emulationAct;
+    
+    QAction		  *groupClientAct;
+    QAction		  *groupServerAct;
+    QAction		  *groupShowHideAct;
+    QAction		  *groupSettingsAct;
 
 public slots:
     void disable_online_actions();
@@ -99,6 +104,11 @@ public slots:
     void about();
     void gotoAction();
     void deleteFully(); // delete with remove flag
+    
+    void groupClient(bool);
+    void groupServer(bool);
+    void groupShowHide(bool);
+    void groupSettings();
 
 private slots:
     void find();

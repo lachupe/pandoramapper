@@ -44,3 +44,18 @@ void CGroupServer::connectionClosed(CGroupClient *connection)
 	print_debug(DEBUG_GROUP, "Deleting the connection");
 	connection->deleteLater();
 }
+
+void CGroupServer::sendToAll(QByteArray message)
+{
+	sendToAllExceptOne(NULL, message);
+}
+
+
+void CGroupServer::sendToAllExceptOne(CGroupClient *conn, QByteArray message)
+{
+	for (int i = 0; i < connections.size(); i++) {
+		if (connections[i] != conn)
+			connections[i]->sendData(message);
+	}
+}
+

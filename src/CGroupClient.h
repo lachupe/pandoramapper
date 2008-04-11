@@ -15,6 +15,10 @@ class CGroupClient : public QTcpSocket
 	CGroupCommunicator* getParent() { return (CGroupCommunicator *) parent(); }
 	void linkSignals();
 	
+	QByteArray buffer;
+	int currentMessageLen;
+	
+	void cutMessageFromBuffer();
 public:
 	enum ConnectionStates { Closed, Connecting, Connected, Quiting};
 	enum ProtocolStates { Idle, AwaitingLogin, AwaitingInfo, Logged }; 
@@ -29,6 +33,7 @@ public:
 	void setConnectionState(int val);
 	void setProtocolState(int val);
 	int getProtocolState() { return protocolState; }
+	void sendData(QByteArray data);
 		
 protected slots:
 	void lostConnection();

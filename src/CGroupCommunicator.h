@@ -64,8 +64,9 @@ public slots:
 	void connectionStateChanged(CGroupClient *connection);
 	void errorInConnection(CGroupClient *connection);
 	void serverStartupFailed();
-	void incomingData(CGroupClient *connection);
-
+	void incomingData(CGroupClient *connection, QByteArray data);
+	void sendGTell(QByteArray tell);
+	void relayMessage(CGroupClient *connection, int message, QDomNode node);
 };
 
 #endif /*CGROUPCOMMUNICATOR_H_*/

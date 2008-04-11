@@ -16,6 +16,8 @@ public:
 	CGroupServer(int localPort, QObject *parent);
 	virtual ~CGroupServer();
 	void addClient(CGroupClient *client);
+	void sendToAll(QByteArray);
+	void sendToAllExceptOne(CGroupClient *conn, QByteArray);
 	
 protected:
     void incomingConnection(int socketDescriptor);

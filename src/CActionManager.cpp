@@ -19,6 +19,7 @@
 #include "CMovementDialog.h"
 #include "CLogDialog.h"
 #include "finddialog.h"
+#include "CGroupCOmmunicator.h"
 
 CActionManager::CActionManager(CMainWindow *parentWindow) 
 {
@@ -207,6 +208,67 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     // Additional Context menu actions
     gotoAct = new QAction(tr("Goto"), this);
     connect(gotoAct, SIGNAL(triggered()), this, SLOT(gotoAction()));
+    
+    
+    // group Manager
+    groupClientAct = new QAction(tr("Client"), this );
+    groupClientAct->setCheckable(true);
+    connect(groupClientAct, SIGNAL(toggled(bool)), this, SLOT(groupClient(bool)), Qt::QueuedConnection);
+    if (conf->getGroupManagerState() == CGroupCommunicator::Client)
+    	groupClientAct->setChecked(true);
+    else 
+    	groupClientAct->setChecked(false);
+
+    groupServerAct = new QAction(tr("Server"), this );
+    groupServerAct->setCheckable(true);
+    connect(groupServerAct, SIGNAL(toggled(bool)), this, SLOT(groupServer(bool)), Qt::QueuedConnection);
+    if (conf->getGroupManagerState() == CGroupCommunicator::Server)
+    	groupServerAct->setChecked(true);
+    else 
+    	groupServerAct->setChecked(false);
+    
+    groupShowHideAct = new QAction(tr("Show/Hide Manager"), this );
+    groupShowHideAct->setCheckable(true);
+    connect(groupShowHideAct, SIGNAL(toggled(bool)), this, SLOT(groupShowHide(bool)), Qt::QueuedConnection);
+    if (conf->getShowGroupManager() == true)
+    	groupShowHideAct->setChecked(true);
+    else 
+    	groupShowHideAct->setChecked(false);
+
+    groupSettingsAct = new QAction(tr("Settings"), this);
+    connect(groupSettingsAct, SIGNAL(triggered()), this, SLOT(groupSettings()));
+
+}
+
+
+void CActionManager::groupClient(bool b)
+{
+	
+}
+
+void CActionManager::groupServer(bool b)
+{
+	
+}
+
+void CActionManager::groupShowHide(bool b)
+{
+	
+}
+
+void CActionManager::groupSettings()
+{
+	print_debug(DEBUG_GROUP, "Starting the dialog ...");
+	
+    if (!parent->groupDialog) {
+        parent->groupDialog = new CGroupSettingsDialog(parent);
+    }
+
+    parent->groupDialog->run();
+    parent->groupDialog->show();
+    parent->groupDialog->raise();
+    parent->groupDialog->activateWindow();
+
 }
 
 

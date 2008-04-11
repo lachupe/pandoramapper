@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QDomNode>
 #include <QVector>
 #include "CGroupCommunicator.h"
 #include "CGroupChar.h"
@@ -26,15 +27,18 @@ public:
 
 	void changeType(int newState);
 
-	bool addChar(QByteArray blob);
+	bool addChar(QDomNode blob);
 	void removeChar(QByteArray name);
+	void removeChar(QDomNode node);
 	bool isNamePresent(QByteArray name);
-	bool addCharIfUnique(QByteArray blob);
-	void updateChar(QByteArray blob);
+	bool addCharIfUnique(QDomNode blob);
+	void updateChar(QDomNode blob);
 	
-	QByteArray getLocalCharData() { return self->toBlob(); }
+	QDomNode getLocalCharData() { return self->toXML(); }
 	void sendAllCharsData(CGroupClient *conn);
 	
+	void gTellArrived(QDomNode node);
+	void sendGTell(QByteArray tell); // sends gtell from local user
 public slots:
 
 	void connectionRefused(QString message);
@@ -42,7 +46,7 @@ public slots:
 	void connectionClosed(QString message);
 	void connectionError(QString message);
 	void serverStartupFailed(QString message);
-	void gotKicked(QString message);
+	void gotKicked(QDomNode message);
 };
 
 #endif /*CGROUP_H_*/

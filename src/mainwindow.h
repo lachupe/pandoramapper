@@ -7,6 +7,7 @@
 #include "CActionManager.h"
 #include "CSelectionManager.h"
 
+
 /* 
  * Use forward declarations instead of including relevant header files to make
  * compiling faster.
@@ -20,6 +21,7 @@ class CLogDialog;
 class FindDialog;
 
 #include "CGroup.h"
+#include "CGroupSettingsDialog.h"
 
 void toggle_renderer_reaction();
 void notify_analyzer();
@@ -43,6 +45,7 @@ class CMainWindow : public QMainWindow
     QMenu       *optionsMenu;
     QMenu       *logMenu;
     QMenu       *helpMenu;
+    QMenu		*groupMenu;
 
  
     QPoint mousePosInRenderer( QPoint pos );
@@ -66,7 +69,8 @@ public:
     CMovementDialog   *movementDialog;
     CLogDialog        *logdialog;
     FindDialog        *findDialog;
-
+    CGroupSettingsDialog *groupDialog;
+    
     QAction       *hide_status_action;
     QAction       *hide_menu_action;
 

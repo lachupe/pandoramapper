@@ -97,7 +97,7 @@ void CGroupCommunicator::connectionEstablished(CGroupClient *connection)
 	} 
 	if (type == Server) {
 		connection->setProtocolState(CGroupClient::AwaitingLogin);
-		sendMessage(connection, REQ_LOGIN, "TESTING");
+		sendMessage(connection, REQ_LOGIN, "test");
 	}
 }
 
@@ -184,9 +184,10 @@ QByteArray CGroupCommunicator::formMessageBlock(int message, QDomNode data)
 	root.setAttribute("message", message );
 	doc.appendChild(root);
 	
-	
-	
-	root.appendChild( doc.importNode(data, true) );
+
+	QDomElement dataElem = doc.createElement("data");
+	dataElem.appendChild( doc.importNode(data, true) );
+	root.appendChild(dataElem);
 	
 	block = doc.toString().toAscii();
 	print_debug(DEBUG_GROUP, "Message: %s", (const char *) block);
@@ -198,7 +199,7 @@ void CGroupCommunicator::sendMessage(CGroupClient *connection, int message, QByt
 {
 	
 	QDomDocument doc("datagram");
-	QDomElement root = doc.createElement("data");
+	QDomElement root = doc.createElement("text");
 
 	QDomText t = doc.createTextNode("dataText");
 	t.setNodeValue(blob);
@@ -209,21 +210,24 @@ void CGroupCommunicator::sendMessage(CGroupClient *connection, int message, QByt
 
 void CGroupCommunicator::sendMessage(CGroupClient *connection, int message, QDomNode node)
 {
-	connection->write( formMessageBlock(message, node) );
+	connection->sendData( formMessageBlock(message, node) );
 }
 
 // the core of the protocol
-void CGroupCommunicator::incomingData(CGroupClient *conn)
+void CGroupCommunicator::incomingData(CGroupClient *conn, QByteArray buff)
 {
 	QString data;
 	
-	data = conn->readAll();
+	data = buff;
 		
 	print_debug(DEBUG_GROUP, "Raw data received: %s", (const char *) data.toAscii());
 	
+	QString error;
+	int errLine, errColumn;
 	QDomDocument doc("datagram");
-	if (!doc.setContent(data)) {
-		print_debug(DEBUG_GROUP, "Failed to set the Contect for the XML Parser");
+	if (!doc.setContent(data, &error, &errLine, &errColumn)) {
+		print_debug(DEBUG_GROUP, "Failed to parse the datagram. Error in line %i, column %i: %s",
+				errLine, errColumn, (const char *) error.toAscii());
 		return;
 	}
 
@@ -235,17 +239,19 @@ void CGroupCommunicator::incomingData(CGroupClient *conn)
 	    
 	    if (e.nodeName() == "datagram") {
 	    	int message;
-	    	QString blob;
-	    	QTextStream stream(&blob);
 	    	
 	    	
 	    	QDomElement dataElement = e.firstChildElement();
-	    	stream << dataElement;
-	    	//message = e.attributeNode()
+
 	    	
 	    	message = e.attribute("message").toInt();
+
 	    	
-	    	print_debug(DEBUG_GROUP, "Datagram arrived. Message : %i, Blob: %s", message, (const char *) blob.toAscii());
+	    	// converting a given node to the text form.
+//	    	QString blob;
+//	    	QTextStream stream(&blob);
+//	    	stream << dataElement;
+//	    	print_debug(DEBUG_GROUP, "Datagram arrived. Message : %i, Blob: %s", message, (const char *) blob.toAscii());
 
 	    	if (type == Client)
 				retrieveDataClient(conn, message, dataElement);
@@ -281,7 +287,7 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 					conn->setProtocolState(CGroupClient::AwaitingInfo);
 				} else if (message == STATE_KICKED) {
 					// woops
-					getGroup()->gotKicked( data.nodeValue() );
+					getGroup()->gotKicked( data );
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
@@ -303,24 +309,22 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 				}
 				
 			} else if (conn->getProtocolState() == CGroupClient::Logged) {
-				// usual update situation. receive update, unpack, apply.
 				if (message == ADD_CHAR) {
-
+					getGroup()->addChar(data.firstChildElement());
 				} else if (message == REMOVE_CHAR) {
-					
+					getGroup()->removeChar(data.firstChildElement());
 				} else if (message == UPDATE_CHAR) {
-					
+					getGroup()->updateChar(data.firstChildElement());
 				} else if (message == GTELL) {
-					
+					getGroup()->gTellArrived(data);
 				} else if (message == REQ_ACK) {
 					sendMessage(conn, ACK);
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
-					print_debug(DEBUG_GROUP, "(AwaitingInfo) Unexpected message marker. Trying to ignore.");
+					print_debug(DEBUG_GROUP, "(Logged) Unexpected message marker. Trying to ignore.");
 				}
-				
-				
+
 			} 
 			
 			break;
@@ -378,8 +382,20 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QDo
 				// ---------------------- LOGGED --------------------
 			} else if (conn->getProtocolState() == CGroupClient::Logged) {
 				// usual update situation. receive update, unpack, apply.
-				
-				
+				// usual update situation. receive update, unpack, apply.
+				if (message == UPDATE_CHAR) {
+					getGroup()->updateChar(data.firstChildElement());
+					relayMessage(conn, UPDATE_CHAR, data);
+				} else if (message == GTELL) {
+					getGroup()->gTellArrived(data);
+					relayMessage(conn, UPDATE_CHAR, data);
+				} else if (message == REQ_ACK) {
+					sendMessage(conn, ACK);
+				} else {
+					// ERROR: unexpected message marker!
+					// try to ignore?
+					print_debug(DEBUG_GROUP, "(Logged) Unexpected message marker. Trying to ignore.");
+				}
 			} 
 			
 			break;
@@ -415,42 +431,39 @@ void CGroupCommunicator::userLoggedOff(CGroupClient *conn)
 //
 void CGroupCommunicator::sendLoginInformation(CGroupClient *conn)
 {
-	QByteArray block;
-
 	QDomDocument doc("datagraminfo");
 
-	QDomElement root = doc.createElement("protocol");
-	root.setAttribute("version", protocolVersion );
+	QDomElement root = doc.createElement("loginData");
+	root.setAttribute("protocolVersion", protocolVersion );
 	doc.appendChild(root);
 	
-	QDomElement dataElem = doc.createElement("data");
-	doc.appendChild(dataElem);
-	
-	QDomText t = doc.createTextNode("dataText");
-	t.setNodeValue(getGroup()->getLocalCharData());
-	dataElem.appendChild(t);
-
-//	block = doc.toString().toAscii();
-//	print_debug(DEBUG_GROUP, "Message: %s", (const char *) block);
-
+	root.appendChild( doc.importNode(getGroup()->getLocalCharData(), true) );
+		
 	sendMessage(conn, UPDATE_CHAR, root);
 }
 
 void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QDomNode data)
 {
-	/*
-	print_debug(DEBUG_GROUP, "Login Information arrived %s", (const char *) data);
+	
+	if (data.nodeName() != "data") {
+    	print_debug(DEBUG_GROUP, "Called parseLoginInformation with wrong node. No data node.");
+		return;
+	}
+	
+	QDomElement node = data.firstChildElement().toElement();
+	
+	if (node.nodeName() != "loginData") {
+    	print_debug(DEBUG_GROUP, "Called parseLoginInformation with wrong node. No loginData node.");
+		return;
+	}
+    
+   	
+   	int ver  = node.attribute("protocolVersion").toInt();
+	print_debug(DEBUG_GROUP, "Client's protocol version : %i", ver);
+	
 
-	QByteArray sVer;
+	QDomNode charNode = node.firstChildElement();
 	
-	int chars = data.size() - data.lastIndexOf(' ') - 1;
-	sVer = data.right( chars );
-	data.chop( chars + 1 );
-	int ver = sVer.toInt();
-	
-	print_debug(DEBUG_GROUP, "Client's protocol version : %s", (const char *) sVer);
-	
-
 	QByteArray kickMessage = "";
 	if (ver < protocolVersion) 
 		kickMessage = "Server uses newer version of the protocol. Please update.";
@@ -458,7 +471,7 @@ void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QDomNode data
 	if (ver > protocolVersion) 
 		kickMessage = "Server uses older version of the protocol.";
 
-	if (getGroup()->addChar(data) == false)
+	if (getGroup()->addChar(charNode) == false)
 		kickMessage = "The name you picked is already present!";
 	
 
@@ -470,7 +483,6 @@ void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QDomNode data
 		sendMessage(conn, ACK); 
 	}
 	
-	*/
 }
 
 void CGroupCommunicator::sendGroupInformation(CGroupClient *conn)
@@ -496,3 +508,36 @@ void CGroupCommunicator::parseGroupInformation(CGroupClient *conn, QDomNode data
 }
 
 
+// this function is for sending gtell from a local user
+void CGroupCommunicator::sendGTell(QByteArray tell)
+{
+	// form the gtell QDomNode first.
+	QDomDocument doc("datagram");
+	QDomElement root = doc.createElement("gtell");
+	root.setAttribute("from", QString(getGroup()->getName()) );
+	
+	QDomText t = doc.createTextNode("dataText");
+	t.setNodeValue(tell);
+	root.appendChild(t);
+
+	
+	// prepare the buffer
+	
+	// depending on the type of this communicator either send to 
+	// server or send to everyone 
+   	if (type == Client) 
+   		sendMessage((CGroupClient *)peer, GTELL, root);
+	if (type == Server) {
+		QByteArray message = formMessageBlock(GTELL, root);
+		CGroupServer *serv = (CGroupServer *) peer;
+		serv->sendToAll(message);
+	}
+}
+
+
+void CGroupCommunicator::relayMessage(CGroupClient *connection, int message, QDomNode data)
+{
+	QByteArray buffer = formMessageBlock(message, data);
+	CGroupServer *serv = (CGroupServer *) peer;
+	serv->sendToAllExceptOne(connection, buffer);
+}

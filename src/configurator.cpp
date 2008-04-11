@@ -87,6 +87,7 @@ Cconfigurator::Cconfigurator()
     groupManagerRemotePort = 4243;
     groupManagerHost = "localhost";
     groupManagerCharName = "Aza";
+    showGroupManager = false;
 
     set_startup_mode(0);
     set_note_color("#F28003");
@@ -532,6 +533,8 @@ int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
                   (const char *) getGroupManagerCharName(), 
                   getGroupManagerLocalPort(), getGroupManagerRemotePort() );
 
+  fprintf(f, "  <groupManagerGUI show=\"%s\">\r\n", ON_OFF( getShowGroupManager() ) );
+
   
   QRect window = renderer_window->geometry(); 
   fprintf(f, "  <window x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n",
@@ -736,6 +739,17 @@ bool ConfigParser::startElement( const QString& , const QString& ,
 
         s = attributes.value("remotePort");
         conf->setGroupManagerRemotePort(s.toInt() );
+
+
+    } else if (qName == "groupManagerGUI") {
+
+   		// BURP
+        s = attributes.value("show");
+        s = s.toLower();
+        if (s == "on") 
+            conf->setShowGroupManager(true);
+        else 
+            conf->setShowGroupManager(false);
 
 
     } else if (qName == "guisettings") {

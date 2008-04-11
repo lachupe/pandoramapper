@@ -14,6 +14,7 @@
 #include "CMovementDialog.h"
 #include "CLogDialog.h"
 #include "finddialog.h"
+#include "CGroupSettingsDialog.h"
 
 void toggle_renderer_reaction()
 {
@@ -39,7 +40,8 @@ CMainWindow::CMainWindow(QWidget *parent)
     movementDialog = NULL;
     logdialog = NULL;
     findDialog = NULL;
-
+    groupDialog = NULL;
+    
     userland_parser = new Userland();
     actionManager = new CActionManager(this);
     
@@ -134,12 +136,23 @@ CMainWindow::CMainWindow(QWidget *parent)
     logMenu = menuBar()->addMenu(tr("&Log") );
     logMenu->addAction(actionManager->showLogAct );
 
+    groupMenu = menuBar()->addMenu(tr("&Group") );
+    groupMenu->addAction(actionManager->groupClientAct);
+    groupMenu->addAction(actionManager->groupServerAct);
+    groupMenu->addSeparator();
+    groupMenu->addAction(actionManager->groupShowHideAct);
+    groupMenu->addSeparator();
+    groupMenu->addAction(actionManager->groupSettingsAct);
+
+    
     menuBar()->addSeparator();
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(actionManager->aboutAct);
     helpMenu->addAction(actionManager->aboutQtAct);
     
+    
+
     
     /* status bar magicz */
     locationLabel = new QLabel("NO_SYNC"); 

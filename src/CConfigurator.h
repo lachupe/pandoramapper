@@ -103,6 +103,7 @@ class Cconfigurator : public QObject {
     int	 groupManagerRemotePort;
     QByteArray groupManagerHost;
     QByteArray groupManagerCharName;
+    bool showGroupManager;
     
     
 public:
@@ -120,13 +121,15 @@ public:
     int getGroupManagerRemotePort() { return groupManagerRemotePort; }
     QByteArray getGroupManagerHost() { return groupManagerHost; }
     QByteArray getGroupManagerCharName() { return groupManagerCharName; }
-                
+    bool getShowGroupManager() { return showGroupManager; }
+    
     void setGroupManagerState(int val) { groupManagerState = val; set_conf_mod(true); }
     void setGroupManagerLocalPort(int val) { groupManagerLocalPort = val; set_conf_mod(true); }
     void setGroupManagerRemotePort(int val) { groupManagerRemotePort = val; set_conf_mod(true); }
     void setGroupManagerHost(QByteArray val) { groupManagerHost = val; set_conf_mod(true); }
     void setGroupManagerCharName(QByteArray val) { groupManagerCharName = val; set_conf_mod(true); }
-
+    void setShowGroupManager(bool b) { showGroupManager = b; set_conf_mod(true); }
+    
     /* texture and sectors stuff */
     vector<struct room_sectors_data> sectors;
     int get_sector_by_desc(QByteArray desc);
