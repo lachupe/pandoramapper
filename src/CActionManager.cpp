@@ -158,8 +158,8 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     always_on_top_action= new QAction(tr("Always on Top"), this);
     always_on_top_action->setStatusTip(tr("Always on Top"));
     always_on_top_action->setCheckable(true);
-    connect(always_on_top_action, SIGNAL(toggled(bool)), this, SLOT(always_on_top(bool)), Qt::QueuedConnection);
-    always_on_top_action->setChecked(conf->get_always_on_top());
+    connect(always_on_top_action, SIGNAL(toggled(bool)), this, SLOT(alwaysOnTop(bool)), Qt::QueuedConnection);
+    always_on_top_action->setChecked(conf->getAlwaysOnTop());
     
     
     
@@ -305,7 +305,7 @@ void CActionManager::bindRooms()
 
             if (fits == true) {
                 one->setExit(dir, two);
-                if (conf->get_duallinker() == true)
+                if (conf->getDuallinker() == true)
                     two->setExit( reversenum( dir ), one);
                 return;
             }
@@ -338,11 +338,11 @@ void CActionManager::edit_current_room()
 
 void CActionManager::updateActionsSettings()
 {
-    conf->get_duallinker() ? duallinkerAct->setChecked(true) : duallinkerAct->setChecked(false);
-    conf->get_angrylinker() ? angryLinkerAct->setChecked(true) : angryLinkerAct->setChecked(false);
+    conf->getDuallinker() ? duallinkerAct->setChecked(true) : duallinkerAct->setChecked(false);
+    conf->getAngrylinker() ? angryLinkerAct->setChecked(true) : angryLinkerAct->setChecked(false);
     proxy->isMudEmulation() ? emulationAct->setChecked(true) : emulationAct->setChecked(false);
     engine->isMapping() ?  mappingAct->setChecked(true) : mappingAct->setChecked(false);
-    conf->get_automerge() ? automergeAct->setChecked(true) : automergeAct->setChecked(false);
+    conf->getAutomerge() ? automergeAct->setChecked(true) : automergeAct->setChecked(false);
 }
 
 
@@ -417,7 +417,7 @@ void CActionManager::always_on_top(bool set_on_top)
   }
   parent->setWindowFlags(flags);
   parent->show();
-  conf->set_always_on_top(set_on_top);
+  conf->setAlwaysOnTop(set_on_top);
 }
 
 
@@ -427,7 +427,7 @@ void CActionManager::newFile()
 	// creates a new map. 
 	// by now - just clears the existing one.
 
-	if (conf->get_data_mod()) {
+	if (conf->isDatabaseModified()) {
 	        switch(QMessageBox::information(parent, "Pandora",
                     "The map contains unsaved changes\n"
                     "Do you want to save the changes before exiting?",
@@ -535,7 +535,7 @@ void CActionManager::reload()
 
 void CActionManager::quit()
 {
-	if (conf->get_data_mod()) {
+	if (conf->isDatabaseModified()) {
 	        switch(QMessageBox::information(parent, "Pandora",
                                         "The map contains unsaved changes\n"
                                         "Do you want to save the changes before exiting?",
@@ -555,7 +555,7 @@ void CActionManager::quit()
     
     } 
     
-    if (conf->get_conf_mod()) {
+    if (conf->isConfigModified()) {
         switch(QMessageBox::information(parent, "Pandora",
                                         "The configuration was changed\n"
                                         "Do you want to write it down on disc before exiting?",
@@ -563,7 +563,7 @@ void CActionManager::quit()
                                         0,      // Enter == button 0
                                         2)) { // Escape == button 2
         case 0: // Save clicked or Alt+S pressed or Enter pressed.
-            conf->save_config();
+            conf->saveConfig();
             break;
         case 1: // Discard clicked or Alt+D pressed
             // don't save but exit
@@ -681,7 +681,7 @@ void CActionManager::duallinker()
 
 void CActionManager::saveConfig()
 {
-    conf->save_config();
+    conf->saveConfig();
     QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
 }
 
@@ -694,7 +694,7 @@ void CActionManager::saveAsConfig()
                     "XML config files (*.xml)");
     if (s.isEmpty())
         return;
-    conf->save_config_as("", s.toAscii());
+    conf->saveConfigAs("", s.toAscii());
     QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
 }
 
@@ -708,7 +708,7 @@ void CActionManager::loadConfig()
   if (s.isEmpty())
         return;
 
-  conf->load_config("", s.toAscii());
+  conf->loadConfig("", s.toAscii());
   QMessageBox::information(parent, "Pandora", "Loaded!\n", QMessageBox::Ok);
 
 }    

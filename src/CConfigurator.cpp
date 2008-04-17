@@ -27,51 +27,51 @@ Cconfigurator::Cconfigurator()
     print_debug(DEBUG_CONFIG, "in configurator constructor");
     
     /* data */
-    base_file = "";
-    local_port = 0;
-    remote_host = "";
-    remote_port = 0;
-    db_modified = false;
-    set_conf_mod(false);
+    baseFile = "";
+    localPort = 0;
+    remoteHost = "";
+    remotePort = 0;
+    databaseModified = false;
+    setConfigModified(false);
     
     userWindowRect.setRect(0, 0, 0, 0);  // means autodetect
-    anglex = 0;
-    angley = 0;
-    anglez = 0;
-    userx = 0;
-    usery = 0;
-    userz = 0;
+    angleX = 0;
+    angleY = 0;
+    angleZ = 0;
+    userX = 0;
+    userY = 0;
+    userZ = 0;
 
     visibleLayers = 5;
 
-    set_autorefresh(true);          /* default values */ 
-    set_automerge(true);
-    set_angrylinker(true);
-    set_exits_check(false);
-    set_terrain_check(true);
-    set_always_on_top(true);
+    setAutorefresh(true);          /* default values */ 
+    setAutomerge(true);
+    setAngrylinker(true);
+    setExitsCheck(false);
+    setTerrainCheck(true);
+    setAlwaysOnTop(true);
     
-    set_details_vis(500);
-    set_texture_vis(300);
+    setDetailsVisibility(500);
+    setTextureVisibility(300);
     
-    set_name_quote(10);
-    set_desc_quote(10);
+    setNameQuote(10);
+    setDescQuote(10);
     
-    set_regions_auto_replace( false );
-    set_regions_auto_set( false );
+    setRegionsAutoReplace( false );
+    setRegionsAutoSet( false );
     
-    set_show_regions_info( true );
-    set_display_regions_renderer( true );
-    set_show_notes_renderer( true );
+    setShowRegionsInfo( true );
+    setDisplayRegionsRenderer( true );
+    setShowNotesRenderer( true );
 
     setSelectOAnyLayer( true );
     
     /* colours */
     
     /* patterns */
-    set_exits_pat("Exits:");
+    setExitsPattern("Exits:");
     
-    struct room_sectors_data first;
+    struct roomSectorsData first;
         
     first.pattern = 0;
     first.desc = "NONE";
@@ -88,18 +88,20 @@ Cconfigurator::Cconfigurator()
     groupManagerHost = "localhost";
     groupManagerCharName = "Aza";
     showGroupManager = false;
+    groupManagerRect.setRect(0, 0, 0, 0);  // means autodetect
+    groupManagerColor = QColor("#F28003");
 
-    set_startup_mode(0);
-    set_note_color("#F28003");
+    setStartupMode(0);
+    setNoteColor("#F28003");
 }
 
 
-void Cconfigurator::reset_current_config()
+void Cconfigurator::resetCurrentConfig()
 {
     sectors.clear();
     spells.clear();
     
-    struct room_sectors_data first;
+    struct roomSectorsData first;
         
     first.pattern = 0;
     first.desc = "NONE";
@@ -109,16 +111,16 @@ void Cconfigurator::reset_current_config()
 }
 
 /* ---------------- PATTERNS and REGEXPS GENERATION --------------- */
-void Cconfigurator::set_exits_pat(QByteArray str) 
+void Cconfigurator::setExitsPattern(QByteArray str) 
 { 
-    exits_pat = str; 
-    exits_exp.setPattern(QRegExp::escape(str) );
+    exitsPattern = str; 
+    exitsExpr.setPattern(QRegExp::escape(str) );
     
-    set_conf_mod(true);
+    setConfigModified(true);
 }
 
 /* --------------------------------------- spells ----------------------------------------- */
-void Cconfigurator::add_spell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon)
+void Cconfigurator::addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon)
 {
     TSpell spell;
     
@@ -130,16 +132,16 @@ void Cconfigurator::add_spell(QByteArray spellname, QByteArray up, QByteArray do
     spell.up = false;
     
     spells.push_back(spell);
-    set_conf_mod(true);
+    setConfigModified(true);
 }
 
-void Cconfigurator::add_spell(TSpell spell)
+void Cconfigurator::addSpell(TSpell spell)
 {
     spells.push_back(spell);
-    set_conf_mod(true);
+    setConfigModified(true);
 }
 
-QString Cconfigurator::spell_up_for(unsigned int p)
+QString Cconfigurator::spellUpFor(unsigned int p)
 {
     QString s;
     int min;
@@ -164,12 +166,12 @@ QString Cconfigurator::spell_up_for(unsigned int p)
 
 /* ----------------- REGULAR EXPRESSIONS SECTION ---------------- */
 /* ------------------- DATA ------------------- */
-char Cconfigurator::get_pattern_by_room(CRoom *r)
+char Cconfigurator::getPatternByRoom(CRoom *r)
 {
     return sectors.at(r->getTerrain()).pattern;
 }
 
-int Cconfigurator::get_sector_by_desc(QByteArray desc)
+int Cconfigurator::getSectorByDesc(QByteArray desc)
 {
     unsigned int i;
     for (i = 0; i < sectors.size(); ++i) {
@@ -179,19 +181,19 @@ int Cconfigurator::get_sector_by_desc(QByteArray desc)
     return 0;
 }
 
-GLuint Cconfigurator::get_texture_by_desc(QByteArray desc)
+GLuint Cconfigurator::getTextureByDesc(QByteArray desc)
 {
     int i;
-    i = get_sector_by_desc(desc);
+    i = getSectorByDesc(desc);
     if (i == -1)
         return 0;
     return sectors[i].texture;
 }
 
 
-void Cconfigurator::add_texture(QByteArray desc, QByteArray filename, char pattern)
+void Cconfigurator::addTexture(QByteArray desc, QByteArray filename, char pattern)
 {
-    struct room_sectors_data s;
+    struct roomSectorsData s;
         
     s.desc = desc;
     s.filename = filename;
@@ -201,7 +203,7 @@ void Cconfigurator::add_texture(QByteArray desc, QByteArray filename, char patte
 //    printf("added texture with pattern %c.\r\n", pattern);
 }
 
-int Cconfigurator::get_sector_by_pattern(char pattern)
+int Cconfigurator::getSectorByPattern(char pattern)
 {
     unsigned int i;
     for (i = 0; i < sectors.size(); ++i) {
@@ -212,185 +214,185 @@ int Cconfigurator::get_sector_by_pattern(char pattern)
 }
 
 
-void Cconfigurator::set_base_file(QByteArray str)
+void Cconfigurator::setBaseFile(QByteArray str)
 {
-    base_file = str;
-    set_conf_mod(true);
+    baseFile = str;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_display_regions_renderer(bool b)
+void Cconfigurator::setDisplayRegionsRenderer(bool b)
 {
-    display_regions_renderer = b;
-    set_conf_mod(true);
+    displayRegionsRenderer = b;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_show_regions_info(bool b)
+void Cconfigurator::setShowRegionsInfo(bool b)
 {
-    show_regions_info = b;
-    set_conf_mod(true);
+    showRegionsInfo = b;
+    setConfigModified(true);
 }
 
-bool Cconfigurator::get_display_regions_renderer()
+bool Cconfigurator::getDisplayRegionsRenderer()
 {
-    return display_regions_renderer;
+    return displayRegionsRenderer;
 }
 
-bool Cconfigurator::get_show_regions_info()
+bool Cconfigurator::getShowRegionsInfo()
 {
-    return show_regions_info;
+    return showRegionsInfo;
 }
 
-bool Cconfigurator::get_regions_auto_set()
+bool Cconfigurator::getRegionsAutoSet()
 {
-    return regions_auto_set;
+    return regionsAutoSet;
 }
 
-bool Cconfigurator::get_regions_auto_replace()
+bool Cconfigurator::getRegionsAutoReplace()
 {
-    return regions_auto_replace;
+    return regionsAutoReplace;
 }
 
-void Cconfigurator::set_regions_auto_set(bool b)
+void Cconfigurator::setRegionsAutoSet(bool b)
 {
-    regions_auto_set = b;
+    regionsAutoSet = b;
 }
 
-void Cconfigurator::set_regions_auto_replace(bool b)
+void Cconfigurator::setRegionsAutoReplace(bool b)
 {
-    regions_auto_replace = b;
-    set_conf_mod(true);
+    regionsAutoReplace = b;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_show_notes_renderer(bool b)
+void Cconfigurator::setShowNotesRenderer(bool b)
 {
-    show_notes_renderer = b;
-    set_conf_mod(true);
+    showNotesRenderer = b;
+    setConfigModified(true);
 }
 
 
 
-void Cconfigurator::set_remote_host(QByteArray str)
+void Cconfigurator::setRemoteHost(QByteArray str)
 {
-    remote_host = str;
-    set_conf_mod(true);
+    remoteHost = str;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_remote_port(int i)
+void Cconfigurator::setRemotePort(int i)
 {
-    remote_port = i;
-    set_conf_mod(true);
+    remotePort = i;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_local_port(int i)
+void Cconfigurator::setLocalPort(int i)
 {
-    local_port = i;
-    set_conf_mod(true);
+    localPort = i;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_autorefresh(bool b)
+void Cconfigurator::setAutorefresh(bool b)
 {
     autorefresh = b;
-    set_conf_mod(true);
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_automerge(bool b)
+void Cconfigurator::setAutomerge(bool b)
 {
     automerge = b;
-    set_conf_mod(true);
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_duallinker(bool b)  
+void Cconfigurator::setDuallinker(bool b)  
 { 
     duallinker = b; 
-    set_conf_mod(true); 
+    setConfigModified(true); 
 }
 
-bool Cconfigurator::get_duallinker() 
+bool Cconfigurator::getDuallinker() 
 { 
     return duallinker; 
 }
 
 
-void Cconfigurator::set_angrylinker(bool b)
+void Cconfigurator::setAngrylinker(bool b)
 {
     angrylinker = b;
-    set_conf_mod(true);
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_exits_check(bool b)
+void Cconfigurator::setExitsCheck(bool b)
 {
-    exits_check = b;
+    exitsCheck = b;
 //    set_conf_mod(true);       /* this option changes repeatedly when you turn */
                                 /* mapping on and off */
 }
 
-void Cconfigurator::set_terrain_check(bool b)
+void Cconfigurator::setTerrainCheck(bool b)
 {
-    terrain_check = b;
-    set_conf_mod(true);
+    terrainCheck = b;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_details_vis(int i)
+void Cconfigurator::setDetailsVisibility(int i)
 {
-    details_visibility_range = i;
-    set_conf_mod(true);
+    detailsVisibilityRange = i;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_texture_vis(int i)
+void Cconfigurator::setTextureVisibility(int i)
 {
-    texture_visibilit_range = i;
-    set_conf_mod(true);
+    textureVisibilityRange = i;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_brief_mode(bool b)
+void Cconfigurator::setBriefMode(bool b)
 {
-    brief_mode = b;
-    set_conf_mod(true);
+    briefMode = b;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_always_on_top(bool b)
+void Cconfigurator::setAlwaysOnTop(bool b)
 {
-    always_on_top = b;
-    set_conf_mod(true);
+    alwaysOnTop = b;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_name_quote(int i)
+void Cconfigurator::setNameQuote(int i)
 {
-    name_quote = i;
-    set_conf_mod(true);
+    nameQuote = i;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_desc_quote(int i)
+void Cconfigurator::setDescQuote(int i)
 {
-    desc_quote = i;
-    set_conf_mod(true);
+    descQuote = i;
+    setConfigModified(true);
 }
 
-void Cconfigurator::set_startup_mode(int i)
+void Cconfigurator::setStartupMode(int i)
 {
-    startup_mode = i;
-    set_conf_mod(true);
+    startupMode = i;
+    setConfigModified(true);
 }
 
-int Cconfigurator::get_startup_mode()
+int Cconfigurator::getStartupMode()
 {
-    return startup_mode;
+    return startupMode;
 }
 
 // default color
-void Cconfigurator::set_note_color(QByteArray c)
+void Cconfigurator::setNoteColor(QByteArray c)
 {
-    note_color = c;
-    set_conf_mod(true);
+    noteColor = c;
+    setConfigModified(true);
 }
 
-QByteArray Cconfigurator::get_note_color()
+QByteArray Cconfigurator::getNoteColor()
 {
-    return note_color;
+    return noteColor;
 }
 
 
-int Cconfigurator::load_texture(struct room_sectors_data *p)
+int Cconfigurator::loadTexture(struct roomSectorsData *p)
 {
     QImage tex1, buf1;
 
@@ -443,7 +445,7 @@ int Cconfigurator::load_texture(struct room_sectors_data *p)
 }
 
 
-int Cconfigurator::load_config(QByteArray path, QByteArray filename)
+int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 {
   QFile xmlFile(path+filename);
   QXmlInputSource source( &xmlFile );
@@ -458,28 +460,29 @@ int Cconfigurator::load_config(QByteArray path, QByteArray filename)
   ConfigParser * handler = new ConfigParser();
   reader.setContentHandler( handler );
     
-  reset_current_config();
+  resetCurrentConfig();
 	
     
   print_debug(DEBUG_CONFIG, "Reading the config file %s", (const char *) (path+filename));
   fflush(stdout);
   reader.parse( source );
   print_debug(DEBUG_CONFIG, "done.");
-  set_conf_mod(false);
+  setConfigModified(false);
 
 
-  config_path = path;
-  config_file = filename;
+  configPath = path;
+  configFile = filename;
   return 1;
 }
 
-int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
+int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
 {
   FILE *f;
   unsigned int i;
+  QRect window;
 
-  config_file = filename;
-  config_path = path;
+  configFile = filename;
+  configPath = path;
 
   f = fopen((const char *) path + filename, "w");
   if (f == NULL) {
@@ -488,33 +491,33 @@ int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
   }    
   
   fprintf(f, "<config>\r\n");
-  fprintf(f, "  <localport port=\"%i\">\r\n", get_local_port());
+  fprintf(f, "  <localport port=\"%i\">\r\n", getLocalPort());
   fprintf(f, "  <remotehost hostname=\"%s\" port=\"%i\">\r\n", 
-                  (const char *) get_remote_host(), 
-                  get_remote_port() );
+                  (const char *) getRemoteHost(), 
+                  getRemotePort() );
   fprintf(f, "  <basefile filename=\"%s\">\r\n", 
-                  (const char *) get_base_file() );
+                  (const char *) getBaseFile() );
   
   fprintf(f, "  <GLvisibility textures=\"%i\" details=\"%i\" shownotes=\"%s\" layers=\"%i\">\r\n", 
-                  get_texture_vis(),  get_details_vis(), ON_OFF(get_show_notes_renderer()),  
+                  getTextureVisibility(),  getDetailsVisibility(), ON_OFF(getShowNotesRenderer()),  
                   getVisibleLayers() );
   
   fprintf(f, "  <analyzers exits=\"%s\"  terrain=\"%s\">\r\n", 
-                  ON_OFF(get_exits_check() ), ON_OFF(get_terrain_check() ) );
+                  ON_OFF(getExitsCheck() ), ON_OFF(getTerrainCheck() ) );
 
   fprintf(f, "  <engineflags briefmode=\"%s\" automerge=\"%s\"  angrylinker=\"%s\" duallinker=\"%s\">\r\n", 
-                  ON_OFF(get_brief_mode()), 
-                  ON_OFF(get_automerge() ), ON_OFF( get_angrylinker()), 
-                  ON_OFF(get_duallinker() ) );
+                  ON_OFF(getBriefMode()), 
+                  ON_OFF(getAutomerge() ), ON_OFF( getAngrylinker()), 
+                  ON_OFF(getDuallinker() ) );
                   
               
   fprintf(f, "  <regionsflags displayinrenderer=\"%s\" showinfo=\"%s\">\r\n", 
-                  ON_OFF(get_display_regions_renderer()), 
-                  ON_OFF(get_show_regions_info()) );
+                  ON_OFF(getDisplayRegionsRenderer()), 
+                  ON_OFF(getShowRegionsInfo()) );
                   
 
   fprintf(f, "  <guisettings always_on_top=\"%s\">\r\n", 
-                  ON_OFF(get_always_on_top()) );
+                  ON_OFF(getAlwaysOnTop()) );
 
   QString grpManager;
   switch (getGroupManagerState()) {
@@ -528,34 +531,36 @@ int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
 		grpManager += "Off";
 		break;
   }
-  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" localPort=\"%i\" remotePort=\"%i\">\r\n", 
+  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" charColor=\"%s\" localPort=\"%i\" remotePort=\"%i\">\r\n", 
                   (const char *) grpManager.toAscii(), (const char *) getGroupManagerHost(),
                   (const char *) getGroupManagerCharName(), 
+                  (const char *) getGroupManagerColor().name().toAscii(), 
                   getGroupManagerLocalPort(), getGroupManagerRemotePort() );
 
-  fprintf(f, "  <groupManagerGUI show=\"%s\">\r\n", ON_OFF( getShowGroupManager() ) );
-
-  
-  QRect window = renderer_window->geometry(); 
+  window = renderer_window->getGroupManagerRect(); 
+  fprintf(f, "  <groupManagerGUI show=\"%s\"  x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n", 
+		  ON_OFF( getShowGroupManager() ), window.x(), window.y(), window.height(), window.width() );
+                        
+  window = renderer_window->geometry(); 
   fprintf(f, "  <window x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n",
             window.x(), window.y(), window.height(), window.width() );                 
 
 
-  anglex = renderer_window->renderer->anglex;
-  angley = renderer_window->renderer->angley;
-  anglez = renderer_window->renderer->anglez;
+  angleX = renderer_window->renderer->angleX;
+  angleY = renderer_window->renderer->angleY;
+  angleZ = renderer_window->renderer->angleZ;
   fprintf(f, "  <rendererangles anglex=\"%f\" angley=\"%f\" anglez=\"%f\">\r\n", 
-                anglex, angley, anglez); 
+                angleX, angleY, angleZ); 
 
-  userx = renderer_window->renderer->userx;
-  usery = renderer_window->renderer->usery;
-  userz = renderer_window->renderer->userz;
+  userX = renderer_window->renderer->userX;
+  userY = renderer_window->renderer->userY;
+  userZ = renderer_window->renderer->userZ;
   fprintf(f, "  <rendererpositions userx=\"%f\" usery=\"%f\" userz=\"%f\">\r\n",
-        userx, usery, userz);
+        userX, userY, userZ);
 
 
   fprintf(f, "  <refresh auto=\"%s\" roomnamequote=\"%i\" descquote=\"%i\">\r\n",
-                  ON_OFF( get_autorefresh() ), get_name_quote(), get_desc_quote() );
+                  ON_OFF( getAutorefresh() ), getNameQuote(), getDescQuote() );
   
   QString ch;
   for (i = 1; i < sectors.size(); i++) {
@@ -595,11 +600,11 @@ int Cconfigurator::save_config_as(QByteArray path, QByteArray filename)
   }
 
   fprintf(f, "  <misc startupmode=\"%d\" notecolor=\"%s\">\r\n", 
-          get_startup_mode(), (const char*)get_note_color());
+          getStartupMode(), (const char*)getNoteColor());
 
   /* PUT ENGINE CONFIG SAVING THERE ! */
   
-  set_conf_mod(false);
+  setConfigModified(false);
   fprintf(f, "</config>\r\n");
   fflush(f);
   fclose(f);
@@ -638,7 +643,7 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         }        
         
         s = attributes.value("port");
-        conf->set_local_port(s.toInt() );
+        conf->setLocalPort(s.toInt() );
 //        printf("Using local port %i. \r\n", conf->get_local_port() );
 
         return TRUE;
@@ -649,10 +654,10 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         }        
         
         s = attributes.value("hostname");
-        conf->set_remote_host(s.toAscii() );
+        conf->setRemoteHost(s.toAscii() );
         
         s = attributes.value("port");
-        conf->set_remote_port(s.toInt() );
+        conf->setRemotePort(s.toInt() );
 //        printf("Using remote host %s:%i\r\n", (const char *)conf->get_remote_host(), 
 //                                            conf->get_remote_port() );
 
@@ -664,7 +669,7 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         }        
         
         s = attributes.value("filename");
-        conf->set_base_file(s.toAscii() );
+        conf->setBaseFile(s.toAscii() );
 //        printf("Using the database file: %s\r\n", qPrintable(s) );
         
         return TRUE;
@@ -675,23 +680,23 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         }        
         
         s = attributes.value("textures");
-        conf->set_texture_vis(s.toInt() );
+        conf->setTextureVisibility(s.toInt() );
         s = attributes.value("details");
-        conf->set_details_vis(s.toInt() );
+        conf->setDetailsVisibility(s.toInt() );
         
         s = attributes.value("shownotes");
         s = s.toLower();
         if (s == "on") 
-            conf->set_show_notes_renderer( true);
+            conf->setShowNotesRenderer( true);
         else 
-            conf->set_show_notes_renderer( false);
+            conf->setShowNotesRenderer( false);
 
         s = attributes.value("layers");
         conf->setVisibleLayers(s.toInt() );
         
         
         print_debug(DEBUG_CONFIG, "OpenGL visibility ranges set to %i (texture) and %i (details).",
-                    conf->get_texture_vis(), conf->get_details_vis() );
+                    conf->getTextureVisibility(), conf->getDetailsVisibility() );
         
         return TRUE;
     } else if (qName == "analyzers") {
@@ -703,20 +708,20 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         s = attributes.value("exits");
         s = s.toLower();
         if (s == "on") 
-            conf->set_exits_check(true);
+            conf->setExitsCheck(true);
         else 
-            conf->set_exits_check(false);
+            conf->setExitsCheck(false);
         
         s = attributes.value("terrain");
         s = s.toLower();
         if (s == "on") 
-            conf->set_terrain_check(true);
+            conf->setTerrainCheck(true);
         else 
-            conf->set_terrain_check(false);
+            conf->setTerrainCheck(false);
         
         
         print_debug(DEBUG_CONFIG, "Analyzers: desc ON, exits %s, terrain %s.",
-                    ON_OFF(conf->get_exits_check() ), ON_OFF(conf->get_terrain_check()) );
+                    ON_OFF(conf->getExitsCheck() ), ON_OFF(conf->getTerrainCheck()) );
         
         return TRUE;
     } else if (qName == "groupManager") {
@@ -731,6 +736,10 @@ bool ConfigParser::startElement( const QString& , const QString& ,
     	s = attributes.value("host");
         conf->setGroupManagerHost(s.toAscii());
 
+        
+    	s = attributes.value("charColor");
+        conf->setGroupManagerColor(QColor(s));
+        
     	s = attributes.value("charName");
         conf->setGroupManagerCharName(s.toAscii());
 
@@ -750,7 +759,19 @@ bool ConfigParser::startElement( const QString& , const QString& ,
             conf->setShowGroupManager(true);
         else 
             conf->setShowGroupManager(false);
+        
+        int x = 0;
+        int y = 0;
+        int height = 0;
+        int width = 0;
+        x = attributes.value("x").toInt();
+        y = attributes.value("y").toInt();
+        height = attributes.value("height").toInt();
+        width = attributes.value("width").toInt();
 
+        conf->setGroupManagerRect(  QRect(x, y, width, height) );
+        print_debug(DEBUG_CONFIG, "Loaded groupManager window settins: x %i, y %i, height %i, width %i",
+                        x, y, height, width);
 
     } else if (qName == "guisettings") {
         if (attributes.length() < 1) {
@@ -761,11 +782,11 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         s = attributes.value("always_on_top");
         s = s.toLower();
         if (s == "on") 
-            conf->set_always_on_top(true);
+            conf->setAlwaysOnTop(true);
         else 
-            conf->set_always_on_top(false);
+            conf->setAlwaysOnTop(false);
 
-        print_debug(DEBUG_CONFIG, "GUI settings: always_on_top %s.", ON_OFF(conf->get_always_on_top()) );
+        print_debug(DEBUG_CONFIG, "GUI settings: always_on_top %s.", ON_OFF(conf->getAlwaysOnTop()) );
 
         return TRUE;
     } else if (qName == "regionsflags") {
@@ -777,20 +798,20 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         s = attributes.value("displayinrenderer");
         s = s.toLower();
         if (s == "on") 
-            conf->set_display_regions_renderer(true);
+            conf->setDisplayRegionsRenderer(true);
         else 
-            conf->set_display_regions_renderer(false);
+            conf->setDisplayRegionsRenderer(false);
             
         s = attributes.value("showinfo");
         s = s.toLower();
         if (s == "on") 
-            conf->set_show_regions_info(true);
+            conf->setShowRegionsInfo(true);
         else 
-            conf->set_show_regions_info(false);
+            conf->setShowRegionsInfo(false);
             
             
 
-        print_debug(DEBUG_CONFIG, "GUI settings: always_on_top %s.", ON_OFF(conf->get_always_on_top()) );
+        print_debug(DEBUG_CONFIG, "GUI settings: always_on_top %s.", ON_OFF(conf->getAlwaysOnTop()) );
 
         return TRUE;
     } else if (qName == "engineflags") {
@@ -803,36 +824,36 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         s = s.toLower();
 //        printf("The brief mode setting : %s\r\n", qPrintable(s) );
         if (s == "on") 
-            conf->set_brief_mode(true);
+            conf->setBriefMode(true);
         else 
-            conf->set_brief_mode(false);
+            conf->setBriefMode(false);
         
         s = attributes.value("automerge");
         s = s.toLower();
         if (s == "on") 
-            conf->set_automerge(true);
+            conf->setAutomerge(true);
         else 
-            conf->set_automerge(false);
+            conf->setAutomerge(false);
 
         s = attributes.value("angrylinker");
         s = s.toLower();
         if (s == "on") 
-            conf->set_angrylinker(true);
+            conf->setAngrylinker(true);
         else 
-            conf->set_angrylinker(false);
+            conf->setAngrylinker(false);
 
         s = attributes.value("duallinker");
         s = s.toLower();
         if (s == "on") 
-            conf->set_duallinker(true);
+            conf->setDuallinker(true);
         else 
-            conf->set_duallinker(false);
+            conf->setDuallinker(false);
 
 
 
         print_debug(DEBUG_CONFIG, "Engine flags: briefmode %s, automerge %s, angrylinker %s.",
-               ON_OFF(conf->get_brief_mode()), ON_OFF(conf->get_automerge()), 
-                ON_OFF(conf->get_angrylinker()), ON_OFF(conf->get_duallinker()) );
+               ON_OFF(conf->getBriefMode()), ON_OFF(conf->getAutomerge()), 
+                ON_OFF(conf->getAngrylinker()), ON_OFF(conf->getDuallinker()) );
         
         return TRUE;
     } else if (qName == "refresh") {
@@ -844,18 +865,18 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         s = attributes.value("auto");
         s = s.toLower();
         if (s == "on") 
-            conf->set_autorefresh(true);
+            conf->setAutorefresh(true);
         else 
-            conf->set_autorefresh(false);
+            conf->setAutorefresh(false);
         
         s = attributes.value("roomnamequote");
-        conf->set_name_quote(s.toInt());
+        conf->setNameQuote(s.toInt());
         s = attributes.value("descquote");
-        conf->set_desc_quote(s.toInt());
+        conf->setDescQuote(s.toInt());
 
         print_debug(DEBUG_CONFIG, "Autorefresh settings: automatic refresh %s, roomname quote %i, desc quote %i.",
-                ON_OFF(conf->get_autorefresh()), conf->get_name_quote(), 
-                conf->get_desc_quote() );
+                ON_OFF(conf->getAutorefresh()), conf->getNameQuote(), 
+                conf->getDescQuote() );
         return TRUE;
     } else if (qName == "texture") {
         if (attributes.length() < 2) {
@@ -873,7 +894,7 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         s = attributes.value("pattern");
         texture.pattern = s[0].toAscii();
 
-        conf->add_texture(texture.desc, texture.filename, texture.pattern);
+        conf->addTexture(texture.desc, texture.filename, texture.pattern);
 //        printf("Added texture: desc %s, file %s, pattern %c.\r\n", 
 //              (const char *) texture.desc, (const char *) texture.filename, texture.pattern);
 
@@ -906,7 +927,7 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         s = attributes.value("down");
         spell.down_mes = s.toAscii();
 
-        conf->add_spell(spell);
+        conf->addSpell(spell);
         return TRUE;
     } else if (qName == "debug") {
         if (attributes.length() < 1) {
@@ -946,7 +967,7 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         height = attributes.value("height").toInt();
         width = attributes.value("width").toInt();
 
-        conf->set_window_rect(x, y, width, height);
+        conf->setWindowRect(x, y, width, height);
         print_debug(DEBUG_CONFIG, "Loaded window settins: x %i, y %i, height %i, width %i",
                         x, y, height, width);
                         
@@ -960,7 +981,7 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         y = attributes.value("angley").toFloat();
         z = attributes.value("anglez").toFloat();
         
-        conf->set_renderer_angles(x,y,z);
+        conf->setRendererAngles(x,y,z);
             
         print_debug(DEBUG_CONFIG, "Loaded renderer angles : x %f, y %f, z %f",x, y, z);
         return TRUE;
@@ -973,7 +994,7 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         y = attributes.value("usery").toFloat();
         z = attributes.value("userz").toFloat();
         
-        conf->set_renderer_position(x,y,z);
+        conf->setRendererPosition(x,y,z);
             
         print_debug(DEBUG_CONFIG, "Loaded renderer shift : x %f, y %f, z %f",x, y, z);
         return TRUE;
@@ -981,11 +1002,11 @@ bool ConfigParser::startElement( const QString& , const QString& ,
     } else if (qName == "misc") {
         int startup_mode = 0;
         startup_mode = attributes.value("startupmode").toInt();
-        conf->set_startup_mode(startup_mode);
+        conf->setStartupMode(startup_mode);
         print_debug(DEBUG_CONFIG, "Set startup mode: %d", startup_mode);
         
         QByteArray note_color = (QByteArray)attributes.value("notecolor").toAscii();
-        conf->set_note_color(note_color);
+        conf->setNoteColor(note_color);
         print_debug(DEBUG_CONFIG, "Set note color: %d", (const char*)note_color);
 
         return TRUE;

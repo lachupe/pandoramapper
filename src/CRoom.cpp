@@ -69,7 +69,7 @@ CRoom::~CRoom()
 void CRoom::setModified(bool b)
 {
     if (b)
-        conf->set_data_mod(true);
+        conf->setDatabaseModified(true);
 }
 
 int CRoom::descCmp(QByteArray d)
@@ -279,7 +279,7 @@ void CRoom::setName(QByteArray newname)
 
 void CRoom::setTerrain(char terrain)
 {
-    sector = conf->get_sector_by_pattern(terrain);
+    sector = conf->getSectorByPattern(terrain);
     setModified(true);
 }
 
@@ -480,7 +480,7 @@ void CRoom::sendRoom()
 
     line[0] = 0;
     pos = 0;
-    if (!(proxy->isMudEmulation() && conf->get_brief_mode() ) ) {
+    if (!(proxy->isMudEmulation() && conf->getBriefMode() ) ) {
       for (i = 0; i <= strlen(desc); i++)
 		if (desc[i] == '|') {
 		    line[pos] = 0;
@@ -504,7 +504,7 @@ void CRoom::sendRoom()
     send_to_user("%s\r\n", line);
 
     
-    if (conf->get_brief_mode() && proxy->isMudEmulation()) {
+    if (conf->getBriefMode() && proxy->isMudEmulation()) {
       sprintf(line, "Exits: ");
       for (i = 0; i <= 5; i++)
           if (isExitPresent(i) == true) {
@@ -628,13 +628,13 @@ int Strings_Comparator::compare_with_quote(QByteArray str, QByteArray text, int 
 
 int Strings_Comparator::strcmp_roomname(QByteArray name, QByteArray text)
 {
-    return compare_with_quote(name, text, conf->get_name_quote());
+    return compare_with_quote(name, text, conf->getNameQuote());
 }
 
 
 int Strings_Comparator::strcmp_desc(QByteArray name, QByteArray text)
 {
-    return compare_with_quote(name, text, conf->get_desc_quote());
+    return compare_with_quote(name, text, conf->getDescQuote());
 }
 
 

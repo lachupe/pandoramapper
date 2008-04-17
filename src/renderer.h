@@ -68,12 +68,12 @@ class RendererWidget : public QGLWidget
     void drawCone();
 
 public:
-    GLfloat       angley;
-    GLfloat       anglex;
-    GLfloat       anglez;
-    float         userx;
-    float         usery;
-    float         userz;		/* additional shift added by user */
+    GLfloat       angleY;
+    GLfloat       angleX;
+    GLfloat       angleZ;
+    float         userX;
+    float         userY;
+    float         userZ;		/* additional shift added by user */
     int           userLayerShift;       // this affect curz.
     
     int           current_plane_z;        

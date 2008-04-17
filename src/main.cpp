@@ -177,39 +177,39 @@ int main(int argc, char *argv[])
     splash->showMessage(QString("Loading the configuration ") + configfile);
     print_debug(DEBUG_SYSTEM, "Using config file : %s.", configfile);
     conf = new Cconfigurator();
-    conf->load_config(resPath, configfile);
+    conf->loadConfig(resPath, configfile);
     print_debug(DEBUG_SYSTEM, "starting up...");
     
     
     if (override_base_file[0] != 0) {
-      conf->set_base_file(override_base_file);
-    } else if ( conf->get_base_file() == "") {
-      conf->set_base_file(default_base_file);
+      conf->setBaseFile(override_base_file);
+    } else if ( conf->getBaseFile() == "") {
+      conf->setBaseFile(default_base_file);
     }
-    print_debug(DEBUG_SYSTEM, "Using database file : %s.", (const char*) conf->get_base_file() );
+    print_debug(DEBUG_SYSTEM, "Using database file : %s.", (const char*) conf->getBaseFile() );
     
     if (override_remote_host[0] != 0) {
-      conf->set_remote_host(override_remote_host);
-    } else if ( conf->get_remote_host().isEmpty() ) {
-      conf->set_remote_host(default_remote_host);
+      conf->setRemoteHost(override_remote_host);
+    } else if ( conf->getRemoteHost().isEmpty() ) {
+      conf->setRemoteHost(default_remote_host);
     }
-    print_debug(DEBUG_SYSTEM, "Using target hostname : %s.", (const char*) conf->get_remote_host() );
+    print_debug(DEBUG_SYSTEM, "Using target hostname : %s.", (const char*) conf->getRemoteHost() );
 
     if (override_local_port != 0) {
-      conf->set_local_port(override_local_port);
-    } else if ( conf->get_local_port() == 0) {
-      conf->set_local_port(default_local_port);
+      conf->setLocalPort(override_local_port);
+    } else if ( conf->getLocalPort() == 0) {
+      conf->setLocalPort(default_local_port);
     }
-    print_debug(DEBUG_SYSTEM, "Using local port : %i.", conf->get_local_port());
+    print_debug(DEBUG_SYSTEM, "Using local port : %i.", conf->getLocalPort());
 
     if (override_remote_port != 0) {
-      conf->set_remote_port(override_remote_port);
-    } else if (conf->get_remote_port() == 0) {
-      conf->set_remote_port(default_remote_port);
+      conf->setRemotePort(override_remote_port);
+    } else if (conf->getRemotePort() == 0) {
+      conf->setRemotePort(default_remote_port);
     }
-    print_debug(DEBUG_SYSTEM, "Using target port : %i.", conf->get_remote_port());
+    print_debug(DEBUG_SYSTEM, "Using target port : %i.", conf->getRemotePort());
 
-    conf->set_conf_mod( false );
+    conf->setConfigModified( false );
 
     splash->showMessage("Starting Analyzer and Proxy...");
     engine = new CEngine();
@@ -240,8 +240,8 @@ int main(int argc, char *argv[])
     }
 
     QRect rect = app.desktop()->availableGeometry(-1);
-    if (conf->get_window_rect().x() == 0 || conf->get_window_rect().x() >= rect.width() || 
-        conf->get_window_rect().y() >= rect.height() ) {
+    if (conf->getWindowRect().x() == 0 || conf->getWindowRect().x() >= rect.width() || 
+        conf->getWindowRect().y() >= rect.height() ) {
         print_debug(DEBUG_SYSTEM && DEBUG_INTERFACE, "Autosettings for window size and position");
         int x, y, height, width;
 
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
         height = rect.height() / 3;
         width = rect.width() - x;
 
-        conf->set_window_rect( x, y, width, height);        
+        conf->setWindowRect( x, y, width, height);        
     }
 
     renderer_window = new CMainWindow( 0 );

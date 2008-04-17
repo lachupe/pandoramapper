@@ -11,7 +11,6 @@ Q_OBJECT
 public:
 	CGroupSettingsDialog(QWidget *parent = 0);
 	virtual ~CGroupSettingsDialog();
-	
     void run();
 public slots:
     void accept();

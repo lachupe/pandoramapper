@@ -237,7 +237,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
       r->simpleSetZ( s.toInt() );
 
       s = attributes.value("terrain");
-      r->setSector( conf->get_sector_by_desc(s.toAscii()) );
+      r->setSector( conf->getSectorByDesc(s.toAscii()) );
       
       s = attributes.value("region");
       r->setRegion(s.toAscii());

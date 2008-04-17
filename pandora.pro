@@ -52,7 +52,8 @@ HEADERS += src/CGroupSettingsDialog.h \
     src/utils.h \
     src/xml2.h \
     src/finddialog.h
-SOURCES += src/CGroupSettingsDialog.cpp \
+SOURCES += src/CConfigurator.cpp \
+    src/CGroupSettingsDialog.cpp \
     src/CGroupChar.cpp \
     src/CGroupCommunicator.cpp \
     src/CGroupClient.cpp \
@@ -74,7 +75,6 @@ SOURCES += src/CGroupSettingsDialog.cpp \
     src/Regions.cpp \
     src/RoomEditDialog.cpp \
     src/SpellsDialog.cpp \
-    src/configurator.cpp \
     src/exits.cpp \
     src/main.cpp \
     src/mainwindow.cpp \

@@ -31,9 +31,9 @@ void CGroupCommunicator::changeType(int newState) {
 	if (type == newState)
 		return;
 
-	if (type == Client) {
+	if (type == Client)
 		peer->deleteLater();
-	} else 
+	if (type == Server)  
 		delete peer;
 
 	type = newState;
@@ -541,3 +541,45 @@ void CGroupCommunicator::relayMessage(CGroupClient *connection, int message, QDo
 	CGroupServer *serv = (CGroupServer *) peer;
 	serv->sendToAllExceptOne(connection, buffer);
 }
+
+void CGroupCommunicator::sendCharUpdate(QDomNode blob)
+{
+	if (type == Off)
+		return;
+   	if (type == Client) 
+   		sendMessage((CGroupClient *)peer, UPDATE_CHAR, blob);
+	if (type == Server) {
+		QByteArray message = formMessageBlock(UPDATE_CHAR, blob);
+		CGroupServer *serv = (CGroupServer *) peer;
+		serv->sendToAll(message);
+	}
+}
+
+bool CGroupCommunicator::isConnected()
+{
+   	if (type == Client) {
+   		CGroupClient *client = (CGroupClient *) peer;
+   		if (client->getConnectionState() == CGroupClient::Connected) 
+   			return true; 
+   	}
+   	return false;
+}
+
+void CGroupCommunicator::reconnect()
+{ 
+	if (type == Client) {
+		changeType(Off); 
+		changeType(Client);
+	} 
+	if (type == Server) {
+		print_debug(DEBUG_GROUP, "Turning server off.");
+		changeType(Off);
+		print_debug(DEBUG_GROUP, "Done.");
+		print_debug(DEBUG_GROUP, "Turning server on.");
+		changeType(Server);
+		print_debug(DEBUG_GROUP, "Done.");
+	}
+}
+	
+
+

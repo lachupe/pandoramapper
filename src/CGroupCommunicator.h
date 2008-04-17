@@ -57,9 +57,12 @@ public:
 	virtual ~CGroupCommunicator();
 	
 	void changeType(int newState);
+	int getType() {return type; }
 	void sendCharUpdate(CGroupClient *conn, QDomNode blob);
-
-
+	void sendCharUpdate(QDomNode blob);
+	bool isConnected();
+	void reconnect();
+		
 public slots:
 	void connectionStateChanged(CGroupClient *connection);
 	void errorInConnection(CGroupClient *connection);

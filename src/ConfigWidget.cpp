@@ -18,20 +18,20 @@ ConfigWidget::ConfigWidget (QWidget *parent) : QDialog(parent)
 void ConfigWidget::run()
 {
 
-    if (conf->get_brief_mode()) 
+    if (conf->getBriefMode()) 
         checkBox_brief->setChecked(true);
     else 
         checkBox_brief->setChecked(false);
               
        
-    lineEdit_remoteport->setText(QString("%1").arg(conf->get_remote_port()) );
-    lineEdit_remotehost->setText(conf->get_remote_host());
+    lineEdit_remoteport->setText(QString("%1").arg(conf->getRemotePort()) );
+    lineEdit_remotehost->setText(conf->getRemoteHost());
     
-    lineEdit_localport->setText(QString("%1").arg(conf->get_local_port()) );
+    lineEdit_localport->setText(QString("%1").arg(conf->getLocalPort()) );
 
-    spinBox_namequote->setValue(conf->get_name_quote());
-    spinBox_descquote->setValue(conf->get_desc_quote());
-    if (conf->get_autorefresh()) {
+    spinBox_namequote->setValue(conf->getNameQuote());
+    spinBox_descquote->setValue(conf->getDescQuote());
+    if (conf->getAutorefresh()) {
         checkBox_autorefresh->setChecked(true);
         spinBox_namequote->setEnabled(true);
         spinBox_descquote->setEnabled(true);
@@ -41,42 +41,42 @@ void ConfigWidget::run()
         spinBox_descquote->setEnabled(false);
     }
     
-    if (conf->get_automerge()) 
+    if (conf->getAutomerge()) 
         checkBox_automerge->setChecked(true);
     else
         checkBox_automerge->setChecked(false);
     
-    if (conf->get_angrylinker()) 
+    if (conf->getAngrylinker()) 
         checkBox_angrylinker->setChecked(true);
     else
         checkBox_angrylinker->setChecked(false);
 
-    if (conf->get_duallinker()) 
+    if (conf->getDuallinker()) 
         checkBox_duallinker->setChecked(true);
     else
         checkBox_duallinker->setChecked(false);
 
 
-    if (conf->get_show_notes_renderer()) 
+    if (conf->getShowNotesRenderer()) 
         checkShowNotes->setChecked(true);    
     else 
         checkShowNotes->setChecked(false);    
 
-    if (conf->get_display_regions_renderer()) 
+    if (conf->getDisplayRegionsRenderer()) 
         checkShowRegions->setChecked(true);    
     else 
         checkShowRegions->setChecked(false);    
 
-    if (conf->get_show_regions_info()) 
+    if (conf->getShowRegionsInfo()) 
         checkShowSecrets->setChecked(true);    
     else 
         checkShowSecrets->setChecked(false);    
 
-    lineEdit_visrange->setText(QString("%1").arg(conf->get_texture_vis()) );
-    lineEdit_detrange->setText(QString("%1").arg(conf->get_details_vis()) );
+    lineEdit_visrange->setText(QString("%1").arg(conf->getTextureVisibility()) );
+    lineEdit_detrange->setText(QString("%1").arg(conf->getDetailsVisibility()) );
     lineEdit_layers->setText(QString("%1").arg(conf->getVisibleLayers()) );
     
-    misc_startupMode->setCurrentIndex(conf->get_startup_mode());
+    misc_startupMode->setCurrentIndex(conf->getStartupMode());
 }
 
 void ConfigWidget::autorefreshUpdated(bool state)
@@ -94,11 +94,11 @@ void ConfigWidget::accept()
 {
     int i;
     
-    if (conf->get_brief_mode() !=  checkBox_brief->isChecked() ) 
-        conf->set_brief_mode( checkBox_brief->isChecked() );
+    if (conf->getBriefMode() !=  checkBox_brief->isChecked() ) 
+        conf->setBriefMode( checkBox_brief->isChecked() );
        
-    if (conf->get_remote_host() != lineEdit_remotehost->text().toAscii() ) 
-        conf->set_remote_host(lineEdit_remotehost->text().toAscii());
+    if (conf->getRemoteHost() != lineEdit_remotehost->text().toAscii() ) 
+        conf->setRemoteHost(lineEdit_remotehost->text().toAscii());
     
     i = lineEdit_remoteport->text().toInt();
     if (i == 0) {
@@ -106,8 +106,8 @@ void ConfigWidget::accept()
                               QString("Bad remote port!"));
             return;    
     }
-    if (conf->get_remote_port() != i)
-        conf->set_remote_port(i);
+    if (conf->getRemotePort() != i)
+        conf->setRemotePort(i);
         
     
     i = lineEdit_localport->text().toInt();
@@ -116,38 +116,38 @@ void ConfigWidget::accept()
                               QString("Bad local port!"));
             return;    
     }
-    if (conf->get_local_port() != i)
-        conf->set_local_port(i);
+    if (conf->getLocalPort() != i)
+        conf->setLocalPort(i);
 
 
-    if (conf->get_name_quote() != spinBox_namequote->value())
-        conf->set_name_quote( spinBox_namequote->value() ); 
-    if (conf->get_desc_quote() != spinBox_descquote->value() )        
-        conf->set_desc_quote( spinBox_descquote->value() ); 
+    if (conf->getNameQuote() != spinBox_namequote->value())
+        conf->setNameQuote( spinBox_namequote->value() ); 
+    if (conf->getDescQuote() != spinBox_descquote->value() )        
+        conf->setDescQuote( spinBox_descquote->value() ); 
     
-    if (conf->get_autorefresh() != checkBox_autorefresh->isChecked())
-        conf->set_autorefresh( checkBox_autorefresh->isChecked() );
+    if (conf->getAutorefresh() != checkBox_autorefresh->isChecked())
+        conf->setAutorefresh( checkBox_autorefresh->isChecked() );
     
     
-    if (conf->get_automerge() != checkBox_automerge->isChecked()) 
-        conf->set_automerge(checkBox_automerge->isChecked());
+    if (conf->getAutomerge() != checkBox_automerge->isChecked()) 
+        conf->setAutomerge(checkBox_automerge->isChecked());
     
-    if (conf->get_angrylinker() != checkBox_angrylinker->isChecked() )
-        conf->set_angrylinker(checkBox_angrylinker->isChecked() );
+    if (conf->getAngrylinker() != checkBox_angrylinker->isChecked() )
+        conf->setAngrylinker(checkBox_angrylinker->isChecked() );
 
-    if (conf->get_duallinker() != checkBox_duallinker->isChecked() )
-        conf->set_duallinker(checkBox_duallinker->isChecked() );
+    if (conf->getDuallinker() != checkBox_duallinker->isChecked() )
+        conf->setDuallinker(checkBox_duallinker->isChecked() );
 
  
-    if (conf->get_show_regions_info() != checkShowSecrets->isChecked() )
-        conf->set_show_regions_info( checkShowSecrets->isChecked() );
+    if (conf->getShowRegionsInfo() != checkShowSecrets->isChecked() )
+        conf->setShowRegionsInfo( checkShowSecrets->isChecked() );
         
         
-    if (conf->get_show_notes_renderer() != checkShowNotes->isChecked() )
-        conf->set_show_notes_renderer( checkShowNotes->isChecked() );
+    if (conf->getShowNotesRenderer() != checkShowNotes->isChecked() )
+        conf->setShowNotesRenderer( checkShowNotes->isChecked() );
         
-    if (conf->get_display_regions_renderer() != checkShowRegions->isChecked() )
-        conf->set_display_regions_renderer( checkShowRegions->isChecked() );
+    if (conf->getDisplayRegionsRenderer() != checkShowRegions->isChecked() )
+        conf->setDisplayRegionsRenderer( checkShowRegions->isChecked() );
         
     i = lineEdit_visrange->text().toInt();
     if (i == 0) {
@@ -155,8 +155,8 @@ void ConfigWidget::accept()
                               QString("Bad textures visibility range port!"));
             return;    
     }
-    if (conf->get_texture_vis() != i)
-        conf->set_texture_vis(i);
+    if (conf->getTextureVisibility() != i)
+        conf->setTextureVisibility(i);
 
 
     i = lineEdit_detrange->text().toInt();
@@ -165,8 +165,8 @@ void ConfigWidget::accept()
                               QString("Bad details visibility range!"));
             return;    
     }
-    if (conf->get_details_vis() != i)
-        conf->set_details_vis(i);
+    if (conf->getDetailsVisibility() != i)
+        conf->setDetailsVisibility(i);
 
     i = lineEdit_layers->text().toInt();
     if (i == 0) {
@@ -177,17 +177,17 @@ void ConfigWidget::accept()
     if (conf->getVisibleLayers() != i)
         conf->setVisibleLayers(i);
     
-    if (conf->get_startup_mode() != misc_startupMode->currentIndex() )
-        conf->set_startup_mode( misc_startupMode->currentIndex() );
+    if (conf->getStartupMode() != misc_startupMode->currentIndex() )
+        conf->setStartupMode( misc_startupMode->currentIndex() );
 
     done(Accepted);
 }
 
 void ConfigWidget::selectNoteColor() {
-    QColor color = QColorDialog::getColor(conf->get_note_color()==""?
-        QColor("#F28003"):QColor((const char*)conf->get_note_color()), this);
+    QColor color = QColorDialog::getColor(conf->getNoteColor()==""?
+        QColor("#F28003"):QColor((const char*)conf->getNoteColor()), this);
     if (color.isValid()) {
-        conf->set_note_color((const char*)color.name().toAscii());
+        conf->setNoteColor((const char*)color.name().toAscii());
         printf("color: %s",(const char*)color.name().toAscii());
         /*
         colorLabel->setText(color.name());

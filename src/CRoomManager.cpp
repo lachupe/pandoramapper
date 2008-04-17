@@ -102,7 +102,7 @@ bool CRoomManager::isDuplicate(CRoom *addedroom)
         return false;
     }
 
-    if (conf->get_automerge() == false) {
+    if (conf->getAutomerge() == false) {
         print_debug(DEBUG_ANALYZER, "autodesc check if OFF - quiting this routine.\n");
         stacker.put(addedroom);
       

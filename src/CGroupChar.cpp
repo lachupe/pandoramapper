@@ -1,5 +1,6 @@
 #include "CGroupChar.h"
 #include "utils.h"
+#include "CRoomManager.h"
 
 CGroupChar::CGroupChar()
 {
@@ -12,13 +13,98 @@ CGroupChar::CGroupChar()
 	mana = 0;
 	maxmana = 0;
 	state = NORMAL;
-	textHP = "";
-	textMoves = "";
-	textMana = "";
+	textHP = "Healthy";
+	textMoves = "Full";
+	textMana = "Full";
+
+	// create the info-labels
+	labelName = new QLabel;
+	labelRoom = new QLabel;
+	labelHpText = new QLabel;
+	labelHpInt = new QLabel;
+	labelManaText = new QLabel;
+	labelManaInt = new QLabel;
+	labelMovesText = new QLabel;
+	labelMovesInt = new QLabel;
+	labelState = new QLabel;
+
+	// setup the layout of labels
+	layout = new QGridLayout;
+	layout->addWidget(labelName, 0, 0, 2, 0);
+	layout->addWidget(labelState, 0, 1, 2, 1);
+	layout->addWidget(labelRoom, 3, 0, 3, 1);
+	layout->addWidget(labelHpText, 0, 2, 1, 2);
+	layout->addWidget(labelHpInt, 2, 2, 3, 2);
+	layout->addWidget(labelManaText, 0, 3, 1, 3);
+	layout->addWidget(labelManaInt, 2, 3, 3, 3);
+	layout->addWidget(labelMovesText, 0, 4, 1, 4);
+	layout->addWidget(labelMovesInt, 2, 4, 3, 4);
+
+	// setup the stretching factors
+	layout->setColumnStretch(0, 25);
+	layout->setColumnStretch(1, 15);
+	layout->setColumnStretch(2, 8);
+	layout->setColumnStretch(3, 8);
+	layout->setColumnStretch(4, 8);
+	
+	
+	charFrame = new QFrame;
+	charFrame->setFrameStyle(QFrame::StyledPanel);
+	charFrame->setLayout(layout);
+
 }
 
 CGroupChar::~CGroupChar()
 {
+	delete layout;
+	delete labelName;
+	delete labelRoom;
+	delete labelHpText;
+	delete labelHpInt;
+	delete labelManaText;
+	delete labelManaInt;
+	delete labelMovesText;
+	delete labelMovesInt;
+	delete labelState;
+}
+
+void CGroupChar::updateLabels()
+{
+	labelName->setText(name);
+	
+	if (pos == 0) {
+		labelRoom->setText("Unknown");
+	} else {
+		CRoom *r = Map.getRoom(pos);
+		if (r == NULL)
+			labelRoom->setText("Unknown");
+		else 
+			labelRoom->setText(QString("%1:%2").arg(r->id).arg( QString(r->getName()) ) );
+	}
+		
+	labelHpText->setText(textHP);
+	
+	labelHpInt->setText( QString("%1/%2").arg(hp).arg(maxhp) );
+	labelManaText->setText(textMana);
+	labelManaInt->setText( QString("%1/%2").arg(mana).arg(maxmana) );
+	labelMovesText->setText(textMoves);
+	labelMovesInt->setText( QString("%1/%2").arg(moves).arg(maxmoves) );
+
+	switch (state) {
+		case BASHED:
+			labelState->setText("BASHED");
+		break;
+		case INCAPACITATED:
+			labelState->setText("INCAP");
+		break;
+		case DEAD:
+			labelState->setText("DEAD");
+		break;
+		default:
+			labelState->setText("Normal");
+			break;
+	}
+	
 }
 
 QDomNode CGroupChar::toXML()
@@ -29,6 +115,7 @@ QDomNode CGroupChar::toXML()
 	QDomElement root = doc.createElement("playerData");
 	root.setAttribute("room", pos );
 	root.setAttribute("name", QString(name) );
+	root.setAttribute("color", color.name() );
 	root.setAttribute("textHP", QString(textHP) );
 	root.setAttribute("textMana", QString(textMana) );
 	root.setAttribute("textMoves", QString(textMoves) );
@@ -71,6 +158,12 @@ bool CGroupChar::updateFromXML(QDomNode node)
    	if (str != name) {
    		updated = true;
    		name = str;
+   	}
+
+   	str = e.attribute("color").toAscii();
+   	if (str != color.name().toAscii()) {
+   		updated = true;
+   		color = QColor(QString(str) );
    	}
 
    	str = e.attribute("textHP").toAscii();
@@ -134,6 +227,8 @@ bool CGroupChar::updateFromXML(QDomNode node)
    	}
    	
    	
+   	if (updated == true)
+   		updateLabels();
 	return updated; // hrmpf!
 }
 

@@ -78,6 +78,9 @@ public:
     void update_status_bar();
     void editRoomDialog(unsigned int id);
     void setToolMode(ToolMode mode);
+    QRect getGroupManagerRect() { return groupManager->geometry(); }
+    CGroup *getGroupManager() { return groupManager; }
+    
 
 private:
     ToolMode toolMode;

@@ -1,15 +1,18 @@
 
+#include <QApplication>
+#include <QDesktopWidget>
+
 #include "utils.h"
 #include "CConfigurator.h"
 #include "CGroup.h"
 #include "CGroupCommunicator.h"
 
-CGroup::CGroup(QByteArray name, QObject *parent)
-: QObject(parent)
+CGroup::CGroup(QByteArray name, QWidget *parent)
+: QWidget(parent, Qt::Tool)
 {
 	CGroupChar *ch;
 	
-	ch = new CGroupChar;
+	ch = new CGroupChar();
 	
 	ch->setName(name);
 	ch->setPosition(1); // FIXME ... or does not really matter.
@@ -19,18 +22,85 @@ CGroup::CGroup(QByteArray name, QObject *parent)
 	print_debug(DEBUG_GROUP, "Starting up the GroupManager.\r\n");
 	network = new CGroupCommunicator(CGroupCommunicator::Off, this);
 	network->changeType(conf->getGroupManagerState());
+	
+	
+/*	
+    QRect rect = app.desktop()->availableGeometry(-1);
+    if (conf->get_window_rect().x() == 0 || conf->get_window_rect().x() >= rect.width() || 
+        conf->get_window_rect().y() >= rect.height() ) {
+        print_debug(DEBUG_SYSTEM && DEBUG_INTERFACE, "Autosettings for window size and position");
+        int x, y, height, width;
+
+        x = rect.width() / 3 * 2;
+        y = 0;
+        height = rect.height() / 3;
+        width = rect.width() - x;
+
+        conf->set_window_rect( x, y, width, height);        
+    }
+*/
+	
+	
+	setWindowTitle("GroupManager");
+	QApplication *app = qApp;
+    QRect rect = app->desktop()->availableGeometry(-1);
+    if (conf->getGroupManagerRect().x() == 0 || conf->getGroupManagerRect().x() >= rect.width() || 
+        conf->getGroupManagerRect().y() >= rect.height() ) {
+        print_debug(DEBUG_SYSTEM && DEBUG_INTERFACE, "Autosettings for window size and position");
+        int x, y, height, width;
+
+        x = conf->getWindowRect().x() - (rect.width() / 3) ;
+        y = conf->getWindowRect().y();
+        width = rect.width() / 3;
+        height = conf->getWindowRect().height() / 2;
+
+        conf->setGroupManagerRect( QRect(x, y, width, height) );        
+    }
+    setGeometry( conf->getGroupManagerRect() );
+    show();
+    raise();
+    
+	layout = new QGridLayout(this);
+	layout->setVerticalSpacing(100);
+	this->setLayout(layout);
 }
+
+
+void CGroup::update()
+{
+}
+
 
 void CGroup::changeType(int newState)
 {
 	network->changeType(newState);
 }
 
+void CGroup::resetChars()
+{
+	for (int i = 0; i < chars.size(); ++i) 
+		delete chars[i];
+	
+	chars.clear();
+}
+
 
 CGroup::~CGroup()
 {
+	resetChars();
+	delete layout;
 	delete network;
 }
+
+void CGroup::resetName()
+{
+	if (self->getName() == conf->getGroupManagerCharName())
+		return;
+	
+	self->setName(conf->getGroupManagerCharName());
+	network->sendCharUpdate(self->toXML());
+}
+
 
 bool CGroup::addChar(QDomNode node)
 {
@@ -47,6 +117,8 @@ bool CGroup::addChar(QDomNode node)
 		print_debug(DEBUG_GROUP, "Added new char. Name %s", 
 				(const char *) newChar->getName());
 		chars.append(newChar);
+		layout->addWidget( newChar->getCharFrame(), layout->rowCount(), 0 );
+		
 		return true;
 	}
 }
@@ -64,6 +136,10 @@ void CGroup::removeChar(QByteArray name)
 			print_debug(DEBUG_GROUP, "CGroup: removing the char from the list.");
 			ch = chars[i];
 			chars.remove(i);
+
+			layout->removeWidget( ch->getCharFrame() );
+
+			
 			delete ch;
 		}
 }

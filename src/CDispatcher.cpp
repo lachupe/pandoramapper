@@ -551,7 +551,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                                                 break;
             case STATE_DESC :
                                                 event.desc.append(buffer[i].line);
-                                                if (conf->get_brief_mode())
+                                                if (conf->getBriefMode())
                                                     continue;
                                                 break;
             case STATE_EXITS:
@@ -564,7 +564,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
         };
         
         // mbrief additional check (for look/scout and similar) 
-        if (mbrief_state == STATE_DESC && conf->get_brief_mode()) 
+        if (mbrief_state == STATE_DESC && conf->getBriefMode()) 
             continue;
 
         if (buffer[i].type == IS_NORMAL && buffer[i].line.indexOf("\r\n") != -1) {
@@ -607,7 +607,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                     if (conf->spells[p].up && conf->spells[p].down_mes != "" && conf->spells[p].down_mes == a_line) {
                         conf->spells[p].up = false;
                         print_debug(DEBUG_SPELLS, "SPELL: %s is DOWN. Uptime: %s.", (const char *) conf->spells[p].name, 
-                                                qPrintable( conf->spell_up_for(p) ) );
+                                                qPrintable( conf->spellUpFor(p) ) );
                         break;                                    
                     }
                 }
@@ -624,7 +624,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                             if (conf->spells[p].up)
                                 s = QString("- %1 (up for %2)\r\n")
                                     .arg( (const char *)conf->spells[p].name )
-                                    .arg( conf->spell_up_for(p) );
+                                    .arg( conf->spellUpFor(p) );
                             else 
                                 s = QString("- %1 (unknown time)\r\n")
                                     .arg( (const char *)conf->spells[p].name );
@@ -662,7 +662,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                            
                         s = QString("- %1 (up for %2)\r\n")
                             .arg( (const char *)conf->spells[spell].name )
-                            .arg( conf->spell_up_for(spell) );
+                            .arg( conf->spellUpFor(spell) );
 
                         memcpy(buf + new_len, qPrintable(s), s.length());
                         new_len += s.length();
@@ -757,7 +757,7 @@ char Cdispatcher::parseTerrain(QByteArray prompt)
     char terrain;
         
     terrain = prompt[1];  /*second charecter is terrain*/
-    if (conf->get_sector_by_pattern(terrain) == 0) 
+    if (conf->getSectorByPattern(terrain) == 0) 
         return -1;
     
     return terrain;

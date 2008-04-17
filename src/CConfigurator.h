@@ -16,7 +16,7 @@
 
 using namespace std;
 
-struct room_sectors_data {
+struct roomSectorsData {
   QByteArray desc;             /* name of this flag */
   QByteArray filename;         /* appropriate texture's filename */
   char   pattern;           /* appropriate pattern */
@@ -39,21 +39,21 @@ class Cconfigurator : public QObject {
     Q_OBJECT
 
     /* general */
-    bool        conf_mod;       /* if the config was modified */
-    QByteArray  config_file;
-    QByteArray  config_path;
+    bool        configModified;       /* if the config was modified */
+    QByteArray  configFile;
+    QByteArray  configPath;
     
     /* patterns/regexps */
-    QByteArray exits_pat;
-    QRegExp     exits_exp;
+    QByteArray exitsPattern;
+    QRegExp     exitsExpr;
     
     /* data */
-    QByteArray  database_path;
-    QByteArray  base_file;
-    int         local_port;
-    QByteArray  remote_host;
-    int         remote_port;
-    bool        db_modified;
+    QByteArray  databasePath;
+    QByteArray  baseFile;
+    int         localPort;
+    QByteArray  remoteHost;
+    int         remotePort;
+    bool        databaseModified;
     
 
     bool autorefresh;             /* automatic room desc refresh */
@@ -61,37 +61,37 @@ class Cconfigurator : public QObject {
     bool angrylinker;             /* automatic linking based on coordinates */
     bool duallinker;              /* auto-link to the room you came from */
 
-    bool exits_check;             /* apply exits check to stacks */
-    bool terrain_check;           /* apply terrain check to stacks */
-    bool brief_mode;
-    bool always_on_top;           /* keep Pandora window on top of others */
+    bool exitsCheck;             /* apply exits check to stacks */
+    bool terrainCheck;           /* apply terrain check to stacks */
+    bool briefMode;
+    bool alwaysOnTop;           /* keep Pandora window on top of others */
         
-    bool regions_auto_set;
-    bool regions_auto_replace;
-    bool display_regions_renderer;
-    bool show_regions_info;
-    bool show_notes_renderer;
+    bool regionsAutoSet;
+    bool regionsAutoReplace;
+    bool displayRegionsRenderer;
+    bool showRegionsInfo;
+    bool showNotesRenderer;
 
-    int startup_mode; /* 0 for select, 1 for move */
-    QByteArray note_color;
+    int startupMode; /* 0 for select, 1 for move */
+    QByteArray noteColor;
     
-    int texture_visibilit_range;
-    int details_visibility_range;
+    int textureVisibilityRange;
+    int detailsVisibilityRange;
 
     
-    int desc_quote;        /* quote for description - in percents */
-    int name_quote;        /* quote for roomname - in percents */
+    int descQuote;        /* quote for description - in percents */
+    int nameQuote;        /* quote for roomname - in percents */
     
 //    void parse_line(char *line);
     
-    void reset_current_config();
+    void resetCurrentConfig();
     
     // user window size/posiiton
     QRect userWindowRect;
 
     // renderer user defined angle's and shift
-    float anglex, angley, anglez;
-    float userx, usery, userz;    
+    float angleX, angleY, angleZ;
+    float userX, userY, userZ;    
 
     int visibleLayers;
     
@@ -104,16 +104,17 @@ class Cconfigurator : public QObject {
     QByteArray groupManagerHost;
     QByteArray groupManagerCharName;
     bool showGroupManager;
-    
+    QRect groupManagerRect;
+    QColor groupManagerColor;
     
 public:
 
     /* spells */
     vector<TSpell>  spells;
     QByteArray      spells_pattern;
-    void add_spell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon);
-    void add_spell(TSpell s);
-    QString spell_up_for(unsigned int p);
+    void addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon);
+    void addSpell(TSpell s);
+    QString spellUpFor(unsigned int p);
 
     // group Manager
     int getGroupManagerState() { return groupManagerState; }
@@ -122,134 +123,138 @@ public:
     QByteArray getGroupManagerHost() { return groupManagerHost; }
     QByteArray getGroupManagerCharName() { return groupManagerCharName; }
     bool getShowGroupManager() { return showGroupManager; }
+    QRect getGroupManagerRect() { return groupManagerRect; }
+    QColor getGroupManagerColor() { return groupManagerColor; }
     
-    void setGroupManagerState(int val) { groupManagerState = val; set_conf_mod(true); }
-    void setGroupManagerLocalPort(int val) { groupManagerLocalPort = val; set_conf_mod(true); }
-    void setGroupManagerRemotePort(int val) { groupManagerRemotePort = val; set_conf_mod(true); }
-    void setGroupManagerHost(QByteArray val) { groupManagerHost = val; set_conf_mod(true); }
-    void setGroupManagerCharName(QByteArray val) { groupManagerCharName = val; set_conf_mod(true); }
-    void setShowGroupManager(bool b) { showGroupManager = b; set_conf_mod(true); }
+    void setGroupManagerState(int val) { groupManagerState = val; setConfigModified(true); }
+    void setGroupManagerLocalPort(int val) { groupManagerLocalPort = val; setConfigModified(true); }
+    void setGroupManagerRemotePort(int val) { groupManagerRemotePort = val; setConfigModified(true); }
+    void setGroupManagerHost(QByteArray val) { groupManagerHost = val; setConfigModified(true); }
+    void setGroupManagerCharName(QByteArray val) { groupManagerCharName = val; setConfigModified(true); }
+    void setShowGroupManager(bool b) { showGroupManager = b; setConfigModified(true); }
+    void setGroupManagerRect(QRect r) { groupManagerRect = r; setConfigModified(true); }
+    void setGroupManagerColor(QColor c) { groupManagerColor = c; setConfigModified(true); }
     
     /* texture and sectors stuff */
-    vector<struct room_sectors_data> sectors;
-    int get_sector_by_desc(QByteArray desc);
-    int get_sector_by_pattern(char pattern);
+    vector<struct roomSectorsData> sectors;
+    int getSectorByDesc(QByteArray desc);
+    int getSectorByPattern(char pattern);
 
-    int load_texture(struct room_sectors_data *p);
-    char get_pattern_by_room(CRoom *r);
-    GLuint get_texture_by_desc(QByteArray desc);
-    void add_texture(QByteArray desc, QByteArray filename, char pattern);
+    int loadTexture(struct roomSectorsData *p);
+    char getPatternByRoom(CRoom *r);
+    GLuint getTextureByDesc(QByteArray desc);
+    void addTexture(QByteArray desc, QByteArray filename, char pattern);
     
     /* */
     
-    int load_engine_config(QByteArray path, QByteArray filename);
+    int loadEngineConfig(QByteArray path, QByteArray filename);
     
     Cconfigurator();
 
 
-    int load_config(QByteArray path, QByteArray filename);
-    int save_config_as(QByteArray path, QByteArray filename);
-    int save_config() { return save_config_as(config_path, config_file); }
+    int loadConfig(QByteArray path, QByteArray filename);
+    int saveConfigAs(QByteArray path, QByteArray filename);
+    int saveConfig() { return saveConfigAs(configPath, configFile); }
     
 
-    void set_end_col(QByteArray str);
+    void setEndCol(QByteArray str);
     /* patterns */
-    QByteArray get_exits_pat() { return exits_pat; }
-    void set_exits_pat(QByteArray str);
+    QByteArray getExitsPattern() { return exitsPattern; }
+    void setExitsPattern(QByteArray str);
     
     
-    QRegExp get_exits_exp() { return exits_exp; }
+    QRegExp getExitsExpr() { return exitsExpr; }
     
     /* data / global flags */
-    void set_base_file(QByteArray str); 
-    void set_data_mod(bool b) { db_modified = b; }
-    void set_remote_host(QByteArray str);
-    void set_remote_port(int i);
-    void set_local_port(int i);
-    void set_conf_mod(bool b) { conf_mod = b; emit configurationChanged(); }
+    void setBaseFile(QByteArray str); 
+    void setDatabaseModified(bool b) { databaseModified = b; }
+    void setRemoteHost(QByteArray str);
+    void setRemotePort(int i);
+    void setLocalPort(int i);
+    void setConfigModified(bool b) { configModified = b; emit configurationChanged(); }
 
-    void set_config_file(QByteArray p, QByteArray f) { config_file = f; config_path = p; }
+    void setConfigFile(QByteArray p, QByteArray f) { configFile = f; configPath = p; }
 
-    void set_autorefresh(bool b); 
-    void set_automerge(bool b);
-    void set_angrylinker(bool b);
-    void set_exits_check(bool b);
-    void set_terrain_check(bool b);
-    void set_details_vis(int i);
-    void set_texture_vis(int i);    
-    void set_brief_mode(bool b);
-    void set_always_on_top(bool b);
-    void set_desc_quote(int i);
-    void set_name_quote(int i);
+    void setAutorefresh(bool b); 
+    void setAutomerge(bool b);
+    void setAngrylinker(bool b);
+    void setExitsCheck(bool b);
+    void setTerrainCheck(bool b);
+    void setDetailsVisibility(int i);
+    void setTextureVisibility(int i);    
+    void setBriefMode(bool b);
+    void setAlwaysOnTop(bool b);
+    void setDescQuote(int i);
+    void setNameQuote(int i);
     
-    void set_regions_auto_set(bool b);
-    void set_regions_auto_replace(bool b);
-    void set_display_regions_renderer(bool b);
-    void set_show_regions_info(bool b);
+    void setRegionsAutoSet(bool b);
+    void setRegionsAutoReplace(bool b);
+    void setDisplayRegionsRenderer(bool b);
+    void setShowRegionsInfo(bool b);
     
-    void set_startup_mode(int i);
-    int get_startup_mode();
-    void set_note_color(QByteArray c);
-    QByteArray get_note_color();
+    void setStartupMode(int i);
+    int getStartupMode();
+    void setNoteColor(QByteArray c);
+    QByteArray getNoteColor();
     
-    void set_show_notes_renderer(bool b);
+    void setShowNotesRenderer(bool b);
     /*--*/
-    bool get_data_mod() { return db_modified; } 
-    QByteArray get_base_file() { return base_file; } 
-    QByteArray get_remote_host() { return remote_host;}
-    int get_remote_port() {return remote_port;}
-    int get_local_port() {return local_port;}
-    bool get_conf_mod() { return conf_mod; }
+    bool isDatabaseModified() { return databaseModified; } 
+    QByteArray getBaseFile() { return baseFile; } 
+    QByteArray getRemoteHost() { return remoteHost;}
+    int getRemotePort() {return remotePort;}
+    int getLocalPort() {return localPort;}
+    bool isConfigModified() { return configModified; }
 
-    bool get_autorefresh() { return autorefresh; }
-    bool get_automerge()  { return automerge; }
-    bool get_angrylinker() { return angrylinker; }
-    bool get_exits_check() { return exits_check; }
-    bool get_terrain_check() { return terrain_check; } 
-    bool get_brief_mode()     {return brief_mode;}
-    bool get_always_on_top()     {return always_on_top;}
+    bool getAutorefresh() { return autorefresh; }
+    bool getAutomerge()  { return automerge; }
+    bool getAngrylinker() { return angrylinker; }
+    bool getExitsCheck() { return exitsCheck; }
+    bool getTerrainCheck() { return terrainCheck; } 
+    bool getBriefMode()     {return briefMode;}
+    bool getAlwaysOnTop()     {return alwaysOnTop;}
     
-    int get_details_vis() { return details_visibility_range; }
-    int get_texture_vis() { return texture_visibilit_range; }
+    int getDetailsVisibility() { return detailsVisibilityRange; }
+    int getTextureVisibility() { return textureVisibilityRange; }
     
-    bool get_regions_auto_set();
-    bool get_regions_auto_replace();
-    bool get_display_regions_renderer();
-    bool get_show_regions_info();
+    bool getRegionsAutoSet();
+    bool getRegionsAutoReplace();
+    bool getDisplayRegionsRenderer();
+    bool getShowRegionsInfo();
     
-    bool get_show_notes_renderer() { return show_notes_renderer; }
+    bool getShowNotesRenderer() { return showNotesRenderer; }
 
     // App Window size
-    void set_window_rect(QRect rect) { userWindowRect = rect; set_conf_mod(true);  } 
-    void set_window_rect(int x, int y, int width, int height) 
-        { userWindowRect.setRect(x, y, width, height); set_conf_mod(true);  } 
-    QRect get_window_rect() {return userWindowRect; }
+    void setWindowRect(QRect rect) { userWindowRect = rect; setConfigModified(true);  } 
+    void setWindowRect(int x, int y, int width, int height) 
+        { userWindowRect.setRect(x, y, width, height); setConfigModified(true);  } 
+    QRect getWindowRect() {return userWindowRect; }
     
     // renderer settings
-    void set_renderer_angles(float x, float y, float z) 
-       { anglex = x; angley = y; anglez = z; set_conf_mod(true);  } 
-    void set_renderer_position(float x, float y, float z) 
-       { userx = x; usery = y; userz = z; set_conf_mod(true);  } 
-    float get_renderer_angle_x() {return anglex;}   // this is ONLY what was read from CONFIG
-    float get_renderer_angle_y() {return angley;}
-    float get_renderer_angle_z() {return anglez;}
+    void setRendererAngles(float x, float y, float z) 
+       { angleX = x; angleY = y; angleZ = z; setConfigModified(true);  } 
+    void setRendererPosition(float x, float y, float z) 
+       { userX = x; userY = y; userZ = z; setConfigModified(true);  } 
+    float getRendererAngleX() {return angleX;}   // this is ONLY what was read from CONFIG
+    float getRendererAngleY() {return angleY;}
+    float getRendererAngleZ() {return angleZ;}
 
-    float get_renderer_position_x() {return userx; }
-    float get_renderer_position_y() {return usery; }
-    float get_renderer_position_z() {return userz; }
+    float getRendererPositionX() {return userX; }
+    float getRendererPositionY() {return userY; }
+    float getRendererPositionZ() {return userZ; }
 
-    void set_duallinker(bool b);
-    bool get_duallinker();
+    void setDuallinker(bool b);
+    bool getDuallinker();
 
-    void setSelectOAnyLayer(bool b) { selectOAnyLayer=b; set_conf_mod(true); }
+    void setSelectOAnyLayer(bool b) { selectOAnyLayer=b; setConfigModified(true); }
     bool getSelectOAnyLayer() { return selectOAnyLayer; }
 
-    void setVisibleLayers(int i) { visibleLayers = i; set_conf_mod(true); }
+    void setVisibleLayers(int i) { visibleLayers = i; setConfigModified(true); }
     int getVisibleLayers() { return visibleLayers; }
 
 
-    int get_desc_quote() { return desc_quote; }
-    int get_name_quote() { return name_quote; }
+    int getDescQuote() { return descQuote; }
+    int getNameQuote() { return nameQuote; }
 
 signals:
     void configurationChanged();
@@ -272,7 +277,7 @@ private:
   //int flag;
   QString s;
 
-  struct room_sectors_data texture;
+  struct roomSectorsData texture;
   TSpell   spell;
   
   int i;

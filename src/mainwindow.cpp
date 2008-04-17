@@ -51,7 +51,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     renderer =  new RendererWidget( this );
     setCentralWidget( renderer );
     
-    setGeometry( conf->get_window_rect() );
+    setGeometry( conf->getWindowRect() );
     
     connect(proxy, SIGNAL(connectionEstablished()), actionManager, SLOT(enable_online_actions()), Qt::QueuedConnection );
     connect(proxy, SIGNAL(connectionLost()), actionManager, SLOT(disable_online_actions()), Qt::QueuedConnection );
@@ -60,7 +60,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     setMouseTracking(true);
 
     //setToolMode(SelectMode);
-    setToolMode(conf->get_startup_mode()?MoveMode:SelectMode);
+    setToolMode(conf->getStartupMode()?MoveMode:SelectMode);
 
     /* now building a menu and adding actions to menu */
     fileMenu = menuBar()->addMenu(tr("&File"));
@@ -268,7 +268,7 @@ void CMainWindow::update_status_bar()
     QString modLabel;
     QString firstPart;
     
-    if (conf->get_data_mod() )
+    if (conf->isDatabaseModified() )
         firstPart = "Data: MOD ";
     else 
         firstPart = "Data: --- ";
@@ -308,57 +308,57 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
     switch ( k->key() ) {
          
         case Qt::Key_X :
-            renderer->userz += 1;
+            renderer->userZ += 1;
             toggle_renderer_reaction();
             break;
     
          case Qt::Key_Y:
-            renderer->userz -= 1;
+            renderer->userZ -= 1;
             toggle_renderer_reaction();
             break;
     
          case Qt::Key_Q:
-            renderer->userx -= 1;
+            renderer->userX -= 1;
             toggle_renderer_reaction();
             break;
          
          case Qt::Key_W:
-            renderer->userx += 1;
+            renderer->userX += 1;
             toggle_renderer_reaction();
             break;
          
          case Qt::Key_A:
-            renderer->usery += 1;
+            renderer->userY += 1;
             toggle_renderer_reaction();
             break;
     
          case Qt::Key_S:
-            renderer->usery -= 1;
+            renderer->userY -= 1;
             toggle_renderer_reaction();
             break;
     
         case Qt::Key_Up:
-            renderer->anglex += 5;
+            renderer->angleX += 5;
             toggle_renderer_reaction();
             break;
         case Qt::Key_Down:
-            renderer->anglex -= 5;
+            renderer->angleX -= 5;
             toggle_renderer_reaction();
             break;
         case Qt::Key_Left:
-            renderer->angley -= 5;
+            renderer->angleY -= 5;
             toggle_renderer_reaction();
             break;
         case Qt::Key_Right:
-            renderer->angley += 5;
+            renderer->angleY += 5;
             toggle_renderer_reaction();
             break;
         case Qt::Key_PageUp:
-            renderer->anglez += 5;
+            renderer->angleZ += 5;
             toggle_renderer_reaction();
             break;
         case Qt::Key_PageDown:
-            renderer->anglez -= 5;
+            renderer->angleZ -= 5;
             toggle_renderer_reaction();
             break;
         
@@ -374,12 +374,12 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
         
          case Qt::Key_Escape:        
             printf("Escape pressed!\r\n");   
-            renderer->angley = 0;
-            renderer->anglex = 0;
-            renderer->anglez = 0;
-            renderer->userx = 0;
-            renderer->usery = 0;
-            renderer->userz = BASE_Z;	
+            renderer->angleY = 0;
+            renderer->angleX = 0;
+            renderer->angleZ = 0;
+            renderer->userX = 0;
+            renderer->userY = 0;
+            renderer->userZ = BASE_Z;	
             renderer->userLayerShift = 0;
             toggle_renderer_reaction();
             break;				
@@ -583,14 +583,14 @@ void CMainWindow::mouseMoveEvent( QMouseEvent *e)
 
     if (toolMode == MoveMode) {
         if (mouseState.LeftButtonPressed) {
-            renderer->userx += (float) dist_x / 10.0;
-            renderer->usery -= (float) dist_y / 10.0;
+            renderer->userX += (float) dist_x / 10.0;
+            renderer->userY -= (float) dist_y / 10.0;
             toggle_renderer_reaction();
 
             mouseState.oldPos = pos;
         } else if (mouseState.RightButtonPressed) {
-            renderer->anglex += dist_y;
-            renderer->angley += dist_x;
+            renderer->angleX += dist_y;
+            renderer->angleY += dist_x;
 
             toggle_renderer_reaction();
             mouseState.oldPos = pos;
@@ -604,7 +604,7 @@ void CMainWindow::wheelEvent(QWheelEvent *e)
     
     delta = e->delta();
     
-    renderer->userz += delta / 120;
+    renderer->userZ += delta / 120;
     toggle_renderer_reaction();
 }
 

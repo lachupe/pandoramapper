@@ -107,16 +107,12 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_ok" >
-       <property name="text" >
-        <string>Ok</string>
+      <widget class="QDialogButtonBox" name="buttonBox" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_cancel" >
-       <property name="text" >
-        <string>Cancel</string>
+       <property name="standardButtons" >
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
        </property>
       </widget>
      </item>
@@ -124,16 +120,23 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_charName</tabstop>
+  <tabstop>lineEdit_remoteHost</tabstop>
+  <tabstop>lineEdit_remotePort</tabstop>
+  <tabstop>lineEdit_localPort</tabstop>
+  <tabstop>pushButton_changeColour</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
-   <sender>pushButton_ok</sender>
-   <signal>clicked()</signal>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
    <receiver>GroupManagerSettings</receiver>
-   <slot>accept()</slot>
+   <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>451</x>
+     <x>433</x>
      <y>118</y>
     </hint>
     <hint type="destinationlabel" >
@@ -143,13 +146,13 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_cancel</sender>
-   <signal>clicked()</signal>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
    <receiver>GroupManagerSettings</receiver>
-   <slot>reject()</slot>
+   <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>534</x>
+     <x>433</x>
      <y>118</y>
     </hint>
     <hint type="destinationlabel" >

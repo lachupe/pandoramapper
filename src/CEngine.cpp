@@ -125,17 +125,17 @@ void CEngine::tryDir()
 //        printf("nameMatch %i, descMatch %i\r\n", nameMatch, descMatch);
         if (nameMatch > 0) {
             /* Autorefresh only if case has been changed. */
-            if (conf->get_autorefresh() && event.name.toLower() == stacker.nextFirst()->getName().toLower()) {
+            if (conf->getAutorefresh() && event.name.toLower() == stacker.nextFirst()->getName().toLower()) {
                 send_to_user("--[ (AutoRefreshed) not exact room name match: %i errors.\r\n", nameMatch);
                 stacker.nextFirst()->setName(event.name);
             } else {
                 send_to_user("--[ not exact room name match: %i errors. Use 'mrefresh' to fix it!\r\n", nameMatch);
             }
         }
-        if (conf->get_autorefresh() && descMatch > 0) {
+        if (conf->getAutorefresh() && descMatch > 0) {
             send_to_user("--[ (AutoRefreshed) not exact room desc match: %i errors.\r\n", descMatch);
             stacker.nextFirst()->setDesc(event.desc);  
-        } else if (!conf->get_autorefresh() && descMatch > 0) {
+        } else if (!conf->getAutorefresh() && descMatch > 0) {
             send_to_user("--[ not exact room desc match: %i errors.\r\n", descMatch);
         }
     }
@@ -360,13 +360,13 @@ void CEngine::updateRegions()
         	return; // probably it needs some heavier work ...region settings might not work correct 
         }
         
-        if (last_region != users_region && conf->get_regions_auto_replace() == false) {
+        if (last_region != users_region && conf->getRegionsAutoReplace() == false) {
             send_to_user("--[ Moved to another region: new region %s\r\n", (const char *)  last_region->getName() );
-            if (conf->get_regions_auto_set()) 
+            if (conf->getRegionsAutoSet()) 
                 users_region = last_region;            
         }
         
-        if (conf->get_regions_auto_replace() && last_region != users_region) {
+        if (conf->getRegionsAutoReplace() && last_region != users_region) {
                 // update is required ...
                 send_to_user( "--[ Regions update: Room region changed from %s to %s\r\n", 
                                         (const char *) last_region->getName(),  
@@ -419,7 +419,7 @@ void CEngine::mapCurrentRoom(CRoom *room, int dir)
     addedroom->setRegion( users_region );
     
     room->setExit(dir, addedroom);
-    if (conf->get_duallinker() == true) 
+    if (conf->getDuallinker() == true) 
         addedroom->setExit(reversenum(dir), room);
     else 
         Map.oneway_room_id = room->id;    
@@ -474,7 +474,7 @@ void CEngine::angryLinker(CRoom *r)
   int z;
 
     
-  if (!conf->get_angrylinker()) 
+  if (!conf->getAngrylinker()) 
     return; 
 
   print_debug(DEBUG_ROOMS && DEBUG_ANALYZER, "in AngryLinker");
@@ -635,10 +635,10 @@ void CEngine::printStacks()
 	    "Conf: Mapping %s, AutoChecks [Desc %s, Exits %s, Terrain %s],\r\n"
             "      AutoRefresh settings %s (RName/Desc quotes %i/%i), \r\n"
             "      AngryLinker %s DualLinker %s\r\n", 
-            ON_OFF(mapping), ON_OFF(conf->get_automerge()), 
-            ON_OFF(conf->get_exits_check() ), ON_OFF(conf->get_terrain_check() ),
-            ON_OFF(conf->get_autorefresh() ), conf->get_name_quote(), conf->get_desc_quote(),
-            ON_OFF(conf->get_angrylinker() ),ON_OFF(conf->get_duallinker() )              );
+            ON_OFF(mapping), ON_OFF(conf->getAutomerge()), 
+            ON_OFF(conf->getExitsCheck() ), ON_OFF(conf->getTerrainCheck() ),
+            ON_OFF(conf->getAutorefresh() ), conf->getNameQuote(), conf->getDescQuote(),
+            ON_OFF(conf->getAngrylinker() ),ON_OFF(conf->getDuallinker() )              );
     
     send_to_user(line);
     stacker.printStacks();

@@ -849,8 +849,8 @@ USERCMD(usercmd_mgoto)
         }
     }    
 
-    renderer_window->renderer->userx = 0;
-    renderer_window->renderer->usery = 0;
+    renderer_window->renderer->userX = 0;
+    renderer_window->renderer->userY = 0;
 //    renderer_window->renderer->userz = 0;
 
     
@@ -1283,7 +1283,7 @@ USERCMD(usercmd_config)
                   }
                     
                   engine->setMapping(true);
-                  conf->set_exits_check(false);
+                  conf->setExitsCheck(false);
                   send_to_mud("brief OFF\n");
                   send_to_mud("spam ON\n");
                   send_to_mud("prompt all\n");
@@ -1298,59 +1298,59 @@ USERCMD(usercmd_config)
 		break;
 	case  USER_CONF_BRIEF:
                 if (desired == -1)
-                  conf->set_brief_mode( !conf->get_brief_mode());
+                  conf->setBriefMode( !conf->getBriefMode());
                 else 
-                  conf->set_brief_mode(desired);
+                  conf->setBriefMode(desired);
                 
                 send_to_user("----[ Mapper Brief Mode is now %s.\r\n", 
-                              ON_OFF(conf->get_brief_mode()) );
+                              ON_OFF(conf->getBriefMode()) );
 		break;
 	case  USER_CONF_AUTOMERGE:
                 if (desired == -1)
-                  conf->set_automerge( !conf->get_automerge() );
+                  conf->setAutomerge( !conf->getAutomerge() );
                 else 
-                  conf->set_automerge(desired);
+                  conf->setAutomerge(desired);
                 
                 send_to_user("----[ Description analyzer and automatic merging is now %s.\r\n", 
-                              ON_OFF(conf->get_automerge()) );
+                              ON_OFF(conf->getAutomerge()) );
 		break;
 	case  USER_CONF_ANGRYLINKER:
                 if (desired == -1)
-                  conf->set_angrylinker( !conf->get_angrylinker() );
+                  conf->setAngrylinker( !conf->getAngrylinker() );
                 else 
-                  conf->set_angrylinker(desired);
+                  conf->setAngrylinker(desired);
                 
                 send_to_user("----[ AngryLinker is now %s.\r\n", 
-                              ON_OFF(conf->get_angrylinker()) );
+                              ON_OFF(conf->getAngrylinker()) );
 		break;
 
 	case  USER_CONF_DUALLINKER:
                 if (desired == -1)
-                  conf->set_duallinker( !conf->get_duallinker());
+                  conf->setDuallinker( !conf->getDuallinker());
                 else 
-                  conf->set_duallinker(desired);
+                  conf->setDuallinker(desired);
                 
                 send_to_user("----[ DualLinker is now %s.\r\n", 
-                              ON_OFF(conf->get_duallinker()) );
+                              ON_OFF(conf->getDuallinker()) );
 		break;
 
         case  USER_CONF_EXITS:
                 if (desired == -1)
-                  conf->set_exits_check( !conf->get_exits_check() );
+                  conf->setExitsCheck( !conf->getExitsCheck() );
                 else 
-                  conf->set_exits_check(desired);
+                  conf->setExitsCheck(desired);
                 
                 send_to_user("----[ Exits analyzer is now %s.\r\n", 
-                              ON_OFF( conf->get_exits_check() ) );
+                              ON_OFF( conf->getExitsCheck() ) );
 		break;
 	case  USER_CONF_TERRAIN:
                 if (desired == -1)
-                  conf->set_terrain_check( !conf->get_terrain_check());
+                  conf->setTerrainCheck( !conf->getTerrainCheck());
                 else 
-                  conf->set_terrain_check(desired);
+                  conf->setTerrainCheck(desired);
                 
                 send_to_user("----[ Terrain analyzer is now %s.\r\n", 
-                              ON_OFF(conf->get_terrain_check()) );
+                              ON_OFF(conf->getTerrainCheck()) );
 		break;
   }
 
@@ -1372,9 +1372,9 @@ USERCMD(usercmd_msave)
   if (!*p) {
     /* no arguments */
     //xml_writebase( conf->get_base_file() );
-    Map.saveMap(conf->get_base_file() );
+    Map.saveMap(conf->getBaseFile() );
     send_to_user("--[Pandora: Saved...\r\n");
-    conf->set_data_mod(false);
+    conf->setDatabaseModified(false);
 
     
     SEND_PROMPT;
@@ -1387,7 +1387,7 @@ USERCMD(usercmd_msave)
         
     send_to_user("--[Pandora: Saved to %s...\r\n", arg);
     
-    conf->set_data_mod(false);
+    conf->setDatabaseModified(false);
 
     SEND_PROMPT;
     return USER_PARSE_SKIP;
@@ -1418,10 +1418,10 @@ USERCMD(usercmd_mload)
   if (!*p) {
     /* no arguments */
     send_to_user(" * Loading the file %s from the disk...\r\n", 
-                  (const char *) conf->get_base_file()  );
+                  (const char *) conf->getBaseFile()  );
       
     //xml_readbase( conf->get_base_file() );
-    Map.loadMap( conf->get_base_file() );
+    Map.loadMap( conf->getBaseFile() );
     
   } else {
     //p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
@@ -1439,7 +1439,7 @@ USERCMD(usercmd_mload)
   
   send_to_user("--[Pandora: Done.\r\n");
 
-  conf->set_data_mod(true);
+  conf->setDatabaseModified(true);
 
   
   SEND_PROMPT;
@@ -1720,9 +1720,9 @@ USERCMD(usercmd_mregion)
     if (!*p) {
             /* print help file or current settings */
         send_to_user("Settings: autoReplace %s, info in client view %s, info in renderer %s\r\n", 
-                                    ON_OFF(conf->get_regions_auto_replace()) ,
-                                    ON_OFF(conf->get_show_regions_info() ),
-                                    ON_OFF(conf->get_display_regions_renderer() )
+                                    ON_OFF(conf->getRegionsAutoReplace()) ,
+                                    ON_OFF(conf->getShowRegionsInfo() ),
+                                    ON_OFF(conf->getDisplayRegionsRenderer() )
                                     );
         send_to_user("Current USER region: %s\r\n", (const char *) engine->get_users_region()->getName());  
         send_to_user("Current ROOMS region: %s\r\n", (const char *) engine->get_last_region()->getName());  
@@ -1953,35 +1953,35 @@ USERCMD(usercmd_mregion)
         
             desired = get_input_boolean(arg);
             if (desired == -1)
-                conf->set_regions_auto_replace( !conf->get_regions_auto_replace());
+                conf->setRegionsAutoReplace( !conf->getRegionsAutoReplace());
             else 
-                conf->set_regions_auto_replace( desired);
+                conf->setRegionsAutoReplace( desired);
                     
             send_to_user("----[ Auto Regions Replace Mode is now %s.\r\n", 
-                                ON_OFF(conf->get_regions_auto_replace()) );
+                                ON_OFF(conf->getRegionsAutoReplace()) );
             
 	    SEND_PROMPT;
             return USER_PARSE_SKIP;
         } else if (is_abbrev(arg, "render")) {
             desired = get_input_boolean(arg);
             if (desired == -1)
-                conf->set_display_regions_renderer( !conf->get_display_regions_renderer());
+                conf->setDisplayRegionsRenderer( !conf->getDisplayRegionsRenderer());
             else 
-                conf->set_display_regions_renderer( desired);
+                conf->setDisplayRegionsRenderer( desired);
                         
             send_to_user("----[ 'Display regions in renderer' Mode is now %s.\r\n", 
-                                    ON_OFF(conf->get_display_regions_renderer()) );
+                                    ON_OFF(conf->getDisplayRegionsRenderer()) );
                                     
                                     
         } else if (is_abbrev(arg, "info")) {
             desired = get_input_boolean(arg);
             if (desired == -1)
-                conf->set_show_regions_info( !conf->get_show_regions_info());
+                conf->setShowRegionsInfo( !conf->getShowRegionsInfo());
             else 
-                conf->set_show_regions_info( desired);
+                conf->setShowRegionsInfo( desired);
                         
             send_to_user("----[ 'Show  regions info' Mode  is now %s.\r\n", 
-                                    ON_OFF(conf->get_show_regions_info()) );
+                                    ON_OFF(conf->getShowRegionsInfo()) );
         }
     
 	SEND_PROMPT;
@@ -1998,12 +1998,12 @@ USERCMD(usercmd_mregion)
     
         desired = get_input_boolean(arg);
         if (desired == -1)
-            conf->set_regions_auto_set( !conf->get_regions_auto_set());
+            conf->setRegionsAutoSet( !conf->getRegionsAutoSet());
         else 
-             conf->set_regions_auto_set( desired );
+             conf->setRegionsAutoSet( desired );
                 
         send_to_user("----[ Automatic regions switching is now %s.\r\n", 
-                              ON_OFF(conf->get_regions_auto_set()) );
+                              ON_OFF(conf->getRegionsAutoSet()) );
 	
 	SEND_PROMPT;
         return USER_PARSE_SKIP;

@@ -137,7 +137,7 @@ void SpellsDialog::accept()
     
     conf->spells.clear();
     for (i = 0; i < spells.size(); i++) {
-        conf->add_spell(spells[i]);
+        conf->addSpell(spells[i]);
     }
     spells.clear();        
     done(Accepted);

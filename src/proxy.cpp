@@ -90,7 +90,7 @@ int Proxy::init()
 
     proxy_name.sin_family=AF_INET;
     proxy_name.sin_addr.s_addr=INADDR_ANY;
-    proxy_name.sin_port=htons(conf->get_local_port());
+    proxy_name.sin_port=htons(conf->getLocalPort());
 
     if (bind(proxy_hangsock, (struct sockaddr *)&proxy_name, sizeof(struct sockaddr_in))) {
         print_debug(DEBUG_PROXY, "proxy: Cannot bind socket\n");
@@ -225,7 +225,7 @@ bool Proxy::connectToMud()
 {
     print_debug(DEBUG_PROXY, "Trying to connect to MUD...\r\n");
 
-    if (mud.openConnection(conf->get_remote_host(), conf->get_remote_port()) != true) {
+    if (mud.openConnection(conf->getRemoteHost(), conf->getRemotePort()) != true) {
         user.send_line( "----[ Pandora: Failed to connect to remote host. See terminal log for details.\r\n");
         return false;
     } else {

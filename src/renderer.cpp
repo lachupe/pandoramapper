@@ -41,16 +41,16 @@ RendererWidget::RendererWidget( QWidget *parent )
 
   print_debug(DEBUG_RENDERER , "in renderer constructor");
 
-  anglex = conf->get_renderer_angle_x();
-  angley = conf->get_renderer_angle_y();
-  anglez = conf->get_renderer_angle_z();
-  userx = (GLfloat) conf->get_renderer_position_x();
-  usery = (GLfloat) conf->get_renderer_position_y();
+  angleX = conf->getRendererAngleX();
+  angleY = conf->getRendererAngleY();
+  angleZ = conf->getRendererAngleZ();
+  userX = (GLfloat) conf->getRendererPositionX();
+  userY = (GLfloat) conf->getRendererPositionY();
     
-  userz = (GLfloat) conf->get_renderer_position_z();	/* additional shift added by user */
+  userZ = (GLfloat) conf->getRendererPositionZ();	/* additional shift added by user */
 
-  if (userz == 0)
-    userz = BASE_Z;
+  if (userZ == 0)
+    userZ = BASE_Z;
 
   curx = 0;
   cury = 0;
@@ -108,14 +108,14 @@ void RendererWidget::initializeGL()
     }
 
     for (i = 0; i < conf->sectors.size(); i++) {
-        conf->load_texture(&conf->sectors[i]);
+        conf->loadTexture(&conf->sectors[i]);
     }
 }
 
 
 void RendererWidget::setupViewingModel(  int width, int height ) 
 {
-    gluPerspective(50.0f, (GLfloat) width / (GLfloat) height, 5.0f, conf->get_details_vis()*1.0f);
+    gluPerspective(50.0f, (GLfloat) width / (GLfloat) height, 5.0f, conf->getDetailsVisibility()*1.0f);
     glMatrixMode (GL_MODELVIEW);	
 }
 
@@ -359,10 +359,10 @@ void RendererWidget::glDrawRoom(CRoom *p)
 
     distance = frustum.distance(dx, dy, dz);
     
-    if (distance >= conf->get_details_vis()) 
+    if (distance >= conf->getDetailsVisibility()) 
       details = 0;
 
-    if (distance >= conf->get_texture_vis()) 
+    if (distance >= conf->getTextureVisibility()) 
       texture = 0;
 
     
@@ -374,7 +374,7 @@ void RendererWidget::glDrawRoom(CRoom *p)
         glCallList(conf->sectors[ p->getTerrain() ].gllist);  
         glDisable(GL_TEXTURE_2D);
         
-       if (conf->get_display_regions_renderer() &&  engine->get_last_region() == p->getRegion()  ) {
+       if (conf->getDisplayRegionsRenderer() &&  engine->get_last_region() == p->getRegion()  ) {
 
 
             // The Regions rectangle around the room
@@ -467,7 +467,7 @@ void RendererWidget::glDrawRoom(CRoom *p)
                     QByteArray info;
                     QByteArray alias;                    
                     info = p->getDoor(k);
-                    if (conf->get_show_regions_info() == true) {
+                    if (conf->getShowRegionsInfo() == true) {
                         alias = engine->get_users_region()->getAliasByDoor( info, k);
                         if (alias != "") {
                             info += " [";
@@ -488,11 +488,11 @@ void RendererWidget::glDrawRoom(CRoom *p)
             glEnd();
 
 
-            if (conf->get_show_notes_renderer() == true && p->getNote().isEmpty() != true) {
+            if (conf->getShowNotesRenderer() == true && p->getNote().isEmpty() != true) {
 
                 QColor color;
                 if(p->getNoteColor() == "")
-                    color = QColor((QString)conf->get_note_color());
+                    color = QColor((QString)conf->getNoteColor());
                 else 
                     color = QColor((QString)p->getNoteColor());
                                 
@@ -574,7 +574,7 @@ void RendererWidget::glDrawRoom(CRoom *p)
             glVertex3f(dx2 + kx, dy2 + ky, dz2);
             glEnd();
             
-            GLuint death_terrain = conf->get_texture_by_desc("DEATH");
+            GLuint death_terrain = conf->getTextureByDesc("DEATH");
 	    if (death_terrain && p->isExitDeath(k)) {
               glTranslatef(dx2 + kx, dy2 + ky, dz2);
               
@@ -681,8 +681,8 @@ void RendererWidget::centerOnRoom(unsigned int id)
 {
     CRoom *r = Map.getRoom(id);
 
-    userx = (double) (curx - r->getX());
-    usery = (double) (cury - r->getY());
+    userX = (double) (curx - r->getX());
+    userY = (double) (cury - r->getY());
     changeUserLayerShift(0 - (curz - r->getZ()));
 
 /*
@@ -729,12 +729,12 @@ void RendererWidget::draw(void)
     
     glColor3ub(255, 0, 0);
 
-    glTranslatef(0, 0, userz);
+    glTranslatef(0, 0, userZ);
 
-    glRotatef(anglex, 1.0f, 0.0f, 0.0f);
-    glRotatef(angley, 0.0f, 1.0f, 0.0f);
-    glRotatef(anglez, 0.0f, 0.0f, 1.0f);
-    glTranslatef(userx, usery, 0);
+    glRotatef(angleX, 1.0f, 0.0f, 0.0f);
+    glRotatef(angleY, 0.0f, 1.0f, 0.0f);
+    glRotatef(angleZ, 0.0f, 0.0f, 1.0f);
+    glTranslatef(userX, userY, 0);
 
     setupNewBaseCoordinates(); 
     
@@ -825,12 +825,12 @@ void RendererWidget::renderPickupObjects()
 
     glColor3ub(255, 0, 0);
 
-    glTranslatef(0, 0, userz);
+    glTranslatef(0, 0, userZ);
 
-    glRotatef(anglex, 1.0f, 0.0f, 0.0f);
-    glRotatef(angley, 0.0f, 1.0f, 0.0f);
-    glRotatef(anglez, 0.0f, 0.0f, 1.0f);
-    glTranslatef(userx, usery, 0);
+    glRotatef(angleX, 1.0f, 0.0f, 0.0f);
+    glRotatef(angleY, 0.0f, 1.0f, 0.0f);
+    glRotatef(angleZ, 0.0f, 0.0f, 1.0f);
+    glTranslatef(userX, userY, 0);
 
     glColor4f(0.1, 0.8, 0.8, 0.4);
 
