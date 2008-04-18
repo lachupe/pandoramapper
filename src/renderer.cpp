@@ -341,11 +341,8 @@ void RendererWidget::glDrawGroupMarkers()
     chars = renderer_window->getGroupManager()->getChars();
     if (chars.isEmpty())
     	return;
-    
-    if (Map.tryLockForRead() == false)
-    	return;
-    
-    for (int i; i < chars.size(); i++) {
+
+    for (int i = 0; i < chars.size(); i++) {
     	ch = chars[i];
     	unsigned int pos = ch->getPosition();
 

@@ -273,8 +273,8 @@ void CGroup::gTellArrived(QDomNode node)
 	
 	QDomNode e = node.firstChildElement();
 	
-	QDomElement root = node.toElement();
-	QString from = root.attribute("from");
+//	QDomElement root = node.toElement();
+	QString from = e.toElement().attribute("from");
 		
 		
 	if (e.nodeName() != "gtell") {
