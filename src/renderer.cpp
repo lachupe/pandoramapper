@@ -312,7 +312,8 @@ void RendererWidget::glDrawMarkers()
     if (last_drawn_marker != stacker.first()->id) {
         last_drawn_trail = last_drawn_marker;
         last_drawn_marker = stacker.first()->id;
-        emit updateCharPosition(last_drawn_marker);
+        renderer_window->getGroupManager()->setCharPosition(last_drawn_marker);
+        //emit updateCharPosition(last_drawn_marker);
     }
 
     /*
@@ -328,6 +329,7 @@ void RendererWidget::glDrawMarkers()
     }
     */
 }
+
 
 
 void RendererWidget::glDrawGroupMarkers()
@@ -363,7 +365,6 @@ void RendererWidget::glDrawGroupMarkers()
         p = Map.getRoom(pos);
 
         if (p == NULL) {
-            print_debug(DEBUG_RENDERER, "RENDERER ERROR: Stuck upon corrupted room while drawing red pointers.\r\n");
             continue;
         }
 
@@ -371,7 +372,7 @@ void RendererWidget::glDrawGroupMarkers()
         dy = p->getY() - cury;
         dz = (p->getZ() - curz) /* * DIST_Z */;
 
-        //drawMarker(dx, dy, dz, 2);
+        drawMarker(dx, dy, dz, 2);
         
         glTranslatef(dx, dy, dz + 0.2f);
         
