@@ -16,7 +16,8 @@ CGroupChar::CGroupChar()
 	textHP = "Healthy";
 	textMoves = "Full";
 	textMana = "Full";
-
+	lastMovement = "";
+	
 	// create the info-labels
 	labelName = new QLabel;
 	labelRoom = new QLabel;
@@ -71,15 +72,17 @@ CGroupChar::~CGroupChar()
 void CGroupChar::updateLabels()
 {
 	labelName->setText(name);
-	
 	if (pos == 0) {
 		labelRoom->setText("Unknown");
 	} else {
-		CRoom *r = Map.getRoom(pos);
-		if (r == NULL)
-			labelRoom->setText("Unknown");
-		else 
-			labelRoom->setText(QString("%1:%2").arg(r->id).arg( QString(r->getName()) ) );
+		if (Map.tryLockForRead() == true) {
+			CRoom *r = Map.getRoom(pos);
+			if (r == NULL)
+				labelRoom->setText("Unknown");
+			else 
+				labelRoom->setText(QString("%1:%2").arg(r->id).arg( QString(r->getName()) ) );
+			Map.unlock();
+		}	
 	}
 		
 	labelHpText->setText(textHP);
@@ -126,6 +129,7 @@ QDomNode CGroupChar::toXML()
 	root.setAttribute("moves", moves );
 	root.setAttribute("maxmoves", maxmoves );
 	root.setAttribute("state", state );
+	root.setAttribute("lastMovement", QString(lastMovement));
 		
 	doc.appendChild(root);
 	
@@ -136,12 +140,13 @@ bool CGroupChar::updateFromXML(QDomNode node)
 {
 	bool updated;
 
+	
 	updated = false;
     if (node.nodeName() != "playerData") {
     	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
     	return false;
     }
-    
+
    	QString s;
    	QByteArray str;
    	int newval;
@@ -154,17 +159,27 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		pos = newpos;
    	}
 
+
    	str = e.attribute("name").toAscii();
    	if (str != name) {
    		updated = true;
    		name = str;
    	}
 
+   	str = e.attribute("lastMovement").toAscii();
+   	if (str != lastMovement) {
+   		updated = true;
+   		lastMovement = str;
+   	}
+
+
    	str = e.attribute("color").toAscii();
    	if (str != color.name().toAscii()) {
    		updated = true;
    		color = QColor(QString(str) );
    	}
+
+	printf("Tut 6.\r\n");
 
    	str = e.attribute("textHP").toAscii();
    	if (s != textHP) {
@@ -226,9 +241,13 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		state = newval;
    	}
    	
-   	
+	printf("Tut 6.\r\n");
+
    	if (updated == true)
    		updateLabels();
+   	
+	printf("Tut 7.\r\n");
+   	
 	return updated; // hrmpf!
 }
 

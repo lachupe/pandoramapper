@@ -19,7 +19,7 @@
 #include "CMovementDialog.h"
 #include "CLogDialog.h"
 #include "finddialog.h"
-#include "CGroupCOmmunicator.h"
+#include "CGroupCommunicator.h"
 
 CActionManager::CActionManager(CMainWindow *parentWindow) 
 {
@@ -214,27 +214,30 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     groupClientAct = new QAction(tr("Client"), this );
     groupClientAct->setCheckable(true);
     connect(groupClientAct, SIGNAL(toggled(bool)), this, SLOT(groupClient(bool)), Qt::QueuedConnection);
-    if (conf->getGroupManagerState() == CGroupCommunicator::Client)
-    	groupClientAct->setChecked(true);
-    else 
-    	groupClientAct->setChecked(false);
 
     groupServerAct = new QAction(tr("Server"), this );
     groupServerAct->setCheckable(true);
     connect(groupServerAct, SIGNAL(toggled(bool)), this, SLOT(groupServer(bool)), Qt::QueuedConnection);
+
+    groupManagerGroup = new QActionGroup(this);
+    groupManagerGroup->addAction(groupClientAct);
+    groupManagerGroup->addAction(groupServerAct);
     if (conf->getGroupManagerState() == CGroupCommunicator::Server)
     	groupServerAct->setChecked(true);
-    else 
-    	groupServerAct->setChecked(false);
+    if (conf->getGroupManagerState() == CGroupCommunicator::Client)
+    	groupClientAct->setChecked(true);
+
     
     groupShowHideAct = new QAction(tr("Show/Hide Manager"), this );
-    groupShowHideAct->setCheckable(true);
-    connect(groupShowHideAct, SIGNAL(toggled(bool)), this, SLOT(groupShowHide(bool)), Qt::QueuedConnection);
-    if (conf->getShowGroupManager() == true)
-    	groupShowHideAct->setChecked(true);
-    else 
-    	groupShowHideAct->setChecked(false);
-
+    connect(groupShowHideAct, SIGNAL(triggered()), this, SLOT(groupHide()), Qt::QueuedConnection);
+    conf->setShowGroupManager( !conf->getShowGroupManager() );
+    if (conf->getShowGroupManager() ) {
+    	groupShowHideAct->setText("Hide");
+    } else {
+    	groupShowHideAct->setText("Show");
+    }
+    groupShowHideAct->trigger();
+    
     groupSettingsAct = new QAction(tr("Settings"), this);
     connect(groupSettingsAct, SIGNAL(triggered()), this, SLOT(groupSettings()));
 
@@ -243,17 +246,33 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
 
 void CActionManager::groupClient(bool b)
 {
-	
+	if (b)
+		parent->getGroupManager()->setType(CGroupCommunicator::Client);
 }
 
 void CActionManager::groupServer(bool b)
 {
-	
+	if (b)
+		parent->getGroupManager()->setType(CGroupCommunicator::Server);
 }
 
-void CActionManager::groupShowHide(bool b)
+void CActionManager::setShowGroupManager(bool b)
 {
-	
+	conf->setShowGroupManager(b);
+	if (b) {
+		printf("Showing\r\n");
+    	groupShowHideAct->setText("Hide Manager");
+        parent->setShowGroupManager(b);
+	} else {
+		printf("Hiding\r\n");
+    	groupShowHideAct->setText("Show Manager");
+        parent->setShowGroupManager(b);
+	}
+}
+
+void CActionManager::groupHide()
+{
+	setShowGroupManager( !conf->getShowGroupManager() );
 }
 
 void CActionManager::groupSettings()
@@ -402,7 +421,7 @@ void CActionManager::about()
 
 
 
-void CActionManager::always_on_top(bool set_on_top)
+void CActionManager::alwaysOnTop(bool set_on_top)
 {
   print_debug(DEBUG_INTERFACE, "always_on_top called");
 

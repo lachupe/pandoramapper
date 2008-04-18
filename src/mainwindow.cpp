@@ -16,6 +16,9 @@
 #include "finddialog.h"
 #include "CGroupSettingsDialog.h"
 
+class CMainWindow *renderer_window;
+
+
 void toggle_renderer_reaction()
 {
     if (renderer_window->renderer->redraw == false) {
@@ -180,6 +183,10 @@ CMainWindow::CMainWindow(QWidget *parent)
             actionManager, SLOT(updateActionsSettings() ), Qt::QueuedConnection);
     
     groupManager = new CGroup(conf->getGroupManagerCharName(), this);
+    connect(groupManager, SIGNAL(hides()), actionManager, SLOT( groupManagerHides() ),  Qt::QueuedConnection );
+    connect(proxy, SIGNAL(sendGTell(QByteArray)), groupManager, SLOT( sendGTell(QByteArray) ),  Qt::QueuedConnection );
+    connect(renderer, SIGNAL(updateCharPosition(unsigned int)), groupManager, SLOT( setCharPosition(unsigned int) ),  Qt::QueuedConnection );
+    
 }
 
 

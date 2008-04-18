@@ -2,6 +2,7 @@
 #define CGROUPCHAR_H_
 
 #include <QByteArray>
+#include <QPixmap>
 #include <QDomNode>
 #include <QLabel>
 #include <QGridLayout>
@@ -14,11 +15,14 @@ class CGroupChar
 	QByteArray textHP;
 	QByteArray textMoves;
 	QByteArray textMana;
+	QByteArray lastMovement;
 	int hp, maxhp;
 	int mana, maxmana;
 	int moves, maxmoves;
 	int state;
 	QColor color;
+	QPixmap pixmap;
+
 	
 	QLabel 	*labelName;
 	QLabel	*labelRoom;
@@ -45,8 +49,10 @@ public:
 	bool updateFromXML(QDomNode blob);
 	QFrame *getCharFrame() { return charFrame; }
 	
+	void setLastMovement(QByteArray move) { lastMovement = move; }
 	void setPosition(unsigned int id) { pos = id; }
 	unsigned int getPosition() { return pos; }
+	QByteArray getLastMovement() { return lastMovement; }
 	static QByteArray getNameFromXML(QDomNode node);
 
 	void draw(int x, int y);

@@ -19,7 +19,8 @@ FORMS += src/groupmanagersettings.ui \
     src/movementdialog.ui \
     src/roomedit.ui \
     src/spellsdialog.ui
-HEADERS += src/CGroupSettingsDialog.h \
+HEADERS += src/CGroupStatus.h \
+    src/CGroupSettingsDialog.h \
     src/CGroupChar.h \
     src/CGroupCommunicator.h \
     src/CGroupClient.h \
@@ -52,7 +53,8 @@ HEADERS += src/CGroupSettingsDialog.h \
     src/utils.h \
     src/xml2.h \
     src/finddialog.h
-SOURCES += src/CConfigurator.cpp \
+SOURCES += src/CGroupStatus.cpp \
+    src/CConfigurator.cpp \
     src/CGroupSettingsDialog.cpp \
     src/CGroupChar.cpp \
     src/CGroupCommunicator.cpp \

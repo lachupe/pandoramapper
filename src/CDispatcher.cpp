@@ -25,6 +25,8 @@
 
 #include "userfunc.h"
 #include "proxy.h"
+#include "CGroup.h"
+#include "mainwindow.h"
 
 
 Cdispatcher::Cdispatcher() 
@@ -700,6 +702,10 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
     int i, result;
     int new_len, len;
     char *buf;
+    CGroup *groupManager;
+    
+    groupManager = renderer_window->getGroupManager();
+    
     
     buf = c.buffer;
     new_len = 0;
@@ -717,7 +723,7 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
             
             if (buffer[i].line.indexOf('\n') == -1) {
                 if (i != (amount -1)) 
-                    printf("NOT LAST LINE HAD NO ENDING !\r\n, MIGHT BE A BUG!\r\n");
+                    printf("LAST LINE HAD NO ENDING !\r\n, MIGHT BE A BUG!\r\n");
                 // the input line got splitted somehow 
 //                printf("Adding fragment of the line to connection\r\n");
                 c.fragment = buffer[i].line;
@@ -734,7 +740,19 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
             result = userland_parser->parse_user_input_line(commandBuffer);
             if (result == USER_PARSE_SKIP) 
                 continue;
-               
+
+            
+            
+            if (buffer[i].line.startsWith("tell Group") == true) {
+            	// this is a GROUP-tell!
+            	int len = buffer[i].line.size() - 11; // 10 is length of "tell Group "
+            	QByteArray data = buffer[i].line.right(len);
+            	print_debug(DEBUG_GROUP, "Sending a G-tell from local user: %s", (const char *) data);
+            	proxy->sendGroupTellEvent(data);
+            	send_to_user( engine->getPrompt() );
+            	continue;
+            }
+            	
             strcat(commandBuffer, "\r\n");
                
             print_debug(DEBUG_DISPATCHER, "recreating the output buffer");

@@ -58,10 +58,15 @@ public:
     
     QAction       *emulationAct;
     
+    QActionGroup  *groupManagerGroup;
     QAction		  *groupClientAct;
     QAction		  *groupServerAct;
     QAction		  *groupShowHideAct;
     QAction		  *groupSettingsAct;
+    
+    
+    void setShowGroupManager(bool b);
+
 
 public slots:
     void disable_online_actions();
@@ -69,7 +74,7 @@ public slots:
     void updateActionsSettings();
     
     
-    void always_on_top(bool);
+    void alwaysOnTop(bool);
     void newFile();
     void open();
     void reload();
@@ -107,8 +112,9 @@ public slots:
     
     void groupClient(bool);
     void groupServer(bool);
-    void groupShowHide(bool);
+    void groupHide();
     void groupSettings();
+    void groupManagerHides() { setShowGroupManager(false); }
 
 private slots:
     void find();

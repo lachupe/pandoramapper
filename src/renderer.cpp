@@ -12,7 +12,7 @@
 #include "renderer.h"
 #include "CConfigurator.h"
 #include "CEngine.h"
-
+#include "mainwindow.h"
 
 #include "CStacksManager.h"
 #include "utils.h"
@@ -21,6 +21,7 @@
 
 #include "CFrustum.h"
 #include "userfunc.h"
+#include "CGroupChar.h"
 
 
 #if defined(Q_CC_MSVC)
@@ -33,7 +34,6 @@ GLfloat marker_colour[4] =  {1.0, 0.1, 0.1, 0.9};
 #define MARKER_SIZE           (ROOM_SIZE/1.85)
 #define PICK_TOL              50 
 
-class CMainWindow *renderer_window;
 
 RendererWidget::RendererWidget( QWidget *parent )
      : QGLWidget( parent )
@@ -310,6 +310,7 @@ void RendererWidget::glDrawMarkers()
     if (last_drawn_marker != stacker.first()->id) {
         last_drawn_trail = last_drawn_marker;
         last_drawn_marker = stacker.first()->id;
+        emit updateCharPosition(last_drawn_marker);
     }
 
     /*
@@ -327,7 +328,84 @@ void RendererWidget::glDrawMarkers()
 }
 
 
+void RendererWidget::glDrawGroupMarkers()
+{
+    CRoom *p;
+    QByteArray lastMovement;
+    int dx, dy, dz;
+    QVector<CGroupChar *>  chars;
+    CGroupChar *ch;
+    
+    chars = renderer_window->getGroupManager()->getChars();
+    if (chars.isEmpty())
+    	return;
+    
+    if (Map.tryLockForRead() == false)
+    	return;
+    
+    for (int i; i < chars.size(); i++) {
+    	ch = chars[i];
+    	unsigned int pos = ch->getPosition();
 
+    	if (pos == 0)
+    		continue;
+
+    	if (last_drawn_marker == pos)
+    		continue; // do not draw markers in the same room as our own marker
+    	
+        QColor color = ch->getColor();
+                        
+        double red = color.red()/255.;
+        double green = color.green()/255.;
+        double blue = color.blue()/255.;
+        double alpha = color.alpha()/255.;
+
+        glColor4f(red, green, blue, alpha);
+        p = Map.getRoom(pos);
+
+        if (p == NULL) {
+            print_debug(DEBUG_RENDERER, "RENDERER ERROR: Stuck upon corrupted room while drawing red pointers.\r\n");
+            continue;
+        }
+
+        dx = p->getX() - curx;
+        dy = p->getY() - cury;
+        dz = (p->getZ() - curz) /* * DIST_Z */;
+
+        //drawMarker(dx, dy, dz, 2);
+        
+        glTranslatef(dx, dy, dz + 0.2f);
+        
+        lastMovement = ch->getLastMovement();
+        if (lastMovement.isEmpty() == false) {
+        	float rotX = 0;
+        	float rotY = 0;
+
+        	if (lastMovement[0] == 'n') {
+    			rotX = -90.0;
+    		} else if (lastMovement[0] == 'e') {
+    			rotY = 90.0;
+    		} else if (lastMovement[0] == 's') {
+    			rotX = 90.0;
+    		} else if (lastMovement[0] == 'w') {
+    			rotY = -90.0;
+    		} else if (lastMovement[0] == 'd') {
+    			rotX = 180.0;
+    		} 
+        	
+
+        	glPushMatrix(); 
+            glRotatef(rotX, 1.0f, 0.0f, 0.0f);
+            glRotatef(rotY, 0.0f, 1.0f, 0.0f);
+            //glRotatef(anglez, 0.0f, 0.0f, 1.0f);
+        	drawCone();
+        	glPopMatrix();
+        } else {
+        	drawCone();
+        }
+
+    }
+}
 
 void RendererWidget::glDrawRoom(CRoom *p)
 {
@@ -788,6 +866,7 @@ void RendererWidget::draw(void)
 //    print_debug(DEBUG_RENDERER, "Drawing markers");
 
     glDrawMarkers();
+    glDrawGroupMarkers();
     
 //    print_debug(DEBUG_RENDERER, "draw() done");
 

@@ -6,6 +6,7 @@
 #include "CConfigurator.h"
 #include "CGroup.h"
 #include "CGroupCommunicator.h"
+#include "CEngine.h"
 
 CGroup::CGroup(QByteArray name, QWidget *parent)
 : QWidget(parent, Qt::Tool)
@@ -46,7 +47,7 @@ CGroup::CGroup(QByteArray name, QWidget *parent)
     QRect rect = app->desktop()->availableGeometry(-1);
     if (conf->getGroupManagerRect().x() == 0 || conf->getGroupManagerRect().x() >= rect.width() || 
         conf->getGroupManagerRect().y() >= rect.height() ) {
-        print_debug(DEBUG_SYSTEM && DEBUG_INTERFACE, "Autosettings for window size and position");
+        print_debug(DEBUG_GROUP, "Autosettings for window size and position");
         int x, y, height, width;
 
         x = conf->getWindowRect().x() - (rect.width() / 3) ;
@@ -56,22 +57,26 @@ CGroup::CGroup(QByteArray name, QWidget *parent)
 
         conf->setGroupManagerRect( QRect(x, y, width, height) );        
     }
-    setGeometry( conf->getGroupManagerRect() );
     show();
     raise();
+    setGeometry( conf->getGroupManagerRect() );
+    
+
+    if (conf->getShowGroupManager() == false)
+    	hide();
     
 	layout = new QGridLayout(this);
 	layout->setVerticalSpacing(100);
 	this->setLayout(layout);
+	//status = new QFrame(this);
+	//status->resize(conf->getGroupManagerRect().width(), conf->getGroupManagerRect().height());
+	//status->setFrameStyle(QFrame::StyledPanel);
+	//layout->addWidget(status);
+	
 }
 
 
-void CGroup::update()
-{
-}
-
-
-void CGroup::changeType(int newState)
+void CGroup::setType(int newState)
 {
 	network->changeType(newState);
 }
@@ -83,7 +88,6 @@ void CGroup::resetChars()
 	
 	chars.clear();
 }
-
 
 CGroup::~CGroup()
 {
@@ -98,7 +102,26 @@ void CGroup::resetName()
 		return;
 	
 	self->setName(conf->getGroupManagerCharName());
-	network->sendCharUpdate(self->toXML());
+	issueLocalCharUpdate();
+}
+
+
+void CGroup::resetColor()
+{
+	if (self->getColor() == conf->getGroupManagerColor() )
+		return;
+	
+	self->setColor(conf->getGroupManagerColor());
+	issueLocalCharUpdate();
+}
+
+void CGroup::setCharPosition(unsigned int pos)
+{
+	if (self->getPosition() != pos) {
+		self->setPosition(pos);
+		self->setLastMovement( engine->getLastMovement() );
+		issueLocalCharUpdate();
+	}
 }
 
 
@@ -118,7 +141,6 @@ bool CGroup::addChar(QDomNode node)
 				(const char *) newChar->getName());
 		chars.append(newChar);
 		layout->addWidget( newChar->getCharFrame(), layout->rowCount(), 0 );
-		
 		return true;
 	}
 }
@@ -156,13 +178,12 @@ void CGroup::removeChar(QDomNode node)
 
 bool CGroup::isNamePresent(QByteArray name)
 {
-
-	for (int i = 0; i < chars.size(); i++)
+	for (int i = 0; i < chars.size(); i++) 
 		if (chars[i]->getName() == name) {
 			print_debug(DEBUG_GROUP, "The name %s is already present.", (const char *) name);
 			return true;
 		}
-	
+
 	return false;
 }
 
@@ -192,7 +213,8 @@ void CGroup::updateChar(QDomNode blob)
 	if (ch == NULL)
 		return;
 	
-	ch->updateFromXML(blob);
+	if (ch->updateFromXML(blob) == true)
+		toggle_renderer_reaction(); // issue a redraw
   // TODO: all teh shit here ...	
 }
 
@@ -253,13 +275,23 @@ void CGroup::gTellArrived(QDomNode node)
 	
 	QDomNode e = node.firstChildElement();
 	
+	QDomElement root = node.toElement();
+	QString from = root.attribute("from");
+		
+		
 	if (e.nodeName() != "gtell") {
     	print_debug(DEBUG_GROUP, "Called gotKicked with wrong node. No text node.");
 		return;
 	}
 
 	QDomElement text = e.toElement();
-	print_debug(DEBUG_GROUP, "GTell Arrived : %s", (const char *) text.text().toAscii());
+	print_debug(DEBUG_GROUP, "GTell from %s, Arrived : %s", 
+			(const char *) from.toAscii(), 
+			(const char *) text.text().toAscii() );
+	send_to_user("%s tells you [GT] '%s'.\r\n\r\n", 
+			(const char *) from.toAscii(), 
+			(const char *) text.text().toAscii() ); 
+	send_to_user( engine->getPrompt() );
 }
 
 void CGroup::sendGTell(QByteArray tell)

@@ -7,8 +7,9 @@
   <engineflags briefmode="ON" automerge="ON"  angrylinker="ON" duallinker="ON">
   <regionsflags displayinrenderer="OFF" showinfo="ON">
   <guisettings always_on_top="ON">
-  <groupManager state="Off" host="localhost" charName="Aza" localPort="4243" remotePort="4243">
-  <window x="841" y="49" height="341" width="428">
+  <groupManager state="Off" host="localhost" charName="Aza" charColor="#000000" localPort="4243" remotePort="4243">
+  <groupManagerGUI show="ON"  x="411" y="46" height="170" width="426">
+  <window x="847" y="49" height="341" width="428">
   <rendererangles anglex="-17.000000" angley="16.000000" anglez="0.000000">
   <rendererpositions userx="0.000000" usery="0.000000" userz="-19.000000">
   <refresh auto="ON" roomnamequote="10" descquote="10">

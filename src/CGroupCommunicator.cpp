@@ -297,7 +297,9 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 			} else if (conn->getProtocolState() == CGroupClient::AwaitingInfo) {
 				// almost connected. awaiting full information about the connection
 				if (message == UPDATE_CHAR) {
-					parseGroupInformation(conn, data);
+					printf("Adding char ....\r\n");
+					getGroup()->addChar(data.firstChildElement());
+					printf("Added char ....\r\n");
 				} else if (message == STATE_LOGGED) {
 					conn->setProtocolState(CGroupClient::Logged);
 				} else if (message == REQ_ACK) {
@@ -492,12 +494,6 @@ void CGroupCommunicator::sendGroupInformation(CGroupClient *conn)
 	getGroup()->sendAllCharsData(conn);
 }
 
-void CGroupCommunicator::sendCharUpdate(CGroupClient *conn, QDomNode blob)
-{
-	sendMessage(conn, UPDATE_CHAR, blob);
-}
-
-
 void CGroupCommunicator::parseGroupInformation(CGroupClient *conn, QDomNode data)
 {
 	// temporary
@@ -505,6 +501,12 @@ void CGroupCommunicator::parseGroupInformation(CGroupClient *conn, QDomNode data
 	print_debug(DEBUG_GROUP, "Group Information arrived %s", (const char *) data);
 	getGroup()->addChar(data);
 	*/
+}
+
+
+void CGroupCommunicator::sendCharUpdate(CGroupClient *conn, QDomNode blob)
+{
+	sendMessage(conn, UPDATE_CHAR, blob);
 }
 
 
@@ -521,13 +523,14 @@ void CGroupCommunicator::sendGTell(QByteArray tell)
 	root.appendChild(t);
 
 	
-	// prepare the buffer
-	
 	// depending on the type of this communicator either send to 
 	// server or send to everyone 
-   	if (type == Client) 
+   	if (type == Client) {
+   		printf("[Client] Sending gtell!\r\n");
    		sendMessage((CGroupClient *)peer, GTELL, root);
+   	}
 	if (type == Server) {
+   		printf("[Server] Sending gtell!\r\n");
 		QByteArray message = formMessageBlock(GTELL, root);
 		CGroupServer *serv = (CGroupServer *) peer;
 		serv->sendToAll(message);

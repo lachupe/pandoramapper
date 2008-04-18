@@ -6,6 +6,9 @@
 #include <QDomNode>
 #include <QVector>
 #include <QGridLayout>
+#include <QCloseEvent>
+#include <QFrame>
+#include <QHash>
 
 #include "CGroupCommunicator.h"
 #include "CGroupChar.h"
@@ -18,7 +21,9 @@ class CGroup : public QWidget
 
 	QVector<CGroupChar *> chars;
 	CGroupChar	*self;
-
+	//QFrame	*status;
+	
+	
 	QGridLayout *layout;
 public:
 
@@ -28,7 +33,7 @@ public:
 	QByteArray getName() { return self->getName(); }
 	CGroupChar* getCharByName(QByteArray name);
 
-	void changeType(int newState);
+	void setType(int newState);
 	int getType() {return network->getType(); }
 	bool isConnected() { return network->isConnected(); }
 	void reconnect() { resetChars();  network->reconnect(); }
@@ -38,18 +43,23 @@ public:
 	void removeChar(QDomNode node);
 	bool isNamePresent(QByteArray name);
 	bool addCharIfUnique(QDomNode blob);
-	void updateChar(QDomNode blob);
+	void updateChar(QDomNode blob); // updates given char from the blob
 	
 	void resetChars();
-	
+	QVector<CGroupChar *>  getChars() { return chars; }
 	// changing settings
 	void resetName();
+	void resetColor();
 	
 	QDomNode getLocalCharData() { return self->toXML(); }
 	void sendAllCharsData(CGroupClient *conn);
+	void issueLocalCharUpdate() { 	network->sendCharUpdate(self->toXML()); }
 	
 	void gTellArrived(QDomNode node);
-	void sendGTell(QByteArray tell); // sends gtell from local user
+	
+	// dispatcher/Engine hooks
+	bool isGroupTell(QByteArray tell);
+	
 public slots:
 	// slots  {}()
 	void connectionRefused(QString message);
@@ -58,9 +68,12 @@ public slots:
 	void connectionError(QString message);
 	void serverStartupFailed(QString message);
 	void gotKicked(QDomNode message);
+	void setCharPosition(unsigned int pos);
 	
-	void update();
-
+	void closeEvent( QCloseEvent * event ) { hide(); event->accept(); emit hides();}
+	void sendGTell(QByteArray tell); // sends gtell from local user
+signals:
+	void hides();
 };
 
 #endif /*CGROUP_H_*/

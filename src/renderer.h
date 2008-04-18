@@ -50,11 +50,12 @@ class RendererWidget : public QGLWidget
     unsigned int last_drawn_trail;
 
     GLuint selectBuf[MAXHITS];
-    
+    void glDrawGroupMarkers();
     void glDrawMarkers();
     void drawMarker(int, int, int, int);
     void glDrawRoom(CRoom *p);
     void glDrawCSquare(CSquare *p, int renderingMode);
+    
     
     void setupViewingModel(  int width, int height  );
     void renderPickupObjects();  
@@ -103,6 +104,9 @@ public:
 public slots:
 	void paintGL();
     void display(void);
+    
+signals:
+	void updateCharPosition(unsigned int);
 };
 
 

@@ -117,12 +117,16 @@ public:
 
         void startEngineCall() { emit startEngine(); }
         void startRendererCall() { emit startRenderer(); }
+        
+        Cdispatcher* getDispatcherInstance() { return dispatcher; }
 
+        void sendGroupTellEvent(QByteArray data) {emit sendGTell(data); }
 signals:
     void connectionEstablished();
     void connectionLost();
     void startEngine();
     void startRenderer();
+	void sendGTell(QByteArray);
 };
 
 /* PROX THREAD ENDS */

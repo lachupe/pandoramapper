@@ -131,7 +131,7 @@ public:
     void setGroupManagerRemotePort(int val) { groupManagerRemotePort = val; setConfigModified(true); }
     void setGroupManagerHost(QByteArray val) { groupManagerHost = val; setConfigModified(true); }
     void setGroupManagerCharName(QByteArray val) { groupManagerCharName = val; setConfigModified(true); }
-    void setShowGroupManager(bool b) { showGroupManager = b; setConfigModified(true); }
+    void setShowGroupManager(bool b) { showGroupManager = b; }
     void setGroupManagerRect(QRect r) { groupManagerRect = r; setConfigModified(true); }
     void setGroupManagerColor(QColor c) { groupManagerColor = c; setConfigModified(true); }
     

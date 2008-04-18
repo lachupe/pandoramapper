@@ -80,7 +80,11 @@ public:
     void setToolMode(ToolMode mode);
     QRect getGroupManagerRect() { return groupManager->geometry(); }
     CGroup *getGroupManager() { return groupManager; }
-    
+    void setShowGroupManager(bool b) { 
+    	if (b == true) 
+    		groupManager->show();
+    	else 
+    		groupManager->hide(); }
 
 private:
     ToolMode toolMode;

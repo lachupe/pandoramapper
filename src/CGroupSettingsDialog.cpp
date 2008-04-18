@@ -19,6 +19,7 @@ CGroupSettingsDialog::~CGroupSettingsDialog()
 
 void CGroupSettingsDialog::run()
 {
+	color = conf->getGroupManagerColor();
 	lineEdit_charName->setText( conf->getGroupManagerCharName() );
 	lineEdit_remoteHost->setText( conf->getGroupManagerHost() );
 	lineEdit_localPort->setText( QString("%1").arg( conf->getGroupManagerLocalPort() ) );
@@ -36,6 +37,11 @@ void CGroupSettingsDialog::accept()
 		group->resetName();
 	}
 
+	if (color != conf->getGroupManagerColor()) {
+		conf->setGroupManagerColor(color);
+		group->resetColor();
+	}
+	
 	QByteArray remoteHost = lineEdit_remoteHost->text().toAscii();
 	int remotePort = lineEdit_remotePort->text().toInt();
 	if (remotePort != conf->getGroupManagerRemotePort() || 
@@ -69,9 +75,9 @@ void CGroupSettingsDialog::accept()
 
 void CGroupSettingsDialog::selectColor() 
 {
-    QColor color = QColorDialog::getColor(QColor("#F28003"), this);
-    if (color.isValid()) {
-        //conf->set_note_color((const char*)color.name().toAscii());
+    QColor newColor = QColorDialog::getColor(color, this);
+    if (newColor.isValid()) {
+        color = newColor;
         print_debug(DEBUG_GROUP, "color selected: %s",(const char*)color.name().toAscii());
         /*
         colorLabel->setText(color.name());
