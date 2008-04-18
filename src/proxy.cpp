@@ -292,6 +292,18 @@ void Proxy::sendGroupTellEvent(QByteArray data)
 	print_debug(DEBUG_PROXY, "Done sending gtell");
 }
 
+void Proxy::sendScoreLineEvent(QByteArray data)
+{
+	emit sendScoreLine(data);
+}
+
+void Proxy::sendPromptLineEvent(QByteArray data)
+{
+	printf("Sending prompt to groupManager: %s\r\n", (const char *) data);
+	emit sendPromptLine(data);
+}
+
+
 // ----------------------------------  ProxySocket ------------------------------------------
 void ProxySocket::send_line(char *line) 
 {

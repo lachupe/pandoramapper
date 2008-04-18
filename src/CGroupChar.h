@@ -57,7 +57,19 @@ public:
 
 	void draw(int x, int y);
 	void updateLabels();
+	
+	// for local char only
+	void setScore(int _hp, int _maxhp, int _mana, int _maxmana, int _moves, int _maxmoves)
+	{ 
+		hp = _hp; maxhp = _maxhp; mana = _mana; maxmana = _maxmana; 
+		moves = _moves; maxmoves = _maxmoves; 
+	}
 
+	void setTextScore(QByteArray hp, QByteArray mana, QByteArray moves)
+	{
+		textHP = hp; textMana = mana; textMoves = moves;
+	}
+	
 };
 
 #endif /*CGROUPCHAR_H_*/

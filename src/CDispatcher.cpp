@@ -460,6 +460,9 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
     int new_len;
     char *buf;
     
+    // bloody hack!
+    QRegExp scoreExp("*/* hits, */* mana, and */* moves.");
+    scoreExp.setPatternSyntax(QRegExp::Wildcard);
 
     print_debug(DEBUG_DISPATCHER, "analyzerMudStream(): starting");
     print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
@@ -537,6 +540,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                 }
                 event.prompt = cutColours(event.prompt);
                 engine->setPrompt(event.prompt);
+                proxy->sendPromptLineEvent(event.prompt);
                 event.terrain = parseTerrain(event.prompt);
                 SEND_EVENT_TO_ENGINE;
                 xmlState = STATE_NORMAL;
@@ -589,6 +593,10 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                     c.setXmlMode( false );
                 }
             }
+
+            // inform groupManager 
+            if (scoreExp.exactMatch(a_line) == true)
+            	proxy->sendScoreLineEvent(a_line);
           
             print_debug(DEBUG_DISPATCHER, "before spells checker");
             // now do all necessary spells checks 
@@ -678,6 +686,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
         if (buffer[i].type == IS_PROMPT) {
             print_debug(DEBUG_DISPATCHER, "PROMPT recognized");
             spells_print_mode = false;      // 
+            proxy->sendPromptLineEvent(buffer[i].line);
             engine->setPrompt(buffer[i].line);
         }
         

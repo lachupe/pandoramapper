@@ -119,12 +119,16 @@ public:
         void startRendererCall() { emit startRenderer(); }
         
         void sendGroupTellEvent(QByteArray data);
+        void sendScoreLineEvent(QByteArray data);
+        void sendPromptLineEvent(QByteArray data);
 signals:
     void connectionEstablished();
     void connectionLost();
     void startEngine();
     void startRenderer();
 	void sendGTell(QByteArray);
+	void sendScoreLine(QByteArray);
+	void sendPromptLine(QByteArray);
 };
 
 /* PROX THREAD ENDS */

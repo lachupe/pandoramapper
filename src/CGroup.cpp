@@ -139,7 +139,7 @@ bool CGroup::addChar(QDomNode node)
 		print_debug(DEBUG_GROUP, "Added new char. Name %s", 
 				(const char *) newChar->getName());
 		chars.append(newChar);
-		layout->addWidget( newChar->getCharFrame(), layout->rowCount(), 0 );
+		layout->addWidget( newChar->getCharFrame());
 		return true;
 	}
 }
@@ -300,4 +300,70 @@ void CGroup::sendGTell(QByteArray tell)
 }
 
 
+void CGroup::parseScoreInformation(QByteArray score)
+{
+	print_debug(DEBUG_GROUP, "Score line: %s", (const char *) score);
+
+	score.replace(" hits, ", "/");
+	score.replace(" mana, and ", "/");
+	score.replace(" moves.", "");
+	
+	
+	
+	QString temp = score;
+	QStringList list = temp.split('/');
+	
+	
+	print_debug(DEBUG_GROUP, "Hp: %s", (const char *) list[0].toAscii());
+	print_debug(DEBUG_GROUP, "Hp max: %s", (const char *) list[1].toAscii());
+	print_debug(DEBUG_GROUP, "Mana: %s", (const char *) list[2].toAscii());
+	print_debug(DEBUG_GROUP, "Max Mana: %s", (const char *) list[3].toAscii());
+	print_debug(DEBUG_GROUP, "Moves: %s", (const char *) list[4].toAscii());
+	print_debug(DEBUG_GROUP, "Max Moves: %s", (const char *) list[5].toAscii());
+
+	self->setScore(list[0].toInt(), list[1].toInt(), list[2].toInt(), list[3].toInt(), 
+					list[4].toInt(), list[5].toInt()			);
+
+	issueLocalCharUpdate();
+}
+
+void CGroup::parsePromptInformation(QByteArray prompt)
+{
+	QByteArray hp, mana, moves;
+	
+	printf("PARSING !\r\n");
+	
+	if (prompt.indexOf('>') == -1)
+		return; // false prompt
+
+	hp = "Healthy";
+	mana = "Full";
+	moves = "A lot";
+	
+	int index = prompt.indexOf("HP:");
+	if (index != -1) {
+		hp = "";
+		int k = index + 3;
+		while (prompt[k] != ' ' && prompt[k] != '>' )
+			hp += prompt[k++];
+	}
+
+	index = prompt.indexOf("Mana:");
+	if (index != -1) {
+		mana = "";
+		int k = index + 5;
+		while (prompt[k] != ' ' && prompt[k] != '>' )
+			mana += prompt[k++];
+	}
+
+	index = prompt.indexOf("Move:");
+	if (index != -1) {
+		moves = "";
+		int k = index + 5;
+		while (prompt[k] != ' ' && prompt[k] != '>' )
+			moves += prompt[k++];
+	}
+
+	self->setTextScore(hp, mana, moves);
+}
 
