@@ -181,12 +181,11 @@ CMainWindow::CMainWindow(QWidget *parent)
     actionManager->disable_online_actions();
     connect(conf, SIGNAL(configurationChanged()),
             actionManager, SLOT(updateActionsSettings() ), Qt::QueuedConnection);
-    
+
     groupManager = new CGroup(conf->getGroupManagerCharName(), this);
     connect(groupManager, SIGNAL(hides()), actionManager, SLOT( groupManagerHides() ),  Qt::QueuedConnection );
     connect(proxy, SIGNAL(sendGTell(QByteArray)), groupManager, SLOT( sendGTell(QByteArray) ),  Qt::QueuedConnection );
     connect(renderer, SIGNAL(updateCharPosition(unsigned int)), groupManager, SLOT( setCharPosition(unsigned int) ),  Qt::QueuedConnection );
-    
 }
 
 

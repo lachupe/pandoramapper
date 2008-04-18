@@ -334,6 +334,8 @@ QList<CRegion *> CRoomManager::getAllRegions()
 /* -------------- reinit ---------------*/
 void CRoomManager::reinit()
 {
+	unlock();
+	unlock();
 	QWriteLocker locker(&mapLock);
 
 	next_free = 1;

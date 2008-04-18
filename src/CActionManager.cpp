@@ -240,24 +240,28 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     
     groupSettingsAct = new QAction(tr("Settings"), this);
     connect(groupSettingsAct, SIGNAL(triggered()), this, SLOT(groupSettings()));
-
 }
 
 
 void CActionManager::groupClient(bool b)
 {
+    print_debug(DEBUG_INTERFACE, "Changing groupManager type to client");
 	if (b)
 		parent->getGroupManager()->setType(CGroupCommunicator::Client);
+    print_debug(DEBUG_INTERFACE, "Done.");
 }
 
 void CActionManager::groupServer(bool b)
 {
+    print_debug(DEBUG_INTERFACE, "Changing groupManager type to server");
 	if (b)
 		parent->getGroupManager()->setType(CGroupCommunicator::Server);
+    print_debug(DEBUG_INTERFACE, "Done.");
 }
 
 void CActionManager::setShowGroupManager(bool b)
 {
+    print_debug(DEBUG_INTERFACE, "Changing the groupManager visibility");
 	conf->setShowGroupManager(b);
 	if (b) {
 		printf("Showing\r\n");
@@ -268,6 +272,7 @@ void CActionManager::setShowGroupManager(bool b)
     	groupShowHideAct->setText("Show Manager");
         parent->setShowGroupManager(b);
 	}
+    print_debug(DEBUG_INTERFACE, "Done.");
 }
 
 void CActionManager::groupHide()
@@ -437,6 +442,7 @@ void CActionManager::alwaysOnTop(bool set_on_top)
   parent->setWindowFlags(flags);
   parent->show();
   conf->setAlwaysOnTop(set_on_top);
+  print_debug(DEBUG_INTERFACE, "Done.");
 }
 
 

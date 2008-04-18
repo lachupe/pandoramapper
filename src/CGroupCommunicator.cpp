@@ -570,6 +570,8 @@ bool CGroupCommunicator::isConnected()
 
 void CGroupCommunicator::reconnect()
 { 
+	print_debug(DEBUG_GROUP, "in Connector::reconnect");
+	
 	if (type == Client) {
 		changeType(Off); 
 		changeType(Client);
@@ -582,6 +584,7 @@ void CGroupCommunicator::reconnect()
 		changeType(Server);
 		print_debug(DEBUG_GROUP, "Done.");
 	}
+	print_debug(DEBUG_GROUP, "reconnect Done");
 }
 	
 

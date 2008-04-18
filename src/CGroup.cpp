@@ -41,7 +41,6 @@ CGroup::CGroup(QByteArray name, QWidget *parent)
     }
 */
 	
-	
 	setWindowTitle("GroupManager");
 	QApplication *app = qApp;
     QRect rect = app->desktop()->availableGeometry(-1);
@@ -60,7 +59,6 @@ CGroup::CGroup(QByteArray name, QWidget *parent)
     show();
     raise();
     setGeometry( conf->getGroupManagerRect() );
-    
 
     if (conf->getShowGroupManager() == false)
     	hide();
@@ -72,7 +70,7 @@ CGroup::CGroup(QByteArray name, QWidget *parent)
 	//status->resize(conf->getGroupManagerRect().width(), conf->getGroupManagerRect().height());
 	//status->setFrameStyle(QFrame::StyledPanel);
 	//layout->addWidget(status);
-	
+	print_debug(DEBUG_GROUP, "Leaving the GroupManager constructor");
 }
 
 

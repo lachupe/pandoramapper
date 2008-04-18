@@ -145,6 +145,7 @@ void RendererWidget::display(void)
     	return;
     } else 
     	Map.unlock();
+    
   
     QTime t;
     t.start();
@@ -168,6 +169,7 @@ void RendererWidget::paintGL()
     	return;
     } else 
     	Map.unlock();
+
 
     QTime t;
     t.start();

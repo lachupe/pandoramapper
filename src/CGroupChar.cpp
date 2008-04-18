@@ -4,6 +4,8 @@
 
 CGroupChar::CGroupChar()
 {
+	print_debug(DEBUG_GROUP, "GroupChar Constructor");
+
 	name = "";
 	pos = 0;
 	hp = 0;
@@ -53,6 +55,7 @@ CGroupChar::CGroupChar()
 	charFrame->setFrameStyle(QFrame::StyledPanel);
 	charFrame->setLayout(layout);
 
+	print_debug(DEBUG_GROUP, "GroupChar Constructor done.");
 }
 
 CGroupChar::~CGroupChar()
@@ -71,6 +74,8 @@ CGroupChar::~CGroupChar()
 
 void CGroupChar::updateLabels()
 {
+	print_debug(DEBUG_GROUP, "UPDATING LABELS ");
+
 	labelName->setText(name);
 	if (pos == 0) {
 		labelRoom->setText("Unknown");
@@ -108,6 +113,7 @@ void CGroupChar::updateLabels()
 			break;
 	}
 	
+	print_debug(DEBUG_GROUP, "FINISHED UPDATING LABELS ");
 }
 
 QDomNode CGroupChar::toXML()

@@ -209,6 +209,7 @@ void CEngine::slotRunEngine()
     	return;
     } else 
     	Map.unlock();
+
     
     if (userland_parser->is_empty()) {
         print_debug(DEBUG_ANALYZER, "Calling the analyzer");

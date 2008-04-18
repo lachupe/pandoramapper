@@ -284,6 +284,14 @@ void Proxy::shutdown()
 //    #endif
 }
 
+
+void Proxy::sendGroupTellEvent(QByteArray data)
+{
+	print_debug(DEBUG_PROXY, "Sending gtell");
+	emit sendGTell(data); 
+	print_debug(DEBUG_PROXY, "Done sending gtell");
+}
+
 // ----------------------------------  ProxySocket ------------------------------------------
 void ProxySocket::send_line(char *line) 
 {
@@ -428,3 +436,5 @@ void ProxySocket::nonblock()
     
     ioctlsocket(sock, FIONBIO, &on);
 }
+
+

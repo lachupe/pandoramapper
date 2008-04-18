@@ -118,9 +118,7 @@ public:
         void startEngineCall() { emit startEngine(); }
         void startRendererCall() { emit startRenderer(); }
         
-        Cdispatcher* getDispatcherInstance() { return dispatcher; }
-
-        void sendGroupTellEvent(QByteArray data) {emit sendGTell(data); }
+        void sendGroupTellEvent(QByteArray data);
 signals:
     void connectionEstablished();
     void connectionLost();

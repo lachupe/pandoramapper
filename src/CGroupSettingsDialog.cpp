@@ -9,8 +9,10 @@
 
 CGroupSettingsDialog::CGroupSettingsDialog(QWidget *parent) : QDialog(parent)
 {
+	print_debug(DEBUG_INTERFACE, "in GroupManager Settings Dialog Constructor");
     setupUi(this);                        
     connect(pushButton_changeColour, SIGNAL(clicked()), this, SLOT(selectColor()) );
+	print_debug(DEBUG_INTERFACE, "exiting the GroupManager Settings Dialog Constructor");
 }
 
 CGroupSettingsDialog::~CGroupSettingsDialog()
@@ -75,6 +77,8 @@ void CGroupSettingsDialog::accept()
 
 void CGroupSettingsDialog::selectColor() 
 {
+    print_debug(DEBUG_GROUP, "in select Color subdialog");
+	
     QColor newColor = QColorDialog::getColor(color, this);
     if (newColor.isValid()) {
         color = newColor;
@@ -85,4 +89,5 @@ void CGroupSettingsDialog::selectColor()
         colorLabel->setAutoFillBackground(true);
         */
     }
+    print_debug(DEBUG_GROUP, "Done select Color subdialog");
 }

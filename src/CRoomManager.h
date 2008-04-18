@@ -13,7 +13,6 @@
 #include <QReadLocker>
 #include <QWriteLocker>
 
-
 class CPlane;
 class CSquare;
 
@@ -50,22 +49,16 @@ public:
     void init();
     void reinit();			/* reinitializer/utilizer */
     void lockForRead() { 
-    //	printf("Locking\r\n"); 
     	mapLock.lockForRead(); 
-    //	printf("Locked!\r\n");
     }
     void lockForWrite() { 
-    //	printf("Locking\r\n"); 
     	mapLock.lockForWrite(); 
-    //	printf("Locked!\r\n");
     }
     void unlock() { 
-    //	printf("Unlocking...\r\n"); 
     	mapLock.unlock(); 
-    //	printf("Unlocked!\r\n");
     }
     bool tryLockForRead() { return mapLock.tryLockForRead(); }
-    bool tryLockForWrite() { return mapLock.tryLockForRead(); }
+    bool tryLockForWrite() { return mapLock.tryLockForWrite(); }
     
     // make sure you LOCK before you use those lists ... !
     QVector<CRoom *> getRooms() { return rooms; }
