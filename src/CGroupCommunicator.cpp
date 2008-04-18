@@ -390,7 +390,7 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QDo
 					relayMessage(conn, UPDATE_CHAR, data);
 				} else if (message == GTELL) {
 					getGroup()->gTellArrived(data);
-					relayMessage(conn, UPDATE_CHAR, data);
+					relayMessage(conn, GTELL, data);
 				} else if (message == REQ_ACK) {
 					sendMessage(conn, ACK);
 				} else {

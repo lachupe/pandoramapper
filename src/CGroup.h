@@ -72,6 +72,8 @@ public slots:
 	
 	void closeEvent( QCloseEvent * event ) { hide(); event->accept(); emit hides();}
 	void sendGTell(QByteArray tell); // sends gtell from local user
+	void parseScoreInformation(QByteArray score);
+	void parsePromptInformation(QByteArray prompt);
 signals:
 	void hides();
 };

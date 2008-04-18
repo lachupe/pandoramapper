@@ -17,6 +17,7 @@ CGroup::CGroup(QByteArray name, QWidget *parent)
 	
 	ch->setName(name);
 	ch->setPosition(1); // FIXME ... or does not really matter.
+	ch->setColor(conf->getGroupManagerColor());
 	chars.append(ch);
 	self = ch;
 	
@@ -286,7 +287,7 @@ void CGroup::gTellArrived(QDomNode node)
 	print_debug(DEBUG_GROUP, "GTell from %s, Arrived : %s", 
 			(const char *) from.toAscii(), 
 			(const char *) text.text().toAscii() );
-	send_to_user("\r\n%s tells you [GT] '%s'.\r\n\r\n", 
+	send_to_user("\r\n%s tells you [GT] '%s'.\r\n", 
 			(const char *) from.toAscii(), 
 			(const char *) text.text().toAscii() ); 
 	send_to_user("\r\n");
@@ -297,5 +298,6 @@ void CGroup::sendGTell(QByteArray tell)
 {
 	network->sendGTell(tell);
 }
+
 
 
