@@ -376,7 +376,7 @@ void CGroup::parseScoreInformation(QByteArray score)
 		print_debug(DEBUG_GROUP, "Moves: %s", (const char *) list[2].toAscii());
 		print_debug(DEBUG_GROUP, "Max Moves: %s", (const char *) list[3].toAscii());
 
-		self->setScore(list[0].toInt(), list[1].toInt(), "--", "--", 
+		self->setScore(list[0].toInt(), list[1].toInt(), 0, 0, 
 						list[2].toInt(), list[3].toInt()			);
 
 		issueLocalCharUpdate();
