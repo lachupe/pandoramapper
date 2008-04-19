@@ -33,9 +33,12 @@ void CGroupCommunicator::changeType(int newState) {
 
 	if (type == Client)
 		peer->deleteLater();
-	if (type == Server)  
+	if (type == Server)  {
+		CGroupServer *serv = (CGroupServer *) peer;
+		serv->closeAll();
 		delete peer;
-
+	}
+	
 	type = newState;
 	getGroup()->resetChars();
 	clientsList.clear();

@@ -246,13 +246,13 @@ void CGroup::updateChar(QDomNode blob)
 void CGroup::connectionRefused(QString message)
 {
 	print_debug(DEBUG_GROUP, "Connection refused: %s", (const char *) message.toAscii());
-    QMessageBox::critical(this, "groupManager", QString("Connection refused: %1.").arg(message));
+    QMessageBox::information(this, "groupManager", QString("Connection refused: %1.").arg(message));
 }
 
 void CGroup::connectionFailed(QString message)
 {
 	print_debug(DEBUG_GROUP, "Failed to connect: %s", (const char *) message.toAscii());
-    QMessageBox::critical(this, "groupManager", QString("Failed to connect: %1.").arg(message));
+    QMessageBox::information(this, "groupManager", QString("Failed to connect: %1.").arg(message));
 }
 
 void CGroup::connectionClosed(QString message)
@@ -336,27 +336,51 @@ void CGroup::parseScoreInformation(QByteArray score)
 {
 	print_debug(DEBUG_GROUP, "Score line: %s", (const char *) score);
 
-	score.replace(" hits, ", "/");
-	score.replace(" mana, and ", "/");
-	score.replace(" moves.", "");
 	
-	
-	
-	QString temp = score;
-	QStringList list = temp.split('/');
-	
-	
-	print_debug(DEBUG_GROUP, "Hp: %s", (const char *) list[0].toAscii());
-	print_debug(DEBUG_GROUP, "Hp max: %s", (const char *) list[1].toAscii());
-	print_debug(DEBUG_GROUP, "Mana: %s", (const char *) list[2].toAscii());
-	print_debug(DEBUG_GROUP, "Max Mana: %s", (const char *) list[3].toAscii());
-	print_debug(DEBUG_GROUP, "Moves: %s", (const char *) list[4].toAscii());
-	print_debug(DEBUG_GROUP, "Max Moves: %s", (const char *) list[5].toAscii());
+	if (score.contains("mana, ") == true) {
+		score.replace(" hits, ", "/");
+		score.replace(" mana, and ", "/");
+		score.replace(" moves.", "");
+		
+		
+		
+		QString temp = score;
+		QStringList list = temp.split('/');
+		
+		
+		print_debug(DEBUG_GROUP, "Hp: %s", (const char *) list[0].toAscii());
+		print_debug(DEBUG_GROUP, "Hp max: %s", (const char *) list[1].toAscii());
+		print_debug(DEBUG_GROUP, "Mana: %s", (const char *) list[2].toAscii());
+		print_debug(DEBUG_GROUP, "Max Mana: %s", (const char *) list[3].toAscii());
+		print_debug(DEBUG_GROUP, "Moves: %s", (const char *) list[4].toAscii());
+		print_debug(DEBUG_GROUP, "Max Moves: %s", (const char *) list[5].toAscii());
 
-	self->setScore(list[0].toInt(), list[1].toInt(), list[2].toInt(), list[3].toInt(), 
-					list[4].toInt(), list[5].toInt()			);
+		self->setScore(list[0].toInt(), list[1].toInt(), list[2].toInt(), list[3].toInt(), 
+						list[4].toInt(), list[5].toInt()			);
 
-	issueLocalCharUpdate();
+		issueLocalCharUpdate();
+
+	} else {
+		// 399/529 hits and 121/133 moves.
+		score.replace(" hits and ", "/");
+		score.replace(" moves.", "");
+		
+		
+		
+		QString temp = score;
+		QStringList list = temp.split('/');
+		
+		
+		print_debug(DEBUG_GROUP, "Hp: %s", (const char *) list[0].toAscii());
+		print_debug(DEBUG_GROUP, "Hp max: %s", (const char *) list[1].toAscii());
+		print_debug(DEBUG_GROUP, "Moves: %s", (const char *) list[2].toAscii());
+		print_debug(DEBUG_GROUP, "Max Moves: %s", (const char *) list[3].toAscii());
+
+		self->setScore(list[0].toInt(), list[1].toInt(), "--", "--", 
+						list[2].toInt(), list[3].toInt()			);
+
+		issueLocalCharUpdate();
+	}
 }
 
 void CGroup::parsePromptInformation(QByteArray prompt)
@@ -395,5 +419,10 @@ void CGroup::parsePromptInformation(QByteArray prompt)
 	}
 
 	self->setTextScore(hp, mana, moves);
+}
+
+void CGroup::parseStateChangeLine(int message, QByteArray line)
+{
+	
 }
 

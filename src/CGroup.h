@@ -30,6 +30,9 @@ class CGroup : public QWidget
 
 public:
 
+	enum StateMessages { NORMAL, FIGHTING, RESTING, SLEEPING, CASTING, INCAP, DEAD, BLIND, UNBLIND };
+	
+
 	CGroup(QByteArray name, QWidget *parent);
 	virtual ~CGroup();
 	
@@ -80,6 +83,9 @@ public slots:
 	void sendGTell(QByteArray tell); // sends gtell from local user
 	void parseScoreInformation(QByteArray score);
 	void parsePromptInformation(QByteArray prompt);
+
+	void parseStateChangeLine(int message, QByteArray line);
+										
 signals:
 	void hides();
 };

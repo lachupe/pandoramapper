@@ -18,6 +18,7 @@ public:
 	void addClient(CGroupClient *client);
 	void sendToAll(QByteArray);
 	void sendToAllExceptOne(CGroupClient *conn, QByteArray);
+	void closeAll();
 	
 protected:
     void incomingConnection(int socketDescriptor);

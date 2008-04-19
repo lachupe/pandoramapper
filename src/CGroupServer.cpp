@@ -58,3 +58,13 @@ void CGroupServer::sendToAllExceptOne(CGroupClient *conn, QByteArray message)
 			connections[i]->sendData(message);
 }
 
+void CGroupServer::closeAll()
+{
+	
+	printf("Closing connections\r\n");
+	for (int i = 0; i < connections.size(); i++) {
+		printf("Closing connections %i\r\n", connections[i]->socketDescriptor());
+		connections[i]->deleteLater();
+	}
+}
+

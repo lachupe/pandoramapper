@@ -299,7 +299,7 @@ void Proxy::sendScoreLineEvent(QByteArray data)
 
 void Proxy::sendPromptLineEvent(QByteArray data)
 {
-	printf("Sending prompt to groupManager: %s\r\n", (const char *) data);
+//	printf("Sending prompt to groupManager: %s\r\n", (const char *) data);
 	emit sendPromptLine(data);
 }
 
