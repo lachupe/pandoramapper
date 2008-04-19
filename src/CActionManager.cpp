@@ -211,6 +211,10 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     
     
     // group Manager
+    groupOffAct = new QAction(tr("Off"), this );
+    groupOffAct->setCheckable(true);
+    connect(groupOffAct, SIGNAL(toggled(bool)), this, SLOT(groupOff(bool)), Qt::QueuedConnection);
+
     groupClientAct = new QAction(tr("Client"), this );
     groupClientAct->setCheckable(true);
     connect(groupClientAct, SIGNAL(toggled(bool)), this, SLOT(groupClient(bool)), Qt::QueuedConnection);
@@ -220,13 +224,10 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     connect(groupServerAct, SIGNAL(toggled(bool)), this, SLOT(groupServer(bool)), Qt::QueuedConnection);
 
     groupManagerGroup = new QActionGroup(this);
+    groupManagerGroup->addAction(groupOffAct);
     groupManagerGroup->addAction(groupClientAct);
     groupManagerGroup->addAction(groupServerAct);
-    if (conf->getGroupManagerState() == CGroupCommunicator::Server)
-    	groupServerAct->setChecked(true);
-    if (conf->getGroupManagerState() == CGroupCommunicator::Client)
-    	groupClientAct->setChecked(true);
-
+    groupManagerTypeChanged( conf->getGroupManagerState() );
     
     groupShowHideAct = new QAction(tr("Show/Hide Manager"), this );
     connect(groupShowHideAct, SIGNAL(triggered()), this, SLOT(groupHide()), Qt::QueuedConnection);
@@ -242,6 +243,27 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     connect(groupSettingsAct, SIGNAL(triggered()), this, SLOT(groupSettings()));
 }
 
+void CActionManager::groupManagerTypeChanged(int type)
+{
+	print_debug(DEBUG_GROUP, "Action: signal received groupManager type changed");
+	
+    if (type == CGroupCommunicator::Server)
+    	groupServerAct->setChecked(true);
+    if (type == CGroupCommunicator::Client)
+    	groupClientAct->setChecked(true);
+    if (type == CGroupCommunicator::Off)
+    	groupOffAct->setChecked(true);
+}
+
+
+void CActionManager::groupOff(bool b)
+{
+    print_debug(DEBUG_INTERFACE, "Changing groupManager type to client");
+	if (b)
+		parent->getGroupManager()->setType(CGroupCommunicator::Off);
+    print_debug(DEBUG_INTERFACE, "Done.");
+}
+
 
 void CActionManager::groupClient(bool b)
 {
@@ -250,6 +272,7 @@ void CActionManager::groupClient(bool b)
 		parent->getGroupManager()->setType(CGroupCommunicator::Client);
     print_debug(DEBUG_INTERFACE, "Done.");
 }
+
 
 void CActionManager::groupServer(bool b)
 {

@@ -53,9 +53,8 @@ void CGroupServer::sendToAll(QByteArray message)
 
 void CGroupServer::sendToAllExceptOne(CGroupClient *conn, QByteArray message)
 {
-	for (int i = 0; i < connections.size(); i++) {
-		if (connections[i] != conn)
+	for (int i = 0; i < connections.size(); i++) 
+		if (connections[i] != conn) 
 			connections[i]->sendData(message);
-	}
 }
 

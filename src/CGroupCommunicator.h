@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDomNode>
+#include <QHash>
 
 class CGroup;
 class CGroupClient;
@@ -48,6 +49,8 @@ class CGroupCommunicator : public QObject
 	void retrieveDataClient(CGroupClient *connection, int message, QDomNode data);
 	void retrieveDataServer(CGroupClient *connection, int message, QDomNode data);
 	
+	QHash<QByteArray, int>  clientsList;
+	
 public:
 	const static int protocolVersion = 102;
 	enum States { Server, Client, Off };
@@ -70,6 +73,8 @@ public slots:
 	void incomingData(CGroupClient *connection, QByteArray data);
 	void sendGTell(QByteArray tell);
 	void relayMessage(CGroupClient *connection, int message, QDomNode node);
+signals:
+	void typeChanged(int type);
 };
 
 #endif /*CGROUPCOMMUNICATOR_H_*/

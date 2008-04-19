@@ -37,6 +37,8 @@ void CGroupCommunicator::changeType(int newState) {
 		delete peer;
 
 	type = newState;
+	getGroup()->resetChars();
+	clientsList.clear();
 
 	print_debug(DEBUG_GROUP, "Changing the Type of the GroupManager: new Type %i.", newState);
 	switch (newState) {
@@ -49,7 +51,9 @@ void CGroupCommunicator::changeType(int newState) {
 		default:
 			break;
 	}
-	
+	emit typeChanged(type);
+	if (type == Off)
+		getGroup()->close();
 }
 
 void CGroupCommunicator::connectionStateChanged(CGroupClient *connection)
@@ -103,34 +107,46 @@ void CGroupCommunicator::connectionEstablished(CGroupClient *connection)
 
 void CGroupCommunicator::connectionClosed(CGroupClient *connection)
 {
-	if (type == Client) {
+	if (type == Off) {
+		printf("Error ... Wtf?\r\n");
+	} else 	if (type == Client) {
+		getGroup()->connectionError("Remote host closed the connection");
 		changeType(Off);
 	} else if (type == Server) {
-		getGroup()->connectionClosed("");
+		int sock = connection->socketDescriptor();
 		
+		QByteArray name = clientsList.key( sock );
+		if (name != "") {
+			getGroup()->connectionClosed(QString("Client %1 quited.").arg(QString(name)) );
+			clientsList.remove(name);
+			getGroup()->removeChar(name);
+		}
 		CGroupServer *server = (CGroupServer *) peer;
 		server->connectionClosed(connection);
-	}
+	} 
+	
 	
 }
 
 void CGroupCommunicator::errorInConnection(CGroupClient *connection)
 {
 	QString str;
-
+	
 	switch(connection->error()) {
 		case QAbstractSocket::ConnectionRefusedError:	
-			getGroup()->connectionRefused(connection->peerName() + " port "+ 
-					connection->peerPort() );
+			str = QString("Tried to connect to %1 on port %2")
+					.arg(connection->peerName())
+					.arg(conf->getGroupManagerRemotePort()) ;
+			getGroup()->connectionRefused( str.toAscii() );
+			changeType(Off);
 			break;
 		case QAbstractSocket::RemoteHostClosedError:
-			//connectionClosed(connection);
-			getGroup()->connectionError("Remote host closed the connection");
+			connectionClosed(connection);
 			break;
 		case QAbstractSocket::HostNotFoundError:
-			str = "Host not found";
-			str += connection->peerName();
-			getGroup()->connectionRefused( str );
+			str = QString("Host %1 not found ").arg(connection->peerName());
+			getGroup()->connectionRefused( str.toAscii() );
+			changeType(Off);
 			break;
 		case QAbstractSocket::SocketAccessError:
 			getGroup()->connectionError("Socket Access Error");
@@ -387,10 +403,10 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QDo
 				// usual update situation. receive update, unpack, apply.
 				if (message == UPDATE_CHAR) {
 					getGroup()->updateChar(data.firstChildElement());
-					relayMessage(conn, UPDATE_CHAR, data);
+					relayMessage(conn, UPDATE_CHAR, data.firstChildElement());
 				} else if (message == GTELL) {
 					getGroup()->gTellArrived(data);
-					relayMessage(conn, GTELL, data);
+					relayMessage(conn, GTELL, data.firstChildElement());
 				} else if (message == REQ_ACK) {
 					sendMessage(conn, ACK);
 				} else {
@@ -473,9 +489,14 @@ void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QDomNode data
 	if (ver > protocolVersion) 
 		kickMessage = "Server uses older version of the protocol.";
 
-	if (getGroup()->addChar(charNode) == false)
+	if (getGroup()->addChar(charNode) == false) {
 		kickMessage = "The name you picked is already present!";
-	
+	} else {
+		QByteArray name = getGroup()->getNameFromBlob(charNode);
+		clientsList.insert( name, conn->socketDescriptor() );
+		
+		relayMessage(conn, ADD_CHAR, getGroup()->getCharByName(name)->toXML() );
+	}
 
 	if (kickMessage != "") {
 		// kicked
@@ -486,6 +507,8 @@ void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QDomNode data
 	}
 	
 }
+
+
 
 void CGroupCommunicator::sendGroupInformation(CGroupClient *conn)
 {
@@ -541,6 +564,8 @@ void CGroupCommunicator::sendGTell(QByteArray tell)
 void CGroupCommunicator::relayMessage(CGroupClient *connection, int message, QDomNode data)
 {
 	QByteArray buffer = formMessageBlock(message, data);
+
+	printf("Relaying message from %s", (const char *) clientsList.key(connection->socketDescriptor()) );
 	CGroupServer *serv = (CGroupServer *) peer;
 	serv->sendToAllExceptOne(connection, buffer);
 }

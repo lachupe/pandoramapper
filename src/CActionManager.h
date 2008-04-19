@@ -59,6 +59,7 @@ public:
     QAction       *emulationAct;
     
     QActionGroup  *groupManagerGroup;
+    QAction		  *groupOffAct;
     QAction		  *groupClientAct;
     QAction		  *groupServerAct;
     QAction		  *groupShowHideAct;
@@ -110,11 +111,13 @@ public slots:
     void gotoAction();
     void deleteFully(); // delete with remove flag
     
+    void groupOff(bool);
     void groupClient(bool);
     void groupServer(bool);
     void groupHide();
     void groupSettings();
     void groupManagerHides() { setShowGroupManager(false); }
+    void groupManagerTypeChanged(int);
 
 private slots:
     void find();

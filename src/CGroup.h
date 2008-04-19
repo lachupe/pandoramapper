@@ -25,6 +25,9 @@ class CGroup : public QWidget
 	
 	
 	QGridLayout *layout;
+	
+	void resetAllChars();
+
 public:
 
 	CGroup(QByteArray name, QWidget *parent);
@@ -42,8 +45,11 @@ public:
 	void removeChar(QByteArray name);
 	void removeChar(QDomNode node);
 	bool isNamePresent(QByteArray name);
-	bool addCharIfUnique(QDomNode blob);
+	QByteArray getNameFromBlob(QDomNode blob);
+//	bool addCharIfUnique(QDomNode blob);
 	void updateChar(QDomNode blob); // updates given char from the blob
+	CGroupCommunicator *getCommunicator() { return network; }
+	
 	
 	void resetChars();
 	QVector<CGroupChar *>  getChars() { return chars; }

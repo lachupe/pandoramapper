@@ -140,6 +140,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     logMenu->addAction(actionManager->showLogAct );
 
     groupMenu = menuBar()->addMenu(tr("&Group") );
+    groupMenu->addAction(actionManager->groupOffAct);
     groupMenu->addAction(actionManager->groupClientAct);
     groupMenu->addAction(actionManager->groupServerAct);
     groupMenu->addSeparator();
@@ -187,6 +188,8 @@ CMainWindow::CMainWindow(QWidget *parent)
     connect(proxy, SIGNAL(sendGTell(QByteArray)), groupManager, SLOT( sendGTell(QByteArray) ),  Qt::QueuedConnection );
     connect(proxy, SIGNAL(sendScoreLine(QByteArray)), groupManager, SLOT( parseScoreInformation(QByteArray) ),  Qt::QueuedConnection );
     connect(proxy, SIGNAL(sendPromptLine(QByteArray)), groupManager, SLOT( parsePromptInformation(QByteArray) ),  Qt::QueuedConnection );
+    CGroupCommunicator *communicator = groupManager->getCommunicator();
+    connect(communicator, SIGNAL(typeChanged(int)), actionManager, SLOT(groupManagerTypeChanged(int)), Qt::QueuedConnection  );
     
     connect(renderer, SIGNAL(updateCharPosition(unsigned int)), groupManager, SLOT( setCharPosition(unsigned int) ),  Qt::QueuedConnection );
     

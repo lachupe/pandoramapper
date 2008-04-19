@@ -1,6 +1,7 @@
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QMessageBox>
 
 #include "utils.h"
 #include "CConfigurator.h"
@@ -65,7 +66,8 @@ CGroup::CGroup(QByteArray name, QWidget *parent)
     	hide();
     
 	layout = new QGridLayout(this);
-	layout->setVerticalSpacing(100);
+	layout->setVerticalSpacing(0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	this->setLayout(layout);
 	//status = new QFrame(this);
 	//status->resize(conf->getGroupManagerRect().width(), conf->getGroupManagerRect().height());
@@ -80,17 +82,27 @@ void CGroup::setType(int newState)
 	network->changeType(newState);
 }
 
+void CGroup::resetAllChars()
+{
+	for (int i = 0; i < chars.size(); ++i) {
+		delete chars[i];
+	}
+	chars.clear();
+}
+
 void CGroup::resetChars()
 {
-	for (int i = 0; i < chars.size(); ++i) 
-		delete chars[i];
-	
+	for (int i = 0; i < chars.size(); ++i) {
+		if (chars[i] != self)
+			delete chars[i];
+	}
 	chars.clear();
+	chars.append(self);
 }
 
 CGroup::~CGroup()
 {
-	resetChars();
+	resetAllChars();
 	delete layout;
 	delete network;
 }
@@ -123,6 +135,19 @@ void CGroup::setCharPosition(unsigned int pos)
 	}
 }
 
+QByteArray CGroup::getNameFromBlob(QDomNode blob)
+{
+	CGroupChar *newChar;
+	
+	newChar = new CGroupChar;
+	newChar->updateFromXML(blob);
+
+	QByteArray name = newChar->getName();
+	delete newChar;
+
+	return name;
+}
+
 
 bool CGroup::addChar(QDomNode node)
 {
@@ -139,7 +164,9 @@ bool CGroup::addChar(QDomNode node)
 		print_debug(DEBUG_GROUP, "Added new char. Name %s", 
 				(const char *) newChar->getName());
 		chars.append(newChar);
+		printf("LAYOUT [before]: Columns %i, Rows %i\r\n", layout->columnCount(), layout->rowCount());
 		layout->addWidget( newChar->getCharFrame());
+		printf("LAYOUT [after]: Columns %i, Rows %i\r\n", layout->columnCount(), layout->rowCount());
 		return true;
 	}
 }
@@ -159,8 +186,6 @@ void CGroup::removeChar(QByteArray name)
 			chars.remove(i);
 
 			layout->removeWidget( ch->getCharFrame() );
-
-			
 			delete ch;
 		}
 }
@@ -221,26 +246,31 @@ void CGroup::updateChar(QDomNode blob)
 void CGroup::connectionRefused(QString message)
 {
 	print_debug(DEBUG_GROUP, "Connection refused: %s", (const char *) message.toAscii());
+    QMessageBox::critical(this, "groupManager", QString("Connection refused: %1.").arg(message));
 }
 
 void CGroup::connectionFailed(QString message)
 {
 	print_debug(DEBUG_GROUP, "Failed to connect: %s", (const char *) message.toAscii());
+    QMessageBox::critical(this, "groupManager", QString("Failed to connect: %1.").arg(message));
 }
 
 void CGroup::connectionClosed(QString message)
 {
 	print_debug(DEBUG_GROUP, "Connection closed: %s", (const char *) message.toAscii());
+    QMessageBox::information(this, "groupManager", QString("Connection closed: %1.").arg(message));
 }
 
 void CGroup::connectionError(QString message)
 {
 	print_debug(DEBUG_GROUP, "Connection closed: %s", (const char *) message.toAscii());
+    QMessageBox::information(this, "groupManager", QString("Connection error: %1.").arg(message));
 }
 
 void CGroup::serverStartupFailed(QString message)
 {
 	print_debug(DEBUG_GROUP, "Failed to start the Group server: %s", (const char *) message.toAscii());
+    QMessageBox::information(this, "groupManager", QString("Failed to start the groupManager server: %1.").arg(message));
 }
 
 void CGroup::gotKicked(QDomNode message)
@@ -262,13 +292,15 @@ void CGroup::gotKicked(QDomNode message)
 	print_debug(DEBUG_GROUP, "You got kicked! Reason [nodename %s] : %s", 
 			(const char *) text.nodeName().toAscii(), 
 			(const char *) text.text().toAscii());
+    
+	QMessageBox::information(this, "groupManager", QString("You got kicked! Reason: %1.").arg(text.text()));
 }
 
 void CGroup::gTellArrived(QDomNode node)
 {
 	
 	if (node.nodeName() != "data") {
-    	print_debug(DEBUG_GROUP, "Called gotKicked with wrong node. No data node.");
+    	print_debug(DEBUG_GROUP, "Called gTellArrived with wrong node. No data node.");
 		return;
 	}
 	
@@ -279,7 +311,7 @@ void CGroup::gTellArrived(QDomNode node)
 		
 		
 	if (e.nodeName() != "gtell") {
-    	print_debug(DEBUG_GROUP, "Called gotKicked with wrong node. No text node.");
+    	print_debug(DEBUG_GROUP, "Called gTellArrived with wrong node. No text node.");
 		return;
 	}
 
@@ -330,8 +362,6 @@ void CGroup::parseScoreInformation(QByteArray score)
 void CGroup::parsePromptInformation(QByteArray prompt)
 {
 	QByteArray hp, mana, moves;
-	
-	printf("PARSING !\r\n");
 	
 	if (prompt.indexOf('>') == -1)
 		return; // false prompt

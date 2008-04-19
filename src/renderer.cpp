@@ -404,6 +404,8 @@ void RendererWidget::glDrawGroupMarkers()
         	drawCone();
         }
 
+        glTranslatef(-dx, -dy, -(dz + 0.2f));
+
     }
 }
 
