@@ -69,6 +69,9 @@ public:
 	// dispatcher/Engine hooks
 	bool isGroupTell(QByteArray tell);
 	
+	void renameChar(QDomNode blob);
+
+	
 public slots:
 	// slots  {}()
 	void connectionRefused(QString message);

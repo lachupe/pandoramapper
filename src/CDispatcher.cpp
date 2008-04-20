@@ -461,8 +461,12 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
     char *buf;
     
     // bloody hack!
-    QRegExp scoreExp("*/* hits, */* mana, and */* moves.");
+    QRegExp scoreExp("[0-9]*/* hits, */* mana, and */* moves.");
     scoreExp.setPatternSyntax(QRegExp::Wildcard);
+	// 399/529 hits and 121/133 moves.
+
+    QRegExp scoreTrollExp("[0-9]*/* hits and */* moves.");
+    scoreTrollExp.setPatternSyntax(QRegExp::Wildcard);
 
     print_debug(DEBUG_DISPATCHER, "analyzerMudStream(): starting");
     print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
@@ -595,9 +599,11 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             }
 
             // inform groupManager 
-            if (scoreExp.exactMatch(a_line) == true)
+            if (scoreExp.exactMatch(a_line) == true || scoreTrollExp.exactMatch(a_line)) {
+            	printf("Caught score line!\r\n");
             	proxy->sendScoreLineEvent(a_line);
-          
+            }
+            
             print_debug(DEBUG_DISPATCHER, "before spells checker");
             // now do all necessary spells checks 
             {

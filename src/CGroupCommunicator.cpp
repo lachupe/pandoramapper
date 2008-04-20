@@ -120,9 +120,10 @@ void CGroupCommunicator::connectionClosed(CGroupClient *connection)
 		
 		QByteArray name = clientsList.key( sock );
 		if (name != "") {
-			getGroup()->connectionClosed(QString("Client %1 quited.").arg(QString(name)) );
+			sendRemoveUserNotification(connection, name);
 			clientsList.remove(name);
 			getGroup()->removeChar(name);
+			getGroup()->connectionClosed(QString("Client %1 quited.").arg(QString(name)) );
 		}
 		CGroupServer *server = (CGroupServer *) peer;
 		server->connectionClosed(connection);
@@ -144,7 +145,8 @@ void CGroupCommunicator::errorInConnection(CGroupClient *connection)
 			changeType(Off);
 			break;
 		case QAbstractSocket::RemoteHostClosedError:
-			connectionClosed(connection);
+			if (type == Server)
+				connectionClosed(connection);
 			break;
 		case QAbstractSocket::HostNotFoundError:
 			str = QString("Host %1 not found ").arg(connection->peerName());
@@ -336,6 +338,8 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 					getGroup()->removeChar(data.firstChildElement());
 				} else if (message == UPDATE_CHAR) {
 					getGroup()->updateChar(data.firstChildElement());
+				} else if (message == RENAME_CHAR) {
+					getGroup()->renameChar(data);
 				} else if (message == GTELL) {
 					getGroup()->gTellArrived(data);
 				} else if (message == REQ_ACK) {
@@ -412,6 +416,9 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QDo
 					relayMessage(conn, GTELL, data.firstChildElement());
 				} else if (message == REQ_ACK) {
 					sendMessage(conn, ACK);
+				} else if (message == RENAME_CHAR) {
+					getGroup()->renameChar(data);
+					relayMessage(conn, RENAME_CHAR, data.firstChildElement());
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
@@ -536,6 +543,20 @@ void CGroupCommunicator::sendCharUpdate(CGroupClient *conn, QDomNode blob)
 }
 
 
+void CGroupCommunicator::sendRemoveUserNotification(CGroupClient *conn, QByteArray name)
+{
+   	if (type == Client) 
+   		return;
+
+	if (type == Server) {
+   		printf("[Server] Sending remove user notification!\r\n");
+		QByteArray message = formMessageBlock(REMOVE_CHAR, getGroup()->getCharByName(name)->toXML());
+		CGroupServer *serv = (CGroupServer *) peer;
+		serv->sendToAllExceptOne(conn, message);
+	}
+	
+}
+
 // this function is for sending gtell from a local user
 void CGroupCommunicator::sendGTell(QByteArray tell)
 {
@@ -585,6 +606,32 @@ void CGroupCommunicator::sendCharUpdate(QDomNode blob)
 		serv->sendToAll(message);
 	}
 }
+
+void CGroupCommunicator::sendUpdateName(QByteArray oldName, QByteArray newName)
+{
+	QDomDocument doc("datagram");
+	QDomElement root = doc.createElement("rename");
+	root.setAttribute("oldname", QString(oldName) );
+	root.setAttribute("newname", QString(newName) );
+
+	if (type == Off)
+		return;
+   	if (type == Client) 
+   		sendMessage((CGroupClient *)peer, RENAME_CHAR, root);
+	if (type == Server) {
+		QByteArray message = formMessageBlock(RENAME_CHAR, root);
+		CGroupServer *serv = (CGroupServer *) peer;
+		serv->sendToAll(message);
+	}
+}
+
+void CGroupCommunicator::renameConnection(QByteArray oldName, QByteArray newName)
+{
+	int socket = clientsList.value(oldName);
+	clientsList.remove(oldName);
+	clientsList.insert(newName, socket);
+}
+
 
 bool CGroupCommunicator::isConnected()
 {

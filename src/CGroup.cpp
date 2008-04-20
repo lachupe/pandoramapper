@@ -107,14 +107,6 @@ CGroup::~CGroup()
 	delete network;
 }
 
-void CGroup::resetName()
-{
-	if (self->getName() == conf->getGroupManagerCharName())
-		return;
-	
-	self->setName(conf->getGroupManagerCharName());
-	issueLocalCharUpdate();
-}
 
 
 void CGroup::resetColor()
@@ -293,7 +285,7 @@ void CGroup::gotKicked(QDomNode message)
 			(const char *) text.nodeName().toAscii(), 
 			(const char *) text.text().toAscii());
     
-	QMessageBox::information(this, "groupManager", QString("You got kicked! Reason: %1.").arg(text.text()));
+//	QMessageBox::critical(this, "groupManager", QString("You got kicked! Reason: %1.").arg(text.text()));
 }
 
 void CGroup::gTellArrived(QDomNode node)
@@ -329,6 +321,48 @@ void CGroup::gTellArrived(QDomNode node)
 void CGroup::sendGTell(QByteArray tell)
 {
 	network->sendGTell(tell);
+}
+
+void CGroup::resetName()
+{
+	if (self->getName() == conf->getGroupManagerCharName())
+		return;
+
+	QByteArray oldname = self->getName();
+	QByteArray newname = conf->getGroupManagerCharName();
+	
+	printf("Sending name update: %s, %s\r\n", (const char *) oldname, (const char *) newname);
+	network->sendUpdateName(oldname, newname);
+	network->renameConnection(oldname, newname);
+	
+	self->setName(conf->getGroupManagerCharName());
+}
+
+void CGroup::renameChar(QDomNode blob)
+{
+	if (blob.nodeName() != "data") {
+    	print_debug(DEBUG_GROUP, "Called renameChar with wrong node. No data node.");
+		return;
+	}
+	
+	QDomNode e = blob.firstChildElement();
+	
+//	QDomElement root = node.toElement();
+	QString oldname = e.toElement().attribute("oldname");
+	QString newname = e.toElement().attribute("newname");
+		
+		
+	print_debug(DEBUG_GROUP, "Renaming a char from %s to %s", 
+			(const char *) oldname.toAscii(), 
+			(const char *) newname.toAscii() );
+	
+	CGroupChar *ch;
+	ch = getCharByName(oldname.toAscii());
+	if (ch == NULL)
+		return;
+	
+	ch->setName(newname.toAscii());
+	ch->updateLabels();
 }
 
 

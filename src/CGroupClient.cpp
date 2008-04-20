@@ -64,6 +64,7 @@ void CGroupClient::setConnectionState(int val)
 
 CGroupClient::~CGroupClient()
 {
+	printf("in CGroupClient destructor!\r\n");
 }
 
 void CGroupClient::lostConnection()
@@ -108,7 +109,6 @@ void CGroupClient::cutMessageFromBuffer()
 	QByteArray rest;
 	
 	if (currentMessageLen == 0) {
-//		print_debug(DEBUG_GROUP, "init reading case");
 		int index = buffer.indexOf(' ');
 		
 		QString len = buffer.left(index + 1);
@@ -121,12 +121,12 @@ void CGroupClient::cutMessageFromBuffer()
 		
 		if (buffer.size() == currentMessageLen)
 			cutMessageFromBuffer();
-		
+
+		printf("returning from cutMessageFromBuffer\r\n");
 		return;
 	}
 
 //	print_debug(DEBUG_GROUP, "cutting off one message case");
-	
 	getParent()->incomingData(this, buffer.left(currentMessageLen));
 	rest = buffer.right( buffer.size() - currentMessageLen);
 	buffer = rest;

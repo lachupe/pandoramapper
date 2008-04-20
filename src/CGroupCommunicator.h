@@ -26,7 +26,7 @@ class CGroupCommunicator : public QObject
 					REQ_VERSION, REQ_ACK, REQ_LOGIN, REQ_INFO, 
 					PROT_VERSION, GTELL, 
 					STATE_LOGGED, STATE_KICKED,
-					ADD_CHAR, REMOVE_CHAR, UPDATE_CHAR };
+					ADD_CHAR, REMOVE_CHAR, UPDATE_CHAR, RENAME_CHAR };
 	
 	QObject *peer;	// server or client
 	CGroup *getGroup() { return (CGroup *) parent(); }
@@ -50,6 +50,7 @@ class CGroupCommunicator : public QObject
 	void retrieveDataServer(CGroupClient *connection, int message, QDomNode data);
 	
 	QHash<QByteArray, int>  clientsList;
+
 	
 public:
 	const static int protocolVersion = 102;
@@ -65,6 +66,9 @@ public:
 	void sendCharUpdate(QDomNode blob);
 	bool isConnected();
 	void reconnect();
+	void sendRemoveUserNotification(CGroupClient *conn, QByteArray name);
+	void renameConnection(QByteArray oldName, QByteArray newName);
+	void sendUpdateName(QByteArray oldName, QByteArray newName);
 		
 public slots:
 	void connectionStateChanged(CGroupClient *connection);
