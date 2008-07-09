@@ -1,7 +1,7 @@
 #ifndef CGROUP_H_
 #define CGROUP_H_
 
-#include <QWidget>
+#include <QDialog>
 #include <QString>
 #include <QDomNode>
 #include <QVector>
@@ -13,7 +13,7 @@
 #include "CGroupCommunicator.h"
 #include "CGroupChar.h"
 
-class CGroup : public QWidget
+class CGroup : public QDialog
 {
 	Q_OBJECT
 	

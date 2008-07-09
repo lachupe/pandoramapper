@@ -9,8 +9,7 @@
 #include "CGroupCommunicator.h"
 #include "CEngine.h"
 
-CGroup::CGroup(QByteArray name, QWidget *parent)
-: QWidget(parent, Qt::Tool)
+CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
 {
 	CGroupChar *ch;
 	
