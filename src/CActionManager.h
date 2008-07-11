@@ -79,7 +79,6 @@ public slots:
     void newFile();
     void open();
     void reload();
-    void quit();
     void save();
     void saveAs();
 

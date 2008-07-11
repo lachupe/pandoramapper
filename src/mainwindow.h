@@ -110,6 +110,9 @@ public slots:
   void setDeleteMode();
   void setSelectMode();
 
+protected slots:
+    void closeEvent(QCloseEvent *event);
+
 signals:
   void newLocationLabel(const QString &label);
   void newModLabel(const QString &label);

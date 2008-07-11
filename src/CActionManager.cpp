@@ -58,7 +58,7 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     quitAct =  new QAction(tr("&Exit..."), this);
     quitAct->setShortcut(tr("Ctrl+Q"));
     quitAct->setStatusTip(tr("Quit Pandora"));
-    connect(quitAct, SIGNAL(triggered()), this, SLOT(quit()));
+    connect(quitAct, SIGNAL(triggered()), parent, SLOT(close()));
         
     /* Room menu */
     findAct = new QAction(tr("Find..."), this);
@@ -579,51 +579,6 @@ void CActionManager::open()
 void CActionManager::reload()
 {
     userland_parser->parse_user_input_line("mload");
-}
-
-void CActionManager::quit()
-{
-	if (conf->isDatabaseModified()) {
-	        switch(QMessageBox::information(parent, "Pandora",
-                                        "The map contains unsaved changes\n"
-                                        "Do you want to save the changes before exiting?",
-                                        "&Save", "&Discard", "Cancel",
-                                        0,      // Enter == button 0
-                                        2)) { // Escape == button 2
-        case 0: // Save clicked or Alt+S pressed or Enter pressed.
-            save();
-            break;
-        case 1: // Discard clicked or Alt+D pressed
-            // don't save but exit
-            break;
-        case 2: // Cancel clicked or Escape pressed
-            return;// don't exit
-            break;
-        }    
-    
-    } 
-    
-    if (conf->isConfigModified()) {
-        switch(QMessageBox::information(parent, "Pandora",
-                                        "The configuration was changed\n"
-                                        "Do you want to write it down on disc before exiting?",
-                                        "&Save", "&Discard", "Cancel",
-                                        0,      // Enter == button 0
-                                        2)) { // Escape == button 2
-        case 0: // Save clicked or Alt+S pressed or Enter pressed.
-            conf->saveConfig();
-            break;
-        case 1: // Discard clicked or Alt+D pressed
-            // don't save but exit
-            break;
-        case 2: // Cancel clicked or Escape pressed
-            return;// don't exit
-            break;
-        }    
-    
-    
-    }
-    QApplication::quit();
 }
 
 void CActionManager::save()
