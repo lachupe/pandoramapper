@@ -47,7 +47,7 @@ void print_usage()
   printf("  --remoteport / -rp  <port>    - override the remote (game) port number.\r\n");
   printf("  --emulate / -e  <port>        - emulate mud environment (disabled).\r\n");
   printf("  --config / -c  <configfile>   - load config file.\r\n");
-  
+
   printf("\r\n");
 }
 
@@ -59,22 +59,22 @@ int main(int argc, char *argv[])
     int     override_local_port = 0;
     char    override_remote_host[MAX_STR_LEN] = "";
     int     override_remote_port = 0;
-    char    configfile[MAX_STR_LEN] = "configs/mume.xml"; 
+    char    configfile[MAX_STR_LEN] = "configs/mume.xml";
     int     default_local_port = 3000;
     int     default_remote_port = 4242;
     int     mud_emulation = 0;
 
 #ifdef Q_OS_MACX
     CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, 
+    CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef,
 						  kCFURLPOSIXPathStyle);
-    const char *appPath = CFStringGetCStringPtr(macPath, 
+    const char *appPath = CFStringGetCStringPtr(macPath,
 						CFStringGetSystemEncoding());
     resPath = (char *)malloc(strlen(appPath)+25);
     strcpy(resPath, appPath);
     strcat(resPath, "/Contents/Resources/");
 
-    char    default_base_file[MAX_STR_LEN] = "databases/base.xml";   
+    char    default_base_file[MAX_STR_LEN] = "databases/base.xml";
     char    default_remote_host[MAX_STR_LEN] = "";
     strcpy(configfile, "configs/default.conf");
 
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 
 #else
     resPath = "";
-    char    default_base_file[MAX_STR_LEN] = "database/mume.xml";   
+    char    default_base_file[MAX_STR_LEN] = "database/mume.xml";
     char    default_remote_host[MAX_STR_LEN] = "129.241.210.221";
 #endif
     QApplication::setColorSpec( QApplication::CustomColor );
@@ -95,10 +95,10 @@ int main(int argc, char *argv[])
 
     splash->showMessage("Loading configuration and database...");
 
-  
+
     for (i=1; i < argc; i++) {
 
-      if ((strcmp(argv[i], "--config") == 0) || ( strcmp(argv[i], "-c") == 0)) 
+      if ((strcmp(argv[i], "--config") == 0) || ( strcmp(argv[i], "-c") == 0))
       {
         if (i == argc) {
           printf("Too few arguments. Missing config file name.\r\n");
@@ -109,15 +109,15 @@ int main(int argc, char *argv[])
 
         strcpy(configfile, argv[i]);
 	resPath = ""; // obviously the user has an own config file - including the path
-      } 
-      
-      if ((strcmp(argv[i], "--emulate") == 0) || ( strcmp(argv[i], "-e") == 0)) 
+      }
+
+      if ((strcmp(argv[i], "--emulate") == 0) || ( strcmp(argv[i], "-e") == 0))
       {
         printf("Pandora: Starting in MUD emulation mode.\r\n");
         mud_emulation = 1;
-      } 
+      }
 
-      if ((strcmp(argv[i], "--base") == 0) || ( strcmp(argv[i], "-b") == 0)) 
+      if ((strcmp(argv[i], "--base") == 0) || ( strcmp(argv[i], "-b") == 0))
       {
         if (i == argc) {
           printf("Too few arguments. Missing database.\r\n");
@@ -126,9 +126,9 @@ int main(int argc, char *argv[])
         }
         i++;
         strcpy(override_base_file, argv[i]); // overriding the database file is possible even with default config file
-      } 
+      }
 
-      if ((strcmp(argv[i], "--hostname") == 0) || ( strcmp(argv[i], "-hn") == 0)) 
+      if ((strcmp(argv[i], "--hostname") == 0) || ( strcmp(argv[i], "-hn") == 0))
       {
         if (i == argc) {
           printf("Too few arguments. Wrong hostname given.\r\n");
@@ -137,9 +137,9 @@ int main(int argc, char *argv[])
         }
         i++;
         strcpy(override_remote_host, argv[i]);
-      } 
+      }
 
-      if ((strcmp(argv[i], "--localport") == 0) || ( strcmp(argv[i], "-lp") == 0)) 
+      if ((strcmp(argv[i], "--localport") == 0) || ( strcmp(argv[i], "-lp") == 0))
       {
         if (i == argc) {
           printf("Too few arguments. Missing localport.\r\n");
@@ -148,9 +148,9 @@ int main(int argc, char *argv[])
         }
         i++;
         override_local_port = atoi(argv[i]);
-      } 
+      }
 
-      if ((strcmp(argv[i], "--remoteport") == 0) || ( strcmp(argv[i], "-rp") == 0)) 
+      if ((strcmp(argv[i], "--remoteport") == 0) || ( strcmp(argv[i], "-rp") == 0))
       {
         if (i == argc) {
           printf("Too few arguments. Missing targetport.\r\n");
@@ -159,15 +159,15 @@ int main(int argc, char *argv[])
         }
         i++;
         override_remote_port = atoi(argv[i]);
-      } 
+      }
 
-      
-      if ((strcmp(argv[i], "--help") == 0) || ( strcmp(argv[i], "-h") == 0)) 
+
+      if ((strcmp(argv[i], "--help") == 0) || ( strcmp(argv[i], "-h") == 0))
       {
         print_usage();
         exit(1);
       }
-      
+
     }
 
 
@@ -179,15 +179,15 @@ int main(int argc, char *argv[])
     conf = new Cconfigurator();
     conf->loadConfig(resPath, configfile);
     print_debug(DEBUG_SYSTEM, "starting up...");
-    
-    
+
+
     if (override_base_file[0] != 0) {
       conf->setBaseFile(override_base_file);
     } else if ( conf->getBaseFile() == "") {
       conf->setBaseFile(default_base_file);
     }
     print_debug(DEBUG_SYSTEM, "Using database file : %s.", (const char*) conf->getBaseFile() );
-    
+
     if (override_remote_host[0] != 0) {
       conf->setRemoteHost(override_remote_host);
     } else if ( conf->getRemoteHost().isEmpty() ) {
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 
     splash->showMessage("Starting Analyzer and Proxy...");
     engine = new CEngine();
-    proxy = new Proxy();  
+    proxy = new Proxy();
 
     //splash->showMessage("Loading the database, please wait...");
     //print_debug(DEBUG_SYSTEM, "Loading the database ... ");
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
     /* special init for the mud emulation */
     if (mud_emulation) {
       print_debug(DEBUG_SYSTEM, "Starting in MUD emulation mode...");
-      
+
       engine->setPrompt("-->");
       stacker.put(1);
       stacker.swap();
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
     }
 
     QRect rect = app.desktop()->availableGeometry(-1);
-    if (conf->getWindowRect().x() == 0 || conf->getWindowRect().x() >= rect.width() || 
+    if (conf->getWindowRect().x() == 0 || conf->getWindowRect().x() >= rect.width() ||
         conf->getWindowRect().y() >= rect.height() ) {
         print_debug(DEBUG_SYSTEM && DEBUG_INTERFACE, "Autosettings for window size and position");
         int x, y, height, width;
@@ -250,13 +250,13 @@ int main(int argc, char *argv[])
         height = rect.height() / 3;
         width = rect.width() - x;
 
-        conf->setWindowRect( x, y, width, height);        
+        conf->setWindowRect( x, y, width, height);
     }
 
     renderer_window = new CMainWindow( 0 );
 
     QGLFormat f;
-    //f.setDoubleBuffer( true );
+    f.setDoubleBuffer( true );
     f.setDirectRendering( true );
     f.setRgba( true );
     f.setDepth( true );
