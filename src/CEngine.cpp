@@ -251,7 +251,7 @@ void CEngine::parseEvent()
     print_debug(DEBUG_ANALYZER, "Entering the main part of the function");
 
     print_debug(DEBUG_ANALYZER, "ANALYZER Event. \r\nNAME %s\r\nDESC %s\r\nEXITS %s\r\nBLIND %i, MOVEMENT %i SCOUT %i",
-        (const char *) event.name, (const char *) event.desc, (const char *) event.exits,
+        (const char *) event.name, (const char *) event.desc, (const char *) event.exits
         /*(const char *) event.prompt*/, event.blind, event.movement, event.scout);
 
     if (event.scout) {
