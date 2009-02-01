@@ -1439,7 +1439,7 @@ USERCMD(usercmd_mload)
   
   send_to_user("--[Pandora: Done.\r\n");
 
-  conf->setDatabaseModified(true);
+  conf->setDatabaseModified(false);
 
   
   SEND_PROMPT;
