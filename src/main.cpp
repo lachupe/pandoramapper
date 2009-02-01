@@ -54,7 +54,7 @@ void print_usage()
 int main(int argc, char *argv[])
 {
     int i;
-    char *  resPath = 0;
+    const char *resPath = 0;
     char    override_base_file[MAX_STR_LEN] = "";
     int     override_local_port = 0;
     char    override_remote_host[MAX_STR_LEN] = "";

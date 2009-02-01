@@ -20,8 +20,8 @@ class QByteArray;
 #define MAX_INPUT_LENGTH	1024	/* Max length per *line* of input */
 
 struct boolean_struct {
-  char *name;
-  int   state;
+  const char  *name;
+  int          state;
 };
 
 
@@ -48,9 +48,9 @@ struct boolean_struct {
 extern const char * exitnames[];
 
 struct debug_data_struct {
-  char          *name;          
-  char          *title;
-  char          *desc;
+  const char   *name;          
+  const char   *title;
+  const char   *desc;
   unsigned int  flag;
   int           state;
 };

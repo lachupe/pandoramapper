@@ -45,9 +45,9 @@ void Cdispatcher::parseXml(QByteArray tag)
 {
         /* types without parameters here */
         struct {
-            char    *name;
-            int      startType;
-            int      endType;
+            const char  *name;
+            int          startType;
+            int          endType;
         } TagTypes[] = {
             {"prompt", XML_START_PROMPT, XML_END_PROMPT},
             {"room", XML_START_ROOM, XML_END_ROOM},

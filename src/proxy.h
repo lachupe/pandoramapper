@@ -66,7 +66,7 @@ public:
 
     void close();
     void clear();
-    void send_line(char *line);
+    void send_line(const char *line);
     SOCKET getSocket();
     bool isXmlMode();
     void setXmlMode( bool b );

@@ -305,7 +305,7 @@ void Proxy::sendPromptLineEvent(QByteArray data)
 
 
 // ----------------------------------  ProxySocket ------------------------------------------
-void ProxySocket::send_line(char *line) 
+void ProxySocket::send_line(const char *line) 
 {
     mutex.lock();
     send(sock, line, strlen(line), 0);
