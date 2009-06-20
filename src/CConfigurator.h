@@ -18,8 +18,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CONFIGURATOR_H 
-#define CONFIGURATOR_H 
+#ifndef CONFIGURATOR_H
+#define CONFIGURATOR_H
 /* configurator */
 
 #include <vector>
@@ -62,11 +62,11 @@ class Cconfigurator : public QObject {
     bool        configModified;       /* if the config was modified */
     QByteArray  configFile;
     QByteArray  configPath;
-    
+
     /* patterns/regexps */
     QByteArray exitsPattern;
     QRegExp     exitsExpr;
-    
+
     /* data */
     QByteArray  databasePath;
     QByteArray  baseFile;
@@ -74,7 +74,7 @@ class Cconfigurator : public QObject {
     QByteArray  remoteHost;
     int         remotePort;
     bool        databaseModified;
-    
+
 
     bool autorefresh;             /* automatic room desc refresh */
     bool automerge;               /* automatic twins merging based on roomdesc */
@@ -85,7 +85,7 @@ class Cconfigurator : public QObject {
     bool terrainCheck;           /* apply terrain check to stacks */
     bool briefMode;
     bool alwaysOnTop;           /* keep Pandora window on top of others */
-        
+
     bool regionsAutoSet;
     bool regionsAutoReplace;
     bool displayRegionsRenderer;
@@ -94,27 +94,27 @@ class Cconfigurator : public QObject {
 
     int startupMode; /* 0 for select, 1 for move */
     QByteArray noteColor;
-    
+
     int textureVisibilityRange;
     int detailsVisibilityRange;
 
-    
+
     int descQuote;        /* quote for description - in percents */
     int nameQuote;        /* quote for roomname - in percents */
-    
+
 //    void parse_line(char *line);
-    
+
     void resetCurrentConfig();
-    
+
     // user window size/posiiton
     QRect userWindowRect;
 
     // renderer user defined angle's and shift
     float angleX, angleY, angleZ;
-    float userX, userY, userZ;    
+    float userX, userY, userZ;
 
     int visibleLayers;
-    
+
     bool selectOAnyLayer;
 
     // groupManager settings
@@ -126,7 +126,7 @@ class Cconfigurator : public QObject {
     bool showGroupManager;
     QRect groupManagerRect;
     QColor groupManagerColor;
-    
+
 public:
 
     /* spells */
@@ -135,6 +135,8 @@ public:
     void addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon);
     void addSpell(TSpell s);
     QString spellUpFor(unsigned int p);
+    QString calculateTimeElapsed(QTime& timer);
+
 
     // group Manager
     int getGroupManagerState() { return groupManagerState; }
@@ -145,7 +147,7 @@ public:
     bool getShowGroupManager() { return showGroupManager; }
     QRect getGroupManagerRect() { return groupManagerRect; }
     QColor getGroupManagerColor() { return groupManagerColor; }
-    
+
     void setGroupManagerState(int val) { groupManagerState = val; setConfigModified(true); }
     void setGroupManagerLocalPort(int val) { groupManagerLocalPort = val; setConfigModified(true); }
     void setGroupManagerRemotePort(int val) { groupManagerRemotePort = val; setConfigModified(true); }
@@ -154,7 +156,7 @@ public:
     void setShowGroupManager(bool b) { showGroupManager = b; }
     void setGroupManagerRect(QRect r) { groupManagerRect = r; setConfigModified(true); }
     void setGroupManagerColor(QColor c) { groupManagerColor = c; setConfigModified(true); }
-    
+
     /* texture and sectors stuff */
     vector<struct roomSectorsData> sectors;
     int getSectorByDesc(QByteArray desc);
@@ -164,29 +166,29 @@ public:
     char getPatternByRoom(CRoom *r);
     GLuint getTextureByDesc(QByteArray desc);
     void addTexture(QByteArray desc, QByteArray filename, char pattern);
-    
+
     /* */
-    
+
     int loadEngineConfig(QByteArray path, QByteArray filename);
-    
+
     Cconfigurator();
 
 
     int loadConfig(QByteArray path, QByteArray filename);
     int saveConfigAs(QByteArray path, QByteArray filename);
     int saveConfig() { return saveConfigAs(configPath, configFile); }
-    
+
 
     void setEndCol(QByteArray str);
     /* patterns */
     QByteArray getExitsPattern() { return exitsPattern; }
     void setExitsPattern(QByteArray str);
-    
-    
+
+
     QRegExp getExitsExpr() { return exitsExpr; }
-    
+
     /* data / global flags */
-    void setBaseFile(QByteArray str); 
+    void setBaseFile(QByteArray str);
     void setDatabaseModified(bool b) { databaseModified = b; }
     void setRemoteHost(QByteArray str);
     void setRemotePort(int i);
@@ -195,32 +197,32 @@ public:
 
     void setConfigFile(QByteArray p, QByteArray f) { configFile = f; configPath = p; }
 
-    void setAutorefresh(bool b); 
+    void setAutorefresh(bool b);
     void setAutomerge(bool b);
     void setAngrylinker(bool b);
     void setExitsCheck(bool b);
     void setTerrainCheck(bool b);
     void setDetailsVisibility(int i);
-    void setTextureVisibility(int i);    
+    void setTextureVisibility(int i);
     void setBriefMode(bool b);
     void setAlwaysOnTop(bool b);
     void setDescQuote(int i);
     void setNameQuote(int i);
-    
+
     void setRegionsAutoSet(bool b);
     void setRegionsAutoReplace(bool b);
     void setDisplayRegionsRenderer(bool b);
     void setShowRegionsInfo(bool b);
-    
+
     void setStartupMode(int i);
     int getStartupMode();
     void setNoteColor(QByteArray c);
     QByteArray getNoteColor();
-    
+
     void setShowNotesRenderer(bool b);
     /*--*/
-    bool isDatabaseModified() { return databaseModified; } 
-    QByteArray getBaseFile() { return baseFile; } 
+    bool isDatabaseModified() { return databaseModified; }
+    QByteArray getBaseFile() { return baseFile; }
     QByteArray getRemoteHost() { return remoteHost;}
     int getRemotePort() {return remotePort;}
     int getLocalPort() {return localPort;}
@@ -230,31 +232,31 @@ public:
     bool getAutomerge()  { return automerge; }
     bool getAngrylinker() { return angrylinker; }
     bool getExitsCheck() { return exitsCheck; }
-    bool getTerrainCheck() { return terrainCheck; } 
+    bool getTerrainCheck() { return terrainCheck; }
     bool getBriefMode()     {return briefMode;}
     bool getAlwaysOnTop()     {return alwaysOnTop;}
-    
+
     int getDetailsVisibility() { return detailsVisibilityRange; }
     int getTextureVisibility() { return textureVisibilityRange; }
-    
+
     bool getRegionsAutoSet();
     bool getRegionsAutoReplace();
     bool getDisplayRegionsRenderer();
     bool getShowRegionsInfo();
-    
+
     bool getShowNotesRenderer() { return showNotesRenderer; }
 
     // App Window size
-    void setWindowRect(QRect rect) { userWindowRect = rect; setConfigModified(true);  } 
-    void setWindowRect(int x, int y, int width, int height) 
-        { userWindowRect.setRect(x, y, width, height); setConfigModified(true);  } 
+    void setWindowRect(QRect rect) { userWindowRect = rect; setConfigModified(true);  }
+    void setWindowRect(int x, int y, int width, int height)
+        { userWindowRect.setRect(x, y, width, height); setConfigModified(true);  }
     QRect getWindowRect() {return userWindowRect; }
-    
+
     // renderer settings
-    void setRendererAngles(float x, float y, float z) 
-       { angleX = x; angleY = y; angleZ = z; setConfigModified(true);  } 
-    void setRendererPosition(float x, float y, float z) 
-       { userX = x; userY = y; userZ = z; setConfigModified(true);  } 
+    void setRendererAngles(float x, float y, float z)
+       { angleX = x; angleY = y; angleZ = z; setConfigModified(true);  }
+    void setRendererPosition(float x, float y, float z)
+       { userX = x; userY = y; userZ = z; setConfigModified(true);  }
     float getRendererAngleX() {return angleX;}   // this is ONLY what was read from CONFIG
     float getRendererAngleY() {return angleY;}
     float getRendererAngleZ() {return angleZ;}
@@ -287,7 +289,7 @@ class ConfigParser : public QXmlDefaultHandler {
 public:
   ConfigParser();
 //  bool characters(const QString& ch);
-    
+
   bool startElement( const QString&, const QString&, const QString& ,
 		     const QXmlAttributes& );
 //  bool endElement( const QString&, const QString&, const QString& );
@@ -299,7 +301,7 @@ private:
 
   struct roomSectorsData texture;
   TSpell   spell;
-  
+
   int i;
 };
 

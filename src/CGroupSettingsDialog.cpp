@@ -30,7 +30,7 @@
 CGroupSettingsDialog::CGroupSettingsDialog(QWidget *parent) : QDialog(parent)
 {
 	print_debug(DEBUG_INTERFACE, "in GroupManager Settings Dialog Constructor");
-    setupUi(this);                        
+    setupUi(this);
     connect(pushButton_changeColour, SIGNAL(clicked()), this, SLOT(selectColor()) );
 	print_debug(DEBUG_INTERFACE, "exiting the GroupManager Settings Dialog Constructor");
 }
@@ -51,7 +51,7 @@ void CGroupSettingsDialog::run()
 void CGroupSettingsDialog::accept()
 {
 	CGroup *group = renderer_window->getGroupManager();
-	
+
 	QString s;
 	s = lineEdit_charName->text();
 	if (s != conf->getGroupManagerCharName() ) {
@@ -63,42 +63,34 @@ void CGroupSettingsDialog::accept()
 		conf->setGroupManagerColor(color);
 		group->resetColor();
 	}
-	
+
 	QByteArray remoteHost = lineEdit_remoteHost->text().toAscii();
 	int remotePort = lineEdit_remotePort->text().toInt();
-	if (remotePort != conf->getGroupManagerRemotePort() || 
+	if (remotePort != conf->getGroupManagerRemotePort() ||
 		remoteHost != conf->getGroupManagerHost()	) {
-		
+
 		conf->setGroupManagerHost(remoteHost);
 		conf->setGroupManagerRemotePort(remotePort);
-		
-		if (group->isConnected()) 
+
+		if (group->isConnected())
 			group->reconnect();
 	}
-
-	print_debug(DEBUG_GROUP, "Changing local port");
 
 	int localPort = lineEdit_localPort->text().toInt();
 	if (localPort != conf->getGroupManagerLocalPort() ) {
-		print_debug(DEBUG_GROUP, "Changing local port 2");
 		conf->setGroupManagerLocalPort(localPort);
-		print_debug(DEBUG_GROUP, "Changing local port 3");
-
 		if (group->getType() == CGroupCommunicator::Server)
 			group->reconnect();
-		
-		print_debug(DEBUG_GROUP, "Changing local port 4");
-
 	}
-	
+
     done(Accepted);
 }
 
 
-void CGroupSettingsDialog::selectColor() 
+void CGroupSettingsDialog::selectColor()
 {
     print_debug(DEBUG_GROUP, "in select Color subdialog");
-	
+
     QColor newColor = QColorDialog::getColor(color, this);
     if (newColor.isValid()) {
         color = newColor;

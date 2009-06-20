@@ -161,16 +161,13 @@ void Cconfigurator::addSpell(TSpell spell)
     setConfigModified(true);
 }
 
-QString Cconfigurator::spellUpFor(unsigned int p)
+QString Cconfigurator::calculateTimeElapsed(QTime& timer)
 {
     QString s;
     int min;
     int sec;
 
-    if (p > spells.size())
-        return "";
-
-    sec = spells[p].timer.elapsed() / (1000);
+    sec = timer.elapsed() / (1000);
     min = sec / 60;
     sec = sec % 60;
 
@@ -181,6 +178,15 @@ QString Cconfigurator::spellUpFor(unsigned int p)
             .arg( sec % 10 );
 
     return s;
+}
+
+
+QString Cconfigurator::spellUpFor(unsigned int p)
+{
+    if (p > spells.size())
+        return "";
+
+    return calculateTimeElapsed(spells[p].timer);
 }
 
 
@@ -540,6 +546,7 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
                   ON_OFF(getAlwaysOnTop()) );
 
   QString grpManager;
+  /*
   switch (getGroupManagerState()) {
 	case CGroupCommunicator::Client :
 		grpManager += "Client";
@@ -551,6 +558,11 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
 		grpManager += "Off";
 		break;
   }
+  */
+  // instant connection does not work atm
+  grpManager += "Off";
+
+
   fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" charColor=\"%s\" localPort=\"%i\" remotePort=\"%i\">\r\n",
                   (const char *) grpManager.toAscii(), (const char *) getGroupManagerHost(),
                   (const char *) getGroupManagerCharName(),
@@ -746,12 +758,16 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         return TRUE;
     } else if (qName == "groupManager") {
     	s = attributes.value("state");
+    	/* TEMP
     	if (s == "Server") {
     		conf->setGroupManagerState(CGroupCommunicator::Server);
     	} else if (s == "Client") {
     		conf->setGroupManagerState(CGroupCommunicator::Client);
     	} else
     		conf->setGroupManagerState(CGroupCommunicator::Off);
+		*/
+		conf->setGroupManagerState(CGroupCommunicator::Off);
+
 
     	s = attributes.value("host");
         conf->setGroupManagerHost(s.toAscii());

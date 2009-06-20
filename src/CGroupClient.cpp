@@ -28,10 +28,10 @@ void CGroupClient::linkSignals()
 {
 	connect(this, SIGNAL(disconnected()), this, SLOT(lostConnection() ) );
 	connect(this, SIGNAL(connected()), this, SLOT(connectionEstablished() ) );
-		
+
 	connect(this, SIGNAL(error(QAbstractSocket::SocketError )), this, SLOT(errorHandler(QAbstractSocket::SocketError) ) );
 	connect(this, SIGNAL(readyRead()), this, SLOT( dataIncoming() )   );
-	
+
 	buffer = "";
 	currentMessageLen = 0;
 }
@@ -46,13 +46,23 @@ CGroupClient::CGroupClient(QByteArray host, int remotePort, QObject *parent) :
 	protocolState = AwaitingLogin;
 
 	linkSignals();
+
+	if (!waitForConnected(5000)) {
+	    printf("Server not responding!\r\n");
+		connectionState = CGroupClient::Quiting;
+	    close();
+	    print_debug(DEBUG_GROUP, "Server not responding!");
+	    errorHandler(QAbstractSocket::ConnectionRefusedError);
+	    getParent()->changeType(CGroupCommunicator::Off);
+	    return;
+	}
 }
 
 CGroupClient::CGroupClient(QObject *parent) :
 	QTcpSocket(parent)
 {
 	connectionState = Closed;
-	
+
 	linkSignals();
 	protocolState = Idle;
 }
@@ -63,7 +73,7 @@ void CGroupClient::setSocket(int socketDescriptor)
 	if (setSocketDescriptor(socketDescriptor) == false) {
 		// failure ... what to do?
 		print_debug(DEBUG_GROUP, "Connection failed. Native socket not recognized by CGroupClient.");
-	} 
+	}
 
 	setConnectionState(Connected);
 }
@@ -74,13 +84,13 @@ void CGroupClient::setProtocolState(int val)
 	protocolState = val;
 }
 
-void CGroupClient::setConnectionState(int val) 
+void CGroupClient::setConnectionState(int val)
 {
 	print_debug(DEBUG_GROUP, "Connection state: %i", val);
 	connectionState = val;
 	getParent()->connectionStateChanged(this);
 }
-	
+
 
 CGroupClient::~CGroupClient()
 {
@@ -107,15 +117,15 @@ void CGroupClient::dataIncoming()
 {
 	QByteArray message;
 	QByteArray rest;
-	
+
 //	print_debug(DEBUG_GROUP, "Incoming Data [conn %i, IP: %s]", socketDescriptor(),
 //			(const char *) peerAddress().toString().toAscii() );
 
 	QByteArray tmp = readAll();
-	
-	
+
+
 	buffer += tmp;
-	
+
 //	print_debug(DEBUG_GROUP, "RAW data buffer: %s", (const char *) buffer);
 
 	while ( currentMessageLen < buffer.size()) {
@@ -127,18 +137,18 @@ void CGroupClient::dataIncoming()
 void CGroupClient::cutMessageFromBuffer()
 {
 	QByteArray rest;
-	
+
 	if (currentMessageLen == 0) {
 		int index = buffer.indexOf(' ');
-		
+
 		QString len = buffer.left(index + 1);
 		currentMessageLen = len.toInt();
 //		print_debug(DEBUG_GROUP, "Incoming buffer length: %i, incoming message length %i",
 //				buffer.size(), currentMessageLen);
-		
+
 		rest = buffer.right( buffer.size() - index - 1);
 		buffer = rest;
-		
+
 		if (buffer.size() == currentMessageLen)
 			cutMessageFromBuffer();
 
@@ -158,16 +168,16 @@ void CGroupClient::sendData(QByteArray data)
 {
 	QByteArray buff;
 	QString len;
-	
+
 	len = QString("%1 ").arg(data.size());
-	
+
 //	char len[10];
-	
+
 //	sprintf(len, "%i ", data.size());
-	
+
 	buff = len.toAscii();
 	buff += data;
-	
+
 	write(buff);
 }
 

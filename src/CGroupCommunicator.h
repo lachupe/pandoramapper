@@ -29,7 +29,7 @@ class CGroup;
 class CGroupClient;
 
 // draft for no peer
-class CGroupDraftConnection : public QObject 
+class CGroupDraftConnection : public QObject
 {
 	Q_OBJECT
 public:
@@ -41,16 +41,16 @@ class CGroupCommunicator : public QObject
 {
 	Q_OBJECT
 	int type;
-	
-	enum Messages { NONE, ACK, 
-					REQ_VERSION, REQ_ACK, REQ_LOGIN, REQ_INFO, 
-					PROT_VERSION, GTELL, 
+
+	enum Messages { NONE, ACK,
+					REQ_VERSION, REQ_ACK, REQ_LOGIN, REQ_INFO,
+					PROT_VERSION, GTELL,
 					STATE_LOGGED, STATE_KICKED,
 					ADD_CHAR, REMOVE_CHAR, UPDATE_CHAR, RENAME_CHAR };
-	
+
 	QObject *peer;	// server or client
 	CGroup *getGroup() { return (CGroup *) parent(); }
-	
+
 	void connectionClosed(CGroupClient *connection);
 	void connectionEstablished(CGroupClient *connection);
 	void connecting(CGroupClient *connection);
@@ -62,24 +62,24 @@ class CGroupCommunicator : public QObject
 	void parseLoginInformation(CGroupClient *connection, QDomNode data);
 	void sendGroupInformation(CGroupClient *connection);
 	void parseGroupInformation(CGroupClient *connection, QDomNode data);
-	
+
 	void userLoggedOn(CGroupClient *conn);
 	void userLoggedOff(CGroupClient *conn);
-		
+
 	void retrieveDataClient(CGroupClient *connection, int message, QDomNode data);
 	void retrieveDataServer(CGroupClient *connection, int message, QDomNode data);
-	
+
 	QHash<QByteArray, int>  clientsList;
 
-	
+
 public:
-	const static int protocolVersion = 102;
+	const static int protocolVersion = 103;
 	enum States { Server, Client, Off };
 
 
 	CGroupCommunicator(int type, QObject *parent);
 	virtual ~CGroupCommunicator();
-	
+
 	void changeType(int newState);
 	int getType() {return type; }
 	void sendCharUpdate(CGroupClient *conn, QDomNode blob);
@@ -89,7 +89,7 @@ public:
 	void sendRemoveUserNotification(CGroupClient *conn, QByteArray name);
 	void renameConnection(QByteArray oldName, QByteArray newName);
 	void sendUpdateName(QByteArray oldName, QByteArray newName);
-		
+
 public slots:
 	void connectionStateChanged(CGroupClient *connection);
 	void errorInConnection(CGroupClient *connection);

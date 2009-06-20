@@ -22,6 +22,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMessageBox>
+#include <QTimer>
 
 #include "utils.h"
 #include "CConfigurator.h"
@@ -31,15 +32,67 @@
 
 CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
 {
-	CGroupChar *ch;
+	setWindowTitle("GroupManager");
+	QApplication *app = qApp;
+    QRect rect = app->desktop()->availableGeometry(-1);
+    if (conf->getGroupManagerRect().x() == 0 || conf->getGroupManagerRect().x() >= rect.width() ||
+        conf->getGroupManagerRect().y() >= rect.height() ) {
+        print_debug(DEBUG_GROUP, "Autosettings for window size and position");
+        int x, y, height, width;
 
-	ch = new CGroupChar();
+        x = conf->getWindowRect().x() - (rect.width() / 3) ;
+        y = conf->getWindowRect().y();
+        width = rect.width() / 3;
+        height = conf->getWindowRect().height() / 2;
 
-	ch->setName(name);
+        conf->setGroupManagerRect( QRect(x, y, width, height) );
+    }
+    setGeometry( conf->getGroupManagerRect() );
+
+	tree = new QTreeWidget(this);
+	tree->setColumnCount(8);
+	tree->setHeaderHidden(true);
+//	tree->setHeaderLabels(QStringList() << tr("Name") << tr("Room Name") << tr("HP") << tr("Mana") << tr("Moves") <<
+//			tr("Spells") << tr("Spells") << tr("Spells"));
+	tree->setRootIsDecorated(false);
+	tree->setAlternatingRowColors(true);
+	tree->setSelectionMode(QAbstractItemView::NoSelection);
+	tree->clear();
+//	tree->hide();
+
+
+	QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(tree);
+
+    this->setLayout(layout);
+
+
+    show();
+    raise();
+
+
+	CGroupChar *ch = new CGroupChar(tree);
+
+	chars.clear();
+	ch->setName("Fistandantilus");
 	ch->setPosition(1); // FIXME ... or does not really matter.
 	ch->setColor(conf->getGroupManagerColor());
 	chars.append(ch);
 	self = ch;
+	ch->updateLabels();
+
+	//
+	tree->resizeColumnToContents(0);
+	tree->resizeColumnToContents(1);
+	tree->resizeColumnToContents(2);
+	tree->resizeColumnToContents(3);
+	tree->resizeColumnToContents(4);
+	tree->resizeColumnToContents(5);
+	tree->resizeColumnToContents(6);
+	tree->resizeColumnToContents(7);
+
+	ch->setName(name);
+
 
 	print_debug(DEBUG_GROUP, "Starting up the GroupManager.\r\n");
 	network = new CGroupCommunicator(CGroupCommunicator::Off, this);
@@ -62,36 +115,18 @@ CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
     }
 */
 
-	setWindowTitle("GroupManager");
-	QApplication *app = qApp;
-    QRect rect = app->desktop()->availableGeometry(-1);
-    if (conf->getGroupManagerRect().x() == 0 || conf->getGroupManagerRect().x() >= rect.width() ||
-        conf->getGroupManagerRect().y() >= rect.height() ) {
-        print_debug(DEBUG_GROUP, "Autosettings for window size and position");
-        int x, y, height, width;
-
-        x = conf->getWindowRect().x() - (rect.width() / 3) ;
-        y = conf->getWindowRect().y();
-        width = rect.width() / 3;
-        height = conf->getWindowRect().height() / 2;
-
-        conf->setGroupManagerRect( QRect(x, y, width, height) );
-    }
-    show();
-    raise();
-    setGeometry( conf->getGroupManagerRect() );
 
     if (conf->getShowGroupManager() == false)
     	hide();
 
-	layout = new QGridLayout(this);
-	layout->setVerticalSpacing(0);
-	layout->setContentsMargins(0, 0, 0, 0);
-	this->setLayout(layout);
-	//status = new QFrame(this);
-	//status->resize(conf->getGroupManagerRect().width(), conf->getGroupManagerRect().height());
-	//status->setFrameStyle(QFrame::StyledPanel);
-	//layout->addWidget(status);
+
+    // initialize timed updates of the group manager frame
+    startTimer( 0 );                            // run continuous timer
+    QTimer * counter = new QTimer( this );
+    connect( counter, SIGNAL(timeout()), this, SLOT(updateGroupManagerWindow()) );
+    counter->start( 1000 );
+
+
 	print_debug(DEBUG_GROUP, "Leaving the GroupManager constructor");
 }
 
@@ -109,8 +144,11 @@ void CGroup::resetAllChars()
 	chars.clear();
 }
 
+
 void CGroup::resetChars()
 {
+	printf(" ---------- Size of chars: %i\r\n", chars.size());
+
 	for (int i = 0; i < chars.size(); ++i) {
 		if (chars[i] != self)
 			delete chars[i];
@@ -122,11 +160,9 @@ void CGroup::resetChars()
 CGroup::~CGroup()
 {
 	resetAllChars();
-	delete layout;
+	delete tree;
 	delete network;
 }
-
-
 
 void CGroup::resetColor()
 {
@@ -150,7 +186,7 @@ QByteArray CGroup::getNameFromBlob(QDomNode blob)
 {
 	CGroupChar *newChar;
 
-	newChar = new CGroupChar;
+	newChar = new CGroupChar(tree);
 	newChar->updateFromXML(blob);
 
 	QByteArray name = newChar->getName();
@@ -164,7 +200,7 @@ bool CGroup::addChar(QDomNode node)
 {
 	CGroupChar *newChar;
 
-	newChar = new CGroupChar;
+	newChar = new CGroupChar(tree);
 	newChar->updateFromXML(node);
 	if ( isNamePresent(newChar->getName()) == true || newChar->getName() == "") {
 		print_debug(DEBUG_GROUP, "Adding new char FAILED. the name %s already existed.",
@@ -175,9 +211,10 @@ bool CGroup::addChar(QDomNode node)
 		print_debug(DEBUG_GROUP, "Added new char. Name %s",
 				(const char *) newChar->getName());
 		chars.append(newChar);
-		printf("LAYOUT [before]: Columns %i, Rows %i\r\n", layout->columnCount(), layout->rowCount());
-		layout->addWidget( newChar->getCharFrame());
-		printf("LAYOUT [after]: Columns %i, Rows %i\r\n", layout->columnCount(), layout->rowCount());
+
+
+//		layout->addWidget( newChar->getCharFrame());
+
 		return true;
 	}
 }
@@ -196,7 +233,7 @@ void CGroup::removeChar(QByteArray name)
 			ch = chars[i];
 			chars.remove(i);
 
-			layout->removeWidget( ch->getCharFrame() );
+//			layout->removeWidget( ch->getCharFrame() );
 			delete ch;
 		}
 }
@@ -271,6 +308,7 @@ void CGroup::connectionFailed(QString message)
 void CGroup::connectionClosed(QString message)
 {
 	print_debug(DEBUG_GROUP, "Connection closed: %s", (const char *) message.toAscii());
+
 	if (network->getType() == CGroupCommunicator::Client)
 		QMessageBox::information(this, "groupManager", QString("Connection closed: %1.").arg(message));
 }
@@ -361,6 +399,14 @@ void CGroup::resetName()
 	self->setName(conf->getGroupManagerCharName());
 }
 
+void CGroup::updateGroupManagerWindow()
+{
+	for (int i = 0; i < chars.size(); ++i) {
+		chars[i]->updateLabels();
+	}
+}
+
+
 void CGroup::renameChar(QDomNode blob)
 {
 	if (blob.nodeName() != "data") {
@@ -404,14 +450,14 @@ void CGroup::parseScoreInformation(QByteArray score)
 		QString temp = score;
 		QStringList list = temp.split('/');
 
-
+/*
 		print_debug(DEBUG_GROUP, "Hp: %s", (const char *) list[0].toAscii());
 		print_debug(DEBUG_GROUP, "Hp max: %s", (const char *) list[1].toAscii());
 		print_debug(DEBUG_GROUP, "Mana: %s", (const char *) list[2].toAscii());
 		print_debug(DEBUG_GROUP, "Max Mana: %s", (const char *) list[3].toAscii());
 		print_debug(DEBUG_GROUP, "Moves: %s", (const char *) list[4].toAscii());
 		print_debug(DEBUG_GROUP, "Max Moves: %s", (const char *) list[5].toAscii());
-
+*/
 		self->setScore(list[0].toInt(), list[1].toInt(), list[2].toInt(), list[3].toInt(),
 						list[4].toInt(), list[5].toInt()			);
 
@@ -427,12 +473,12 @@ void CGroup::parseScoreInformation(QByteArray score)
 		QString temp = score;
 		QStringList list = temp.split('/');
 
-
+/*
 		print_debug(DEBUG_GROUP, "Hp: %s", (const char *) list[0].toAscii());
 		print_debug(DEBUG_GROUP, "Hp max: %s", (const char *) list[1].toAscii());
 		print_debug(DEBUG_GROUP, "Moves: %s", (const char *) list[2].toAscii());
 		print_debug(DEBUG_GROUP, "Max Moves: %s", (const char *) list[3].toAscii());
-
+*/
 		self->setScore(list[0].toInt(), list[1].toInt(), 0, 0,
 						list[2].toInt(), list[3].toInt()			);
 
@@ -444,12 +490,14 @@ void CGroup::parsePromptInformation(QByteArray prompt)
 {
 	QByteArray hp, mana, moves;
 
+	printf("Prompt: %s\r\n", (const char *) prompt);
+
 	if (prompt.indexOf('>') == -1)
 		return; // false prompt
 
 	hp = "Healthy";
 	mana = "Full";
-	moves = "A lot";
+	moves = "Lots";
 
 	int index = prompt.indexOf("HP:");
 	if (index != -1) {

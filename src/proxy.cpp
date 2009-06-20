@@ -33,9 +33,9 @@
     #include <arpa/inet.h>
     #include <netdb.h>
     #include <sys/ioctl.h>
-    
-    
-    
+
+
+
     #define WSAEWOULDBLOCK EWOULDBLOCK
     #define WSAEINPROGRESS EINPROGRESS
     #define WSAGetLastError() errno
@@ -89,13 +89,13 @@ int Proxy::init()
             exit(1);
         } else {
 	    print_debug(DEBUG_PROXY, "Started windows sockets.\r\n");
-	}	
+	}
     #endif
 
     #ifdef DEBUG
         debug_file = fopen(DEBUG_FILE_NAME, "w+");
     #endif
-  
+
     print_debug(DEBUG_PROXY, "proxy: initializing...\r\n");
     if ((proxy_hangsock = socket (AF_INET, SOCK_STREAM, 0))<0) {
         print_debug(DEBUG_PROXY, "proxy: Cannot open socket\n");
@@ -106,7 +106,7 @@ int Proxy::init()
     if(setsockopt(proxy_hangsock, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) == -1) {
         print_debug(DEBUG_PROXY, "Couldn't set the SO_REUSEADDR.\r\n");
         exit(1);
-    } 
+    }
 
     proxy_name.sin_family=AF_INET;
     proxy_name.sin_addr.s_addr=INADDR_ANY;
@@ -117,7 +117,7 @@ int Proxy::init()
         exit(1);
     }
 
-  
+
     print_debug(DEBUG_PROXY, "Proxy: ready and listening...\r\n");
     listen(proxy_hangsock, 3);
 
@@ -128,9 +128,9 @@ int Proxy::loop(void)
 {
     fd_set   input, exc;
     int n;
-        
+
   while (1) {
-    
+
     FD_ZERO(&input);
     FD_ZERO(&exc);
 
@@ -138,35 +138,35 @@ int Proxy::loop(void)
         SOCKET sock = user.getSocket();
         FD_SET(sock, &input);
         FD_SET(sock, &exc);
-          
+
         if (!mudEmulation) {
             SOCKET sock = mud.getSocket();
             FD_SET(sock, &input);
             FD_SET(sock, &exc);
         }
     }
-  
+
     FD_SET(proxy_hangsock, &input);
 
     n = select (FD_SETSIZE , &input, NULL, &exc, NULL);
     if (n < 0) {
         /* .... */
-        print_debug(DEBUG_PROXY, "Networking error: Select failed.  Quiting.\r\n"); 
+        print_debug(DEBUG_PROXY, "Networking error: Select failed.  Quiting.\r\n");
         exit(1);
     }
-        
-    if (FD_ISSET(proxy_hangsock, &input)) 
+
+    if (FD_ISSET(proxy_hangsock, &input))
         if (!user.isConnected())
             incomingConnection();
-                
+
     if (user.isConnected()) {
         if (FD_ISSET(user.getSocket(), &exc) || FD_ISSET(mud.getSocket(), &exc))
             shutdown();
-    
+
         if (FD_ISSET(user.getSocket(),&input)) {
             /* user stream */
             int size;
-            
+
             print_debug(DEBUG_PROXY, "Proxy: Network activity!\r\n");
 
             size = user.read();
@@ -176,33 +176,33 @@ int Proxy::loop(void)
                     mud.write(user.buffer, size);
                 }
             } else {
-                if (WSAGetLastError() == WSAEWOULDBLOCK) 
+                if (WSAGetLastError() == WSAEWOULDBLOCK)
                     continue;
                 shutdown();
              }
         }
-          
+
         if (mudEmulation)
             continue;
-          
+
         if (FD_ISSET(mud.getSocket(),&input)) {
             int size;
-            
+
             size = mud.read();
             if (size>0) {
                 size = dispatcher->analyzeMudStream(mud);
-                user.write( mud.buffer, size );      
-            } else { 
-                if (WSAGetLastError() == WSAEWOULDBLOCK) 
+                user.write( mud.buffer, size );
+            } else {
+                if (WSAGetLastError() == WSAEWOULDBLOCK)
                     continue;
                 shutdown();
             }
 
         }
     }
-    
+
   }     /* while loop ends */
-  
+
   return 0;
 }
 
@@ -215,29 +215,29 @@ void Proxy::run()
 }
 
 
-void Proxy::send_line_to_mud(const char *line) 
+void Proxy::send_line_to_mud(const char *line)
 {
-    mud.send_line((char *) line);    
+    mud.send_line((char *) line);
 }
 
-void Proxy::send_line_to_user(const char *line) 
+void Proxy::send_line_to_user(const char *line)
 {
-    user.send_line((char *)line);    
+    user.send_line((char *)line);
 }
 
 void Proxy::sendMudEmulationGreeting()
 {
     CRoom *r;
-    
+
     user.send_line( "Welcome to Pandora MUD Emulation!\r\n\r\n" );
 
-    if (stacker.amount() == 0) 
+    if (stacker.amount() == 0)
         r = Map.getRoom( 1 );
     else
         r = stacker.first();
 
     r->sendRoom();
-    
+
     user.send_line( "-->" );
 }
 
@@ -250,8 +250,8 @@ bool Proxy::connectToMud()
         return false;
     } else {
         print_debug(DEBUG_PROXY, "Connected!\r\n");
-        return true;        
-    }    
+        return true;
+    }
 }
 
 
@@ -260,23 +260,23 @@ void Proxy::incomingConnection()
     SOCKET newsock;
     int size;
     struct sockaddr_in networkName;
-    
+
     print_debug(DEBUG_PROXY, "Incoming connection!\r\n");
-    
+
     size = sizeof(struct sockaddr_in);
     newsock = accept(proxy_hangsock, (struct sockaddr *)&networkName, (socklen_t *) &size);
     if (newsock > 0) {
         user.setConnection( newsock );
-//        user.nonblock();                
-                
-        if (mudEmulation) 
+//        user.nonblock();
+
+        if (mudEmulation)
             sendMudEmulationGreeting();
-        else 
-            if (!connectToMud()) 
+        else
+            if (!connectToMud())
                 user.close();
 
         emit connectionEstablished();
-        engine->clear(); /* clear event pipes */   
+        engine->clear(); /* clear event pipes */
     } else {
 //        printf("Connection to user failed! New  socket is not valid.\r\n");
 //          printf(".");
@@ -297,7 +297,7 @@ void Proxy::shutdown()
         mud.close();
         mud.clear();
     }
-    
+
     emit connectionLost();
 //    #ifdef Q_OS_WIN32
 //        WSACleanup();
@@ -308,7 +308,7 @@ void Proxy::shutdown()
 void Proxy::sendGroupTellEvent(QByteArray data)
 {
 	print_debug(DEBUG_PROXY, "Sending gtell");
-	emit sendGTell(data); 
+	emit sendGTell(data);
 	print_debug(DEBUG_PROXY, "Done sending gtell");
 }
 
@@ -319,20 +319,20 @@ void Proxy::sendScoreLineEvent(QByteArray data)
 
 void Proxy::sendPromptLineEvent(QByteArray data)
 {
-//	printf("Sending prompt to groupManager: %s\r\n", (const char *) data);
+	printf("Sending prompt to groupManager: %s\r\n", (const char *) data);
 	emit sendPromptLine(data);
 }
 
 
 // ----------------------------------  ProxySocket ------------------------------------------
-void ProxySocket::send_line(const char *line) 
+void ProxySocket::send_line(const char *line)
 {
     mutex.lock();
     send(sock, line, strlen(line), 0);
     mutex.unlock();
 }
 
-void ProxySocket::clear() { 
+void ProxySocket::clear() {
     sock = 0;
     mainState = 0;
     subState = 0;
@@ -344,45 +344,45 @@ void ProxySocket::clear() {
 void ProxySocket::close() {
     ::shutdown(sock, 2);
     print_debug(DEBUG_PROXY, "Closing the socket.\r\n");
-    ::closesocket(sock);               
+    ::closesocket(sock);
 }
 
-ProxySocket::ProxySocket(bool xml) 
-{ 
-    clear(); 
-    setXmlTogglable( xml); 
+ProxySocket::ProxySocket(bool xml)
+{
+    clear();
+    setXmlTogglable( xml);
 }
 
-SOCKET ProxySocket::getSocket()     
-{ 
-    return sock; 
+SOCKET ProxySocket::getSocket()
+{
+    return sock;
 }
 
-bool ProxySocket::isXmlMode()    
-{ 
-    return xmlMode; 
+bool ProxySocket::isXmlMode()
+{
+    return xmlMode;
 }
 
-void ProxySocket::setXmlMode( bool b ) 
-{ 
-    if (xmlTogglable && b) 
-        xmlMode = b; 
+void ProxySocket::setXmlMode( bool b )
+{
+    if (xmlTogglable && b)
+        xmlMode = b;
 }
 
-bool ProxySocket::isXmlTogglable()    
-{ 
-    return xmlTogglable; 
+bool ProxySocket::isXmlTogglable()
+{
+    return xmlTogglable;
 }
 
-void ProxySocket::setXmlTogglable( bool b ) { 
-    xmlTogglable = b; 
+void ProxySocket::setXmlTogglable( bool b ) {
+    xmlTogglable = b;
 }
 
 bool ProxySocket::isConnected()
 {
     if (sock)
         return true;
-    else 
+    else
         return false;
 }
 
@@ -404,7 +404,7 @@ bool ProxySocket::openConnection(QByteArray name, int port)
         return false;
     }
 
-    networkName.sin_addr.s_addr = *((unsigned int *) h->h_addr);     
+    networkName.sin_addr.s_addr = *((unsigned int *) h->h_addr);
     networkName.sin_family = AF_INET;
     networkName.sin_port = htons(port);
 
@@ -413,7 +413,7 @@ bool ProxySocket::openConnection(QByteArray name, int port)
         print_debug(DEBUG_PROXY, "Cannot create new socket!\r\n");
         return false;
     }
-    
+
     print_debug(DEBUG_PROXY, "Connecting ....\r\n");
     if (!connect(snew, (struct sockaddr *)&networkName, sizeof(struct sockaddr_in))  )  {
         sock = snew;
@@ -422,7 +422,7 @@ bool ProxySocket::openConnection(QByteArray name, int port)
         return false;
     }
 
-//    nonblock();                
+//    nonblock();
 
     return true;
 }
@@ -430,7 +430,7 @@ bool ProxySocket::openConnection(QByteArray name, int port)
 int ProxySocket::read(char * buffer, int len)
 {
     int rd;
-    
+
     mutex.lock();
     rd = recv(sock, buffer, len, 0);
     #ifdef DEBUG
@@ -465,7 +465,7 @@ int ProxySocket::read()
 void ProxySocket::nonblock()
 {
     unsigned long on = 1;
-    
+
     ioctlsocket(sock, FIONBIO, &on);
 }
 

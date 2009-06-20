@@ -21,103 +21,174 @@
 #include "CGroupChar.h"
 #include "utils.h"
 #include "CRoomManager.h"
+#include "CConfigurator.h"
 
-CGroupChar::CGroupChar()
+CGroupChar::CGroupChar(QTreeWidget* t) :
+	charTable(t)
 {
 	print_debug(DEBUG_GROUP, "GroupChar Constructor");
 
-	name = "";
+	name = "Fistandantilus";
 	pos = 0;
-	hp = 0;
-	maxhp = 0;
-	moves = 0;
-	maxmoves = 0;
-	mana = 0;
-	maxmana = 0;
+	hp = 999;
+	maxhp = 999;
+	moves = 999;
+	maxmoves = 999;
+	mana = 999;
+	maxmana = 999;
 	state = NORMAL;
 	textHP = "Healthy";
-	textMoves = "Full";
-	textMana = "Full";
+	textMana = "Burning";
+	textMoves = "Exhausted";
 	lastMovement = "";
-	
-	// create the info-labels
-	labelName = new QLabel;
-	labelRoom = new QLabel;
-	labelHpText = new QLabel;
-	labelHpInt = new QLabel;
-	labelManaText = new QLabel;
-	labelManaInt = new QLabel;
-	labelMovesText = new QLabel;
-	labelMovesInt = new QLabel;
-	labelState = new QLabel;
 
-	// setup the layout of labels
-	layout = new QGridLayout;
-	layout->addWidget(labelName, 0, 0, 2, 0);
-	layout->addWidget(labelState, 0, 1, 2, 1);
-	layout->addWidget(labelRoom, 3, 0, 3, 1);
-	layout->addWidget(labelHpText, 0, 2, 1, 2);
-	layout->addWidget(labelHpInt, 2, 2, 3, 2);
-	layout->addWidget(labelManaText, 0, 3, 1, 3);
-	layout->addWidget(labelManaInt, 2, 3, 3, 3);
-	layout->addWidget(labelMovesText, 0, 4, 1, 4);
-	layout->addWidget(labelMovesInt, 2, 4, 3, 4);
+	arm = false;
+	shld = false;
+	str = false;
+	bob = false;
+	bls = false;
+	sanc = false;
 
-	// setup the stretching factors
-	layout->setColumnStretch(0, 25);
-	layout->setColumnStretch(1, 15);
-	layout->setColumnStretch(2, 8);
-	layout->setColumnStretch(3, 8);
-	layout->setColumnStretch(4, 8);
-	
-	
-	charFrame = new QFrame;
-	charFrame->setFrameStyle(QFrame::StyledPanel);
-	charFrame->setLayout(layout);
+	blind = true;
+	tblind.start();
+
+	status = NORMAL;
+
+	charItem = new QTreeWidgetItem(charTable);
+	statusItem = new QTreeWidgetItem(charTable);
 
 	print_debug(DEBUG_GROUP, "GroupChar Constructor done.");
 }
 
 CGroupChar::~CGroupChar()
 {
-	delete layout;
-	delete labelName;
-	delete labelRoom;
-	delete labelHpText;
-	delete labelHpInt;
-	delete labelManaText;
-	delete labelManaInt;
-	delete labelMovesText;
-	delete labelMovesInt;
-	delete labelState;
+	delete charItem;
+	delete statusItem;
 }
 
-void CGroupChar::updateLabels()
+void CGroupChar::setNameField(QString name)
 {
-	print_debug(DEBUG_GROUP, "UPDATING LABELS ");
+	charItem->setTextAlignment(0, Qt::AlignCenter);
+	charItem->setText(0, name);
+	charItem->setBackgroundColor(0, color);
+	if (color.value() < 150)
+		charItem->setTextColor(0, Qt::white);
+	else
+		charItem->setTextColor(0, Qt::black);
+}
 
-	labelName->setText(name);
-	if (pos == 0) {
-		labelRoom->setText("Unknown");
+void CGroupChar::setField(int i, QString text)
+{
+	charItem->setText(i, text);
+}
+
+void CGroupChar::setSpellsFields()
+{
+
+	statusItem->setTextAlignment(0, Qt::AlignCenter);
+	if (blind) {
+		statusItem->setBackgroundColor(0, Qt::red);
 	} else {
-		if (Map.tryLockForRead() == true) {
-			CRoom *r = Map.getRoom(pos);
-			if (r == NULL)
-				labelRoom->setText("Unknown");
-			else 
-				labelRoom->setText(QString("%1:%2").arg(r->id).arg( QString(r->getName()) ) );
-			Map.unlock();
-		}	
+		statusItem->setBackgroundColor(0, Qt::darkGray);
 	}
-		
-	labelHpText->setText(textHP);
-	
-	labelHpInt->setText( QString("%1/%2").arg(hp).arg(maxhp) );
-	labelManaText->setText(textMana);
-	labelManaInt->setText( QString("%1/%2").arg(mana).arg(maxmana) );
-	labelMovesText->setText(textMoves);
-	labelMovesInt->setText( QString("%1/%2").arg(moves).arg(maxmoves) );
+	statusItem->setText(0, "BLIND " + conf->calculateTimeElapsed(tblind) );
 
+	charItem->setTextAlignment(5, Qt::AlignCenter);
+	charItem->setBackgroundColor(5, arm ? Qt::green : Qt::darkGray);
+	charItem->setText(5, "ARM");
+
+	statusItem->setTextAlignment(5, Qt::AlignCenter);
+	statusItem->setBackgroundColor(5, shld ? Qt::green : Qt::darkGray);
+	statusItem->setText(5, "SHLD");
+
+	charItem->setTextAlignment(6, Qt::AlignCenter);
+	charItem->setBackgroundColor(6, bob ? Qt::green : Qt::darkGray);
+	charItem->setText(6, "BOB");
+
+	statusItem->setTextAlignment(6, Qt::AlignCenter);
+	statusItem->setBackgroundColor(6, str ? Qt::green : Qt::darkGray);
+	statusItem->setText(6, "STR");
+
+	charItem->setTextAlignment(7, Qt::AlignCenter);
+	if (bls) {
+		charItem->setBackgroundColor(7, Qt::green);
+	} else {
+		charItem->setBackgroundColor(7, Qt::darkGray);
+	}
+	charItem->setText(7, "BLS " + conf->calculateTimeElapsed(tbless) );
+
+	statusItem->setTextAlignment(7, Qt::AlignCenter);
+	if (sanc) {
+		statusItem->setBackgroundColor(7, Qt::green);
+	} else {
+		statusItem->setBackgroundColor(7, Qt::darkGray);
+	}
+	statusItem->setText(7, "SANC " + conf->calculateTimeElapsed(tsanc));
+
+}
+
+
+void CGroupChar::setScoreFields()
+{
+	statusItem->setTextAlignment(2, Qt::AlignCenter);
+	statusItem->setTextAlignment(3, Qt::AlignCenter);
+	statusItem->setTextAlignment(4, Qt::AlignCenter);
+	charItem->setTextAlignment(2, Qt::AlignCenter);
+	charItem->setTextAlignment(3, Qt::AlignCenter);
+	charItem->setTextAlignment(4, Qt::AlignCenter);
+
+	QColor col;
+	col = QColor(qRgb(120, 249, 16));
+	if (textHP == "Hurt") {
+		col = QColor(qRgb(184, 243, 113));
+	} else 	if (textHP == "Wounded") {
+		col = QColor(qRgb(249, 251, 92));
+	} else 	if (textHP == "Bad") {
+		col = QColor(qRgb(224, 17, 31));
+	} else 	if (textHP == "Awful") {
+		col = QColor(qRgb(255, 0, 0));
+	}
+	charItem->setBackgroundColor(2, col);
+	charItem->setText(2, textHP);
+
+
+	col = QColor(qRgb(2, 0, 255));
+	if (textMana == "Hot") {
+		col = QColor(qRgb(184, 243, 113));
+	} else 	if (textMana == "Warm") {
+		col = QColor(qRgb(0, 79, 255));
+	} else 	if (textMana == "Cold") {
+		col = QColor(qRgb(0, 183, 255));
+	} else 	if (textMana == "Icy") {
+		col = QColor(qRgb(0, 255, 247));
+	}
+	charItem->setBackgroundColor(3, col);
+	charItem->setText(3, textMana);
+
+	col = QColor(qRgb(94, 36, 14));
+	if (textMoves == "Tired") {
+		col = QColor(qRgb(162, 47, 4));
+	} else 	if (textMoves == "Slow") {
+		col = QColor(qRgb(207, 64, 10));
+	} else 	if (textMoves == "Fainting") {
+		col = QColor(qRgb(207, 47, 10));
+	} else 	if (textMoves == "Exhausted") {
+		col = QColor(qRgb(255, 0, 0));
+	}
+	charItem->setBackgroundColor(4, col);
+	charItem->setText(4, textMoves);
+
+	statusItem->setText(2, QString("%1/%2").arg(hp).arg(maxhp));
+	statusItem->setText(3, QString("%1/%2").arg(mana).arg(maxmana));
+	statusItem->setText(4, QString("%1/%2").arg(moves).arg(maxmoves));
+}
+
+void CGroupChar::setStatusFields()
+{
+	  statusItem->setTextAlignment(1, Qt::AlignCenter);
+	  statusItem->setText(1, "STANDING");
+
+/*
 	switch (state) {
 		case BASHED:
 			labelState->setText("BASHED");
@@ -132,13 +203,39 @@ void CGroupChar::updateLabels()
 			labelState->setText("Normal");
 			break;
 	}
-	
-	print_debug(DEBUG_GROUP, "FINISHED UPDATING LABELS ");
+*/
+}
+
+void CGroupChar::updateLabels()
+{
+	setNameField(name);
+
+
+	  if (pos == 0) {
+		  setField(1, "The position of this users is unknown");
+	  } else {
+		  if (Map.tryLockForRead() == true) {
+			    CRoom *r = Map.getRoom(pos);
+				if (r == NULL)
+					setField(1, "The position of this users is unknown");
+				else
+					setField(1,  r->getName());
+
+				// QString("%1:%2").arg(r->id).arg( QString(r->getName()) )
+			    Map.unlock();
+			}
+	  }
+
+	  setScoreFields();
+	  setSpellsFields();
+	  setStatusFields();
+
+
 }
 
 QDomNode CGroupChar::toXML()
 {
-	
+
 	QDomDocument doc("charinfo");
 
 	QDomElement root = doc.createElement("playerData");
@@ -156,9 +253,9 @@ QDomNode CGroupChar::toXML()
 	root.setAttribute("maxmoves", maxmoves );
 	root.setAttribute("state", state );
 	root.setAttribute("lastMovement", QString(lastMovement));
-		
+
 	doc.appendChild(root);
-	
+
 	return root;
 }
 
@@ -166,7 +263,7 @@ bool CGroupChar::updateFromXML(QDomNode node)
 {
 	bool updated;
 
-	
+
 	updated = false;
     if (node.nodeName() != "playerData") {
     	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
@@ -176,9 +273,9 @@ bool CGroupChar::updateFromXML(QDomNode node)
    	QString s;
    	QByteArray str;
    	int newval;
-    	
+
    	QDomElement e = node.toElement();
-   	
+
    	unsigned int newpos  = e.attribute("room").toInt();
    	if (newpos != pos) {
    		updated = true;
@@ -205,7 +302,7 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		color = QColor(QString(str) );
    	}
 
-	printf("Tut 6.\r\n");
+//	printf("Tut 6.\r\n");
 
    	str = e.attribute("textHP").toAscii();
    	if (s != textHP) {
@@ -266,14 +363,14 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		state = newval;
    	}
-   	
-	printf("Tut 6.\r\n");
+
+//	printf("Tut 6.\r\n");
 
    	if (updated == true)
    		updateLabels();
-   	
-	printf("Tut 7.\r\n");
-   	
+
+//	printf("Tut 7.\r\n");
+
 	return updated; // hrmpf!
 }
 
@@ -283,9 +380,9 @@ QByteArray CGroupChar::getNameFromXML(QDomNode node)
     	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
     	return false;
     }
-    
+
    	QDomElement e = node.toElement();
-   	
+
    	return e.attribute("name").toAscii();
 }
 

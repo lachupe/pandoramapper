@@ -36,26 +36,16 @@
 class CGroup : public QDialog
 {
 	Q_OBJECT
-	
-	CGroupCommunicator *network;
 
-	QVector<CGroupChar *> chars;
-	CGroupChar	*self;
-	//QFrame	*status;
-	
-	
-	QGridLayout *layout;
-	
 	void resetAllChars();
-
 public:
 
 	enum StateMessages { NORMAL, FIGHTING, RESTING, SLEEPING, CASTING, INCAP, DEAD, BLIND, UNBLIND };
-	
+
 
 	CGroup(QByteArray name, QWidget *parent);
 	virtual ~CGroup();
-	
+
 	QByteArray getName() { return self->getName(); }
 	CGroupChar* getCharByName(QByteArray name);
 
@@ -72,28 +62,27 @@ public:
 //	bool addCharIfUnique(QDomNode blob);
 	void updateChar(QDomNode blob); // updates given char from the blob
 	CGroupCommunicator *getCommunicator() { return network; }
-	
-	
+
+
 	void resetChars();
 	QVector<CGroupChar *>  getChars() { return chars; }
 	// changing settings
 	void resetName();
 	void resetColor();
-	
+
 	QDomNode getLocalCharData() { return self->toXML(); }
 	void sendAllCharsData(CGroupClient *conn);
 	void issueLocalCharUpdate() { 	network->sendCharUpdate(self->toXML()); }
-	
+
 	void gTellArrived(QDomNode node);
-	
+
 	// dispatcher/Engine hooks
 	bool isGroupTell(QByteArray tell);
-	
+
 	void renameChar(QDomNode blob);
 
-	
+
 public slots:
-	// slots  {}()
 	void connectionRefused(QString message);
 	void connectionFailed(QString message);
 	void connectionClosed(QString message);
@@ -101,16 +90,24 @@ public slots:
 	void serverStartupFailed(QString message);
 	void gotKicked(QDomNode message);
 	void setCharPosition(unsigned int pos);
-	
+
 	void closeEvent( QCloseEvent * event ) { hide(); event->accept(); emit hides();}
 	void sendGTell(QByteArray tell); // sends gtell from local user
 	void parseScoreInformation(QByteArray score);
 	void parsePromptInformation(QByteArray prompt);
 
 	void parseStateChangeLine(int message, QByteArray line);
-										
+
+	void updateGroupManagerWindow();
+
 signals:
 	void hides();
+
+private:
+	CGroupCommunicator*		network;
+	QVector<CGroupChar *> 	chars;
+	CGroupChar*				self;
+	QTreeWidget*			tree;
 };
 
 #endif /*CGROUP_H_*/
