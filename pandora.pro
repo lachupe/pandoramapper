@@ -6,33 +6,41 @@ CONFIG += qt \
     opengl \
     warn_on \
     thread
-
 CONFIG += debug
+
 # CONFIG += release
 QT += xml \
     opengl \
     gui \
-    network
-FORMS += src/groupmanagersettings.ui \
+    network \
+    core
+FORMS += src/configedit.ui \
+    src/finddialog.ui \
+    src/groupmanagersettings.ui \
+    src/logdialog.ui \
+    src/movementdialog.ui \
+    src/roomedit.ui \
+    src/spellsdialog.ui \
+    src/groupmanagersettings.ui \
     src/configedit.ui \
     src/finddialog.ui \
     src/logdialog.ui \
     src/movementdialog.ui \
     src/roomedit.ui \
     src/spellsdialog.ui
-HEADERS += src/CGroupStatus.h \
-    src/CGroupSettingsDialog.h \
-    src/CGroupChar.h \
-    src/CGroupCommunicator.h \
-    src/CGroupClient.h \
-    src/CGroupServer.h \
-    src/CGroup.h \
-    src/CActionManager.h \
+HEADERS += src/CActionManager.h \
     src/CConfigurator.h \
     src/CDispatcher.h \
     src/CEngine.h \
     src/CEvent.h \
     src/CFrustum.h \
+    src/CGroup.h \
+    src/CGroupChar.h \
+    src/CGroupClient.h \
+    src/CGroupCommunicator.h \
+    src/CGroupServer.h \
+    src/CGroupSettingsDialog.h \
+    src/CGroupStatus.h \
     src/CLogDialog.h \
     src/CMovementDialog.h \
     src/CRegion.h \
@@ -47,22 +55,15 @@ HEADERS += src/CGroupStatus.h \
     src/SpellsDialog.h \
     src/defines.h \
     src/exits.h \
+    src/finddialog.h \
     src/mainwindow.h \
     src/proxy.h \
     src/renderer.h \
     src/userfunc.h \
     src/utils.h \
-    src/xml2.h \
-    src/finddialog.h
-SOURCES += src/CGroupStatus.cpp \
+    src/xml2.h
+SOURCES += src/CActionManager.cpp \
     src/CConfigurator.cpp \
-    src/CGroupSettingsDialog.cpp \
-    src/CGroupChar.cpp \
-    src/CGroupCommunicator.cpp \
-    src/CGroupClient.cpp \
-    src/CGroupServer.cpp \
-    src/CGroup.cpp \
-    src/CActionManager.cpp \
     src/CDispatcher.cpp \
     src/CEngine.cpp \
     src/CFrustum.cpp \
@@ -79,14 +80,21 @@ SOURCES += src/CGroupStatus.cpp \
     src/RoomEditDialog.cpp \
     src/SpellsDialog.cpp \
     src/exits.cpp \
+    src/finddialog.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/proxy.cpp \
     src/renderer.cpp \
     src/userfunc.cpp \
     src/utils.cpp \
-    src/finddialog.cpp \
-    src/xml2.cpp
+    src/xml2.cpp \
+    src/CGroupStatus.cpp \
+    src/CGroupSettingsDialog.cpp \
+    src/CGroupChar.cpp \
+    src/CGroupCommunicator.cpp \
+    src/CGroupClient.cpp \
+    src/CGroupServer.cpp \
+    src/CGroup.cpp
 TARGET = release/pandora
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 win32:LIBS += -lwsock32

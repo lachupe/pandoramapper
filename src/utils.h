@@ -19,8 +19,8 @@
  */
 
 /* Utilities, String functions and stuff */
-#ifndef UTILS_H 
-#define UTILS_H 
+#ifndef UTILS_H
+#define UTILS_H
 
 class QByteArray;
 
@@ -49,7 +49,7 @@ struct boolean_struct {
 #define DEBUG_ANALYZER          (1 << 1)
 #define DEBUG_SYSTEM            (1 << 2)
 #define DEBUG_CONFIG            (1 << 3)
-#define DEBUG_DISPATCHER        (1 << 4)        
+#define DEBUG_DISPATCHER        (1 << 4)
 #define DEBUG_PROXY             (1 << 5)
 #define DEBUG_RENDERER          (1 << 6)
 #define DEBUG_ROOMS             (1 << 7)
@@ -68,7 +68,7 @@ struct boolean_struct {
 extern const char * exitnames[];
 
 struct debug_data_struct {
-  const char   *name;          
+  const char   *name;
   const char   *title;
   const char   *desc;
   unsigned int  flag;
@@ -94,6 +94,7 @@ int is_abbrev(const char *arg1, const char *arg2);
 int reversenum(int num);
 char dirbynum(int dir);
 int numbydir(char dir);
+void send_prompt();
 void send_to_user(const char *messg, ...);
 void send_to_mud(const char *messg, ...);
 int get_input_boolean(char *input);
@@ -101,7 +102,7 @@ int parse_dir(char *dir);
 void basic_mud_log(const char *format, ...);
 int MIN(int a, int b);
 
-void latinToAscii(QByteArray &text); 
+void latinToAscii(QByteArray &text);
 
 #endif
 

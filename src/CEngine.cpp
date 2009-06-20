@@ -19,10 +19,10 @@
  */
 
 /* rewritten analyzer engine. */
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctype.h>
+//#include <cstdio>
+//#include <cstdlib>
+//#include <cstring>
+//#include <ctype.h>
 #include <QMutex>
 #include <QTime>
 #include <QTimer>
@@ -378,12 +378,17 @@ void CEngine::updateRegions()
         last_region = r->getRegion();
         // If this room was JUST added, it has no region set.
         if (last_region == NULL) {
-        	return; // probably it needs some heavier work ...region settings might not work correct
+        	return; // probably it needs some heavier work ...region settings might not work correctly
         }
 
         if (last_region != users_region && conf->getRegionsAutoReplace() == false) {
-            send_to_user("--[ Moved to another region: new region %s\r\n", (const char *)  last_region->getName() );
-            if (conf->getRegionsAutoSet())
+
+        	if (last_warning_region != last_region && conf->getRegionsAutoSet() == false) {
+        		send_to_user("--[ Moved to another region: new region %s\r\n", (const char *)  last_region->getName() );
+        		last_warning_region = last_region;
+        	}
+
+        	if (conf->getRegionsAutoSet())
                 users_region = last_region;
         }
 

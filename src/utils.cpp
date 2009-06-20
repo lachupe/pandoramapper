@@ -28,6 +28,7 @@
 
 #include "defines.h"
 #include "CConfigurator.h"
+#include "CEngine.h"
 
 #if defined Q_OS_WIN32
   #define vsnprintf _vsnprintf
@@ -56,10 +57,10 @@ struct debug_data_struct debug_data[] = {
   {"spells", "Spells", "Spells timers messages",  DEBUG_SPELLS, 0},
   {"group", "GroupManager", "Group Manager messages",  DEBUG_GROUP, 1},
 
-  
+
   {NULL, NULL, NULL, 0, 0}
 };
-  
+
 const char *exits[] = {
       "north",
       "east",
@@ -81,8 +82,8 @@ const boolean_struct input_booleans[] = {
   {"-", FALSE},
   {"true", TRUE},
   {"false", FALSE},
-  
-  
+
+
   {NULL, FALSE}
 };
 
@@ -105,7 +106,7 @@ int write_debug(unsigned int flag, const char *format, va_list args)
     char txt[MAX_STR_LEN*2];
     int size;
     int i;
-    
+
 
     if (logfile == NULL) {
 
@@ -114,16 +115,16 @@ int write_debug(unsigned int flag, const char *format, va_list args)
 
         logFileName = new QString();
         *logFileName = fileName;
-        
+
         logfile = fopen( (const char *) fileName.toAscii(), "w+");
         if (!logfile) {
             perror ("Error opening logfile for writing");
             return -1;
         }
-    }    
-    
+    }
+
     size = vsnprintf(txt, sizeof(txt), format, args);
-    
+
     for (i = 0; debug_data[i].name; i++)
         if (IS_SET(flag, debug_data[i].flag) && debug_data[i].state) {
         fprintf(logfile, "%s: %s\r\n", debug_data[i].title, txt);
@@ -131,7 +132,7 @@ int write_debug(unsigned int flag, const char *format, va_list args)
         if (IS_SET(flag, DEBUG_TOUSER) )
             send_to_user("--[ %s: %s\r\n", debug_data[i].title, txt);
         }
-    
+
     return size;
 }
 
@@ -142,7 +143,7 @@ void print_debug(unsigned int flag, const char *messg, ...)
 
   if (!debug_data[0].state)
     return;
-  
+
   if (messg == NULL)
     return;
 
@@ -155,22 +156,22 @@ void print_debug(unsigned int flag, const char *messg, ...)
 int parse_dir(char *dir)
 {
   int i;
-  
+
   for (i = 0; i<= 5; i++)
     if (is_abbrev(dir, exits[i]) )
       return i;
-    
+
   return -1;
 }
 
 
 int is_integer(char *str)
 {
-  while ((isdigit(*str) || isspace(*str) || (*str == '-') || (*str == '+')) && 
+  while ((isdigit(*str) || isspace(*str) || (*str == '-') || (*str == '+')) &&
               (*str != 0))
     str++;
-  
-  if (*str != 0) 
+
+  if (*str != 0)
     return 0;
 
   return 1;
@@ -184,7 +185,7 @@ int get_input_boolean(char *input)
   for (i = 0; input_booleans[i].name != NULL; i++)
     if (strcmp(input, input_booleans[i].name) == 0)
       return input_booleans[i].state;
-    
+
   return -1;
 }
 
@@ -224,7 +225,7 @@ char *one_argument(char *argument, char *first_arg, int mode)
     }
     argument++;
   }
-  
+
   *(first_arg) = '\0';
 
   return (argument);
@@ -243,14 +244,14 @@ int is_abbrev(const char *arg1, const char *arg2)
     if (*arg1 == '*')
       arg2--;
     else
-      if (LOWER(*arg1) != LOWER(*arg2)) 
+      if (LOWER(*arg1) != LOWER(*arg2))
         return (0);
-      
-  if (!*arg1 || *arg1 == '*') 
+
+  if (!*arg1 || *arg1 == '*')
     return (1);
-  else 
+  else
     return (0);
-  
+
 }
 
 int numbydir(char dir)
@@ -274,7 +275,7 @@ int numbydir(char dir)
 char dirbynum(int dir)
 {
   switch (dir) {
-	case  NORTH : 
+	case  NORTH :
                 return 'n';
 		break;
 	case  SOUTH :
@@ -327,6 +328,12 @@ void send_to_user(const char *messg, ...)
   va_end(args);
 }
 
+
+void send_prompt() {
+	proxy->send_line_to_user( (const char *) engine->getPrompt() );
+}
+
+
 void send_to_mud(const char *messg, ...)
 {
   va_list args;
@@ -350,78 +357,78 @@ int write_to_channel(int mode, const char *format, va_list args)
     proxy->send_line_to_user(txt);
   else if (mode == 1)
     proxy->send_line_to_mud(txt);
-  
+
   return size;
 }
 
 
 // latin1 to 7-bit Ascii
-void latinToAscii(QByteArray &text) 
+void latinToAscii(QByteArray &text)
 {
     const unsigned char table[]= {
-/*192*/   'A',    
-          'A',    
-          'A',    
-          'A',    
-          'A',    
-          'A',    
-          'A',    
-          'C',    
-          'E',    
-          'E',    
-          'E',    
-          'E',    
-          'I',    
-          'I',    
-          'I',    
-          'I',    
-          'D',    
-          'N',    
-          'O',    
-          'O',    
-          'O',    
-          'O',    
-          'O',    
-          'x',    
-          'O',    
-          'U',    
-          'U',    
-          'U',    
-          'U',    
-          'Y',    
-          'b',    
-          'B',    
-          'a',    
-          'a',    
-          'a',    
-          'a',    
-          'a',    
-          'a',    
-          'a',    
-          'c',    
-          'e',    
-          'e',    
-          'e',    
-          'e',    
-          'i',    
-          'i',    
-          'i',    
-          'i',    
-          'o',    
-          'n',    
-          'o',    
-          'o',    
-          'o',    
-          'o',    
-          'o',    
-          ':',    
-          'o',    
-          'u',    
-          'u',    
-          'u',    
-          'u',    
-          'y',    
-          'b',    
+/*192*/   'A',
+          'A',
+          'A',
+          'A',
+          'A',
+          'A',
+          'A',
+          'C',
+          'E',
+          'E',
+          'E',
+          'E',
+          'I',
+          'I',
+          'I',
+          'I',
+          'D',
+          'N',
+          'O',
+          'O',
+          'O',
+          'O',
+          'O',
+          'x',
+          'O',
+          'U',
+          'U',
+          'U',
+          'U',
+          'Y',
+          'b',
+          'B',
+          'a',
+          'a',
+          'a',
+          'a',
+          'a',
+          'a',
+          'a',
+          'c',
+          'e',
+          'e',
+          'e',
+          'e',
+          'i',
+          'i',
+          'i',
+          'i',
+          'o',
+          'n',
+          'o',
+          'o',
+          'o',
+          'o',
+          'o',
+          ':',
+          'o',
+          'u',
+          'u',
+          'u',
+          'u',
+          'y',
+          'b',
           'y'
     };
     unsigned char ch;
@@ -430,9 +437,9 @@ void latinToAscii(QByteArray &text)
     for (pos = 0; pos <= text.length(); pos++) {
         ch = text[pos];
         if (ch > 128) {
-            if (ch < 192) 
+            if (ch < 192)
                 ch = 'z';
-            else 
+            else
                 ch = table[ ch - 192 ];
 
             text[pos] = ch;

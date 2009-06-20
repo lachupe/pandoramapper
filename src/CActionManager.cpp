@@ -19,6 +19,7 @@
  */
 
 
+
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -41,7 +42,7 @@
 #include "finddialog.h"
 #include "CGroupCommunicator.h"
 
-CActionManager::CActionManager(CMainWindow *parentWindow) 
+CActionManager::CActionManager(CMainWindow *parentWindow)
 {
     parent = parentWindow;
 
@@ -49,79 +50,79 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     newAct = new QAction(tr("&Close"), this);
     newAct->setShortcut(tr("Ctrl+N"));
     newAct->setStatusTip(tr("Close current map"));
-    connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));    
-    
+    connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
+
     openAct = new QAction(tr("&Load..."), this);
     openAct->setShortcut(tr("Ctrl+L"));
     openAct->setStatusTip(tr("Open an existing map"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-    
+
     reloadAct = new QAction(tr("&Reload..."), this);
     reloadAct->setShortcut(tr("Ctrl+R"));
     reloadAct->setStatusTip(tr("Reload current map"));
     connect(reloadAct, SIGNAL(triggered()), this, SLOT(reload()));
-    
+
     saveAct = new QAction(tr("&Save..."), this);
     saveAct->setShortcut(tr("Ctrl+S"));
     saveAct->setStatusTip(tr("Save currently opened map"));
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
-    
+
     saveAsAct = new QAction(tr("Save As..."), this);
     saveAsAct->setStatusTip(tr("Save the map As"));
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
-    
+
     publishAct= new QAction(tr("Remove Secrets"), this);
     publishAct->setStatusTip(tr("Removes all secret exits and rooms behind them from the map"));
-    connect(publishAct, SIGNAL(triggered()), this, SLOT(publish_map()));    
-    
-        
+    connect(publishAct, SIGNAL(triggered()), this, SLOT(publish_map()));
+
+
     quitAct =  new QAction(tr("&Exit..."), this);
     quitAct->setShortcut(tr("Ctrl+Q"));
     quitAct->setStatusTip(tr("Quit Pandora"));
     connect(quitAct, SIGNAL(triggered()), parent, SLOT(close()));
-        
+
     /* Room menu */
     findAct = new QAction(tr("Find..."), this);
     findAct->setStatusTip(tr("Find matching rooms"));
     connect(findAct, SIGNAL(triggered()), this, SLOT(find()));
-    
+
     roomeditAct= new QAction(tr("Edit"), this);
     roomeditAct->setStatusTip(tr("View/Edit current Room's info"));
-    connect(roomeditAct, SIGNAL(triggered()), this, SLOT(edit_current_room()));    
-    
+    connect(roomeditAct, SIGNAL(triggered()), this, SLOT(edit_current_room()));
+
     deleteAct= new QAction(tr("Delete"), this);
     deleteAct->setStatusTip(tr("Deletes this room"));
-    connect(deleteAct, SIGNAL(triggered()), this, SLOT(delete_room()));    
+    connect(deleteAct, SIGNAL(triggered()), this, SLOT(delete_room()));
 
     deleteFullyAct= new QAction(tr("Delete Fully"), this);
     deleteFullyAct->setStatusTip(tr("Deletes this room and everything that leads to it, including doors in other rooms"));
-    connect(deleteFullyAct, SIGNAL(triggered()), this, SLOT(deleteFully()));    
+    connect(deleteFullyAct, SIGNAL(triggered()), this, SLOT(deleteFully()));
 
     selectionTypeAct= new QAction(tr("Select On Any Layer"), this);
     selectionTypeAct->setStatusTip(tr("Selection can either pick the rooms on your current layer or on any lLayer."));
     selectionTypeAct->setCheckable(true);
     selectionTypeAct->setChecked( conf->getSelectOAnyLayer() );
-    connect(selectionTypeAct, SIGNAL(triggered()), this, SLOT( selectionType() ));    
+    connect(selectionTypeAct, SIGNAL(triggered()), this, SLOT( selectionType() ));
 
 
-    
+
     mergeAct= new QAction(tr("Merge"), this);
     mergeAct->setStatusTip(tr("Tries to merge two twin rooms"));
-    connect(mergeAct, SIGNAL(triggered()), this, SLOT(merge_room()));    
+    connect(mergeAct, SIGNAL(triggered()), this, SLOT(merge_room()));
 
     bindRoomsAct= new QAction(tr("Bind Rooms"), this);
     bindRoomsAct->setStatusTip(tr("Tries to connect two rooms"));
-    connect(bindRoomsAct, SIGNAL(triggered()), this, SLOT(bindRooms()));    
+    connect(bindRoomsAct, SIGNAL(triggered()), this, SLOT(bindRooms()));
 
 
     refreshAct= new QAction(tr("Refresh"), this);
     refreshAct->setStatusTip(tr("Switches to selected room and refreshes it"));
-    connect(refreshAct, SIGNAL(triggered()), this, SLOT(refreshRoom()));    
+    connect(refreshAct, SIGNAL(triggered()), this, SLOT(refreshRoom()));
 
-    
+
     moveRoomAct= new QAction(tr("Move"), this);
     moveRoomAct->setStatusTip(tr("Moves the room or rooms by given shift"));
-    connect(moveRoomAct, SIGNAL(triggered()), parent, SLOT(moveRoomDialog()));    
+    connect(moveRoomAct, SIGNAL(triggered()), parent, SLOT(moveRoomDialog()));
 
     /* Tools menu */
 
@@ -134,7 +135,7 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     mapMoveToolAct->setStatusTip(tr("Move map around"));
     mapMoveToolAct->setCheckable(true);
     connect(mapMoveToolAct, SIGNAL(triggered()), parent, SLOT(setMapMoveMode()));
- 
+
     deleteToolAct = new QAction(tr("Delete tool"), this);
     deleteToolAct->setStatusTip(tr("Delete tool"));
     deleteToolAct->setCheckable(true);
@@ -148,69 +149,69 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
 
 
     /* Mapping menu */
-    
+
     mappingAct= new QAction(tr("Mapping"), this);
     mappingAct->setCheckable(true);
     mappingAct->setChecked(false);
     mappingAct->setStatusTip(tr("Switch mapping mode on/off"));
-    connect(mappingAct, SIGNAL(triggered()), this, SLOT(mapping_mode()));    
-    
+    connect(mappingAct, SIGNAL(triggered()), this, SLOT(mapping_mode()));
+
     automergeAct= new QAction(tr("AutoMerge"), this);
     automergeAct->setCheckable(true);
     automergeAct->setStatusTip(tr("Automatically merge twin (same name/desc) rooms"));
-    connect(automergeAct, SIGNAL(triggered()), this, SLOT(automerge()));    
-    
+    connect(automergeAct, SIGNAL(triggered()), this, SLOT(automerge()));
+
     angryLinkerAct= new QAction(tr("AngryLinker"), this);
     angryLinkerAct->setCheckable(true);
     angryLinkerAct->setStatusTip(tr("Auto-link neightbour rooms"));
-    connect(angryLinkerAct, SIGNAL(triggered()), this, SLOT(angrylinker()));    
+    connect(angryLinkerAct, SIGNAL(triggered()), this, SLOT(angrylinker()));
 
 
     duallinkerAct= new QAction(tr("DualLinker"), this);
     duallinkerAct->setCheckable(true);
     duallinkerAct->setStatusTip(tr("Binds the connection in the mapped room with the room you came from"));
-    connect(duallinkerAct, SIGNAL(triggered()), this, SLOT(duallinker()));    
-    
-  
-    
+    connect(duallinkerAct, SIGNAL(triggered()), this, SLOT(duallinker()));
+
+
+
     /* Configuration menu bar */
-    
+
     always_on_top_action= new QAction(tr("Always on Top"), this);
     always_on_top_action->setStatusTip(tr("Always on Top"));
     always_on_top_action->setCheckable(true);
     connect(always_on_top_action, SIGNAL(toggled(bool)), this, SLOT(alwaysOnTop(bool)), Qt::QueuedConnection);
     always_on_top_action->setChecked(conf->getAlwaysOnTop());
-    
-    
-    
+
+
+
     emulationAct= new QAction(tr("Emulation Mode"), this);
     emulationAct->setStatusTip(tr("Offline MUME Emulation"));
     emulationAct->setCheckable(true);
     emulationAct->setChecked(false);
-    connect(emulationAct, SIGNAL(triggered()), this, SLOT(emulation_mode()));    
-    
-    
+    connect(emulationAct, SIGNAL(triggered()), this, SLOT(emulation_mode()));
+
+
     setupGeneralAct= new QAction(tr("General Settings ..."), this);
     setupGeneralAct->setStatusTip(tr("Edit general settings"));
-    connect(setupGeneralAct, SIGNAL(triggered()), this, SLOT(generalSetting()) );    
-    
+    connect(setupGeneralAct, SIGNAL(triggered()), this, SLOT(generalSetting()) );
+
     spellsAct= new QAction(tr("Spells Settings"), this);
     spellsAct->setStatusTip(tr("Spells Settings"));
-    connect(spellsAct, SIGNAL(triggered()), this, SLOT(spellsSettings()) );    
-    
-    
+    connect(spellsAct, SIGNAL(triggered()), this, SLOT(spellsSettings()) );
+
+
     saveConfigAct= new QAction(tr("Save Configuration ..."), this);
     saveConfigAct->setStatusTip(tr("Save current configuration"));
-    connect(saveConfigAct, SIGNAL(triggered()), this, SLOT(saveConfig()));    
-    
+    connect(saveConfigAct, SIGNAL(triggered()), this, SLOT(saveConfig()));
+
     saveConfigAsAct= new QAction(tr("Save Configuration As ..."), this);
     saveConfigAsAct->setStatusTip(tr("Save current configuration to a different file"));
-    connect(saveConfigAsAct, SIGNAL(triggered()), this, SLOT(saveAsConfig()));    
-    
+    connect(saveConfigAsAct, SIGNAL(triggered()), this, SLOT(saveAsConfig()));
+
     loadConfigAct= new QAction(tr("Load Configuration"), this);
     loadConfigAct->setStatusTip(tr("Save current configuration to a different file"));
-    connect(loadConfigAct, SIGNAL(triggered()), this, SLOT(loadConfig()));    
-    
+    connect(loadConfigAct, SIGNAL(triggered()), this, SLOT(loadConfig()));
+
     showLogAct = new QAction(tr("&Show Log"), this);
     showLogAct->setStatusTip(tr("Show the application's Log file"));
     connect(showLogAct, SIGNAL(triggered()), this, SLOT(showLog() ));
@@ -220,16 +221,16 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     aboutAct = new QAction(tr("&About"), this);
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-    
+
     aboutQtAct = new QAction(tr("About &Qt"), this);
     aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-    
+
     // Additional Context menu actions
     gotoAct = new QAction(tr("Goto"), this);
     connect(gotoAct, SIGNAL(triggered()), this, SLOT(gotoAction()));
-    
-    
+
+
     // group Manager
     groupOffAct = new QAction(tr("Off"), this );
     groupOffAct->setCheckable(true);
@@ -248,7 +249,7 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     groupManagerGroup->addAction(groupClientAct);
     groupManagerGroup->addAction(groupServerAct);
     groupManagerTypeChanged( conf->getGroupManagerState() );
-    
+
     groupShowHideAct = new QAction(tr("Show/Hide Manager"), this );
     connect(groupShowHideAct, SIGNAL(triggered()), this, SLOT(groupHide()), Qt::QueuedConnection);
     conf->setShowGroupManager( !conf->getShowGroupManager() );
@@ -258,7 +259,7 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     	groupShowHideAct->setText("Show");
     }
     groupShowHideAct->trigger();
-    
+
     groupSettingsAct = new QAction(tr("Settings"), this);
     connect(groupSettingsAct, SIGNAL(triggered()), this, SLOT(groupSettings()));
 }
@@ -266,7 +267,7 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
 void CActionManager::groupManagerTypeChanged(int type)
 {
 	print_debug(DEBUG_GROUP, "Action: signal received groupManager type changed");
-	
+
     if (type == CGroupCommunicator::Server)
     	groupServerAct->setChecked(true);
     if (type == CGroupCommunicator::Client)
@@ -326,7 +327,7 @@ void CActionManager::groupHide()
 void CActionManager::groupSettings()
 {
 	print_debug(DEBUG_GROUP, "Starting the dialog ...");
-	
+
     if (!parent->groupDialog) {
         parent->groupDialog = new CGroupSettingsDialog(parent);
     }
@@ -354,7 +355,7 @@ void CActionManager::bindRooms()
     two = Map.getRoom( Map.selections.get(1) );
 
     // roll over all dirs
-    for (dir = 0; dir <= 5; dir++) 
+    for (dir = 0; dir <= 5; dir++)
         // and check if there are connections like undefined exits north-south etc
         if (one->isExitUndefined( dir) == true && two->isExitUndefined( reversenum( dir ) ) ) {
             // now test is the connection is geometrically right
@@ -365,7 +366,7 @@ void CActionManager::bindRooms()
                  (dir == WEST && one->getX() > two->getX())  ||
                  (dir == SOUTH && one->getY() > two->getY()) ||
                  (dir == UP && one->getZ() < two->getZ())    ||
-                 (dir == DOWN && one->getZ() > two->getZ()) ) 
+                 (dir == DOWN && one->getZ() > two->getZ()) )
             {
                 fits = true;
             }
@@ -376,12 +377,12 @@ void CActionManager::bindRooms()
                     two->setExit( reversenum( dir ), one);
                 return;
             }
-                
+
         }
 
-    
+
     QMessageBox::critical(parent, "Failure", QString("No fitting exits found. Rooms are badly positioned or exits are not marked as Undefined."));
-        
+
 
 }
 
@@ -395,10 +396,10 @@ void CActionManager::edit_current_room()
         if (stacker.amount() != 1) {
             QMessageBox::critical(parent, "Room Info Edit", QString("You are not in sync!"));
             return;
-        } 
+        }
         id = stacker.first()->id;
     }
-    
+
     parent->editRoomDialog( id );
 }
 
@@ -492,7 +493,7 @@ void CActionManager::alwaysOnTop(bool set_on_top)
 
 void CActionManager::newFile()
 {
-	// creates a new map. 
+	// creates a new map.
 	// by now - just clears the existing one.
 
 	if (conf->isDatabaseModified()) {
@@ -511,9 +512,9 @@ void CActionManager::newFile()
         case 2: // Cancel clicked or Escape pressed
             return;// don't exit
             break;
-        }    
-    
-    } 
+        }
+
+    }
 
 	Map.reinit();  /* this one reinits Ctree structure also */
 	stacker.reset();  /* resetting stacks */
@@ -550,7 +551,7 @@ void CActionManager::delete_room()
                    QMessageBox::Ok);
 
 
-        if (ret == QMessageBox::Cancel) 
+        if (ret == QMessageBox::Cancel)
             return;
     }
 //    while (Map.selections.isEmpty() != true)
@@ -567,7 +568,7 @@ void CActionManager::deleteFully()
                    QMessageBox::Ok |  QMessageBox::Cancel,
                    QMessageBox::Ok);
 
-    if (ret == QMessageBox::Cancel) 
+    if (ret == QMessageBox::Cancel)
         return;
 //    while (Map.selections.isEmpty() == false)
         userland_parser->parse_user_input_line("mdelete remove");
@@ -585,15 +586,15 @@ void CActionManager::open()
                     parent,
                     "Choose a database",
                     "database/",
-                    "XML files (*.xml)");    
+                    "XML files (*.xml)");
   char data[MAX_STR_LEN];
-    
+
   print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));
   strcpy(data, qPrintable(s));
-    
-  if (!s.isEmpty()) { 
-    usercmd_mload(0, 0,  data, data);  
-  }  
+
+  if (!s.isEmpty()) {
+    usercmd_mload(0, 0,  data, data);
+  }
 }
 
 void CActionManager::reload()
@@ -610,25 +611,25 @@ void CActionManager::save()
 void CActionManager::saveAs()
 {
   char data[MAX_STR_LEN];
-  
+
   QString s = QFileDialog::getSaveFileName(
                     parent,
                     "Choose a filename to save under",
                     "database/",
                     "XML database files (*.xml)");
-                    
+
   strcpy(data, qPrintable(s));
-    
-  if (!s.isEmpty()) { 
-    usercmd_msave(0, 0,  data, data);  
+
+  if (!s.isEmpty()) {
+    usercmd_msave(0, 0,  data, data);
     QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
-  }  
+  }
 }
 
 
 void CActionManager::mapping_mode()
 {
-    if (mappingAct->isChecked()) 
+    if (mappingAct->isChecked())
     {
         userland_parser->parse_user_input_line("mmap on");
     } else {
@@ -646,7 +647,7 @@ void CActionManager::refreshRoom()
             QMessageBox::critical(parent, "Pandora",
                               QString("You have to be in sync or select just one room!"));
             return;
-        }        
+        }
         r = stacker.first();
     } else {
         if (Map.selections.size() != 1) {
@@ -673,7 +674,7 @@ void CActionManager::selectionType()
 
 void CActionManager::automerge()
 {
-    if (automergeAct->isChecked()) 
+    if (automergeAct->isChecked())
     {
         userland_parser->parse_user_input_line("mautomerge on");
     } else {
@@ -683,7 +684,7 @@ void CActionManager::automerge()
 
 void CActionManager::angrylinker()
 {
-    if (angryLinkerAct->isChecked()) 
+    if (angryLinkerAct->isChecked())
     {
         userland_parser->parse_user_input_line("mangrylinker on");
     } else {
@@ -694,7 +695,7 @@ void CActionManager::angrylinker()
 
 void CActionManager::duallinker()
 {
-    if (angryLinkerAct->isChecked()) 
+    if (angryLinkerAct->isChecked())
     {
         userland_parser->parse_user_input_line("mduallinker on");
     } else {
@@ -727,14 +728,14 @@ void CActionManager::loadConfig()
                     parent,
                     "Choose another configuration file to load",
                     "configs/",
-                    "XML config files (*.xml)");    
+                    "XML config files (*.xml)");
   if (s.isEmpty())
         return;
 
   conf->loadConfig("", s.toAscii());
   QMessageBox::information(parent, "Pandora", "Loaded!\n", QMessageBox::Ok);
 
-}    
+}
 
 void CActionManager::emulation_mode()
 {
@@ -742,10 +743,10 @@ void CActionManager::emulation_mode()
         /* cannot turn it on if we have anyone connected to us already */
         /* tricky check - if online_actions are on, then we have connections */
         if (mappingAct->isChecked()) {
-            emulationAct->setChecked(false); 
+            emulationAct->setChecked(false);
             QMessageBox::critical(parent, "Pandora",
                               QString("You have to disconnect from the game first!"));
-            return;        
+            return;
         }
         proxy->setMudEmulation( true );
         engine->setPrompt("-->");
@@ -753,7 +754,7 @@ void CActionManager::emulation_mode()
         stacker.swap();
     } else {
         proxy->setMudEmulation( false );
-    
+
     }
 
 }
@@ -763,10 +764,10 @@ void CActionManager::publish_map()
 {
 
     if (mappingAct->isChecked()) {
-        emulationAct->setChecked(false); 
+        emulationAct->setChecked(false);
         QMessageBox::critical(parent, "Pandora",
                           QString("You have to disconnect from the game first!"));
-        return;        
+        return;
     }
 
     Map.clearAllSecrets();

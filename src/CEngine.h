@@ -34,17 +34,18 @@ Q_OBJECT
     bool mgoto;
     int   nameMatch;
     int   descMatch;
-    
+
     CRegion  *users_region;
     CRegion  *last_region;
-    
+    CRegion	 *last_warning_region;
+
     QByteArray last_name;
     QByteArray last_desc;
     QByteArray last_exits;
     QByteArray last_prompt;
-    char 	   last_terrain;	
+    char 	   last_terrain;
     QByteArray last_movement;
-  
+
     PipeManager  eventPipe;
     Event        event;
 
@@ -55,7 +56,7 @@ Q_OBJECT
     void swap();
     void resync();
     void mappingOff();
-    
+
     bool testRoom(CRoom *room);
 
     void mapCurrentRoom(CRoom *room, int dir);
@@ -65,23 +66,23 @@ public:
     ~CEngine();
 
     CRoom *addedroom;	/* fresh added room */
-    
+
     void addEvent(Event e) { eventPipe.addEvent(e); }
 
     int parseCommandLine(char cause, char result, char *line);
 
-    void exec();       
-    
+    void exec();
+
     void angryLinker(CRoom *r);
     void printStacks();
-    
+
     QByteArray getRoomName() { return last_name; }
     QByteArray getDesc() { return last_desc; }
     QByteArray getExits() { return last_exits; }
     QByteArray getPrompt() { return last_prompt; }
     char getTerrain() { return last_terrain; }
     QByteArray getLastMovement() { return last_movement; }
-    
+
     void setRoomname(QByteArray s) { last_name = s; }
     void setDesc(QByteArray s) { last_desc = s; }
     void setExits(QByteArray s) { last_exits = s; }
@@ -90,12 +91,12 @@ public:
 
     bool isMapping() { return mapping; }
     void setMapping(bool b) { mapping = b; }
-    
+
     void setMgoto(bool b) { mgoto = b; }
     bool isMgoto() { return mgoto; }
     bool empty() { return eventPipe.isEmpty(); };                      /* are pipes empty? */
     void clear();                      /* clears events pipes */
-    
+
     void set_users_region(CRegion *reg);
     void set_last_region(CRegion *reg);
     CRegion *get_users_region();
@@ -103,7 +104,7 @@ public:
 
     void updateRegions();
 
-    void resetAddedRoomVar() { addedroom = NULL; }    
+    void resetAddedRoomVar() { addedroom = NULL; }
 public slots:
     void slotRunEngine();
 };

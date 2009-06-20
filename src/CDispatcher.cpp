@@ -785,7 +785,7 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
             	print_debug(DEBUG_GROUP, "Sending a G-tell from local user: %s", (const char *) data);
             	proxy->sendGroupTellEvent(data);
             	send_to_user("Ok.\r\n\r\n");
-            	send_to_user( engine->getPrompt() );
+            	send_prompt();
             	continue;
             }
 

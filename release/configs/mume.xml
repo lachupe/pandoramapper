@@ -1,17 +1,17 @@
 <config>
-  <localport port="3000">
-  <remotehost hostname="129.241.210.221" port="443">
+  <localport port="4242">
+  <remotehost hostname="mume.org" port="4242">
   <basefile filename="database/mume.xml">
   <GLvisibility textures="100" details="100" shownotes="ON" layers="7">
   <analyzers exits="OFF"  terrain="ON">
   <engineflags briefmode="ON" automerge="ON"  angrylinker="ON" duallinker="ON">
   <regionsflags displayinrenderer="OFF" showinfo="ON">
   <guisettings always_on_top="ON">
-  <groupManager state="Server" host="localhost" charName="Aza" charColor="#000000" localPort="4243" remotePort="4243">
-  <groupManagerGUI show="ON"  x="5" y="46" height="170" width="426">
-  <window x="847" y="49" height="341" width="428">
+  <groupManager state="Server" host="localhost" charName="Aza" charColor="#00ff00" localPort="4243" remotePort="4243">
+  <groupManagerGUI show="OFF"  x="5" y="24" height="124" width="693">
+  <window x="708" y="49" height="398" width="567">
   <rendererangles anglex="-17.000000" angley="16.000000" anglez="0.000000">
-  <rendererpositions userx="0.000000" usery="0.000000" userz="-19.000000">
+  <rendererpositions userx="0.000000" usery="0.000000" userz="-25.000000">
   <refresh auto="ON" roomnamequote="10" descquote="10">
   <texture handle="INDOORS" file="images/indoors.png" pattern="[">
   <texture handle="CITY" file="images/city.png" pattern="#">

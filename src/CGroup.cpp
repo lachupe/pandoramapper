@@ -338,7 +338,7 @@ void CGroup::gTellArrived(QDomNode node)
 			(const char *) from.toAscii(),
 			(const char *) text.text().toAscii() );
 	send_to_user("\r\n");
-	send_to_user( engine->getPrompt() );
+	send_prompt();
 }
 
 void CGroup::sendGTell(QByteArray tell)

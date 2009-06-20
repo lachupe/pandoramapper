@@ -18,21 +18,21 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef DEFINES_H 
-#define DEFINES_H 
+#ifndef DEFINES_H
+#define DEFINES_H
 
 class QString;
 
-#define MAX_ROOMS       30000		/* maximal amount of rooms */
+#define MAX_ROOMS       35000		/* maximal amount of rooms */
 
 
 #define MAX_STR_LEN     400
 #define MAX_DATA_LEN 3072
 #define MAX_LINES_DESC  20
 
-#define NORTH           0         
+#define NORTH           0
 #define EAST            1
-#define SOUTH           2         
+#define SOUTH           2
 #define WEST            3
 #define UP              4
 #define DOWN            5

@@ -45,7 +45,7 @@ Cconfigurator::Cconfigurator()
     /* here we set the default configuration */
 
     print_debug(DEBUG_CONFIG, "in configurator constructor");
-    
+
     /* data */
     baseFile = "";
     localPort = 0;
@@ -53,7 +53,7 @@ Cconfigurator::Cconfigurator()
     remotePort = 0;
     databaseModified = false;
     setConfigModified(false);
-    
+
     userWindowRect.setRect(0, 0, 0, 0);  // means autodetect
     angleX = 0;
     angleY = 0;
@@ -64,43 +64,43 @@ Cconfigurator::Cconfigurator()
 
     visibleLayers = 5;
 
-    setAutorefresh(true);          /* default values */ 
+    setAutorefresh(true);          /* default values */
     setAutomerge(true);
     setAngrylinker(true);
     setExitsCheck(false);
     setTerrainCheck(true);
     setAlwaysOnTop(true);
-    
+
     setDetailsVisibility(500);
     setTextureVisibility(300);
-    
+
     setNameQuote(10);
     setDescQuote(10);
-    
+
     setRegionsAutoReplace( false );
     setRegionsAutoSet( false );
-    
+
     setShowRegionsInfo( true );
     setDisplayRegionsRenderer( true );
     setShowNotesRenderer( true );
 
     setSelectOAnyLayer( true );
-    
+
     /* colours */
-    
+
     /* patterns */
     setExitsPattern("Exits:");
-    
+
     struct roomSectorsData first;
-        
+
     first.pattern = 0;
     first.desc = "NONE";
     first.texture = 1;
     first.gllist = 1;
     sectors.push_back(first);
-    
+
     spells_pattern = "Affected by:";
-    
+
     // group Manager
     groupManagerState = CGroupCommunicator::Off;
     groupManagerLocalPort = 4243;
@@ -120,9 +120,9 @@ void Cconfigurator::resetCurrentConfig()
 {
     sectors.clear();
     spells.clear();
-    
+
     struct roomSectorsData first;
-        
+
     first.pattern = 0;
     first.desc = "NONE";
     first.texture = 1;
@@ -131,11 +131,11 @@ void Cconfigurator::resetCurrentConfig()
 }
 
 /* ---------------- PATTERNS and REGEXPS GENERATION --------------- */
-void Cconfigurator::setExitsPattern(QByteArray str) 
-{ 
-    exitsPattern = str; 
+void Cconfigurator::setExitsPattern(QByteArray str)
+{
+    exitsPattern = str;
     exitsExpr.setPattern(QRegExp::escape(str) );
-    
+
     setConfigModified(true);
 }
 
@@ -143,14 +143,14 @@ void Cconfigurator::setExitsPattern(QByteArray str)
 void Cconfigurator::addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon)
 {
     TSpell spell;
-    
+
     spell.name = spellname;
     spell.up_mes = up;
     spell.down_mes = down;
     spell.refresh_mes = refresh;
     spell.addon = addon;
     spell.up = false;
-    
+
     spells.push_back(spell);
     setConfigModified(true);
 }
@@ -166,14 +166,14 @@ QString Cconfigurator::spellUpFor(unsigned int p)
     QString s;
     int min;
     int sec;
-    
+
     if (p > spells.size())
         return "";
-        
+
     sec = spells[p].timer.elapsed() / (1000);
     min = sec / 60;
-    sec = sec % 60;    
-        
+    sec = sec % 60;
+
     s = QString("- %1%2:%3%4")
             .arg( min / 10 )
             .arg( min % 10 )
@@ -214,7 +214,7 @@ GLuint Cconfigurator::getTextureByDesc(QByteArray desc)
 void Cconfigurator::addTexture(QByteArray desc, QByteArray filename, char pattern)
 {
     struct roomSectorsData s;
-        
+
     s.desc = desc;
     s.filename = filename;
     s.pattern = pattern;
@@ -321,15 +321,15 @@ void Cconfigurator::setAutomerge(bool b)
     setConfigModified(true);
 }
 
-void Cconfigurator::setDuallinker(bool b)  
-{ 
-    duallinker = b; 
-    setConfigModified(true); 
+void Cconfigurator::setDuallinker(bool b)
+{
+    duallinker = b;
+    setConfigModified(true);
 }
 
-bool Cconfigurator::getDuallinker() 
-{ 
-    return duallinker; 
+bool Cconfigurator::getDuallinker()
+{
+    return duallinker;
 }
 
 
@@ -431,19 +431,19 @@ int Cconfigurator::loadTexture(struct roomSectorsData *p)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex1.width(), tex1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex1.bits() );
-    
-    
-    
+
+
+
     p->gllist = glGenLists(1);
     if (p->gllist != 0) {
         glNewList(p->gllist, GL_COMPILE);
-        
+
         glEnable(GL_TEXTURE_2D);
-        
+
         glBindTexture(GL_TEXTURE_2D, p->texture);
-        
+
         glBegin(GL_QUADS);
             glTexCoord2f(0.0, 1.0);
             glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
@@ -453,12 +453,12 @@ int Cconfigurator::loadTexture(struct roomSectorsData *p)
             glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
             glTexCoord2f(1.0, 1.0);
             glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
-            
+
         glEnd();
         glDisable(GL_TEXTURE_2D);
-        
-        
-        
+
+
+
         glEndList();
     }
     return 1;
@@ -479,10 +479,10 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 
   ConfigParser * handler = new ConfigParser();
   reader.setContentHandler( handler );
-    
+
   resetCurrentConfig();
-	
-    
+
+
   print_debug(DEBUG_CONFIG, "Reading the config file %s", (const char *) (path+filename));
   fflush(stdout);
   reader.parse( source );
@@ -508,35 +508,35 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
   if (f == NULL) {
     print_debug(DEBUG_XML, "XML: Error - can not open the file: %s.", (const char *) filename);
     return -1;
-  }    
-  
+  }
+
   fprintf(f, "<config>\r\n");
   fprintf(f, "  <localport port=\"%i\">\r\n", getLocalPort());
-  fprintf(f, "  <remotehost hostname=\"%s\" port=\"%i\">\r\n", 
-                  (const char *) getRemoteHost(), 
+  fprintf(f, "  <remotehost hostname=\"%s\" port=\"%i\">\r\n",
+                  (const char *) getRemoteHost(),
                   getRemotePort() );
-  fprintf(f, "  <basefile filename=\"%s\">\r\n", 
+  fprintf(f, "  <basefile filename=\"%s\">\r\n",
                   (const char *) getBaseFile() );
-  
-  fprintf(f, "  <GLvisibility textures=\"%i\" details=\"%i\" shownotes=\"%s\" layers=\"%i\">\r\n", 
-                  getTextureVisibility(),  getDetailsVisibility(), ON_OFF(getShowNotesRenderer()),  
+
+  fprintf(f, "  <GLvisibility textures=\"%i\" details=\"%i\" shownotes=\"%s\" layers=\"%i\">\r\n",
+                  getTextureVisibility(),  getDetailsVisibility(), ON_OFF(getShowNotesRenderer()),
                   getVisibleLayers() );
-  
-  fprintf(f, "  <analyzers exits=\"%s\"  terrain=\"%s\">\r\n", 
+
+  fprintf(f, "  <analyzers exits=\"%s\"  terrain=\"%s\">\r\n",
                   ON_OFF(getExitsCheck() ), ON_OFF(getTerrainCheck() ) );
 
-  fprintf(f, "  <engineflags briefmode=\"%s\" automerge=\"%s\"  angrylinker=\"%s\" duallinker=\"%s\">\r\n", 
-                  ON_OFF(getBriefMode()), 
-                  ON_OFF(getAutomerge() ), ON_OFF( getAngrylinker()), 
+  fprintf(f, "  <engineflags briefmode=\"%s\" automerge=\"%s\"  angrylinker=\"%s\" duallinker=\"%s\">\r\n",
+                  ON_OFF(getBriefMode()),
+                  ON_OFF(getAutomerge() ), ON_OFF( getAngrylinker()),
                   ON_OFF(getDuallinker() ) );
-                  
-              
-  fprintf(f, "  <regionsflags displayinrenderer=\"%s\" showinfo=\"%s\">\r\n", 
-                  ON_OFF(getDisplayRegionsRenderer()), 
-                  ON_OFF(getShowRegionsInfo()) );
-                  
 
-  fprintf(f, "  <guisettings always_on_top=\"%s\">\r\n", 
+
+  fprintf(f, "  <regionsflags displayinrenderer=\"%s\" showinfo=\"%s\">\r\n",
+                  ON_OFF(getDisplayRegionsRenderer()),
+                  ON_OFF(getShowRegionsInfo()) );
+
+
+  fprintf(f, "  <guisettings always_on_top=\"%s\">\r\n",
                   ON_OFF(getAlwaysOnTop()) );
 
   QString grpManager;
@@ -551,26 +551,26 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
 		grpManager += "Off";
 		break;
   }
-  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" charColor=\"%s\" localPort=\"%i\" remotePort=\"%i\">\r\n", 
+  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" charColor=\"%s\" localPort=\"%i\" remotePort=\"%i\">\r\n",
                   (const char *) grpManager.toAscii(), (const char *) getGroupManagerHost(),
-                  (const char *) getGroupManagerCharName(), 
-                  (const char *) getGroupManagerColor().name().toAscii(), 
+                  (const char *) getGroupManagerCharName(),
+                  (const char *) getGroupManagerColor().name().toAscii(),
                   getGroupManagerLocalPort(), getGroupManagerRemotePort() );
 
-  window = renderer_window->getGroupManagerRect(); 
-  fprintf(f, "  <groupManagerGUI show=\"%s\"  x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n", 
+  window = renderer_window->getGroupManagerRect();
+  fprintf(f, "  <groupManagerGUI show=\"%s\"  x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n",
 		  ON_OFF( getShowGroupManager() ), window.x(), window.y(), window.height(), window.width() );
-                        
-  window = renderer_window->geometry(); 
+
+  window = renderer_window->geometry();
   fprintf(f, "  <window x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n",
-            window.x(), window.y(), window.height(), window.width() );                 
+            window.x(), window.y(), window.height(), window.width() );
 
 
   angleX = renderer_window->renderer->angleX;
   angleY = renderer_window->renderer->angleY;
   angleZ = renderer_window->renderer->angleZ;
-  fprintf(f, "  <rendererangles anglex=\"%f\" angley=\"%f\" anglez=\"%f\">\r\n", 
-                angleX, angleY, angleZ); 
+  fprintf(f, "  <rendererangles anglex=\"%f\" angley=\"%f\" anglez=\"%f\">\r\n",
+                angleX, angleY, angleZ);
 
   userX = renderer_window->renderer->userX;
   userY = renderer_window->renderer->userY;
@@ -581,7 +581,7 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
 
   fprintf(f, "  <refresh auto=\"%s\" roomnamequote=\"%i\" descquote=\"%i\">\r\n",
                   ON_OFF( getAutorefresh() ), getNameQuote(), getDescQuote() );
-  
+
   QString ch;
   for (i = 1; i < sectors.size(); i++) {
       if (sectors[i].pattern == '<')
@@ -596,34 +596,34 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
           ch = "&quot";
       else
           ch = sectors[i].pattern;
-      
+
       fprintf(f, "  <texture handle=\"%s\" file=\"%s\" pattern=\"%s\">\r\n",
-                  (const char *) sectors[i].desc, 
+                  (const char *) sectors[i].desc,
                   (const char *) sectors[i].filename, qPrintable(ch));
-  
+
   }
-  
+
   for (i = 0; i < spells.size(); i++) {
         fprintf(f, "  <spell addon=\"%s\" name=\"%s\" up=\"%s\" refresh=\"%s\" down=\"%s\">\r\n",
-                    YES_NO(spells[i].addon), 
+                    YES_NO(spells[i].addon),
                     (const char *) spells[i].name,
                     (const char *) spells[i].up_mes,
                     (const char *) spells[i].refresh_mes,
                     (const char *) spells[i].down_mes);
   }
 
-  
+
   i = 0;
   while (debug_data[i].name) {
       fprintf(f, "  <debug name=\"%s\"  state=\"%s\">\r\n", debug_data[i].name, ON_OFF(debug_data[i].state));
       i++;
   }
 
-  fprintf(f, "  <misc startupmode=\"%d\" notecolor=\"%s\">\r\n", 
+  fprintf(f, "  <misc startupmode=\"%d\" notecolor=\"%s\">\r\n",
           getStartupMode(), (const char*)getNoteColor());
 
   /* PUT ENGINE CONFIG SAVING THERE ! */
-  
+
   setConfigModified(false);
   fprintf(f, "</config>\r\n");
   fflush(f);
@@ -649,19 +649,19 @@ ConfigParser::ConfigParser()
 /*bool ConfigParser::characters( const QString& ch)
 {
   return TRUE;
-} 
+}
 */
 
-bool ConfigParser::startElement( const QString& , const QString& , 
-                                    const QString& qName, 
+bool ConfigParser::startElement( const QString& , const QString& ,
+                                    const QString& qName,
                                     const QXmlAttributes& attributes)
 {
     if (qName == "localport") {
         if (attributes.length() < 1) {
             print_debug(DEBUG_CONFIG, "(localport token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("port");
         conf->setLocalPort(s.toInt() );
 //        printf("Using local port %i. \r\n", conf->get_local_port() );
@@ -671,14 +671,14 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         if (attributes.length() < 2) {
             print_debug(DEBUG_CONFIG, "(remotehost token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("hostname");
         conf->setRemoteHost(s.toAscii() );
-        
+
         s = attributes.value("port");
         conf->setRemotePort(s.toInt() );
-//        printf("Using remote host %s:%i\r\n", (const char *)conf->get_remote_host(), 
+//        printf("Using remote host %s:%i\r\n", (const char *)conf->get_remote_host(),
 //                                            conf->get_remote_port() );
 
         return TRUE;
@@ -686,63 +686,63 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         if (attributes.length() < 1) {
             print_debug(DEBUG_CONFIG, "(basefile token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("filename");
         conf->setBaseFile(s.toAscii() );
 //        printf("Using the database file: %s\r\n", qPrintable(s) );
-        
+
         return TRUE;
     } else if (qName == "GLvisibility") {
         if (attributes.length() < 2) {
             print_debug(DEBUG_CONFIG, "(GLvisibility token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("textures");
         conf->setTextureVisibility(s.toInt() );
         s = attributes.value("details");
         conf->setDetailsVisibility(s.toInt() );
-        
+
         s = attributes.value("shownotes");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setShowNotesRenderer( true);
-        else 
+        else
             conf->setShowNotesRenderer( false);
 
         s = attributes.value("layers");
         conf->setVisibleLayers(s.toInt() );
-        
-        
+
+
         print_debug(DEBUG_CONFIG, "OpenGL visibility ranges set to %i (texture) and %i (details).",
                     conf->getTextureVisibility(), conf->getDetailsVisibility() );
-        
+
         return TRUE;
     } else if (qName == "analyzers") {
         if (attributes.length() < 2) {
             print_debug(DEBUG_CONFIG, "(analyzers token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("exits");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setExitsCheck(true);
-        else 
+        else
             conf->setExitsCheck(false);
-        
+
         s = attributes.value("terrain");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setTerrainCheck(true);
-        else 
+        else
             conf->setTerrainCheck(false);
-        
-        
+
+
         print_debug(DEBUG_CONFIG, "Analyzers: desc ON, exits %s, terrain %s.",
                     ON_OFF(conf->getExitsCheck() ), ON_OFF(conf->getTerrainCheck()) );
-        
+
         return TRUE;
     } else if (qName == "groupManager") {
     	s = attributes.value("state");
@@ -750,16 +750,16 @@ bool ConfigParser::startElement( const QString& , const QString& ,
     		conf->setGroupManagerState(CGroupCommunicator::Server);
     	} else if (s == "Client") {
     		conf->setGroupManagerState(CGroupCommunicator::Client);
-    	} else 
+    	} else
     		conf->setGroupManagerState(CGroupCommunicator::Off);
-        
+
     	s = attributes.value("host");
         conf->setGroupManagerHost(s.toAscii());
 
-        
+
     	s = attributes.value("charColor");
         conf->setGroupManagerColor(QColor(s));
-        
+
     	s = attributes.value("charName");
         conf->setGroupManagerCharName(s.toAscii());
 
@@ -775,11 +775,11 @@ bool ConfigParser::startElement( const QString& , const QString& ,
    		// BURP
         s = attributes.value("show");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setShowGroupManager(true);
-        else 
+        else
             conf->setShowGroupManager(false);
-        
+
         int x = 0;
         int y = 0;
         int height = 0;
@@ -797,13 +797,13 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         if (attributes.length() < 1) {
             print_debug(DEBUG_CONFIG, "(guisettings token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("always_on_top");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setAlwaysOnTop(true);
-        else 
+        else
             conf->setAlwaysOnTop(false);
 
         print_debug(DEBUG_CONFIG, "GUI settings: always_on_top %s.", ON_OFF(conf->getAlwaysOnTop()) );
@@ -813,23 +813,23 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         if (attributes.length() < 1) {
             print_debug(DEBUG_CONFIG, "(guisettings token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("displayinrenderer");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setDisplayRegionsRenderer(true);
-        else 
+        else
             conf->setDisplayRegionsRenderer(false);
-            
+
         s = attributes.value("showinfo");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setShowRegionsInfo(true);
-        else 
+        else
             conf->setShowRegionsInfo(false);
-            
-            
+
+
 
         print_debug(DEBUG_CONFIG, "GUI settings: always_on_top %s.", ON_OFF(conf->getAlwaysOnTop()) );
 
@@ -838,76 +838,76 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         if (attributes.length() < 3) {
             print_debug(DEBUG_CONFIG, "(engineflags token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("briefmode");
         s = s.toLower();
 //        printf("The brief mode setting : %s\r\n", qPrintable(s) );
-        if (s == "on") 
+        if (s == "on")
             conf->setBriefMode(true);
-        else 
+        else
             conf->setBriefMode(false);
-        
+
         s = attributes.value("automerge");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setAutomerge(true);
-        else 
+        else
             conf->setAutomerge(false);
 
         s = attributes.value("angrylinker");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setAngrylinker(true);
-        else 
+        else
             conf->setAngrylinker(false);
 
         s = attributes.value("duallinker");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setDuallinker(true);
-        else 
+        else
             conf->setDuallinker(false);
 
 
 
         print_debug(DEBUG_CONFIG, "Engine flags: briefmode %s, automerge %s, angrylinker %s.",
-               ON_OFF(conf->getBriefMode()), ON_OFF(conf->getAutomerge()), 
+               ON_OFF(conf->getBriefMode()), ON_OFF(conf->getAutomerge()),
                 ON_OFF(conf->getAngrylinker()), ON_OFF(conf->getDuallinker()) );
-        
+
         return TRUE;
     } else if (qName == "refresh") {
         if (attributes.length() < 3) {
             print_debug(DEBUG_CONFIG, "(refresh token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("auto");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             conf->setAutorefresh(true);
-        else 
+        else
             conf->setAutorefresh(false);
-        
+
         s = attributes.value("roomnamequote");
         conf->setNameQuote(s.toInt());
         s = attributes.value("descquote");
         conf->setDescQuote(s.toInt());
 
         print_debug(DEBUG_CONFIG, "Autorefresh settings: automatic refresh %s, roomname quote %i, desc quote %i.",
-                ON_OFF(conf->getAutorefresh()), conf->getNameQuote(), 
+                ON_OFF(conf->getAutorefresh()), conf->getNameQuote(),
                 conf->getDescQuote() );
         return TRUE;
     } else if (qName == "texture") {
         if (attributes.length() < 2) {
             print_debug(DEBUG_CONFIG, "(texture token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("handle");
         s.toUpper();
         texture.desc = s.toAscii();
-        
+
         s = attributes.value("file");
         texture.filename = s.toAscii();
 
@@ -915,29 +915,29 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         texture.pattern = s[0].toAscii();
 
         conf->addTexture(texture.desc, texture.filename, texture.pattern);
-//        printf("Added texture: desc %s, file %s, pattern %c.\r\n", 
+//        printf("Added texture: desc %s, file %s, pattern %c.\r\n",
 //              (const char *) texture.desc, (const char *) texture.filename, texture.pattern);
 
-        
+
 //        flag = TEXTURE;         /* get the inner data ! */
         return TRUE;
     } else if (qName == "spell") {
         if (attributes.length() < 4) {
             print_debug(DEBUG_CONFIG, "(pattern token) Not enough attributes in XML file!");
             exit(1);
-        }        
+        }
 
         spell.up = false;
         s = attributes.value("addon");
         s = s.toLower();
         spell.addon = false;
-        if (s == "yes") 
+        if (s == "yes")
           spell.addon = true;
-        
-        
+
+
         s = attributes.value("name");
         spell.name = s.toAscii();
-        
+
         s = attributes.value("up");
         spell.up_mes = s.toAscii();
 
@@ -953,12 +953,12 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         if (attributes.length() < 1) {
             print_debug(DEBUG_CONFIG, "(texture token) Not enough attributes in XML file!");
             exit(1);
-        }        
-        
+        }
+
         s = attributes.value("name");
         unsigned int i = 0;
         while (debug_data[i].name != NULL) {
-            if (debug_data[i].name == s) 
+            if (debug_data[i].name == s)
                 break;
             i++;
         }
@@ -966,14 +966,14 @@ bool ConfigParser::startElement( const QString& , const QString& ,
             print_debug(DEBUG_CONFIG, "Warning, %s is a wrong debug descriptor/name!", qPrintable(s));
             return TRUE;
         }
-        
+
         s = attributes.value("state");
         s = s.toLower();
-        if (s == "on") 
+        if (s == "on")
             debug_data[i].state = 1;
-        else 
+        else
             debug_data[i].state = 0;
-        
+
 //        printf("Debug option %s is now %s.\r\n", debug_data[i].name, ON_OFF(debug_data[i].state) );
         return TRUE;
     } else if (qName == "window") {
@@ -990,7 +990,7 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         conf->setWindowRect(x, y, width, height);
         print_debug(DEBUG_CONFIG, "Loaded window settins: x %i, y %i, height %i, width %i",
                         x, y, height, width);
-                        
+
         return TRUE;
     } else if (qName == "rendererangles") {
         float x = 0;
@@ -1000,9 +1000,9 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         x = attributes.value("anglex").toFloat();
         y = attributes.value("angley").toFloat();
         z = attributes.value("anglez").toFloat();
-        
+
         conf->setRendererAngles(x,y,z);
-            
+
         print_debug(DEBUG_CONFIG, "Loaded renderer angles : x %f, y %f, z %f",x, y, z);
         return TRUE;
     } else if (qName == "rendererpositions") {
@@ -1013,18 +1013,18 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         x = attributes.value("userx").toFloat();
         y = attributes.value("usery").toFloat();
         z = attributes.value("userz").toFloat();
-        
+
         conf->setRendererPosition(x,y,z);
-            
+
         print_debug(DEBUG_CONFIG, "Loaded renderer shift : x %f, y %f, z %f",x, y, z);
         return TRUE;
-    
+
     } else if (qName == "misc") {
         int startup_mode = 0;
         startup_mode = attributes.value("startupmode").toInt();
         conf->setStartupMode(startup_mode);
         print_debug(DEBUG_CONFIG, "Set startup mode: %d", startup_mode);
-        
+
         QByteArray note_color = (QByteArray)attributes.value("notecolor").toAscii();
         conf->setNoteColor(note_color);
         print_debug(DEBUG_CONFIG, "Set note color: %d", (const char*)note_color);

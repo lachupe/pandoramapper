@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>ConfigDialog</class>
- <widget class="QDialog" name="ConfigDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="ConfigDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,103 +10,103 @@
     <height>287</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QVBoxLayout">
    <item>
-    <widget class="QTabWidget" name="tabWidget" >
-     <property name="currentIndex" >
-      <number>0</number>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>4</number>
      </property>
-     <widget class="QWidget" name="networkTab" >
-      <attribute name="title" >
+     <widget class="QWidget" name="networkTab">
+      <attribute name="title">
        <string>Networking</string>
       </attribute>
-      <layout class="QVBoxLayout" >
+      <layout class="QVBoxLayout">
        <item>
-        <layout class="QHBoxLayout" >
+        <layout class="QHBoxLayout">
          <item>
-          <widget class="QLabel" name="label" >
-           <property name="text" >
+          <widget class="QLabel" name="label">
+           <property name="text">
             <string>Local port:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_localport" />
+          <widget class="QLineEdit" name="lineEdit_localport"/>
          </item>
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" >
+        <layout class="QHBoxLayout">
          <item>
-          <widget class="QLabel" name="label_2" >
-           <property name="text" >
+          <widget class="QLabel" name="label_2">
+           <property name="text">
             <string>Remote host:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_remotehost" />
+          <widget class="QLineEdit" name="lineEdit_remotehost"/>
          </item>
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" >
+        <layout class="QHBoxLayout">
          <item>
-          <widget class="QLabel" name="label_3" >
-           <property name="text" >
+          <widget class="QLabel" name="label_3">
+           <property name="text">
             <string>Remote port:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_remoteport" />
+          <widget class="QLineEdit" name="lineEdit_remoteport"/>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QLabel" name="label_5" >
-         <property name="text" >
+        <widget class="QLabel" name="label_5">
+         <property name="text">
           <string>NOTE: Changes to local port take place after restart!</string>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="mappingTab" >
-      <attribute name="title" >
+     <widget class="QWidget" name="mappingTab">
+      <attribute name="title">
        <string>Mapping</string>
       </attribute>
-      <layout class="QVBoxLayout" >
+      <layout class="QVBoxLayout">
        <item>
-        <widget class="QCheckBox" name="checkBox_angrylinker" >
-         <property name="text" >
+        <widget class="QCheckBox" name="checkBox_angrylinker">
+         <property name="text">
           <string>AngryLinker</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBox_automerge" >
-         <property name="text" >
+        <widget class="QCheckBox" name="checkBox_automerge">
+         <property name="text">
           <string>Automerge</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBox_duallinker" >
-         <property name="text" >
+        <widget class="QCheckBox" name="checkBox_duallinker">
+         <property name="text">
           <string>Duallinker</string>
          </property>
         </widget>
        </item>
        <item>
         <spacer>
-         <property name="orientation" >
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -115,59 +116,59 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="engineTab" >
-      <attribute name="title" >
+     <widget class="QWidget" name="engineTab">
+      <attribute name="title">
        <string>Engine</string>
       </attribute>
-      <layout class="QGridLayout" >
-       <item row="0" column="0" >
-        <layout class="QGridLayout" >
-         <item row="0" column="0" >
-          <widget class="QCheckBox" name="checkBox_autorefresh" >
-           <property name="text" >
+      <layout class="QGridLayout">
+       <item row="0" column="0">
+        <layout class="QGridLayout">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBox_autorefresh">
+           <property name="text">
             <string>Enable automatic refresh of data</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0" >
-          <widget class="QCheckBox" name="checkBox_brief" >
-           <property name="text" >
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="checkBox_brief">
+           <property name="text">
             <string>Brief Mode</string>
            </property>
           </widget>
          </item>
         </layout>
        </item>
-       <item row="1" column="0" >
-        <layout class="QGridLayout" >
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label_4" >
-           <property name="text" >
+       <item row="1" column="0">
+        <layout class="QGridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
             <string>Room name quote:</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1" >
-          <widget class="QSpinBox" name="spinBox_namequote" />
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="spinBox_namequote"/>
          </item>
-         <item row="1" column="0" >
-          <widget class="QLabel" name="label_descquote" >
-           <property name="text" >
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_descquote">
+           <property name="text">
             <string>Description quote:</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1" >
-          <widget class="QSpinBox" name="spinBox_descquote" />
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="spinBox_descquote"/>
          </item>
         </layout>
        </item>
-       <item row="1" column="1" >
+       <item row="1" column="1">
         <spacer>
-         <property name="orientation" >
+         <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -175,12 +176,12 @@
          </property>
         </spacer>
        </item>
-       <item row="0" column="1" >
+       <item row="0" column="1">
         <spacer>
-         <property name="orientation" >
+         <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -190,51 +191,51 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="openglTab" >
-      <attribute name="title" >
+     <widget class="QWidget" name="openglTab">
+      <attribute name="title">
        <string>OpenGL</string>
       </attribute>
-      <layout class="QGridLayout" >
-       <item row="0" column="0" >
-        <layout class="QGridLayout" >
-         <item row="0" column="0" colspan="2" >
-          <widget class="QLabel" name="label_7" >
-           <property name="text" >
+      <layout class="QGridLayout">
+       <item row="0" column="0">
+        <layout class="QGridLayout">
+         <item row="0" column="0" colspan="2">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
             <string>Textures Visibility Range:</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="2" >
-          <widget class="QLineEdit" name="lineEdit_visrange" />
+         <item row="0" column="2">
+          <widget class="QLineEdit" name="lineEdit_visrange"/>
          </item>
-         <item row="1" column="0" colspan="2" >
-          <widget class="QLabel" name="label_8" >
-           <property name="text" >
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
             <string>Details Visibility Range:</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="2" >
-          <widget class="QLineEdit" name="lineEdit_detrange" />
+         <item row="1" column="2">
+          <widget class="QLineEdit" name="lineEdit_detrange"/>
          </item>
-         <item row="2" column="0" >
-          <widget class="QLabel" name="label_6" >
-           <property name="text" >
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
             <string>Visible Layers :</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1" colspan="2" >
-          <widget class="QLineEdit" name="lineEdit_layers" />
+         <item row="2" column="1" colspan="2">
+          <widget class="QLineEdit" name="lineEdit_layers"/>
          </item>
         </layout>
        </item>
-       <item row="0" column="1" >
+       <item row="0" column="1">
         <spacer>
-         <property name="orientation" >
+         <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -242,37 +243,37 @@
          </property>
         </spacer>
        </item>
-       <item row="1" column="0" >
-        <layout class="QVBoxLayout" >
+       <item row="1" column="0">
+        <layout class="QVBoxLayout">
          <item>
-          <widget class="QCheckBox" name="checkShowNotes" >
-           <property name="text" >
+          <widget class="QCheckBox" name="checkShowNotes">
+           <property name="text">
             <string>Show Notes</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkShowRegions" >
-           <property name="text" >
+          <widget class="QCheckBox" name="checkShowRegions">
+           <property name="text">
             <string>Show Regions</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkShowSecrets" >
-           <property name="text" >
+          <widget class="QCheckBox" name="checkShowSecrets">
+           <property name="text">
             <string>Show Secret Doors</string>
            </property>
           </widget>
          </item>
         </layout>
        </item>
-       <item row="1" column="1" >
+       <item row="1" column="1">
         <spacer>
-         <property name="orientation" >
+         <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <property name="sizeHint" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -282,12 +283,12 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="miscTab" >
-      <attribute name="title" >
+     <widget class="QWidget" name="miscTab">
+      <attribute name="title">
        <string>Misc.</string>
       </attribute>
-      <widget class="QComboBox" name="misc_startupMode" >
-       <property name="geometry" >
+      <widget class="QComboBox" name="misc_startupMode">
+       <property name="geometry">
         <rect>
          <x>120</x>
          <y>20</y>
@@ -296,18 +297,18 @@
         </rect>
        </property>
        <item>
-        <property name="text" >
+        <property name="text">
          <string>Select mode</string>
         </property>
        </item>
        <item>
-        <property name="text" >
+        <property name="text">
          <string>Move mode</string>
         </property>
        </item>
       </widget>
-      <widget class="QLabel" name="misc_startupModeLabel" >
-       <property name="geometry" >
+      <widget class="QLabel" name="misc_startupModeLabel">
+       <property name="geometry">
         <rect>
          <x>10</x>
          <y>20</y>
@@ -315,12 +316,12 @@
          <height>31</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Startup Mode:</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="misc_noteColorButton" >
-       <property name="geometry" >
+      <widget class="QPushButton" name="misc_noteColorButton">
+       <property name="geometry">
         <rect>
          <x>290</x>
          <y>20</y>
@@ -328,7 +329,7 @@
          <height>32</height>
         </rect>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Note color...</string>
        </property>
       </widget>
@@ -336,13 +337,13 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>131</width>
          <height>31</height>
@@ -351,15 +352,15 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="okButton" >
-       <property name="text" >
+      <widget class="QPushButton" name="okButton">
+       <property name="text">
         <string>OK</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="cancelButton" >
-       <property name="text" >
+      <widget class="QPushButton" name="cancelButton">
+       <property name="text">
         <string>Cancel</string>
        </property>
       </widget>
@@ -395,11 +396,11 @@
    <receiver>ConfigDialog</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>278</x>
      <y>253</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>96</x>
      <y>254</y>
     </hint>
@@ -411,11 +412,11 @@
    <receiver>ConfigDialog</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>369</x>
      <y>253</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>179</x>
      <y>282</y>
     </hint>
@@ -427,11 +428,11 @@
    <receiver>ConfigDialog</receiver>
    <slot>selectNoteColor()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>362</x>
      <y>75</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>239</x>
      <y>143</y>
     </hint>
