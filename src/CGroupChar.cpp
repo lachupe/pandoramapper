@@ -523,13 +523,13 @@ QDomNode CGroupChar::toXML()
 	root.setAttribute("str", str ? "true" : "false" );
 	root.setAttribute("bob", bob ? "true" : "false" );
 	root.setAttribute("bless", bls ? "true" : "false" );
-	root.setAttribute("blessTimer", QString(tbless.elapsed()) );
+	root.setAttribute("blessTimer", tbless.elapsed() );
 
 	root.setAttribute("sanc", sanc ? "true" : "false" );
-	root.setAttribute("sancTimer", QString(tsanc.elapsed()) );
+	root.setAttribute("sancTimer", tsanc.elapsed() );
 
 	root.setAttribute("blind", blind ? "true" : "false" );
-	root.setAttribute("blindTimer", QString(tblind.elapsed()) );
+	root.setAttribute("blindTimer", tblind.elapsed() );
 
 	doc.appendChild(root);
 	return root;
