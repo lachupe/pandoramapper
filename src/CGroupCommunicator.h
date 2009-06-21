@@ -74,7 +74,7 @@ class CGroupCommunicator : public QObject
 
 
 public:
-	const static int protocolVersion = 104;
+	const static int protocolVersion = 105;
 	enum States { Server, Client, Off };
 
 
