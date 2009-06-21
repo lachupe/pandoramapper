@@ -58,6 +58,9 @@ class CGroupChar
 
 	int 	status;
 
+	int 	blind_elapsed;
+	int 	sanc_elapsed;
+	int 	bless_elapsed;
 	QTime	tblind;
 	QTime	tsanc;
 	QTime	tbless;
@@ -67,6 +70,9 @@ class CGroupChar
 	void setSpellsFields();
 	void setScoreFields();
 	void setStatusFields();
+
+	QString calculateTimeElapsed(QTime& timer, int delay);
+
 
 public:
 	enum Char_States { NORMAL, BASHED, INCAPACITATED, DEAD };

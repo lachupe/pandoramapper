@@ -53,7 +53,7 @@ CGroupClient::CGroupClient(QByteArray host, int remotePort, QObject *parent) :
 	    close();
 	    print_debug(DEBUG_GROUP, "Server not responding!");
 	    errorHandler(QAbstractSocket::ConnectionRefusedError);
-	    getParent()->changeType(CGroupCommunicator::Off);
+	    //getParent()->changeType(CGroupCommunicator::Off);
 	    return;
 	}
 }

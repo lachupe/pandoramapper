@@ -51,6 +51,10 @@ CGroupChar::CGroupChar(QTreeWidget* t) :
 
 	blind = false;
 	//tblind.start();
+	blind_elapsed = 0;
+	sanc_elapsed = 0;
+	bless_elapsed = 0;
+
 
 	status = NORMAL;
 
@@ -82,19 +86,82 @@ void CGroupChar::setField(int i, QString text)
 	charItem->setText(i, text);
 }
 
+QString CGroupChar::calculateTimeElapsed(QTime& timer, int delay)
+{
+    QString s;
+    int min;
+    int sec;
+
+    sec = timer.elapsed() / (1000) - delay;
+    min = sec / 60;
+    sec = sec % 60;
+
+    s = QString("- %1%2:%3%4")
+            .arg( min / 10 )
+            .arg( min % 10 )
+            .arg( sec / 10 )
+            .arg( sec % 10 );
+
+    return s;
+}
+
+// TODO: Evil hack!
+// FIXME: Evil hack!
+void CGroupChar::updateSpells()
+{
+    for (unsigned int p = 0; p < conf->spells.size(); p++) {
+    	if (conf->spells[p].name == "armour") {
+			arm = conf->spells[p].up || conf->spells[p].silently_up;
+			continue;
+    	}
+    	if (conf->spells[p].name == "breath of briskness") {
+			bob = conf->spells[p].up || conf->spells[p].silently_up;
+			continue;
+    	}
+    	if (conf->spells[p].name == "shield") {
+			shld = conf->spells[p].up || conf->spells[p].silently_up;
+			continue;
+    	}
+    	if (conf->spells[p].name == "strength") {
+			str = conf->spells[p].up || conf->spells[p].silently_up;
+			continue;
+    	}
+    	if (conf->spells[p].name == "bless") {
+			bls = conf->spells[p].up || conf->spells[p].silently_up;
+			tbless = conf->spells[p].timer;
+			bless_elapsed = 0;
+			continue;
+    	}
+    	if (conf->spells[p].name == "sanctuary") {
+			sanc = conf->spells[p].up || conf->spells[p].silently_up;
+			tsanc = conf->spells[p].timer;
+			sanc_elapsed = 0;
+			continue;
+    	}
+    	if (conf->spells[p].name == "blindness") {
+			blind = conf->spells[p].up || conf->spells[p].silently_up;
+			tblind = conf->spells[p].timer;
+			blind_elapsed = 0;
+			continue;
+    	}
+    }
+}
+
+
 void CGroupChar::setSpellsFields()
 {
 
 	statusItem->setTextAlignment(0, Qt::AlignCenter);
 	if (blind) {
 		statusItem->setBackgroundColor(0, Qt::red);
+		statusItem->setText(0, "BLIND " + calculateTimeElapsed(tblind, blind_elapsed) );
 	} else {
 		statusItem->setBackgroundColor(0, Qt::darkGray);
+		statusItem->setText(0, "BLIND - 00:00");
 	}
-	statusItem->setText(0, "BLIND " + conf->calculateTimeElapsed(tblind) );
 
 	charItem->setTextAlignment(5, Qt::AlignCenter);
-	charItem->setBackgroundColor(5, arm ? Qt::green : Qt::darkGray);
+	charItem->setBackgroundColor(5, arm ? Qt::green : Qt::red);
 	charItem->setText(5, "ARM");
 
 	statusItem->setTextAlignment(5, Qt::AlignCenter);
@@ -112,19 +179,20 @@ void CGroupChar::setSpellsFields()
 	charItem->setTextAlignment(7, Qt::AlignCenter);
 	if (bls) {
 		charItem->setBackgroundColor(7, Qt::green);
+		charItem->setText(7, "BLESS " + calculateTimeElapsed(tbless, bless_elapsed) );
 	} else {
 		charItem->setBackgroundColor(7, Qt::darkGray);
+		charItem->setText(7, "BLESS - 00:00");
 	}
-	charItem->setText(7, "BLS " + conf->calculateTimeElapsed(tbless) );
 
 	statusItem->setTextAlignment(7, Qt::AlignCenter);
 	if (sanc) {
 		statusItem->setBackgroundColor(7, Qt::green);
+		statusItem->setText(7, "SANC " + calculateTimeElapsed(tsanc, sanc_elapsed));
 	} else {
 		statusItem->setBackgroundColor(7, Qt::darkGray);
+		statusItem->setText(7, "SANC - 00:00");
 	}
-	statusItem->setText(7, "SANC " + conf->calculateTimeElapsed(tsanc));
-
 }
 
 
@@ -170,8 +238,10 @@ void CGroupChar::setScoreFields()
 		col = QColor(qRgb(162, 47, 4));
 	} else 	if (textMoves == "Slow") {
 		col = QColor(qRgb(207, 64, 10));
+	} else 	if (textMoves == "Weak") {
+		col = QColor(qRgb(207, 47, 5));
 	} else 	if (textMoves == "Fainting") {
-		col = QColor(qRgb(207, 47, 10));
+		col = QColor(qRgb(237, 47, 0));
 	} else 	if (textMoves == "Exhausted") {
 		col = QColor(qRgb(255, 0, 0));
 	}
@@ -379,15 +449,17 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		bls = spell;
    	}
    	printf("Received bless Timer: %s\r\n", (const char *) e.attribute("blessTimer").toAscii());
-   	tbless = tbless.fromString(e.attribute("blessTimer"), "hh/mm/ss");
-
+   	tbless.restart();
+   	bless_elapsed = e.attribute("blessTimer").toInt();
 
    	spell = (e.attribute("sanc").toAscii() == "true");
    	if (spell != sanc) {
    		updated = true;
    		sanc = spell;
    	}
-   	tsanc = tsanc.fromString(e.attribute("sancTimer"), "hh/mm/ss");
+   	printf("Received sanc Timer: %s\r\n", (const char *) e.attribute("blessTimer").toAscii());
+   	tsanc.restart();
+   	sanc_elapsed = e.attribute("sancTimer").toInt();
 
    	spell = (e.attribute("blind").toAscii() == "true");
    	if (spell != blind) {
@@ -395,6 +467,9 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		blind = spell;
    	}
    	tblind = tblind.fromString(e.attribute("blindTimer"), "hh/mm/ss");
+   	printf("Received blind Timer: %s\r\n", (const char *) e.attribute("blindTimer").toAscii());
+   	tsanc.restart();
+   	sanc_elapsed = e.attribute("sancTimer").toInt();
 
 
    	if (updated == true)
@@ -419,44 +494,6 @@ QByteArray CGroupChar::getNameFromXML(QDomNode node)
    	return e.attribute("name").toAscii();
 }
 
-// TODO: Evil hack!
-// FIXME: Evil hack!
-void CGroupChar::updateSpells()
-{
-    for (unsigned int p = 0; p < conf->spells.size(); p++) {
-    	if (conf->spells[p].name == "armour") {
-			arm = conf->spells[p].up || conf->spells[p].silently_up;
-			continue;
-    	}
-    	if (conf->spells[p].name == "breath of briskness") {
-			bob = conf->spells[p].up || conf->spells[p].silently_up;
-			continue;
-    	}
-    	if (conf->spells[p].name == "shield") {
-			shld = conf->spells[p].up || conf->spells[p].silently_up;
-			continue;
-    	}
-    	if (conf->spells[p].name == "strength") {
-			str = conf->spells[p].up || conf->spells[p].silently_up;
-			continue;
-    	}
-    	if (conf->spells[p].name == "bless") {
-			bls = conf->spells[p].up || conf->spells[p].silently_up;
-			tbless = conf->spells[p].timer;
-			continue;
-    	}
-    	if (conf->spells[p].name == "sanctuary") {
-			sanc = conf->spells[p].up || conf->spells[p].silently_up;
-			tsanc = conf->spells[p].timer;
-			continue;
-    	}
-    	if (conf->spells[p].name == "blindness") {
-			blind = conf->spells[p].up || conf->spells[p].silently_up;
-			tblind = conf->spells[p].timer;
-			continue;
-    	}
-    }
-}
 
 
 QDomNode CGroupChar::toXML()
@@ -486,20 +523,15 @@ QDomNode CGroupChar::toXML()
 	root.setAttribute("str", str ? "true" : "false" );
 	root.setAttribute("bob", bob ? "true" : "false" );
 	root.setAttribute("bless", bls ? "true" : "false" );
-	root.setAttribute("blessTimer", tbless.toString("hh/mm/ss") );
+	root.setAttribute("blessTimer", QString(tbless.elapsed()) );
 
 	root.setAttribute("sanc", sanc ? "true" : "false" );
-	root.setAttribute("sancTimer", tsanc.toString("hh/mm/ss") );
+	root.setAttribute("sancTimer", QString(tsanc.elapsed()) );
 
 	root.setAttribute("blind", blind ? "true" : "false" );
-	root.setAttribute("blindTimer", tblind.toString("hh/mm/ss") );
-
-
-
-
+	root.setAttribute("blindTimer", QString(tblind.elapsed()) );
 
 	doc.appendChild(root);
-
 	return root;
 }
 

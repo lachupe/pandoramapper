@@ -162,13 +162,17 @@ void Cconfigurator::addSpell(TSpell spell)
     setConfigModified(true);
 }
 
-QString Cconfigurator::calculateTimeElapsed(QTime& timer)
+QString Cconfigurator::spellUpFor(unsigned int p)
 {
+    if (p > spells.size())
+        return "";
+
+
     QString s;
     int min;
     int sec;
 
-    sec = timer.elapsed() / (1000);
+    sec = spells[p].timer.elapsed() / (1000);
     min = sec / 60;
     sec = sec % 60;
 
@@ -179,15 +183,6 @@ QString Cconfigurator::calculateTimeElapsed(QTime& timer)
             .arg( sec % 10 );
 
     return s;
-}
-
-
-QString Cconfigurator::spellUpFor(unsigned int p)
-{
-    if (p > spells.size())
-        return "";
-
-    return calculateTimeElapsed(spells[p].timer);
 }
 
 
@@ -945,6 +940,7 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         }
 
         spell.up = false;
+        spell.silently_up = false;
         s = attributes.value("addon");
         s = s.toLower();
         spell.addon = false;
