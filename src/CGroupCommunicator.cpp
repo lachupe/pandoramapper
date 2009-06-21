@@ -335,6 +335,12 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 					getGroup()->gTellArrived(data);
 				} else if (message == REQ_ACK) {
 					sendMessage(conn, ACK);
+				} else if (message == CHAR_POSITION) {
+					getGroup()->updateCharPosition(data);
+				} else if (message == CHAR_PROMPT) {
+					getGroup()->updateCharPrompt(data);
+				} else if (message == CHAR_SCORE) {
+					getGroup()->updateCharScore(data);
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
@@ -402,6 +408,15 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QDo
 				if (message == UPDATE_CHAR) {
 					getGroup()->updateChar(data.firstChildElement());
 					relayMessage(conn, UPDATE_CHAR, data.firstChildElement());
+				} else if (message == CHAR_POSITION) {
+					getGroup()->updateCharPosition(data.firstChildElement());
+					relayMessage(conn, CHAR_POSITION, data.firstChildElement());
+				} else if (message == CHAR_SCORE) {
+					getGroup()->updateCharScore(data.firstChildElement());
+					relayMessage(conn, CHAR_SCORE, data.firstChildElement());
+				} else if (message == CHAR_PROMPT) {
+					getGroup()->updateCharPrompt(data.firstChildElement());
+					relayMessage(conn, CHAR_PROMPT, data.firstChildElement());
 				} else if (message == GTELL) {
 					getGroup()->gTellArrived(data);
 					relayMessage(conn, GTELL, data.firstChildElement());
@@ -528,10 +543,7 @@ void CGroupCommunicator::parseGroupInformation(CGroupClient *conn, QDomNode data
 }
 
 
-void CGroupCommunicator::sendCharUpdate(CGroupClient *conn, QDomNode blob)
-{
-	sendMessage(conn, UPDATE_CHAR, blob);
-}
+
 
 
 void CGroupCommunicator::sendRemoveUserNotification(CGroupClient *conn, QByteArray name)
@@ -585,6 +597,14 @@ void CGroupCommunicator::relayMessage(CGroupClient *connection, int message, QDo
 	serv->sendToAllExceptOne(connection, buffer);
 }
 
+
+void CGroupCommunicator::sendCharUpdate(CGroupClient *conn, QDomNode blob)
+{
+	sendMessage(conn, UPDATE_CHAR, blob);
+}
+
+
+
 void CGroupCommunicator::sendCharUpdate(QDomNode blob)
 {
 	if (type == Off)
@@ -597,6 +617,68 @@ void CGroupCommunicator::sendCharUpdate(QDomNode blob)
 		serv->sendToAll(message);
 	}
 }
+
+
+void CGroupCommunicator::sendCharScoreUpdate(CGroupClient *conn, QDomNode blob)
+{
+	sendMessage(conn, CHAR_SCORE, blob);
+}
+
+
+
+void CGroupCommunicator::sendCharScoreUpdate(QDomNode blob)
+{
+	if (type == Off)
+		return;
+   	if (type == Client)
+   		sendMessage((CGroupClient *)peer, CHAR_SCORE, blob);
+	if (type == Server) {
+		QByteArray message = formMessageBlock(CHAR_SCORE, blob);
+		CGroupServer *serv = (CGroupServer *) peer;
+		serv->sendToAll(message);
+	}
+}
+
+void CGroupCommunicator::sendCharPromptUpdate(CGroupClient *conn, QDomNode blob)
+{
+	sendMessage(conn, CHAR_PROMPT, blob);
+}
+
+
+
+void CGroupCommunicator::sendCharPromptUpdate(QDomNode blob)
+{
+	if (type == Off)
+		return;
+   	if (type == Client)
+   		sendMessage((CGroupClient *)peer, CHAR_PROMPT, blob);
+	if (type == Server) {
+		QByteArray message = formMessageBlock(CHAR_PROMPT, blob);
+		CGroupServer *serv = (CGroupServer *) peer;
+		serv->sendToAll(message);
+	}
+}
+
+void CGroupCommunicator::sendCharPositionUpdate(CGroupClient *conn, QDomNode blob)
+{
+	sendMessage(conn, CHAR_POSITION, blob);
+}
+
+
+
+void CGroupCommunicator::sendCharPositionUpdate(QDomNode blob)
+{
+	if (type == Off)
+		return;
+   	if (type == Client)
+   		sendMessage((CGroupClient *)peer, CHAR_POSITION, blob);
+	if (type == Server) {
+		QByteArray message = formMessageBlock(CHAR_POSITION, blob);
+		CGroupServer *serv = (CGroupServer *) peer;
+		serv->sendToAll(message);
+	}
+}
+
 
 void CGroupCommunicator::sendUpdateName(QByteArray oldName, QByteArray newName)
 {

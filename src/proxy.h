@@ -18,8 +18,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FORWARDER_H 
-#define FORWARDER_H 
+#ifndef FORWARDER_H
+#define FORWARDER_H
 
 #include <QMutex>
 #include <QThread>
@@ -66,18 +66,18 @@ class ProxySocket {
     /* connection sockets */
     SOCKET sock;
     QMutex mutex;
-    
+
 public:
     int mainState;
     int subState;
     char                          buffer[PROXY_BUFFER_SIZE];
     int                             length;
-    
+
     ProxySocket(bool xml);
     ProxySocket() {};
-    
+
     /* xml flags */
-    bool xmlMode;  int n;  
+    bool xmlMode;  int n;
 
     bool xmlTogglable;
 
@@ -92,15 +92,15 @@ public:
     void setXmlMode( bool b );
     bool isXmlTogglable();
     void setXmlTogglable( bool b );
-    
+
     bool isConnected();
     void setConnection(SOCKET sock);
-    bool openConnection(QByteArray name, int port); 
-    
+    bool openConnection(QByteArray name, int port);
+
     void nonblock();
 
-    
-    int read();     // read stuff in internal buffer 
+
+    int read();     // read stuff in internal buffer
     int read(char *buf, int len);
     void write(char *buf, int len);
 
@@ -111,7 +111,7 @@ public:
 /* PROXY THREAD DEFINES */
 class Proxy : public QThread {
         Q_OBJECT
-        
+
         ProxySocket             mud;
         ProxySocket             user;
         SOCKET                  proxy_hangsock;
@@ -120,11 +120,11 @@ class Proxy : public QThread {
 
         int      loop();
         bool    mudEmulation;
-    
+
         bool connectToMud();
         void incomingConnection();
         void sendMudEmulationGreeting();
-    
+
 public:
 
         void run();
@@ -137,10 +137,11 @@ public:
 
         void startEngineCall() { emit startEngine(); }
         void startRendererCall() { emit startRenderer(); }
-        
+
         void sendGroupTellEvent(QByteArray data);
         void sendScoreLineEvent(QByteArray data);
         void sendPromptLineEvent(QByteArray data);
+        void sendSpellsUpdatedEvent() { emit sendSpellsUpdate(); }
 signals:
     void connectionEstablished();
     void connectionLost();
@@ -149,6 +150,7 @@ signals:
 	void sendGTell(QByteArray);
 	void sendScoreLine(QByteArray);
 	void sendPromptLine(QByteArray);
+	void sendSpellsUpdate();
 };
 
 /* PROX THREAD ENDS */

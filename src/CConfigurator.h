@@ -53,6 +53,8 @@ typedef struct {
     QTime       timer;          /* timer */
     bool        addon;          /* if this spell has to be added after the "Affected by:" line */
     bool        up;             /* is this spell currently up ? */
+    bool		silently_up;	/* this spell is up, but time wasn't set for ome reason (reconnect) */
+								/* this option is required for better GroupManager functioning */
 } TSpell;
 
 class Cconfigurator : public QObject {

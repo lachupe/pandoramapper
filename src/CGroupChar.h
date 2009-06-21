@@ -78,7 +78,16 @@ public:
 	void setColor(QColor col) { color = col; updateLabels(); }
 	QColor getColor() { return color; }
 	QDomNode toXML();
+	QDomNode promptToXML();
+	QDomNode positionToXML();
+	QDomNode scoreToXML();
+
 	bool updateFromXML(QDomNode blob);
+	bool updatePositionFromXML(QDomNode blob);
+	bool updatePromptFromXML(QDomNode blob);
+	bool updateScoreFromXML(QDomNode blob);
+
+	void updateSpells();
 
 	QTreeWidgetItem *getCharItem() { return charItem; }
 

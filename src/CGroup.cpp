@@ -178,7 +178,7 @@ void CGroup::setCharPosition(unsigned int pos)
 	if (self->getPosition() != pos) {
 		self->setPosition(pos);
 		self->setLastMovement( engine->getLastMovement() );
-		issueLocalCharUpdate();
+		issueLocalCharPositionUpdate();
 	}
 }
 
@@ -275,20 +275,45 @@ void CGroup::sendAllCharsData(CGroupClient *conn)
 		network->sendCharUpdate(conn, chars[i]->toXML());
 }
 
-
+// UPDATERS
 void CGroup::updateChar(QDomNode blob)
 {
-	CGroupChar *ch;
-
-
-	ch = getCharByName(CGroupChar::getNameFromXML(blob));
+	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
 	if (ch == NULL)
 		return;
 
 	if (ch->updateFromXML(blob) == true)
 		toggle_renderer_reaction(); // issue a redraw
-  // TODO: all teh shit here ...
 }
+
+void CGroup::updateCharPosition(QDomNode blob)
+{
+	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
+	if (ch == NULL)
+		return;
+
+	if (ch->updatePositionFromXML(blob) == true)
+		toggle_renderer_reaction(); // issue a redraw
+}
+
+void CGroup::updateCharScore(QDomNode blob)
+{
+	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
+	if (ch == NULL)
+		return;
+
+	ch->updateScoreFromXML(blob);
+}
+
+void CGroup::updateCharPrompt(QDomNode blob)
+{
+	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
+	if (ch == NULL)
+		return;
+
+	ch->updatePromptFromXML(blob);
+}
+
 
 
 void CGroup::connectionRefused(QString message)
@@ -434,6 +459,14 @@ void CGroup::renameChar(QDomNode blob)
 	ch->updateLabels();
 }
 
+void CGroup::updateSpellsInfo()
+{
+	printf("Updating spells info's\r\n");
+
+	self->updateSpells();
+	issueLocalCharUpdate();
+}
+
 
 void CGroup::parseScoreInformation(QByteArray score)
 {
@@ -445,44 +478,25 @@ void CGroup::parseScoreInformation(QByteArray score)
 		score.replace(" mana, and ", "/");
 		score.replace(" moves.", "");
 
-
-
 		QString temp = score;
 		QStringList list = temp.split('/');
 
-/*
-		print_debug(DEBUG_GROUP, "Hp: %s", (const char *) list[0].toAscii());
-		print_debug(DEBUG_GROUP, "Hp max: %s", (const char *) list[1].toAscii());
-		print_debug(DEBUG_GROUP, "Mana: %s", (const char *) list[2].toAscii());
-		print_debug(DEBUG_GROUP, "Max Mana: %s", (const char *) list[3].toAscii());
-		print_debug(DEBUG_GROUP, "Moves: %s", (const char *) list[4].toAscii());
-		print_debug(DEBUG_GROUP, "Max Moves: %s", (const char *) list[5].toAscii());
-*/
 		self->setScore(list[0].toInt(), list[1].toInt(), list[2].toInt(), list[3].toInt(),
 						list[4].toInt(), list[5].toInt()			);
 
-		issueLocalCharUpdate();
+		issueLocalCharScoreUpdate();
 
 	} else {
 		// 399/529 hits and 121/133 moves.
 		score.replace(" hits and ", "/");
 		score.replace(" moves.", "");
 
-
-
 		QString temp = score;
 		QStringList list = temp.split('/');
-
-/*
-		print_debug(DEBUG_GROUP, "Hp: %s", (const char *) list[0].toAscii());
-		print_debug(DEBUG_GROUP, "Hp max: %s", (const char *) list[1].toAscii());
-		print_debug(DEBUG_GROUP, "Moves: %s", (const char *) list[2].toAscii());
-		print_debug(DEBUG_GROUP, "Max Moves: %s", (const char *) list[3].toAscii());
-*/
 		self->setScore(list[0].toInt(), list[1].toInt(), 0, 0,
 						list[2].toInt(), list[3].toInt()			);
 
-		issueLocalCharUpdate();
+		issueLocalCharScoreUpdate();
 	}
 }
 
@@ -524,6 +538,7 @@ void CGroup::parsePromptInformation(QByteArray prompt)
 	}
 
 	self->setTextScore(hp, mana, moves);
+	issueLocalCharPromptUpdate();
 }
 
 void CGroup::parseStateChangeLine(int message, QByteArray line)

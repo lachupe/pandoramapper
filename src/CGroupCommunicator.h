@@ -46,7 +46,8 @@ class CGroupCommunicator : public QObject
 					REQ_VERSION, REQ_ACK, REQ_LOGIN, REQ_INFO,
 					PROT_VERSION, GTELL,
 					STATE_LOGGED, STATE_KICKED,
-					ADD_CHAR, REMOVE_CHAR, UPDATE_CHAR, RENAME_CHAR };
+					ADD_CHAR, REMOVE_CHAR, UPDATE_CHAR, RENAME_CHAR,
+					CHAR_PROMPT, CHAR_SCORE, CHAR_POSITION};
 
 	QObject *peer;	// server or client
 	CGroup *getGroup() { return (CGroup *) parent(); }
@@ -84,6 +85,13 @@ public:
 	int getType() {return type; }
 	void sendCharUpdate(CGroupClient *conn, QDomNode blob);
 	void sendCharUpdate(QDomNode blob);
+	void sendCharScoreUpdate(CGroupClient *conn, QDomNode blob);
+	void sendCharScoreUpdate(QDomNode blob);
+	void sendCharPromptUpdate(CGroupClient *conn, QDomNode blob);
+	void sendCharPromptUpdate(QDomNode blob);
+	void sendCharPositionUpdate(CGroupClient *conn, QDomNode blob);
+	void sendCharPositionUpdate(QDomNode blob);
+
 	bool isConnected();
 	void reconnect();
 	void sendRemoveUserNotification(CGroupClient *conn, QByteArray name);

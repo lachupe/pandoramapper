@@ -64,18 +64,18 @@ CMainWindow::CMainWindow(QWidget *parent)
     logdialog = NULL;
     findDialog = NULL;
     groupDialog = NULL;
-    
+
     userland_parser = new Userland();
     actionManager = new CActionManager(this);
-    
+
     print_debug(DEBUG_INTERFACE, "in mainwindow constructor");
-    
+
     setWindowTitle("Pandora");
     renderer =  new RendererWidget( this );
     setCentralWidget( renderer );
-    
+
     setGeometry( conf->getWindowRect() );
-    
+
     connect(proxy, SIGNAL(connectionEstablished()), actionManager, SLOT(enable_online_actions()), Qt::QueuedConnection );
     connect(proxy, SIGNAL(connectionLost()), actionManager, SLOT(disable_online_actions()), Qt::QueuedConnection );
 
@@ -89,13 +89,13 @@ CMainWindow::CMainWindow(QWidget *parent)
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(actionManager->newAct);
     fileMenu->addSeparator();
-    fileMenu->addAction(actionManager->openAct);  
-    fileMenu->addAction(actionManager->reloadAct);  
+    fileMenu->addAction(actionManager->openAct);
+    fileMenu->addAction(actionManager->reloadAct);
     fileMenu->addSeparator();
-    fileMenu->addAction(actionManager->saveAct);  
-    fileMenu->addAction(actionManager->saveAsAct);  
+    fileMenu->addAction(actionManager->saveAct);
+    fileMenu->addAction(actionManager->saveAsAct);
     fileMenu->addSeparator();
-    fileMenu->addAction(actionManager->quitAct);  
+    fileMenu->addAction(actionManager->quitAct);
 
 
     actionsMenu = menuBar()->addMenu(tr("&Room"));
@@ -107,7 +107,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     actionsMenu->addAction(actionManager->mergeAct);
     actionsMenu->addAction(actionManager->refreshAct);
 
-    
+
     toolsMenu = menuBar()->addMenu(tr("&Tools"));
     toolsMenu->addAction(actionManager->selectToolAct);
     toolsMenu->addAction(actionManager->mapMoveToolAct);
@@ -117,7 +117,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 
 
-    
+
     mappingMenu = menuBar()->addMenu(tr("&Mapping"));
     mappingMenu->addAction(actionManager->mappingAct);
     mappingMenu->addAction(actionManager->automergeAct);
@@ -131,24 +131,24 @@ CMainWindow::CMainWindow(QWidget *parent)
     hide_status_action->setStatusTip(tr("Hides the Statusbar"));
     hide_status_action->setCheckable(true);
     hide_status_action->setChecked(false);
-    connect(hide_status_action, SIGNAL(triggered()), this, SLOT(hide_status()));    
-    
+    connect(hide_status_action, SIGNAL(triggered()), this, SLOT(hide_status()));
+
     hide_menu_action= new QAction(tr("Hide Menu Bar"), this);
     hide_menu_action->setShortcut(tr("F12"));
     hide_menu_action->setStatusTip(tr("Hides the Menubar"));
     hide_menu_action->setCheckable(true);
     hide_menu_action->setChecked(false);
-    connect(hide_menu_action, SIGNAL(triggered()), this, SLOT(hide_menu()));    
+    connect(hide_menu_action, SIGNAL(triggered()), this, SLOT(hide_menu()));
 
 
     optionsMenu = menuBar()->addMenu(tr("&Configuration"));
     optionsMenu->addAction(hide_status_action);
     optionsMenu->addAction(hide_menu_action);
-    optionsMenu->addAction(actionManager->always_on_top_action);  
-    optionsMenu->addAction(actionManager->emulationAct);  
+    optionsMenu->addAction(actionManager->always_on_top_action);
+    optionsMenu->addAction(actionManager->emulationAct);
     optionsMenu->addSeparator();
-    optionsMenu->addAction(actionManager->setupGeneralAct);  
-    optionsMenu->addAction(actionManager->spellsAct);  
+    optionsMenu->addAction(actionManager->setupGeneralAct);
+    optionsMenu->addAction(actionManager->spellsAct);
     optionsMenu->addSeparator();
     optionsMenu->addAction(actionManager->saveConfigAct);
     //  optionsMenu->addAction(saveConfigAsAct);
@@ -168,37 +168,37 @@ CMainWindow::CMainWindow(QWidget *parent)
     groupMenu->addSeparator();
     groupMenu->addAction(actionManager->groupSettingsAct);
 
-    
+
     menuBar()->addSeparator();
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(actionManager->aboutAct);
     helpMenu->addAction(actionManager->aboutQtAct);
-    
-    
 
-    
+
+
+
     /* status bar magicz */
-    locationLabel = new QLabel("NO_SYNC"); 
-    locationLabel->setAlignment(Qt::AlignHCenter); 
-    locationLabel->setMinimumSize(locationLabel->sizeHint()); 
-    
-    formulaLabel = new QLabel(); 
-    
-    modLabel = new QLabel(tr("     ")); 
-    modLabel->setAlignment(Qt::AlignHCenter); 
-    modLabel->setMinimumSize(modLabel->sizeHint());      
-    modLabel->clear(); 
-    
-    statusBar()->addWidget(locationLabel); 
-    statusBar()->addWidget(formulaLabel, 1); 
-    statusBar()->addWidget(modLabel); 
-    
+    locationLabel = new QLabel("NO_SYNC");
+    locationLabel->setAlignment(Qt::AlignHCenter);
+    locationLabel->setMinimumSize(locationLabel->sizeHint());
+
+    formulaLabel = new QLabel();
+
+    modLabel = new QLabel(tr("     "));
+    modLabel->setAlignment(Qt::AlignHCenter);
+    modLabel->setMinimumSize(modLabel->sizeHint());
+    modLabel->clear();
+
+    statusBar()->addWidget(locationLabel);
+    statusBar()->addWidget(formulaLabel, 1);
+    statusBar()->addWidget(modLabel);
+
     connect(this, SIGNAL(newLocationLabel(const QString &)),
             locationLabel, SLOT(setText(const QString &)));
     connect(this, SIGNAL(newModLabel(const QString &)),
             modLabel, SLOT(setText(const QString &)));
-    
+
     actionManager->disable_online_actions();
     connect(conf, SIGNAL(configurationChanged()),
             actionManager, SLOT(updateActionsSettings() ), Qt::QueuedConnection);
@@ -208,11 +208,12 @@ CMainWindow::CMainWindow(QWidget *parent)
     connect(proxy, SIGNAL(sendGTell(QByteArray)), groupManager, SLOT( sendGTell(QByteArray) ),  Qt::QueuedConnection );
     connect(proxy, SIGNAL(sendScoreLine(QByteArray)), groupManager, SLOT( parseScoreInformation(QByteArray) ),  Qt::QueuedConnection );
     connect(proxy, SIGNAL(sendPromptLine(QByteArray)), groupManager, SLOT( parsePromptInformation(QByteArray) ),  Qt::QueuedConnection );
+    connect(proxy, SIGNAL(sendSpellsUpdate()), groupManager, SLOT( updateSpellsInfo() ),  Qt::QueuedConnection );
     CGroupCommunicator *communicator = groupManager->getCommunicator();
     connect(communicator, SIGNAL(typeChanged(int)), actionManager, SLOT(groupManagerTypeChanged(int)), Qt::QueuedConnection  );
-    
+
     connect(renderer, SIGNAL(updateCharPosition(unsigned int)), groupManager, SLOT( setCharPosition(unsigned int) ),  Qt::QueuedConnection );
-    
+
 }
 
 
@@ -245,9 +246,9 @@ void CMainWindow::hide_status()
 {
   print_debug(DEBUG_INTERFACE, "hide/show status called");
 
-  if (hide_status_action->isChecked() ) 
+  if (hide_status_action->isChecked() )
   {
-    statusBar()->hide();  
+    statusBar()->hide();
   } else {
     statusBar()->show();
   }
@@ -261,7 +262,7 @@ void CMainWindow::editRoomDialog(unsigned int id)
 
     edit_dialog->clear_data();
     edit_dialog->load_room_data(id);
-        
+
     edit_dialog->show();
     edit_dialog->raise();
     edit_dialog->activateWindow();
@@ -271,20 +272,20 @@ void CMainWindow::editRoomDialog(unsigned int id)
 void CMainWindow::hide()
 {
   print_debug(DEBUG_INTERFACE, "hide/show all function");
-  
+
   menuBar()->hide();
   statusBar()->hide();
 
-  
+
   hide_menu_action->setChecked(true);
   hide_status_action->setChecked(true);
 }
 
 void CMainWindow::hide_menu()
 {
-  if (hide_menu_action->isChecked()) 
+  if (hide_menu_action->isChecked())
   {
-    menuBar()->hide();  
+    menuBar()->hide();
   } else {
     menuBar()->show();
   }
@@ -294,22 +295,22 @@ void CMainWindow::hide_menu()
 void CMainWindow::update_status_bar()
 {
     char str[20];
-        
-    
+
+
     print_debug(DEBUG_INTERFACE, "Updating status bar\r\n");
 
     QString modLabel;
     QString firstPart;
-    
+
     if (conf->isDatabaseModified() )
         firstPart = "Data: MOD ";
-    else 
+    else
         firstPart = "Data: --- ";
 
-    modLabel = QString("Rooms Selected %1 ").arg( Map.selections.size() );   
+    modLabel = QString("Rooms Selected %1 ").arg( Map.selections.size() );
 
-    emit newModLabel(modLabel + firstPart);     
-    
+    emit newModLabel(modLabel + firstPart);
+
     stacker.getCurrent(str);
     emit newLocationLabel(str);
     print_debug(DEBUG_INTERFACE, "Done updating interface!\r\n");
@@ -339,37 +340,37 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
 
     print_debug(DEBUG_INTERFACE, "Processing events in keyPressEvent\r\n");
     switch ( k->key() ) {
-         
+
         case Qt::Key_X :
             renderer->userZ += 1;
             toggle_renderer_reaction();
             break;
-    
+
          case Qt::Key_Y:
             renderer->userZ -= 1;
             toggle_renderer_reaction();
             break;
-    
+
          case Qt::Key_Q:
             renderer->userX -= 1;
             toggle_renderer_reaction();
             break;
-         
+
          case Qt::Key_W:
             renderer->userX += 1;
             toggle_renderer_reaction();
             break;
-         
+
          case Qt::Key_A:
             renderer->userY += 1;
             toggle_renderer_reaction();
             break;
-    
+
          case Qt::Key_S:
             renderer->userY -= 1;
             toggle_renderer_reaction();
             break;
-    
+
         case Qt::Key_Up:
             renderer->angleX += 5;
             toggle_renderer_reaction();
@@ -394,7 +395,7 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
             renderer->angleZ -= 5;
             toggle_renderer_reaction();
             break;
-        
+
         case Qt::Key_Plus:
             renderer->changeUserLayerShift( +1 );
             toggle_renderer_reaction();
@@ -404,18 +405,18 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
             renderer->changeUserLayerShift( -1 );
             toggle_renderer_reaction();
             break;
-        
-         case Qt::Key_Escape:        
-            printf("Escape pressed!\r\n");   
+
+         case Qt::Key_Escape:
+            printf("Escape pressed!\r\n");
             renderer->angleY = 0;
             renderer->angleX = 0;
             renderer->angleZ = 0;
             renderer->userX = 0;
             renderer->userY = 0;
-            renderer->userZ = BASE_Z;	
+            renderer->userZ = BASE_Z;
             renderer->userLayerShift = 0;
             toggle_renderer_reaction();
-            break;				
+            break;
 
          case Qt::Key_F12:
              hide_menu_action->setChecked(!hide_menu_action->isChecked());
@@ -424,10 +425,10 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
          case Qt::Key_F11:
         	 hide_status_action->setChecked(!hide_status_action->isChecked());
             hide_status();
-            break;				
+            break;
          case Qt::Key_F10:
             //hide_roominfo();
-            break;				
+            break;
          case Qt::Key_Space:
             if (!k->isAutoRepeat()) {
                 setToolMode(MoveMode);
@@ -458,11 +459,11 @@ void CMainWindow::mousePressEvent( QMouseEvent *e )
     	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
     	QTimer::singleShot( 100, this, SLOT(mousePressEvent(e)) );
     	return;
-    } else 
+    } else
     	Map.unlock();
 
-	
-	
+
+
     mouseState.oldPos = e->pos();
     mouseState.origPos = e->pos();
 
@@ -516,10 +517,10 @@ void CMainWindow::createContextMenu( QMouseEvent *e )
     	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
     	QTimer::singleShot( 100, this, SLOT(createContextMenu(e)) );
     	return;
-    } else 
+    } else
     	Map.unlock();
 
-    
+
     if (renderer->doSelect( mousePosInRenderer( e->pos() ), id )) {
         roomName = Map.getRoom(id)->getName();
     } else {
@@ -544,7 +545,7 @@ void CMainWindow::createContextMenu( QMouseEvent *e )
     menu.addAction(actionManager->bindRoomsAct);
     if (Map.selections.size() == 2)
         actionManager->bindRoomsAct->setEnabled(true);
-    else 
+    else
         actionManager->bindRoomsAct->setEnabled(false);
 
     menu.exec(e->globalPos());
@@ -553,7 +554,7 @@ void CMainWindow::createContextMenu( QMouseEvent *e )
 QPoint CMainWindow::mousePosInRenderer( QPoint pos ) {
 
     QPoint inFramePos = pos;
-    
+
     if (menuBar()->isHidden() == false) {
         int height = menuBar()->height();
         inFramePos.setY( inFramePos.y() -  height);
@@ -562,26 +563,26 @@ QPoint CMainWindow::mousePosInRenderer( QPoint pos ) {
     return inFramePos;
 }
 
-bool CMainWindow::checkMouseSelection( QMouseEvent *e ) 
+bool CMainWindow::checkMouseSelection( QMouseEvent *e )
 {
     unsigned int id;
 
     if (mouseState.delta( e->pos() ) <= 100) {
         if (renderer->doSelect( mousePosInRenderer( e->pos() ), id ) == true) {
             if (e->modifiers() & Qt::ControlModifier) {
-                if (Map.selections.isSelected( id ) == true) 
+                if (Map.selections.isSelected( id ) == true)
                     printf("The room already WAS selected!\r\n");
 
                 if (Map.selections.isSelected( id) == true)
                     Map.selections.unselect( id );
-                else 
+                else
                     Map.selections.select( id );
-            } else 
+            } else
                 Map.selections.exclusiveSelection( id );
-            
+
             return true;
         }
-    } 
+    }
 
     return false;
 }
@@ -609,10 +610,10 @@ void CMainWindow::mouseMoveEvent( QMouseEvent *e)
   pos = e->pos();
   dist_x = pos.x() - mouseState.oldPos.x();
   dist_y = pos.y() - mouseState.oldPos.y();
-/*  
+/*
   print_debug(DEBUG_INTERFACE, "mouseEvent. LeftMouse %s, RightMouse %s. Dist_x %i, dist_y %i.",
       ON_OFF(LeftButtonPressed), ON_OFF(RightButtonPressed), dist_x, dist_y);
-*/  
+*/
 
     if (toolMode == MoveMode) {
         if (mouseState.LeftButtonPressed) {
@@ -634,9 +635,9 @@ void CMainWindow::mouseMoveEvent( QMouseEvent *e)
 void CMainWindow::wheelEvent(QWheelEvent *e)
 {
     int delta;
-    
+
     delta = e->delta();
-    
+
     renderer->userZ += delta / 120;
     toggle_renderer_reaction();
 }
@@ -699,10 +700,10 @@ void CMainWindow::closeEvent(QCloseEvent *event)
             event->ignore();
             return;// don't exit
             break;
-        }    
-    
-    } 
-    
+        }
+
+    }
+
     if (conf->isConfigModified()) {
         switch(QMessageBox::information(this, "Pandora",
                                         "The configuration was changed\n"
@@ -720,7 +721,7 @@ void CMainWindow::closeEvent(QCloseEvent *event)
             event->ignore();
             return;// don't exit
             break;
-        }    
+        }
     }
 
     event->accept();

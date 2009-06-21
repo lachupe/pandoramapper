@@ -49,8 +49,8 @@ CGroupChar::CGroupChar(QTreeWidget* t) :
 	bls = false;
 	sanc = false;
 
-	blind = true;
-	tblind.start();
+	blind = false;
+	//tblind.start();
 
 	status = NORMAL;
 
@@ -254,6 +254,24 @@ QDomNode CGroupChar::toXML()
 	root.setAttribute("state", state );
 	root.setAttribute("lastMovement", QString(lastMovement));
 
+	// spells
+	root.setAttribute("arm", arm ? "true" : "false" );
+	root.setAttribute("shld", shld ? "true" : "false" );
+	root.setAttribute("str", str ? "true" : "false" );
+	root.setAttribute("bob", bob ? "true" : "false" );
+	root.setAttribute("bless", bls ? "true" : "false" );
+	root.setAttribute("blessTimer", tbless.toString("hh/mm/ss") );
+
+	root.setAttribute("sanc", sanc ? "true" : "false" );
+	root.setAttribute("sancTimer", tsanc.toString("hh/mm/ss") );
+
+	root.setAttribute("blind", blind ? "true" : "false" );
+	root.setAttribute("blindTimer", tblind.toString("hh/mm/ss") );
+
+
+
+
+
 	doc.appendChild(root);
 
 	return root;
@@ -273,6 +291,7 @@ bool CGroupChar::updateFromXML(QDomNode node)
    	QString s;
    	QByteArray str;
    	int newval;
+   	bool spell;
 
    	QDomElement e = node.toElement();
 
@@ -301,8 +320,6 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		color = QColor(QString(str) );
    	}
-
-//	printf("Tut 6.\r\n");
 
    	str = e.attribute("textHP").toAscii();
    	if (s != textHP) {
@@ -364,12 +381,70 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		state = newval;
    	}
 
-//	printf("Tut 6.\r\n");
+/*
+	root.setAttribute("arm", arm ? "up" : "down" );
+	root.setAttribute("shld", shld ? "up" : "down" );
+	root.setAttribute("str", str ? "up" : "down" );
+	root.setAttribute("bob", bob ? "up" : "down" );
+	root.setAttribute("bless", bless ? "up" : "down" );
+	root.setAttribute("sanc", sanc ? "up" : "down" );
+	root.setAttribute("blind", blind ? "up" : "down" );
+*/
+
+
+   	spell = (e.attribute("arm").toAscii() == "true");
+   	if (spell != arm) {
+   		updated = true;
+   		arm = spell;
+   	}
+
+   	spell = (e.attribute("shld").toAscii() == "true");
+   	if (spell != shld) {
+   		updated = true;
+   		shld = spell;
+   	}
+
+   	spell = (e.attribute("str").toAscii() == "true");
+   	if (spell != CGroupChar::str) {
+   		updated = true;
+   		CGroupChar::str = spell;
+   	}
+
+   	spell = (e.attribute("bob").toAscii() == "true");
+   	if (spell != bob) {
+   		updated = true;
+   		bob = spell;
+   	}
+
+   	spell = (e.attribute("bless").toAscii() == "true");
+   	if (spell != bls) {
+   		updated = true;
+   		bls = spell;
+   	}
+   	str = e.attribute("blessTimer").toAscii();
+   	tbless.fromString(str, "hh/mm/ss");
+
+
+   	spell = (e.attribute("sanc").toAscii() == "true");
+   	if (spell != sanc) {
+   		updated = true;
+   		sanc = spell;
+   	}
+   	str = e.attribute("sancTimer").toAscii();
+   	tsanc.fromString(str, "hh/mm/ss");
+
+   	spell = (e.attribute("blind").toAscii() == "true");
+   	if (spell != blind) {
+   		updated = true;
+   		blind = spell;
+   	}
+   	str = e.attribute("blindTimer").toAscii();
+   	tblind.fromString(str, "hh/mm/ss");
+
 
    	if (updated == true)
    		updateLabels();
 
-//	printf("Tut 7.\r\n");
 
 	return updated; // hrmpf!
 }
@@ -385,4 +460,219 @@ QByteArray CGroupChar::getNameFromXML(QDomNode node)
 
    	return e.attribute("name").toAscii();
 }
+
+// TODO: Evil hack!
+// FIXME: Evil hack!
+void CGroupChar::updateSpells()
+{
+    for (unsigned int p = 0; p < conf->spells.size(); p++) {
+    	if (conf->spells[p].name == "armour") {
+			arm = conf->spells[p].up || conf->spells[p].silently_up;
+			continue;
+    	}
+    	if (conf->spells[p].name == "breath of briskness") {
+			bob = conf->spells[p].up || conf->spells[p].silently_up;
+			continue;
+    	}
+    	if (conf->spells[p].name == "shield") {
+			shld = conf->spells[p].up || conf->spells[p].silently_up;
+			continue;
+    	}
+    	if (conf->spells[p].name == "strength") {
+			str = conf->spells[p].up || conf->spells[p].silently_up;
+			continue;
+    	}
+    	if (conf->spells[p].name == "bless") {
+			bls = conf->spells[p].up || conf->spells[p].silently_up;
+			tbless = conf->spells[p].timer;
+			continue;
+    	}
+    	if (conf->spells[p].name == "sanctuary") {
+			sanc = conf->spells[p].up || conf->spells[p].silently_up;
+			tsanc = conf->spells[p].timer;
+			continue;
+    	}
+    	if (conf->spells[p].name == "blindness") {
+			blind = conf->spells[p].up || conf->spells[p].silently_up;
+			tblind = conf->spells[p].timer;
+			continue;
+    	}
+    }
+}
+
+
+QDomNode CGroupChar::promptToXML()
+{
+	QDomDocument doc("promptinfo");
+
+	QDomElement root = doc.createElement("playerData");
+	root.setAttribute("name", QString(name) );
+	root.setAttribute("textHP", QString(textHP) );
+	root.setAttribute("textMana", QString(textMana) );
+	root.setAttribute("textMoves", QString(textMoves) );
+
+	doc.appendChild(root);
+
+	return root;
+}
+
+QDomNode CGroupChar::positionToXML()
+{
+	QDomDocument doc("positioninfo");
+
+	QDomElement root = doc.createElement("playerData");
+	root.setAttribute("room", pos );
+	root.setAttribute("name", QString(name) );
+
+	doc.appendChild(root);
+	return root;
+}
+
+QDomNode CGroupChar::scoreToXML()
+{
+	QDomDocument doc("positioninfo");
+
+	QDomElement root = doc.createElement("playerData");
+	root.setAttribute("name", QString(name) );
+	root.setAttribute("hp", hp );
+	root.setAttribute("maxhp", maxhp );
+	root.setAttribute("mana", mana);
+	root.setAttribute("maxmana", maxmana);
+	root.setAttribute("moves", moves );
+	root.setAttribute("maxmoves", maxmoves );
+
+	doc.appendChild(root);
+	return root;
+}
+
+
+
+bool CGroupChar::updatePositionFromXML(QDomNode node)
+{
+	bool updated;
+
+	updated = false;
+    if (node.nodeName() != "playerData") {
+    	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
+    	return false;
+    }
+
+   	QString s;
+   	QByteArray str;
+
+   	QDomElement e = node.toElement();
+
+   	unsigned int newpos  = e.attribute("room").toInt();
+   	if (newpos != pos) {
+   		updated = true;
+   		pos = newpos;
+   	}
+
+   	if (updated == true)
+   		updateLabels();
+
+	return updated; // hrmpf!
+}
+
+
+bool CGroupChar::updateScoreFromXML(QDomNode node)
+{
+	bool updated;
+
+	updated = false;
+    if (node.nodeName() != "playerData") {
+    	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
+    	return false;
+    }
+
+   	QString s;
+   	QByteArray str;
+   	int newval;
+
+   	QDomElement e = node.toElement();
+
+	newval  = e.attribute("hp").toInt();
+	if (newval != hp) {
+		updated = true;
+		hp = newval;
+	}
+
+	newval  = e.attribute("maxhp").toInt();
+	if (newval != maxhp) {
+		updated = true;
+		maxhp = newval;
+	}
+
+	newval  = e.attribute("mana").toInt();
+	if (newval != mana) {
+		updated = true;
+		mana = newval;
+	}
+
+	newval  = e.attribute("maxmana").toInt();
+	if (newval != maxmana) {
+		updated = true;
+		maxmana = newval;
+	}
+
+	newval  = e.attribute("moves").toInt();
+	if (newval != moves) {
+		updated = true;
+		moves = newval;
+	}
+
+	newval  = e.attribute("maxmoves").toInt();
+	if (newval != maxmoves) {
+		updated = true;
+		maxmoves = newval;
+	}
+
+   	if (updated == true)
+   		updateLabels();
+
+	return updated; // hrmpf!
+}
+
+
+
+bool CGroupChar::updatePromptFromXML(QDomNode node)
+{
+	bool updated;
+
+	updated = false;
+    if (node.nodeName() != "playerData") {
+    	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
+    	return false;
+    }
+
+   	QString s;
+   	QByteArray str;
+
+   	QDomElement e = node.toElement();
+
+   	str = e.attribute("textHP").toAscii();
+   	if (s != textHP) {
+   		updated = true;
+   		textHP = str;
+   	}
+
+   	str = e.attribute("textMana").toAscii();
+   	if (s != textMana) {
+   		updated = true;
+   		textMana = str;
+   	}
+
+   	str = e.attribute("textMoves").toAscii();
+   	if (s != textMoves) {
+   		updated = true;
+   		textMoves = str;
+   	}
+
+   	if (updated == true)
+   		updateLabels();
+
+	return updated; // hrmpf!
+}
+
+
 

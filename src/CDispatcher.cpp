@@ -22,8 +22,8 @@
 #define MPILEN		4	/* strlen(MPI) */
 
 
-#include <cstdio>
-#include <cstring>
+//#include <cstdio>
+//#include <cstring>
 #include <qregexp.h>
 
 //#include <arpa/telnet.h>
@@ -636,14 +636,17 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                         print_debug(DEBUG_SPELLS, "SPELL %s Starting/Restaring timer.",  (const char *) conf->spells[p].name);
                         conf->spells[p].timer.start();   // start counting
                         conf->spells[p].up = true;
+                        proxy->sendSpellsUpdatedEvent();
                         break;
                     }
 
                     // if some spell is up - only then we check if its down
                     if (conf->spells[p].up && conf->spells[p].down_mes != "" && conf->spells[p].down_mes == a_line) {
                         conf->spells[p].up = false;
+                        conf->spells[p].silently_up = false;
                         print_debug(DEBUG_SPELLS, "SPELL: %s is DOWN. Uptime: %s.", (const char *) conf->spells[p].name,
                                                 qPrintable( conf->spellUpFor(p) ) );
+                        proxy->sendSpellsUpdatedEvent();
                         break;
                     }
                 }
@@ -657,14 +660,16 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                         if (a_line.indexOf(conf->spells[p].name) == 2) {
                             QString s;
 
-                            if (conf->spells[p].up)
+                            if (conf->spells[p].up) {
                                 s = QString("- %1 (up for %2)\r\n")
                                     .arg( (const char *)conf->spells[p].name )
                                     .arg( conf->spellUpFor(p) );
-                            else
+                            } else {
                                 s = QString("- %1 (unknown time)\r\n")
                                     .arg( (const char *)conf->spells[p].name );
-
+                                conf->spells[p].silently_up = true;
+                                proxy->sendSpellsUpdatedEvent();
+                            }
                             memcpy(buf + new_len, qPrintable(s), s.length());
                             new_len += s.length();
 

@@ -1,17 +1,17 @@
 <config>
   <localport port="4242">
-  <remotehost hostname="mume.org" port="4242">
+  <remotehost hostname="193.134.218.111" port="443">
   <basefile filename="database/mume.xml">
   <GLvisibility textures="100" details="100" shownotes="ON" layers="7">
   <analyzers exits="OFF"  terrain="ON">
   <engineflags briefmode="ON" automerge="ON"  angrylinker="ON" duallinker="ON">
   <regionsflags displayinrenderer="OFF" showinfo="ON">
   <guisettings always_on_top="ON">
-  <groupManager state="Server" host="localhost" charName="Aza" charColor="#00ff00" localPort="4243" remotePort="4243">
-  <groupManagerGUI show="OFF"  x="5" y="24" height="124" width="693">
-  <window x="708" y="49" height="398" width="567">
-  <rendererangles anglex="-17.000000" angley="16.000000" anglez="0.000000">
-  <rendererpositions userx="0.000000" usery="0.000000" userz="-25.000000">
+  <groupManager state="Off" host="85.182.11.185" charName="Burunduk" charColor="#ffff00" localPort="4243" remotePort="23">
+  <groupManagerGUI show="OFF"  x="5" y="24" height="107" width="644">
+  <window x="847" y="49" height="324" width="428">
+  <rendererangles anglex="-18.000000" angley="11.000000" anglez="0.000000">
+  <rendererpositions userx="0.000000" usery="0.000000" userz="-19.000000">
   <refresh auto="ON" roomnamequote="10" descquote="10">
   <texture handle="INDOORS" file="images/indoors.png" pattern="[">
   <texture handle="CITY" file="images/city.png" pattern="#">
@@ -28,8 +28,8 @@
   <texture handle="CAVERN" file="images/cavern.png" pattern="O">
   <texture handle="DEATH" file="images/death.png" pattern="?">
   <texture handle="MOUNTAINS" file="images/mountain.png" pattern="&lt;">
-  <spell addon="NO" name="armour" up="A blue transparent wall slowly appears around you." refresh="Your magic armour is revitalized." down="You feel less protected.">
-  <spell addon="NO" name="shield" up="You feel protected." refresh="Your protection is revitalized." down="Your magical shield wears off.">
+  <spell addon="NO" name="armour" up="A blue transparent wall slowly appears around you." refresh="Your magic armour is revitalised." down="You feel less protected.">
+  <spell addon="NO" name="shield" up="You feel protected." refresh="Your protection is revitalised." down="Your magical shield wears off.">
   <spell addon="NO" name="strength" up="You feel stronger." refresh="The duration of the strength spell has been improved." down="You feel weaker.">
   <spell addon="NO" name="bless" up="You begin to feel the light of Aman shine upon you." refresh="You feel a renewed light shine upon you." down="The light of Aman fades away from you.">
   <spell addon="NO" name="sense life" up="You feel your awareness improve." refresh="Your awareness is refreshed." down="You feel less aware of your surroundings.">
@@ -42,7 +42,6 @@
   <spell addon="NO" name="nightvision" up="Your eyes tingle." refresh="" down="Your vision blurs.">
   <spell addon="NO" name="battleglory" up="Hearing the horn blow, you feel your urge to battle increase!" refresh="" down="You feel your newfound strength leaving you again.">
   <spell addon="NO" name="breath of briskness" up="An energy begins to flow within your legs as your body becomes lighter." refresh="The energy in your legs is refreshed." down="Your legs feel heavier.">
-  <spell addon="NO" name="protection from evil" up="You have a righteous feeling!" refresh="You feel a renewed righteousness." down="You feel less righteous.">
   <debug name="general"  state="ON">
   <debug name="analyzer"  state="ON">
   <debug name="system"  state="ON">
@@ -53,10 +52,10 @@
   <debug name="roommanager"  state="ON">
   <debug name="stacks"  state="OFF">
   <debug name="tree"  state="OFF">
-  <debug name="userfunc"  state="ON">
+  <debug name="userfunc"  state="OFF">
   <debug name="xml"  state="ON">
   <debug name="interface"  state="ON">
   <debug name="spells"  state="ON">
   <debug name="group"  state="ON">
-  <misc startupmode="0" notecolor="#F28003">
+  <misc startupmode="0" notecolor="#ffdc4c">
 </config>

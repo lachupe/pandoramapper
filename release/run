@@ -1,0 +1,8 @@
+#!/bin/bash
+# for core files in case you want to debug
+ulimit -c unlimited
+./pandora -c ./configs/mume.xml
+
+# Use this one for MUD Emulation mode
+#./pandora -e -c ./configs/mume.conf
+

@@ -61,6 +61,10 @@ public:
 	QByteArray getNameFromBlob(QDomNode blob);
 //	bool addCharIfUnique(QDomNode blob);
 	void updateChar(QDomNode blob); // updates given char from the blob
+	void updateCharPosition(QDomNode blob);
+	void updateCharScore(QDomNode blob);
+	void updateCharPrompt(QDomNode blob);
+
 	CGroupCommunicator *getCommunicator() { return network; }
 
 
@@ -73,6 +77,9 @@ public:
 	QDomNode getLocalCharData() { return self->toXML(); }
 	void sendAllCharsData(CGroupClient *conn);
 	void issueLocalCharUpdate() { 	network->sendCharUpdate(self->toXML()); }
+	void issueLocalCharScoreUpdate() { 	network->sendCharScoreUpdate(self->scoreToXML()); }
+	void issueLocalCharPromptUpdate() { 	network->sendCharPromptUpdate(self->promptToXML()); }
+	void issueLocalCharPositionUpdate() { 	network->sendCharPositionUpdate(self->positionToXML()); }
 
 	void gTellArrived(QDomNode node);
 
@@ -97,6 +104,8 @@ public slots:
 	void parsePromptInformation(QByteArray prompt);
 
 	void parseStateChangeLine(int message, QByteArray line);
+
+	void updateSpellsInfo();
 
 	void updateGroupManagerWindow();
 
