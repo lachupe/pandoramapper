@@ -152,7 +152,7 @@ void CGroupClient::cutMessageFromBuffer()
 		if (buffer.size() == currentMessageLen)
 			cutMessageFromBuffer();
 
-		printf("returning from cutMessageFromBuffer\r\n");
+//		printf("returning from cutMessageFromBuffer\r\n");
 		return;
 	}
 

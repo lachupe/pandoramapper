@@ -233,49 +233,6 @@ void CGroupChar::updateLabels()
 
 }
 
-QDomNode CGroupChar::toXML()
-{
-
-	QDomDocument doc("charinfo");
-
-	QDomElement root = doc.createElement("playerData");
-	root.setAttribute("room", pos );
-	root.setAttribute("name", QString(name) );
-	root.setAttribute("color", color.name() );
-	root.setAttribute("textHP", QString(textHP) );
-	root.setAttribute("textMana", QString(textMana) );
-	root.setAttribute("textMoves", QString(textMoves) );
-	root.setAttribute("hp", hp );
-	root.setAttribute("maxhp", maxhp );
-	root.setAttribute("mana", mana);
-	root.setAttribute("maxmana", maxmana);
-	root.setAttribute("moves", moves );
-	root.setAttribute("maxmoves", maxmoves );
-	root.setAttribute("state", state );
-	root.setAttribute("lastMovement", QString(lastMovement));
-
-	// spells
-	root.setAttribute("arm", arm ? "true" : "false" );
-	root.setAttribute("shld", shld ? "true" : "false" );
-	root.setAttribute("str", str ? "true" : "false" );
-	root.setAttribute("bob", bob ? "true" : "false" );
-	root.setAttribute("bless", bls ? "true" : "false" );
-	root.setAttribute("blessTimer", tbless.toString("hh/mm/ss") );
-
-	root.setAttribute("sanc", sanc ? "true" : "false" );
-	root.setAttribute("sancTimer", tsanc.toString("hh/mm/ss") );
-
-	root.setAttribute("blind", blind ? "true" : "false" );
-	root.setAttribute("blindTimer", tblind.toString("hh/mm/ss") );
-
-
-
-
-
-	doc.appendChild(root);
-
-	return root;
-}
 
 bool CGroupChar::updateFromXML(QDomNode node)
 {
@@ -421,8 +378,8 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		bls = spell;
    	}
-   	str = e.attribute("blessTimer").toAscii();
-   	tbless.fromString(str, "hh/mm/ss");
+   	printf("Received bless Timer: %s\r\n", (const char *) e.attribute("blessTimer").toAscii());
+   	tbless = tbless.fromString(e.attribute("blessTimer"), "hh/mm/ss");
 
 
    	spell = (e.attribute("sanc").toAscii() == "true");
@@ -430,16 +387,14 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		sanc = spell;
    	}
-   	str = e.attribute("sancTimer").toAscii();
-   	tsanc.fromString(str, "hh/mm/ss");
+   	tsanc = tsanc.fromString(e.attribute("sancTimer"), "hh/mm/ss");
 
    	spell = (e.attribute("blind").toAscii() == "true");
    	if (spell != blind) {
    		updated = true;
    		blind = spell;
    	}
-   	str = e.attribute("blindTimer").toAscii();
-   	tblind.fromString(str, "hh/mm/ss");
+   	tblind = tblind.fromString(e.attribute("blindTimer"), "hh/mm/ss");
 
 
    	if (updated == true)
@@ -451,7 +406,10 @@ bool CGroupChar::updateFromXML(QDomNode node)
 
 QByteArray CGroupChar::getNameFromXML(QDomNode node)
 {
+
     if (node.nodeName() != "playerData") {
+    	printf("Called updateFromXML with wrong node. The name does not fit.\r\n");
+    	printf("Occured node name: %s\r\n", (const char *) node.nodeName().toAscii());
     	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
     	return false;
     }
@@ -501,9 +459,54 @@ void CGroupChar::updateSpells()
 }
 
 
+QDomNode CGroupChar::toXML()
+{
+
+	QDomDocument doc("charinfo");
+
+	QDomElement root = doc.createElement("playerData");
+	root.setAttribute("room", pos );
+	root.setAttribute("name", QString(name) );
+	root.setAttribute("color", color.name() );
+	root.setAttribute("textHP", QString(textHP) );
+	root.setAttribute("textMana", QString(textMana) );
+	root.setAttribute("textMoves", QString(textMoves) );
+	root.setAttribute("hp", hp );
+	root.setAttribute("maxhp", maxhp );
+	root.setAttribute("mana", mana);
+	root.setAttribute("maxmana", maxmana);
+	root.setAttribute("moves", moves );
+	root.setAttribute("maxmoves", maxmoves );
+	root.setAttribute("state", state );
+	root.setAttribute("lastMovement", QString(lastMovement));
+
+	// spells
+	root.setAttribute("arm", arm ? "true" : "false" );
+	root.setAttribute("shld", shld ? "true" : "false" );
+	root.setAttribute("str", str ? "true" : "false" );
+	root.setAttribute("bob", bob ? "true" : "false" );
+	root.setAttribute("bless", bls ? "true" : "false" );
+	root.setAttribute("blessTimer", tbless.toString("hh/mm/ss") );
+
+	root.setAttribute("sanc", sanc ? "true" : "false" );
+	root.setAttribute("sancTimer", tsanc.toString("hh/mm/ss") );
+
+	root.setAttribute("blind", blind ? "true" : "false" );
+	root.setAttribute("blindTimer", tblind.toString("hh/mm/ss") );
+
+
+
+
+
+	doc.appendChild(root);
+
+	return root;
+}
+
+
 QDomNode CGroupChar::promptToXML()
 {
-	QDomDocument doc("promptinfo");
+	QDomDocument doc("charinfo");
 
 	QDomElement root = doc.createElement("playerData");
 	root.setAttribute("name", QString(name) );
@@ -518,7 +521,7 @@ QDomNode CGroupChar::promptToXML()
 
 QDomNode CGroupChar::positionToXML()
 {
-	QDomDocument doc("positioninfo");
+	QDomDocument doc("charinfo");
 
 	QDomElement root = doc.createElement("playerData");
 	root.setAttribute("room", pos );
@@ -530,7 +533,7 @@ QDomNode CGroupChar::positionToXML()
 
 QDomNode CGroupChar::scoreToXML()
 {
-	QDomDocument doc("positioninfo");
+	QDomDocument doc("charinfo");
 
 	QDomElement root = doc.createElement("playerData");
 	root.setAttribute("name", QString(name) );
@@ -553,7 +556,7 @@ bool CGroupChar::updatePositionFromXML(QDomNode node)
 
 	updated = false;
     if (node.nodeName() != "playerData") {
-    	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
+    	print_debug(DEBUG_GROUP, "Called updatePositionFromXML with wrong node. The name does not fit.");
     	return false;
     }
 
@@ -581,7 +584,7 @@ bool CGroupChar::updateScoreFromXML(QDomNode node)
 
 	updated = false;
     if (node.nodeName() != "playerData") {
-    	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
+    	print_debug(DEBUG_GROUP, "Called updateScoreFromXML with wrong node. The name does not fit.");
     	return false;
     }
 
@@ -641,7 +644,7 @@ bool CGroupChar::updatePromptFromXML(QDomNode node)
 
 	updated = false;
     if (node.nodeName() != "playerData") {
-    	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
+    	print_debug(DEBUG_GROUP, "Called updatePromptFromXML with wrong node. The name does not fit.");
     	return false;
     }
 

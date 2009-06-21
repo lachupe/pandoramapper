@@ -309,9 +309,7 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 			} else if (conn->getProtocolState() == CGroupClient::AwaitingInfo) {
 				// almost connected. awaiting full information about the connection
 				if (message == UPDATE_CHAR) {
-					printf("Adding char ....\r\n");
 					getGroup()->addChar(data.firstChildElement());
-					printf("Added char ....\r\n");
 				} else if (message == STATE_LOGGED) {
 					conn->setProtocolState(CGroupClient::Logged);
 				} else if (message == REQ_ACK) {
@@ -336,11 +334,11 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 				} else if (message == REQ_ACK) {
 					sendMessage(conn, ACK);
 				} else if (message == CHAR_POSITION) {
-					getGroup()->updateCharPosition(data);
+					getGroup()->updateCharPosition(data.firstChildElement());
 				} else if (message == CHAR_PROMPT) {
-					getGroup()->updateCharPrompt(data);
+					getGroup()->updateCharPrompt(data.firstChildElement());
 				} else if (message == CHAR_SCORE) {
-					getGroup()->updateCharScore(data);
+					getGroup()->updateCharScore(data.firstChildElement());
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
@@ -592,7 +590,7 @@ void CGroupCommunicator::relayMessage(CGroupClient *connection, int message, QDo
 {
 	QByteArray buffer = formMessageBlock(message, data);
 
-	printf("Relaying message from %s", (const char *) clientsList.key(connection->socketDescriptor()) );
+	printf("Relaying message from %s\r\n", (const char *) clientsList.key(connection->socketDescriptor()) );
 	CGroupServer *serv = (CGroupServer *) peer;
 	serv->sendToAllExceptOne(connection, buffer);
 }
@@ -661,6 +659,7 @@ void CGroupCommunicator::sendCharPromptUpdate(QDomNode blob)
 
 void CGroupCommunicator::sendCharPositionUpdate(CGroupClient *conn, QDomNode blob)
 {
+	printf("Sending position update.\r\n");
 	sendMessage(conn, CHAR_POSITION, blob);
 }
 
@@ -668,6 +667,7 @@ void CGroupCommunicator::sendCharPositionUpdate(CGroupClient *conn, QDomNode blo
 
 void CGroupCommunicator::sendCharPositionUpdate(QDomNode blob)
 {
+	printf("Sending position update.\r\n");
 	if (type == Off)
 		return;
    	if (type == Client)
@@ -744,7 +744,8 @@ void CGroupCommunicator::changeType(int newState) {
 		return;
 
 	if (type == Client)
-		peer->deleteLater();
+		if (peer)
+			peer->deleteLater();
 	if (type == Server)  {
 		CGroupServer *serv = (CGroupServer *) peer;
 		serv->closeAll();

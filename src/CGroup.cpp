@@ -121,7 +121,8 @@ CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
 
 
     // initialize timed updates of the group manager frame
-    startTimer( 0 );                            // run continuous timer
+
+    //startTimer( 0 );                            // run continuous timer
     QTimer * counter = new QTimer( this );
     connect( counter, SIGNAL(timeout()), this, SLOT(updateGroupManagerWindow()) );
     counter->start( 1000 );
@@ -288,9 +289,13 @@ void CGroup::updateChar(QDomNode blob)
 
 void CGroup::updateCharPosition(QDomNode blob)
 {
+	printf("CHAR_POSITION for: %s\r\n", (const char *) CGroupChar::getNameFromXML(blob));
+
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
 	if (ch == NULL)
 		return;
+
+	printf("updating\r\n");
 
 	if (ch->updatePositionFromXML(blob) == true)
 		toggle_renderer_reaction(); // issue a redraw
@@ -298,6 +303,7 @@ void CGroup::updateCharPosition(QDomNode blob)
 
 void CGroup::updateCharScore(QDomNode blob)
 {
+	printf("CHAR_SCORE for: %s\r\n", (const char *) CGroupChar::getNameFromXML(blob));
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
 	if (ch == NULL)
 		return;
@@ -307,6 +313,7 @@ void CGroup::updateCharScore(QDomNode blob)
 
 void CGroup::updateCharPrompt(QDomNode blob)
 {
+	printf("CHAR_PROMPT for: %s\r\n", (const char *) CGroupChar::getNameFromXML(blob));
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
 	if (ch == NULL)
 		return;

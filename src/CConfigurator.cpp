@@ -150,6 +150,7 @@ void Cconfigurator::addSpell(QByteArray spellname, QByteArray up, QByteArray dow
     spell.refresh_mes = refresh;
     spell.addon = addon;
     spell.up = false;
+    spell.silently_up = false;
 
     spells.push_back(spell);
     setConfigModified(true);
