@@ -92,7 +92,7 @@ QString CGroupChar::calculateTimeElapsed(QTime& timer, int delay)
     int min;
     int sec;
 
-    sec = timer.elapsed() / (1000) - delay;
+    sec = timer.elapsed() / (1000) + delay;
     min = sec / 60;
     sec = sec % 60;
 
