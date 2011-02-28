@@ -63,6 +63,7 @@ void CGroupCommunicator::connectionStateChanged(CGroupClient *connection)
 			break;
 		case CGroupClient::Closed :
 			print_debug(DEBUG_GROUP, "Connection closed.");
+			printf("Connection closed\r\n");
 			connectionClosed(connection);
 			break;
 		case CGroupClient::Quiting :
@@ -95,7 +96,7 @@ void CGroupCommunicator::connectionEstablished(CGroupClient *connection)
 	}
 	if (type == Server) {
 		connection->setProtocolState(CGroupClient::AwaitingLogin);
-		sendMessage(connection, REQ_LOGIN, "test");
+		sendMessage(connection, REQ_LOGIN, "");
 	}
 }
 
@@ -104,7 +105,7 @@ void CGroupCommunicator::connectionClosed(CGroupClient *connection)
 	if (type == Off) {
 		printf("Error ... Wtf?\r\n");
 	} else 	if (type == Client) {
-		getGroup()->connectionError("Remote host closed the connection");
+		//getGroup()->connectionError("Remote host closed the connection");
 		changeType(Off);
 	} else if (type == Server) {
 		int sock = connection->socketDescriptor();
@@ -724,7 +725,8 @@ void CGroupCommunicator::reconnect()
 		peer->deleteLater();
 	} else 	if (type == Server) {
 	    ((CGroupServer*) peer)->closeAll();
-	    delete peer;
+	    peer->deleteLater();
+	    //delete peer;
 	}
 	print_debug(DEBUG_GROUP, "reconnect Done");
 
@@ -749,7 +751,8 @@ void CGroupCommunicator::changeType(int newState) {
 	if (type == Server)  {
 		CGroupServer *serv = (CGroupServer *) peer;
 		serv->closeAll();
-		delete peer;
+		//delete peer;
+		peer->deleteLater();
 	}
 
 	type = newState;

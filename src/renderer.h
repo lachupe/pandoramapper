@@ -57,7 +57,7 @@ class RendererWidget : public QGLWidget
     GLuint        global_list;
     int           curx;
     int           cury;
-    int           curz;			/* current rooms position */ 
+    int           curz;			/* current rooms position */
     CFrustum       frustum;
 //    QFont         textFont;
     

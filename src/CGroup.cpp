@@ -17,8 +17,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMessageBox>
@@ -148,8 +146,6 @@ void CGroup::resetAllChars()
 
 void CGroup::resetChars()
 {
-	printf(" ---------- Size of chars: %i\r\n", chars.size());
-
 	for (int i = 0; i < chars.size(); ++i) {
 		if (chars[i] != self)
 			delete chars[i];
@@ -347,7 +343,7 @@ void CGroup::connectionClosed(QString message)
 
 void CGroup::connectionError(QString message)
 {
-	print_debug(DEBUG_GROUP, "Connection closed: %s", (const char *) message.toAscii());
+	print_debug(DEBUG_GROUP, "Connection error: %s", (const char *) message.toAscii());
 	if (network->getType() == CGroupCommunicator::Client)
 		QMessageBox::information(this, "groupManager", QString("Connection error: %1.").arg(message));
 }

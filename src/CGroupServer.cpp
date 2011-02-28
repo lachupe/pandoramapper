@@ -60,6 +60,7 @@ void CGroupServer::addClient(CGroupClient *client)
 void CGroupServer::connectionClosed(CGroupClient *connection)
 {
 	print_debug(DEBUG_GROUP, "Removing and deleting the connection completely.");
+	connection->disconnect();
 	connections.removeAll(connection);
 	print_debug(DEBUG_GROUP, "Deleting the connection");
 	connection->deleteLater();

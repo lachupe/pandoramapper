@@ -321,12 +321,15 @@ const struct user_command_type user_commands[] = {
     "    Uses last seen roomdesc and all other information (e.g terrain flags).\r\n"
     "Use together with mgoto.\r\n"},
 
-  {"mregion",              usercmd_mregion,        0,      USERCMD_FLAG_REDRAW,
-    "Region's system subcommands entry point",
-    "    Usage: mregion \r\n\r\n"
-    "    blabla.\r\n"
-    "blabla2.\r\n"},
+    {"mregion",              usercmd_mregion,        0,      USERCMD_FLAG_REDRAW,
+      "Region's system subcommands entry point",
+      "    Usage: mregion \r\n\r\n"
+      "blabla2.\r\n"},
 
+    {"mtimer",              usercmd_mtimer,        0,      USERCMD_FLAG_INSTANT,
+        "Setup and addon timer ",
+        "    Usage: mtimer <start|stop> <timers-name>\r\n\r\n"
+        "blabla.\r\n"},
 
 
   {NULL, NULL, 0, 0, NULL, NULL}
@@ -2010,6 +2013,85 @@ USERCMD(usercmd_mregion)
     return USER_PARSE_SKIP;
 }
 
+
+
+USERCMD(usercmd_mtimer)
+{
+    char *p;
+    char arg[MAX_STR_LEN];
+
+    userfunc_print_debug;
+
+    p = skip_spaces(line);
+    if (!*p) {
+            /* print help file or current settings */
+    	send_to_user("Starts/stops add-on timers.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
+    p = one_argument(p, arg, 0);
+
+
+    if (is_abbrev(arg, "start") ) {
+
+        p = skip_spaces(p);
+        if (!*p) {
+            send_to_user("Error. Missing timer's name. \r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        p = one_argument(p, arg, 0);
+
+        QByteArray timer = arg;
+        for (unsigned int spell = 0; spell < conf->spells.size(); spell++) {
+        	//printf("Spell name %s, line %s\r\n", (const char *) conf->spells[p].name, (const char*) a_line );
+            if (conf->spells[spell].name == timer && conf->spells[spell].addon == true) {
+
+            	conf->spells[spell].up = true;
+            	conf->spells[spell].timer.start();   // start counting
+
+            	send_to_user("Timer %s refreshed.\r\n", (const char *) conf->spells[spell].name );
+                send_prompt();
+                return USER_PARSE_SKIP;
+            }
+        }
+
+        send_to_user("Timer with this name not found. \r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
+
+    if (is_abbrev(arg, "stop") ) {
+
+        p = skip_spaces(p);
+        if (!*p) {
+            send_to_user("Error. Missing timer's name. \r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        p = one_argument(p, arg, 0);
+
+        QByteArray timer = arg;
+        for (unsigned int spell = 0; spell < conf->spells.size(); spell++) {
+        	//printf("Spell name %s, line %s\r\n", (const char *) conf->spells[p].name, (const char*) a_line );
+            if (conf->spells[spell].name == timer && conf->spells[spell].addon == true) {
+                conf->spells[spell].up = false;
+                conf->spells[spell].silently_up = false;
+            	send_to_user("Timer %s stopped. Duration: %s.\r\n", (const char *) conf->spells[spell].name, qPrintable( conf->spellUpFor(spell) ) );
+                send_prompt();
+                return USER_PARSE_SKIP;
+            }
+        }
+
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
+    send_prompt();
+    return USER_PARSE_SKIP;
+}
 
 
 

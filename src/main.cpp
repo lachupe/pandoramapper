@@ -115,7 +115,6 @@ int main(int argc, char *argv[])
 
     splash->showMessage("Loading configuration and database...");
 
-
     for (i=1; i < argc; i++) {
 
       if ((strcmp(argv[i], "--config") == 0) || ( strcmp(argv[i], "-c") == 0))

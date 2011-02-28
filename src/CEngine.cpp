@@ -90,11 +90,12 @@ bool CEngine::testRoom(CRoom *room)
 {
     if (event.blind)
         return true;
-    if  ((nameMatch = room->roomnameCmp(event.name)) >= 0)
+    if  ((nameMatch = room->roomnameCmp(event.name)) >= 0) {
         if (event.desc == "")
             return true;
         else if ( (descMatch = room->descCmp(event.desc)) >= 0 )
             return true;
+    }
     return false;
 }
 

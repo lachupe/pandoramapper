@@ -59,9 +59,9 @@ Cdispatcher::Cdispatcher()
 }
 
 /**
- *
+ * return false if this XML tag has to be ignored
  */
-void Cdispatcher::parseXml(QByteArray tag)
+bool Cdispatcher::parseXml(QByteArray tag)
 {
         /* types without parameters here */
         struct {
@@ -121,6 +121,11 @@ void Cdispatcher::parseXml(QByteArray tag)
 
         // now parse the tags !
 
+        // avoid the status tags
+        if (name == "status")
+        	return false;
+
+
         // hard tags first
         if (name == "movement") {
   //          printf("XML TAG: %s\r\n", TagTypes[p].name);
@@ -170,6 +175,8 @@ void Cdispatcher::parseXml(QByteArray tag)
             buffer[amount].xmlType = endType;
             amount++;
         }
+
+        return true;
 }
 
 
@@ -205,12 +212,13 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
     for (s = (unsigned char *) c.buffer;  s != stop; s++) {
 //        printf("[ amount %i - m %i, s %i,  s %i, left %i ] \r\n", amount, c.mainState, c.subState, s, stop - s);
 	switch (c.mainState) {
-	   case NORMAL :
+	   	case NORMAL :
 			switch (*s) {
-			   case IAC:
+			   	   case IAC:
 										if (line != "") {
 											buffer[amount].type = IS_NORMAL;
-											buffer[amount++].line = line;
+											buffer[amount].line = line;
+											amount++;
 											line.clear();
 										}
 										c.mainState = TELNET;
@@ -221,14 +229,16 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
 //										printf("Appending %i : %c [newline] \r\n", s, *s);
 										line.append(*s);
 										buffer[amount].type = IS_NORMAL;
-										buffer[amount++].line = line;
+										buffer[amount].line = line;
+										amount++;
 										line.clear();
 										continue;
 				   case '<'      :  // turns XML tag mode on
 										if (c.isXmlMode()) {
 											if (line != "") {
 												buffer[amount].type = IS_NORMAL;
-												buffer[amount++].line = line;
+												buffer[amount].line = line;
+												amount++;
 												line.clear();
 											}
 											c.subchars.append('<');
@@ -252,7 +262,14 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
 			switch (*s) {
 				case '>' :
 								c.subchars.append('>');
-								parseXml(c.subchars);
+
+								if (parseXml(c.subchars) == false && amount != 0) {
+									// this is a bit tricky and hacky
+									// we have to go back one line and join them
+									// to do that we reinit the line variable with content of the previous line
+									amount--;
+									line = buffer[amount].line;
+								}
 								c.mainState = NORMAL;
 								c.subState = NORMAL;
 								c.subchars.clear();
@@ -438,7 +455,7 @@ QByteArray Cdispatcher::cutColours(QByteArray line)
     for (i =0; i < line.length(); i++) {
         if (line.at(i) == '|' || line.at(i) == '-' || line.at(i) == '\\' || line.at(i) == '/')
             if ((i+1) < line.length() && line.at(i+1) == 0x8) {
-                 i += 1; /*properller char*/
+                 i += 1; /*propeller char*/
                  continue;   /* and the next one and move on with the same check */
             }
 
@@ -479,6 +496,11 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
     int i;
     int new_len;
     char *buf;
+    QByteArray scoreLine;
+
+
+    print_debug(DEBUG_DISPATCHER, "analyzerMudStream(): starting");
+    print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
 
     // bloody hack!
     QRegExp scoreExp("[0-9]*/* hits, */* mana, and */* moves.");
@@ -488,8 +510,6 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
     QRegExp scoreTrollExp("[0-9]*/* hits and */* moves.");
     scoreTrollExp.setPatternSyntax(QRegExp::Wildcard);
 
-    print_debug(DEBUG_DISPATCHER, "analyzerMudStream(): starting");
-    print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
 
     dispatchBuffer(c);
 
@@ -498,7 +518,6 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
 
     // else we simply recreate our buffer and parse lines
     for (i = 0; i< amount; i++) {
-
 
         //XML messages parser
         if (buffer[i].type == IS_XML) {
@@ -570,7 +589,6 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                 xmlState = STATE_NORMAL;
                 continue;
             }
-
             continue;
         }
 

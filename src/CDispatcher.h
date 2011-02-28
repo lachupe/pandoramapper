@@ -22,7 +22,6 @@
 #define CDISPATCHER_H
 
 
-#include <vector>
 #include "proxy.h"
 #include "CEngine.h"
 
@@ -37,8 +36,8 @@ struct Tincoming_lines {
 
 class Cdispatcher
 {
-    struct Tincoming_lines buffer[1024];
-    int amount;
+    struct Tincoming_lines buffer[2048];
+    int 	amount;
     char    commandBuffer[MAX_DATA_LEN];
     
     int       xmlState;          /* desc shall be incoming - just got roomname */
@@ -70,7 +69,7 @@ class Cdispatcher
                                    XML_START_PROMPT = 4, 
                                    XML_START_EXITS = 5, 
                                    XML_START_MOVEMENT = 6, 
-                                   XML_START_TERRAIN = 7,                                       
+                                   XML_START_TERRAIN = 7,
                                    XML_END_ROOM = 11, 
                                    XML_END_NAME = 12, 
                                    XML_END_DESC = 13,  
@@ -122,7 +121,7 @@ class Cdispatcher
     char parseTerrain(QByteArray prompt);
 
 
-    void parseXml(QByteArray tag);
+    bool parseXml(QByteArray tag);
     void dispatchBuffer(ProxySocket &c);
     QByteArray cutColours(QByteArray line);
 public:

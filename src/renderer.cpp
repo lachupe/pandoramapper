@@ -772,9 +772,11 @@ void RendererWidget::setupNewBaseCoordinates()
         }
     }
 
-    curx = newRoom->getX();
-    cury = newRoom->getY();
-    curz = newRoom->getZ() + userLayerShift;
+    if (newRoom != NULL) {
+		curx = newRoom->getX();
+		cury = newRoom->getY();
+		curz = newRoom->getZ() + userLayerShift;
+    }
 }
 
 void RendererWidget::centerOnRoom(unsigned int id)

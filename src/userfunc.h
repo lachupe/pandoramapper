@@ -61,6 +61,7 @@ USERCMD(usercmd_maddroom);
 USERCMD(usercmd_mnote);
 USERCMD(usercmd_mnotecolor);
 USERCMD(usercmd_mregion);
+USERCMD(usercmd_mtimer);
 
 
 
@@ -98,9 +99,9 @@ public:
 
 extern class Userland *userland_parser;
 
-#define USER_PARSE_NONE 0 /* 0 - not my area - send the line futher */
+#define USER_PARSE_NONE 0 /* 0 - not my area - send the line further */
 #define USER_PARSE_SKIP 1 /* skip this line */
-#define USER_PARSE_DONE 2 /* parsed the line, pass corrected line futher */
+#define USER_PARSE_DONE 2 /* parsed the line, pass corrected line further */
 
 #endif
 

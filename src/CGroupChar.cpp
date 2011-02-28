@@ -457,7 +457,7 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		sanc = spell;
    	}
-   	printf("Received sanc Timer: %s\r\n", (const char *) e.attribute("blessTimer").toAscii());
+   	printf("Received sanc Timer: %s\r\n", (const char *) e.attribute("sancTimer").toAscii());
    	tsanc.restart();
    	sanc_elapsed = e.attribute("sancTimer").toInt();
 
@@ -466,10 +466,9 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		blind = spell;
    	}
-   	tblind = tblind.fromString(e.attribute("blindTimer"), "hh/mm/ss");
    	printf("Received blind Timer: %s\r\n", (const char *) e.attribute("blindTimer").toAscii());
-   	tsanc.restart();
-   	sanc_elapsed = e.attribute("sancTimer").toInt();
+   	tblind.restart();
+   	blind_elapsed = e.attribute("blindTimer").toInt();
 
 
    	if (updated == true)

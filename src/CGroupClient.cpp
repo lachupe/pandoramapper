@@ -86,6 +86,7 @@ void CGroupClient::setProtocolState(int val)
 
 void CGroupClient::setConnectionState(int val)
 {
+	printf("Client: preparing to set connection state to: %i\r\n", val);
 	print_debug(DEBUG_GROUP, "Connection state: %i", val);
 	connectionState = val;
 	getParent()->connectionStateChanged(this);
@@ -95,6 +96,8 @@ void CGroupClient::setConnectionState(int val)
 CGroupClient::~CGroupClient()
 {
 	printf("in CGroupClient destructor!\r\n");
+	disconnect();
+	this->deleteLater();
 }
 
 void CGroupClient::lostConnection()
@@ -123,7 +126,6 @@ void CGroupClient::dataIncoming()
 
 	QByteArray tmp = readAll();
 
-
 	buffer += tmp;
 
 //	print_debug(DEBUG_GROUP, "RAW data buffer: %s", (const char *) buffer);
@@ -141,7 +143,14 @@ void CGroupClient::cutMessageFromBuffer()
 	if (currentMessageLen == 0) {
 		int index = buffer.indexOf(' ');
 
-		QString len = buffer.left(index + 1);
+		if (index == -1) {
+			print_debug(DEBUG_GROUP, "Incoming buffer contains broken message");
+			// zap the buffer in this case, and hope for the best
+			buffer.clear();
+			return;
+		}
+
+		QByteArray len = buffer.left(index);
 		currentMessageLen = len.toInt();
 //		print_debug(DEBUG_GROUP, "Incoming buffer length: %i, incoming message length %i",
 //				buffer.size(), currentMessageLen);

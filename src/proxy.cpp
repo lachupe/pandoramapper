@@ -229,7 +229,7 @@ void Proxy::sendMudEmulationGreeting()
 {
     CRoom *r;
 
-    user.send_line( "Welcome to Pandora MUD Emulation!\r\n\r\n" );
+    user.send_line( "Welcome to PandoraMapper MUD Emulation!\r\n\r\n" );
 
     if (stacker.amount() == 0)
         r = Map.getRoom( 1 );
@@ -249,6 +249,8 @@ bool Proxy::connectToMud()
         user.send_line( "----[ Pandora: Failed to connect to remote host. See terminal log for details.\r\n");
         return false;
     } else {
+    	// turn XML on! enable withoit the <xml> message from the mud.
+    	mud.send_line("~$#EX1\n1\n");
         print_debug(DEBUG_PROXY, "Connected!\r\n");
         return true;
     }
@@ -319,7 +321,7 @@ void Proxy::sendScoreLineEvent(QByteArray data)
 
 void Proxy::sendPromptLineEvent(QByteArray data)
 {
-	printf("Sending prompt to groupManager: %s\r\n", (const char *) data);
+	//printf("Sending prompt to groupManager: %s\r\n", (const char *) data);
 	emit sendPromptLine(data);
 }
 
