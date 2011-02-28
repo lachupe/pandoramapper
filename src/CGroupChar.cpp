@@ -92,7 +92,7 @@ QString CGroupChar::calculateTimeElapsed(QTime& timer, int delay)
     int min;
     int sec;
 
-    sec = timer.elapsed() / (1000) + delay;
+    sec = (timer.elapsed() + delay) / 1000;
     min = sec / 60;
     sec = sec % 60;
 
@@ -448,16 +448,17 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		bls = spell;
    	}
-   	printf("Received bless Timer: %s\r\n", (const char *) e.attribute("blessTimer").toAscii());
+   	printf("[%s] Received bless Timer: %s\r\n", (const char*) name, (const char *) e.attribute("blessTimer").toAscii());
    	tbless.restart();
    	bless_elapsed = e.attribute("blessTimer").toInt();
+   	printf("Restarted time. Additional delay %i\r\n" , bless_elapsed );
 
    	spell = (e.attribute("sanc").toAscii() == "true");
    	if (spell != sanc) {
    		updated = true;
    		sanc = spell;
    	}
-   	printf("Received sanc Timer: %s\r\n", (const char *) e.attribute("sancTimer").toAscii());
+   	printf("[%s] Received sanc Timer: %s\r\n", (const char*) name, (const char *) e.attribute("sancTimer").toAscii());
    	tsanc.restart();
    	sanc_elapsed = e.attribute("sancTimer").toInt();
 
@@ -466,7 +467,7 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		blind = spell;
    	}
-   	printf("Received blind Timer: %s\r\n", (const char *) e.attribute("blindTimer").toAscii());
+   	printf("[%s] Received blind Timer: %s\r\n", (const char*) name, (const char *) e.attribute("blindTimer").toAscii());
    	tblind.restart();
    	blind_elapsed = e.attribute("blindTimer").toInt();
 
@@ -522,13 +523,13 @@ QDomNode CGroupChar::toXML()
 	root.setAttribute("str", str ? "true" : "false" );
 	root.setAttribute("bob", bob ? "true" : "false" );
 	root.setAttribute("bless", bls ? "true" : "false" );
-	root.setAttribute("blessTimer", tbless.elapsed() );
+	root.setAttribute("blessTimer", tbless.elapsed() + bless_elapsed );
 
 	root.setAttribute("sanc", sanc ? "true" : "false" );
-	root.setAttribute("sancTimer", tsanc.elapsed() );
+	root.setAttribute("sancTimer", tsanc.elapsed() + sanc_elapsed );
 
 	root.setAttribute("blind", blind ? "true" : "false" );
-	root.setAttribute("blindTimer", tblind.elapsed() );
+	root.setAttribute("blindTimer", tblind.elapsed() + blind_elapsed);
 
 	doc.appendChild(root);
 	return root;
