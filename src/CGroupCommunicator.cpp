@@ -63,7 +63,6 @@ void CGroupCommunicator::connectionStateChanged(CGroupClient *connection)
 			break;
 		case CGroupClient::Closed :
 			print_debug(DEBUG_GROUP, "Connection closed.");
-			printf("Connection closed\r\n");
 			connectionClosed(connection);
 			break;
 		case CGroupClient::Quiting :
@@ -71,7 +70,6 @@ void CGroupCommunicator::connectionStateChanged(CGroupClient *connection)
 			//connectionClosed(connection);
 			break;
 		default:
-			printf("Some state change...\r\n");
 			break;
 	}
 }
@@ -290,6 +288,12 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 		case CGroupClient::Connected:
 			// AwaitingLogin, AwaitingInfo, Logged
 
+			if (message == STATE_KICKED) {
+				// in any state of the protocol you can be kicked out ...
+				getGroup()->gotKicked( data );
+				break;
+			}
+
 			if (conn->getProtocolState() == CGroupClient::AwaitingLogin) {
 				// Login state. either REQ_LOGIN or ACK should come
 				if (message == REQ_LOGIN) {
@@ -298,9 +302,6 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 					// aha! logged on!
 					sendMessage(conn, REQ_INFO);
 					conn->setProtocolState(CGroupClient::AwaitingInfo);
-				} else if (message == STATE_KICKED) {
-					// woops
-					getGroup()->gotKicked( data );
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
@@ -475,6 +476,42 @@ void CGroupCommunicator::sendLoginInformation(CGroupClient *conn)
 	sendMessage(conn, UPDATE_CHAR, root);
 }
 
+void CGroupCommunicator::kick(CGroupClient *& conn, QByteArray kickMessage)
+{
+	// a bit of an overkill on state checks here, but well, may be it will be needed later
+
+	if (type == Server) {
+		switch (conn->getConnectionState()) {
+			case CGroupClient::Connected:
+
+				// send the message first, since closeConnection shuts the connection down
+			    sendMessage(conn, STATE_KICKED, kickMessage);
+
+			    switch (conn->getProtocolState())  {
+					case CGroupClient::AwaitingLogin:
+						// premature kicking? no protocol info, no name given
+					case CGroupClient::AwaitingInfo:
+					case CGroupClient::Logged:
+
+						// close it, remove it from all the lists, notify other clients that the user is gone!
+						connectionClosed(conn);
+						break;
+				}
+
+				break;
+			case CGroupClient::Closed:
+			case CGroupClient::Connecting:
+			case CGroupClient::Quiting:
+				print_debug(DEBUG_GROUP, "Kick called in wrong comm protocol state.");
+				break;
+		}
+
+	} else {
+    	print_debug(DEBUG_GROUP, "WARNING: Kick called on client side.");
+	}
+
+}
+
 void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QDomNode data)
 {
 
@@ -498,29 +535,26 @@ void CGroupCommunicator::parseLoginInformation(CGroupClient *conn, QDomNode data
 	QDomNode charNode = node.firstChildElement();
 
 	QByteArray kickMessage = "";
-	if (ver < protocolVersion)
-		kickMessage = "Server uses newer version of the protocol. Please update.";
+	if (ver < protocolVersion) {
+		kick(conn, "Server uses newer version of the communication protocol. Please update.");
+		return;
+	}
 
-	if (ver > protocolVersion)
-		kickMessage = "Server uses older version of the protocol.";
+	if (ver > protocolVersion) {
+		kick( conn, "Server uses older version of the protocol.");
+		return;
+	}
 
 	if (getGroup()->addChar(charNode) == false) {
-		kickMessage = "The name you picked is already present!";
-	} else {
-		QByteArray name = getGroup()->getNameFromBlob(charNode);
-		clientsList.insert( name, conn->socketDescriptor() );
-
-		relayMessage(conn, ADD_CHAR, getGroup()->getCharByName(name)->toXML() );
+		kick( conn, "The name you picked is already present!");
+		return;
 	}
 
-	if (kickMessage != "") {
-		// kicked
-		sendMessage(conn, STATE_KICKED, kickMessage);
-		conn->close();	// got to make sure this causes the connection closed signal ...
-	} else {
-		sendMessage(conn, ACK);
-	}
+	QByteArray name = getGroup()->getNameFromBlob(charNode);
+	clientsList.insert( name, conn->socketDescriptor() );
+	relayMessage(conn, ADD_CHAR, getGroup()->getCharByName(name)->toXML() );
 
+	sendMessage(conn, ACK);
 }
 
 
@@ -551,7 +585,6 @@ void CGroupCommunicator::sendRemoveUserNotification(CGroupClient *conn, QByteArr
    		return;
 
 	if (type == Server) {
-   		printf("[Server] Sending remove user notification!\r\n");
 		QByteArray message = formMessageBlock(REMOVE_CHAR, getGroup()->getCharByName(name)->toXML());
 		CGroupServer *serv = (CGroupServer *) peer;
 		serv->sendToAllExceptOne(conn, message);
@@ -575,11 +608,9 @@ void CGroupCommunicator::sendGTell(QByteArray tell)
 	// depending on the type of this communicator either send to
 	// server or send to everyone
    	if (type == Client) {
-   		printf("[Client] Sending gtell!\r\n");
    		sendMessage((CGroupClient *)peer, GTELL, root);
    	}
 	if (type == Server) {
-   		printf("[Server] Sending gtell!\r\n");
 		QByteArray message = formMessageBlock(GTELL, root);
 		CGroupServer *serv = (CGroupServer *) peer;
 		serv->sendToAll(message);
@@ -591,7 +622,6 @@ void CGroupCommunicator::relayMessage(CGroupClient *connection, int message, QDo
 {
 	QByteArray buffer = formMessageBlock(message, data);
 
-	printf("Relaying message from %s\r\n", (const char *) clientsList.key(connection->socketDescriptor()) );
 	CGroupServer *serv = (CGroupServer *) peer;
 	serv->sendToAllExceptOne(connection, buffer);
 }
@@ -660,7 +690,6 @@ void CGroupCommunicator::sendCharPromptUpdate(QDomNode blob)
 
 void CGroupCommunicator::sendCharPositionUpdate(CGroupClient *conn, QDomNode blob)
 {
-	printf("Sending position update.\r\n");
 	sendMessage(conn, CHAR_POSITION, blob);
 }
 
@@ -668,7 +697,6 @@ void CGroupCommunicator::sendCharPositionUpdate(CGroupClient *conn, QDomNode blo
 
 void CGroupCommunicator::sendCharPositionUpdate(QDomNode blob)
 {
-	printf("Sending position update.\r\n");
 	if (type == Off)
 		return;
    	if (type == Client)

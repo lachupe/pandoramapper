@@ -50,61 +50,56 @@ class CGroupCommunicator : public QObject
 					CHAR_PROMPT, CHAR_SCORE, CHAR_POSITION};
 
 	QObject *peer;	// server or client
-	CGroup *getGroup() { return (CGroup *) parent(); }
+	CGroup *getGroup() { return (CGroup *)(parent());
+    }
 
-	void connectionClosed(CGroupClient *connection);
-	void connectionEstablished(CGroupClient *connection);
-	void connecting(CGroupClient *connection);
-	QByteArray formMessageBlock(int message, QDomNode data);
-	void sendMessage(CGroupClient *connection, int message, QByteArray data = "");
-	void sendMessage(CGroupClient *connection, int message, QDomNode data);
-
-	void sendLoginInformation(CGroupClient *connection);
-	void parseLoginInformation(CGroupClient *connection, QDomNode data);
-	void sendGroupInformation(CGroupClient *connection);
-	void parseGroupInformation(CGroupClient *connection, QDomNode data);
-
-	void userLoggedOn(CGroupClient *conn);
-	void userLoggedOff(CGroupClient *conn);
-
-	void retrieveDataClient(CGroupClient *connection, int message, QDomNode data);
-	void retrieveDataServer(CGroupClient *connection, int message, QDomNode data);
-
-	QHash<QByteArray, int>  clientsList;
-
-
+    void connectionClosed(CGroupClient *connection);
+    void connectionEstablished(CGroupClient *connection);
+    void connecting(CGroupClient *connection);
+    QByteArray formMessageBlock(int message, QDomNode data);
+    void sendMessage(CGroupClient *connection, int message, QByteArray data = "");
+    void sendMessage(CGroupClient *connection, int message, QDomNode data);
+    void sendLoginInformation(CGroupClient *connection);
+    void parseLoginInformation(CGroupClient *connection, QDomNode data);
+    void sendGroupInformation(CGroupClient *connection);
+    void parseGroupInformation(CGroupClient *connection, QDomNode data);
+    void userLoggedOn(CGroupClient *conn);
+    void userLoggedOff(CGroupClient *conn);
+    void retrieveDataClient(CGroupClient *connection, int message, QDomNode data);
+    void retrieveDataServer(CGroupClient *connection, int message, QDomNode data);
+    void kick(CGroupClient *& conn, QByteArray kickMessage);
+    QHash<QByteArray,int> clientsList;
 public:
-	const static int protocolVersion = 105;
-	enum States { Server, Client, Off };
+    static const int protocolVersion = 106;
+    enum States{ Server, Client, Off};
+    CGroupCommunicator(int type, QObject *parent);
+    virtual ~CGroupCommunicator();
+    void changeType(int newState);
+    int getType()
+    {
+        return type;
+    }
 
-
-	CGroupCommunicator(int type, QObject *parent);
-	virtual ~CGroupCommunicator();
-
-	void changeType(int newState);
-	int getType() {return type; }
-	void sendCharUpdate(CGroupClient *conn, QDomNode blob);
-	void sendCharUpdate(QDomNode blob);
-	void sendCharScoreUpdate(CGroupClient *conn, QDomNode blob);
-	void sendCharScoreUpdate(QDomNode blob);
-	void sendCharPromptUpdate(CGroupClient *conn, QDomNode blob);
-	void sendCharPromptUpdate(QDomNode blob);
-	void sendCharPositionUpdate(CGroupClient *conn, QDomNode blob);
-	void sendCharPositionUpdate(QDomNode blob);
-
-	bool isConnected();
-	void reconnect();
-	void sendRemoveUserNotification(CGroupClient *conn, QByteArray name);
-	void renameConnection(QByteArray oldName, QByteArray newName);
-	void sendUpdateName(QByteArray oldName, QByteArray newName);
-
-public slots:
-	void connectionStateChanged(CGroupClient *connection);
-	void errorInConnection(CGroupClient *connection);
-	void serverStartupFailed();
-	void incomingData(CGroupClient *connection, QByteArray data);
-	void sendGTell(QByteArray tell);
-	void relayMessage(CGroupClient *connection, int message, QDomNode node);
+    void sendCharUpdate(CGroupClient *conn, QDomNode blob);
+    void sendCharUpdate(QDomNode blob);
+    void sendCharScoreUpdate(CGroupClient *conn, QDomNode blob);
+    void sendCharScoreUpdate(QDomNode blob);
+    void sendCharPromptUpdate(CGroupClient *conn, QDomNode blob);
+    void sendCharPromptUpdate(QDomNode blob);
+    void sendCharPositionUpdate(CGroupClient *conn, QDomNode blob);
+    void sendCharPositionUpdate(QDomNode blob);
+    bool isConnected();
+    void reconnect();
+    void sendRemoveUserNotification(CGroupClient *conn, QByteArray name);
+    void renameConnection(QByteArray oldName, QByteArray newName);
+    void sendUpdateName(QByteArray oldName, QByteArray newName);
+public:
+    void connectionStateChanged(CGroupClient *connection);
+    void errorInConnection(CGroupClient *connection);
+    void serverStartupFailed();
+    void incomingData(CGroupClient *connection, QByteArray data);
+    void sendGTell(QByteArray tell);
+    void relayMessage(CGroupClient *connection, int message, QDomNode node);
 signals:
 	void typeChanged(int type);
 };

@@ -63,6 +63,8 @@ void CGroupServer::connectionClosed(CGroupClient *connection)
 	connection->disconnect();
 	connections.removeAll(connection);
 	print_debug(DEBUG_GROUP, "Deleting the connection");
+	// flush whatever is waiting to be written
+	connection->flush();
 	connection->deleteLater();
 }
 
