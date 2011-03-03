@@ -185,6 +185,16 @@ QString Cconfigurator::spellUpFor(unsigned int p)
     return s;
 }
 
+void Cconfigurator::resetSpells()
+{
+    for (unsigned int p = 0; p < conf->spells.size(); p++) {
+    	conf->spells[p].up = false;
+    	conf->spells[p].silently_up = false;
+    }
+
+}
+
+
 
 /* ----------------- REGULAR EXPRESSIONS SECTION ---------------- */
 /* ------------------- DATA ------------------- */

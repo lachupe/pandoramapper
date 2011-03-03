@@ -84,6 +84,7 @@ public:
     QAction		  *groupServerAct;
     QAction		  *groupShowHideAct;
     QAction		  *groupSettingsAct;
+    QAction		  *groupClearSpellsAct;
     
     
     void setShowGroupManager(bool b);
@@ -137,6 +138,8 @@ public slots:
     void groupSettings();
     void groupManagerHides() { setShowGroupManager(false); }
     void groupManagerTypeChanged(int);
+    void groupClearSpells();
+
 
 private slots:
     void find();

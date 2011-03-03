@@ -137,6 +137,8 @@ public:
     void addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon);
     void addSpell(TSpell s);
     QString spellUpFor(unsigned int p);
+    void resetSpells();
+
 
 
     // group Manager

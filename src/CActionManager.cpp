@@ -260,6 +260,11 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     }
     groupShowHideAct->trigger();
 
+    groupClearSpellsAct = new QAction( tr("Reset Spells Info"), this );
+    groupClearSpellsAct ->setStatusTip(tr("Resets all the spells info on your character"));
+    connect(groupClearSpellsAct, SIGNAL(triggered()), this, SLOT( groupClearSpells() ), Qt::QueuedConnection );
+
+
     groupSettingsAct = new QAction(tr("Settings"), this);
     connect(groupSettingsAct, SIGNAL(triggered()), this, SLOT(groupSettings()));
 }
@@ -279,7 +284,7 @@ void CActionManager::groupManagerTypeChanged(int type)
 
 void CActionManager::groupOff(bool b)
 {
-    print_debug(DEBUG_INTERFACE, "Changing groupManager type to client");
+    print_debug(DEBUG_INTERFACE, "Changing groupManager tygroupClearSpells()pe to client");
 	if (b)
 		parent->getGroupManager()->setType(CGroupCommunicator::Off);
     print_debug(DEBUG_INTERFACE, "Done.");
@@ -315,6 +320,12 @@ void CActionManager::setShowGroupManager(bool b)
         parent->setShowGroupManager(b);
 	}
     print_debug(DEBUG_INTERFACE, "Done.");
+}
+
+void CActionManager::groupClearSpells()
+{
+	conf->resetSpells();
+    proxy->sendSpellsUpdatedEvent();
 }
 
 void CActionManager::groupHide()

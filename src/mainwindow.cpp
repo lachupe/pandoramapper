@@ -167,6 +167,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     groupMenu->addAction(actionManager->groupShowHideAct);
     groupMenu->addSeparator();
     groupMenu->addAction(actionManager->groupSettingsAct);
+    groupMenu->addAction(actionManager->groupClearSpellsAct);
 
 
     menuBar()->addSeparator();
