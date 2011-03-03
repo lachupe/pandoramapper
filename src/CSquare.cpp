@@ -228,10 +228,6 @@ CPlane::CPlane(CRoom *room)
                             room->getX() + ( MAX_SQUARE_SIZE - 1 ) / 2,
                             room->getY() - ( MAX_SQUARE_SIZE - 1 ) / 2);
 
-/*    printf("Created a new square lx ly: %i %i, rx ry: %i %i, cx cy: %i %i, for room x y: %i %i\r\n",
-            squares->leftx, squares->lefty, squares->rightx, squares->righty, 
-            squares->centerx, squares->centery, room->x, room->y);
-*/
     if (squares->rooms.contains(room) == false)
         squares->rooms.push_back(room);
 }

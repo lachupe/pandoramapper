@@ -222,7 +222,6 @@ void Cconfigurator::addTexture(QByteArray desc, QByteArray filename, char patter
     s.pattern = pattern;
 
     sectors.push_back(s);
-//    printf("added texture with pattern %c.\r\n", pattern);
 }
 
 int Cconfigurator::getSectorByPattern(char pattern)
@@ -672,7 +671,6 @@ bool ConfigParser::startElement( const QString& , const QString& ,
 
         s = attributes.value("port");
         conf->setLocalPort(s.toInt() );
-//        printf("Using local port %i. \r\n", conf->get_local_port() );
 
         return TRUE;
     } else if (qName == "remotehost") {
@@ -686,9 +684,6 @@ bool ConfigParser::startElement( const QString& , const QString& ,
 
         s = attributes.value("port");
         conf->setRemotePort(s.toInt() );
-//        printf("Using remote host %s:%i\r\n", (const char *)conf->get_remote_host(),
-//                                            conf->get_remote_port() );
-
         return TRUE;
     } else if (qName == "basefile") {
         if (attributes.length() < 1) {
@@ -698,7 +693,6 @@ bool ConfigParser::startElement( const QString& , const QString& ,
 
         s = attributes.value("filename");
         conf->setBaseFile(s.toAscii() );
-//        printf("Using the database file: %s\r\n", qPrintable(s) );
 
         return TRUE;
     } else if (qName == "GLvisibility") {

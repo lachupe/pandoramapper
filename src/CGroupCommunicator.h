@@ -70,7 +70,7 @@ class CGroupCommunicator : public QObject
     void kick(CGroupClient *& conn, QByteArray kickMessage);
     QHash<QByteArray,int> clientsList;
 public:
-    static const int protocolVersion = 106;
+    static const int protocolVersion = 107;
     enum States{ Server, Client, Off};
     CGroupCommunicator(int type, QObject *parent);
     virtual ~CGroupCommunicator();

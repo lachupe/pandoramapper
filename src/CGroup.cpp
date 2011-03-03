@@ -285,13 +285,9 @@ void CGroup::updateChar(QDomNode blob)
 
 void CGroup::updateCharPosition(QDomNode blob)
 {
-	printf("CHAR_POSITION for: %s\r\n", (const char *) CGroupChar::getNameFromXML(blob));
-
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
 	if (ch == NULL)
 		return;
-
-	printf("updating\r\n");
 
 	if (ch->updatePositionFromXML(blob) == true)
 		toggle_renderer_reaction(); // issue a redraw
@@ -299,7 +295,6 @@ void CGroup::updateCharPosition(QDomNode blob)
 
 void CGroup::updateCharScore(QDomNode blob)
 {
-	printf("CHAR_SCORE for: %s\r\n", (const char *) CGroupChar::getNameFromXML(blob));
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
 	if (ch == NULL)
 		return;
@@ -309,7 +304,6 @@ void CGroup::updateCharScore(QDomNode blob)
 
 void CGroup::updateCharPrompt(QDomNode blob)
 {
-	printf("CHAR_PROMPT for: %s\r\n", (const char *) CGroupChar::getNameFromXML(blob));
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
 	if (ch == NULL)
 		return;
@@ -432,7 +426,6 @@ void CGroup::resetName()
 	QByteArray oldname = self->getName();
 	QByteArray newname = conf->getGroupManagerCharName();
 
-	printf("Sending name update: %s, %s\r\n", (const char *) oldname, (const char *) newname);
 	network->sendUpdateName(oldname, newname);
 	network->renameConnection(oldname, newname);
 
@@ -476,8 +469,6 @@ void CGroup::renameChar(QDomNode blob)
 
 void CGroup::updateSpellsInfo()
 {
-	printf("Updating spells info's\r\n");
-
 	self->updateSpells();
 	issueLocalCharUpdate();
 }
@@ -518,8 +509,6 @@ void CGroup::parseScoreInformation(QByteArray score)
 void CGroup::parsePromptInformation(QByteArray prompt)
 {
 	QByteArray hp, mana, moves;
-
-	printf("Prompt: %s\r\n", (const char *) prompt);
 
 	if (prompt.indexOf('>') == -1)
 		return; // false prompt

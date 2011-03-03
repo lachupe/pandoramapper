@@ -448,17 +448,14 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		bls = spell;
    	}
-   	printf("[%s] Received bless Timer: %s\r\n", (const char*) name, (const char *) e.attribute("blessTimer").toAscii());
    	tbless.restart();
    	bless_elapsed = e.attribute("blessTimer").toInt();
-   	printf("Restarted time. Additional delay %i\r\n" , bless_elapsed );
 
    	spell = (e.attribute("sanc").toAscii() == "true");
    	if (spell != sanc) {
    		updated = true;
    		sanc = spell;
    	}
-   	printf("[%s] Received sanc Timer: %s\r\n", (const char*) name, (const char *) e.attribute("sancTimer").toAscii());
    	tsanc.restart();
    	sanc_elapsed = e.attribute("sancTimer").toInt();
 
@@ -467,7 +464,6 @@ bool CGroupChar::updateFromXML(QDomNode node)
    		updated = true;
    		blind = spell;
    	}
-   	printf("[%s] Received blind Timer: %s\r\n", (const char*) name, (const char *) e.attribute("blindTimer").toAscii());
    	tblind.restart();
    	blind_elapsed = e.attribute("blindTimer").toInt();
 
@@ -483,8 +479,6 @@ QByteArray CGroupChar::getNameFromXML(QDomNode node)
 {
 
     if (node.nodeName() != "playerData") {
-    	printf("Called updateFromXML with wrong node. The name does not fit.\r\n");
-    	printf("Occured node name: %s\r\n", (const char *) node.nodeName().toAscii());
     	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
     	return false;
     }

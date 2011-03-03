@@ -26,7 +26,6 @@
 CGroupServer::CGroupServer(int localPort, QObject *parent) : 
 	QTcpServer(parent)
 {
-	printf("Creating the GroupManager Server.\r\n");
 	if (listen(QHostAddress::Any, localPort) != true) {
 		print_debug(DEBUG_GROUP, "Failed to start a group Manager server!");
 		emit failedToStart();
@@ -83,10 +82,7 @@ void CGroupServer::sendToAllExceptOne(CGroupClient *conn, QByteArray message)
 
 void CGroupServer::closeAll()
 {
-	
-	printf("Closing connections\r\n");
 	for (int i = 0; i < connections.size(); i++) {
-		printf("Closing connections %i\r\n", connections[i]->socketDescriptor());
 		connections[i]->deleteLater();
 	}
 }

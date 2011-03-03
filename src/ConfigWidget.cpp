@@ -208,7 +208,6 @@ void ConfigWidget::selectNoteColor() {
         QColor("#F28003"):QColor((const char*)conf->getNoteColor()), this);
     if (color.isValid()) {
         conf->setNoteColor((const char*)color.name().toAscii());
-        printf("color: %s",(const char*)color.name().toAscii());
         /*
         colorLabel->setText(color.name());
         colorLabel->setPalette(QPalette(color));

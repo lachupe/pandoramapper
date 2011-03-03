@@ -407,7 +407,6 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
             break;
 
          case Qt::Key_Escape:
-            printf("Escape pressed!\r\n");
             renderer->angleY = 0;
             renderer->angleX = 0;
             renderer->angleZ = 0;
@@ -570,9 +569,6 @@ bool CMainWindow::checkMouseSelection( QMouseEvent *e )
     if (mouseState.delta( e->pos() ) <= 100) {
         if (renderer->doSelect( mousePosInRenderer( e->pos() ), id ) == true) {
             if (e->modifiers() & Qt::ControlModifier) {
-                if (Map.selections.isSelected( id ) == true)
-                    printf("The room already WAS selected!\r\n");
-
                 if (Map.selections.isSelected( id) == true)
                     Map.selections.unselect( id );
                 else

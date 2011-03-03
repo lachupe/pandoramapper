@@ -158,9 +158,6 @@ void parse_exits(const char *p, int exits[])
     /* 0 - no exit there, 1 - normal exit, 2 - open door, 3 - closed door, 4 - portal */
 
     print_debug(DEBUG_ANALYZER, "Parsing exits line");
-    if (p == NULL) {
-        printf("parse_exits: ERROR - NULL EVENT GIVEN!\r\n");
-    }
 
     exits[0] = E_NOEXIT;
     exits[1] = E_NOEXIT;

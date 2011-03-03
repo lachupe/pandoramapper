@@ -47,9 +47,9 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     parent = parentWindow;
 
     /* creating actions and connecting them here */
-    newAct = new QAction(tr("&Close"), this);
+    newAct = new QAction(tr("&New"), this);
     newAct->setShortcut(tr("Ctrl+N"));
-    newAct->setStatusTip(tr("Close current map"));
+    newAct->setStatusTip(tr("Create a &new map"));
     connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
 
     openAct = new QAction(tr("&Load..."), this);
@@ -308,11 +308,9 @@ void CActionManager::setShowGroupManager(bool b)
     print_debug(DEBUG_INTERFACE, "Changing the groupManager visibility");
 	conf->setShowGroupManager(b);
 	if (b) {
-		printf("Showing\r\n");
     	groupShowHideAct->setText("Hide Manager");
         parent->setShowGroupManager(b);
 	} else {
-		printf("Hiding\r\n");
     	groupShowHideAct->setText("Show Manager");
         parent->setShowGroupManager(b);
 	}

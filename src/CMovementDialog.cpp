@@ -50,7 +50,6 @@ void CMovementDialog::accept()
     CRoom *r;
 
 
-    printf("Accepted!\r\n");
     x = lineEdit_x->text().toInt();
     y = lineEdit_y->text().toInt();
     z = lineEdit_z->text().toInt();
@@ -58,12 +57,9 @@ void CMovementDialog::accept()
 
     // now proceed if needed to the actuall operation
     print_debug(DEBUG_INTERFACE, "movement dialog accepted");
-    printf("movement dialog accepted\r\n");
     if (x != 0 || y != 0 || z != 0) {
         print_debug(DEBUG_INTERFACE, "moving rooms by shift : x %i, y %i, z %i", x, y, z);
 
-        printf("moving rooms by shift : x %i, y %i, z %i\r\n", x, y, z);
-        
         // collect the room for the movement            
         if (Map.selections.isEmpty() == false) {
             ids = Map.selections.getList();

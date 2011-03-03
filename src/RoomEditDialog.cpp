@@ -79,7 +79,6 @@ RoomEditDialog::RoomEditDialog(QWidget *parent) :
 
 void RoomEditDialog::roomSelected(unsigned int id) 
 {
-    printf("Room selection event received!\r\n");
     if (this->isVisible() == true) {
         for (int i = 0; i < 5; i++) {
             set_door_context( i );

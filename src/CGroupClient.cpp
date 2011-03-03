@@ -48,7 +48,6 @@ CGroupClient::CGroupClient(QByteArray host, int remotePort, QObject *parent) :
 	linkSignals();
 
 	if (!waitForConnected(5000)) {
-	    printf("Server not responding!\r\n");
 		connectionState = CGroupClient::Quiting;
 	    close();
 	    print_debug(DEBUG_GROUP, "Server not responding!");
@@ -86,7 +85,6 @@ void CGroupClient::setProtocolState(int val)
 
 void CGroupClient::setConnectionState(int val)
 {
-	printf("Client: preparing to set connection state to: %i\r\n", val);
 	print_debug(DEBUG_GROUP, "Connection state: %i", val);
 	connectionState = val;
 	getParent()->connectionStateChanged(this);
@@ -95,7 +93,6 @@ void CGroupClient::setConnectionState(int val)
 
 CGroupClient::~CGroupClient()
 {
-	printf("in CGroupClient destructor!\r\n");
 	disconnect();
 	this->deleteLater();
 }
@@ -161,7 +158,6 @@ void CGroupClient::cutMessageFromBuffer()
 		if (buffer.size() == currentMessageLen)
 			cutMessageFromBuffer();
 
-//		printf("returning from cutMessageFromBuffer\r\n");
 		return;
 	}
 

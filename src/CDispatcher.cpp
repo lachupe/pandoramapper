@@ -436,12 +436,6 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
 
 
     print_debug(DEBUG_DISPATCHER, "Done with dispatching");
-
-/*    printf("Dispatched buffer:\r\n");
-    for (int i = 0; i < amount; i++)
-        printf("Line type: %i, line len %i,  Line: %s\r\n", buffer[i].type, buffer[i].line.length(),
-                        (const char *) buffer[i].line);
- */
 }
 
 QByteArray Cdispatcher::cutColours(QByteArray line)
@@ -638,11 +632,9 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
 
             // inform groupManager
             if (scoreExp.exactMatch(a_line) == true || scoreTrollExp.exactMatch(a_line)) {
-            	printf("Caught score line!\r\n");
             	proxy->sendScoreLineEvent(a_line);
             }
 
-            print_debug(DEBUG_DISPATCHER, "before spells checker");
             // now do all necessary spells checks
             {
                 unsigned int p;
@@ -781,7 +773,6 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
 
             if (buffer[i].line.indexOf('\n') == -1) {
                 if (i != (amount -1))
-                    printf("LAST LINE HAD NO ENDING !\r\n, MIGHT BE A BUG!\r\n");
                 // the input line got splitted somehow
 //                printf("Adding fragment of the line to connection\r\n");
                 c.fragment = buffer[i].line;

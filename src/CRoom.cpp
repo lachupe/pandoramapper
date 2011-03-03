@@ -68,8 +68,8 @@ CRoom::CRoom()
   
     for (i = 0; i <= 5; i++) {
         exits[i] = NULL;
-	exitFlags[i] = 0;
-	doors[i].clear();
+        exitFlags[i] = 0;
+        doors[i].clear();
     }
 }
 

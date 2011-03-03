@@ -100,9 +100,7 @@ void CGroupCommunicator::connectionEstablished(CGroupClient *connection)
 
 void CGroupCommunicator::connectionClosed(CGroupClient *connection)
 {
-	if (type == Off) {
-		printf("Error ... Wtf?\r\n");
-	} else 	if (type == Client) {
+	if (type == Client) {
 		//getGroup()->connectionError("Remote host closed the connection");
 		changeType(Off);
 	} else if (type == Server) {
@@ -256,13 +254,6 @@ void CGroupCommunicator::incomingData(CGroupClient *conn, QByteArray buff)
 
 
 	    	message = e.attribute("message").toInt();
-
-
-	    	// converting a given node to the text form.
-//	    	QString blob;
-//	    	QTextStream stream(&blob);
-//	    	stream << dataElement;
-//	    	print_debug(DEBUG_GROUP, "Datagram arrived. Message : %i, Blob: %s", message, (const char *) blob.toAscii());
 
 	    	if (type == Client)
 				retrieveDataClient(conn, message, dataElement);

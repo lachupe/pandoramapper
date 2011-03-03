@@ -468,13 +468,12 @@ void CEngine::mapCurrentRoom(CRoom *room, int dir)
 
     addedroom->setX(x);
     addedroom->setY(y);
-    addedroom->setZ(z);
+    addedroom->simpleSetZ(z);
 
 
     Map.addRoom(addedroom);
     stacker.put(addedroom);
 
-    printf("Was there 1!\r\n");
     if (Map.isDuplicate(addedroom) == true) {
     	resetAddedRoomVar();
     	send_to_user("--[Pandora: Twin rooms merged!\n");
@@ -483,8 +482,6 @@ void CEngine::mapCurrentRoom(CRoom *room, int dir)
     } else {
         angryLinker(addedroom);
     }
-
-    printf("Was there 2!\r\n");
 
     print_debug(DEBUG_ANALYZER, "leaving mapCurrentRoom");
 

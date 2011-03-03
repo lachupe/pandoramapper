@@ -108,10 +108,7 @@ bool CRoomManager::isDuplicate(CRoom *addedroom)
     unsigned int i;
     int j;
 
-    printf("In isDuplicate check!");
     QWriteLocker locker(&mapLock);
-
-
 
     print_debug(DEBUG_ANALYZER, "Room-desc check for new room");
 
@@ -252,14 +249,14 @@ void CRoomManager::fixFreeRooms()
 /* ------------ addroom --------------*/
 void CRoomManager::addRoomNonsorted(CRoom *room)
 {
+
 	if (ids[room->id] != NULL) {
         print_debug(DEBUG_ROOMS, "Error while adding new element to database! This id already exists!\n");
-        exit(1);
+    	// Whaaaat?
+        //exit(1);
+        return;
     }
 
-
-    if (ids[room->id] != NULL)
-        return;
     rooms.push_back(room);
     ids[room->id] = room;	/* add to the first array */
     NameMap.addName(room->getName(), room->id);	/* update name-searhing engine */
@@ -273,7 +270,6 @@ void CRoomManager::addRoom(CRoom *room)
 {
 	QWriteLocker locker(&mapLock);
 	addRoomNonsorted(room);
-	printf("TEST TEST... ADDED!\r\n");
 }
 /* ------------ addroom ENDS ---------- */
 
@@ -393,12 +389,6 @@ void CRoomManager::reinit()
     }
 
     memset(ids, 0, MAX_ROOMS * sizeof (CRoom *) );
-/*
-    for (i = 0; i < MAX_ROOMS; i++)
-      ids[i] = NULL;
-    ids[0] = rooms;
-*/
-
     rooms.clear();
     NameMap.reinit();
 }
