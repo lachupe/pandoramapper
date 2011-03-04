@@ -25,6 +25,7 @@
 
 #include "CRoom.h"
 #include "CEvent.h"
+#include "CCommandQueue.h"
 
 class CEngine : public QObject {
 Q_OBJECT
@@ -49,6 +50,9 @@ Q_OBJECT
     PipeManager  eventPipe;
     Event        event;
 
+    CCommandQueue commandQueue;
+
+
     void parseEvent();
     void tryAllDirs();
     void tryDir();
@@ -69,7 +73,11 @@ public:
 
     void addEvent(Event e) { eventPipe.addEvent(e); }
 
-    int parseCommandLine(char cause, char result, char *line);
+    void addMovementCommand(int dir) { commandQueue.addCommand(CCommand::MOVEMENT, dir); }
+    QVector<unsigned int> *getPrespammedDirs();
+
+
+
 
     void exec();
 

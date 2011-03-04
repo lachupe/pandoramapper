@@ -350,6 +350,54 @@ void RendererWidget::glDrawMarkers()
     */
 }
 
+void RendererWidget::glDrawPrespamLine()
+{
+	QVector<unsigned int> *line = engine->getPrespammedDirs();
+    int prevx, prevy, prevz, dx, dy, dz;
+
+	if (line == NULL)
+		return;
+
+    CRoom *p = Map.getRoom( line->at(0) );
+
+    if (p == NULL) {
+        return;
+    }
+
+    prevx = p->getX() - curx;
+    prevy = p->getY() - cury;
+    prevz = (p->getZ() - curz) /* * DIST_Z */;
+
+    glColor4f(1.0, 0.0, 1.0, 1.0);
+
+	for (int i = 1; i < line->size(); i++) {
+		// connect all rooms with lines
+		unsigned int id = line->at(i);
+
+        CRoom *p = Map.getRoom(id);
+
+        if (p == NULL)
+            continue;
+
+        dx = p->getX() - curx;
+        dy = p->getY() - cury;
+        dz = (p->getZ() - curz) /* * DIST_Z */;
+
+        //drawMarker(dx, dy, dz, 2);
+
+        //glTranslatef(dx, dy, dz + 0.2f);
+
+        glBegin(GL_LINES);
+        glVertex3f(prevx, prevy, prevz);
+        glVertex3f(dx, dy, dz);
+        glEnd();
+
+
+        prevx = dx;
+        prevy = dy;
+        prevz = dz;
+	}
+}
 
 
 void RendererWidget::glDrawGroupMarkers()
@@ -891,6 +939,8 @@ void RendererWidget::draw(void)
 
     glDrawMarkers();
     glDrawGroupMarkers();
+    glDrawPrespamLine();
+
     
 //    print_debug(DEBUG_RENDERER, "draw() done");
 
@@ -1074,6 +1124,8 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
 
     return selected;
 }
+
+
 
 
 void RendererWidget::drawCone()

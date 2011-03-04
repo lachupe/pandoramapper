@@ -113,6 +113,46 @@ Cconfigurator::Cconfigurator()
 
     setStartupMode(0);
     setNoteColor("#F28003");
+
+                     //moveForcePatterns.append("#=You flee head over heels.");
+	moveForcePatterns.append("#=You are borne along by a strong current.");
+	moveForcePatterns.append("#?leads you out");
+	//moveForcePatterns.append("#=You are dead! Sorry...");
+	moveForcePatterns.append("#<Your feet slip, making you fall to the");
+	moveForcePatterns.append("#<Suddenly an explosion of ancient rhymes");
+
+	moveCancelPatterns.append("#=Your boat cannot enter this place.");
+	moveCancelPatterns.append("#>steps in front of you.");
+	moveCancelPatterns.append("#>bars your way.");
+	moveCancelPatterns.append("#=Maybe you should get on your feet first?");
+	moveCancelPatterns.append("#<Alas, you cannot go that way...");
+	moveCancelPatterns.append("#<You need to swim");
+	moveCancelPatterns.append("#=You failed swimming there.");
+	moveCancelPatterns.append("#<You failed to climb there");
+	moveCancelPatterns.append("#=No way! You are fighting for your life!");
+	moveCancelPatterns.append("#<Nah...");
+	moveCancelPatterns.append("#<You are too exhausted.");
+	moveCancelPatterns.append("#>is too exhausted.");
+	moveCancelPatterns.append("#=PANIC! You couldn't escape!");
+	moveCancelPatterns.append("#=PANIC! You can't quit the fight!");
+	moveCancelPatterns.append("#<ZBLAM");
+	moveCancelPatterns.append("#<Oops!");
+	moveCancelPatterns.append("#>seems to be closed.");
+	moveCancelPatterns.append("#>ou need to climb to go there.");
+	moveCancelPatterns.append("#=In your dreams, or what?");
+	moveCancelPatterns.append("#<You'd better be swimming");
+	moveCancelPatterns.append("#=You unsuccessfully try to break through the ice.");
+	moveCancelPatterns.append("#=Your mount refuses to follow your orders!");
+	moveCancelPatterns.append("#<You are too exhausted to ride");
+	moveCancelPatterns.append("#=You can't go into deep water!");
+	moveCancelPatterns.append("#=You don't control your mount!");
+	moveCancelPatterns.append("#=Your mount is too sensible to attempt such a feat.");
+	moveCancelPatterns.append("#?* prevents you from going *.");
+	moveCancelPatterns.append("#=Scouting in that direction is impossible.");
+	moveCancelPatterns.append("#<You stop moving towards");
+	moveCancelPatterns.append("#>is too difficult.");
+
+
 }
 
 

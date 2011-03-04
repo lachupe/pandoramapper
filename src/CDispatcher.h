@@ -118,6 +118,10 @@ class Cdispatcher
         T_SKIP,
      };
 
+    QRegExp scoreExp;
+    QRegExp scoreTrollExp;
+
+
     char parseTerrain(QByteArray prompt);
 
 

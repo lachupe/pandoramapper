@@ -32,6 +32,7 @@
 #include "defines.h"
 
 #include <QMutex>
+#include "patterns.h"
 
 
 #include "CConfigurator.h"
@@ -42,7 +43,6 @@
 #include "xml2.h"
 #include "CDispatcher.h"
 #include "CEngine.h"
-
 #include "userfunc.h"
 #include "proxy.h"
 #include "CGroup.h"
@@ -56,6 +56,12 @@ Cdispatcher::Cdispatcher()
     awaitingData = false;
     scouting = false;
     event.clear();
+
+    scoreExp.setPattern("[0-9]*/* hits, */* mana, and */* moves.");
+    scoreTrollExp.setPattern("[0-9]*/* hits and */* moves.");
+
+    scoreExp.setPatternSyntax(QRegExp::Wildcard);
+    scoreTrollExp.setPatternSyntax(QRegExp::Wildcard);
 }
 
 /**
@@ -492,17 +498,9 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
     char *buf;
     QByteArray scoreLine;
 
-
     print_debug(DEBUG_DISPATCHER, "analyzerMudStream(): starting");
     print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
 
-    // bloody hack!
-    QRegExp scoreExp("[0-9]*/* hits, */* mana, and */* moves.");
-    scoreExp.setPatternSyntax(QRegExp::Wildcard);
-	// 399/529 hits and 121/133 moves.
-
-    QRegExp scoreTrollExp("[0-9]*/* hits and */* moves.");
-    scoreTrollExp.setPatternSyntax(QRegExp::Wildcard);
 
 
     dispatchBuffer(c);
@@ -611,6 +609,19 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
 
         if (buffer[i].type == IS_NORMAL && buffer[i].line.indexOf("\r\n") != -1) {
             QByteArray a_line = cutColours( buffer[i].line );
+
+
+            if (Patterns::matchMoveCancelPatterns( a_line ) ) {
+            	event.clear(); // it should actually be clear
+            	event.movementBlocker = true;
+            	SEND_EVENT_TO_ENGINE;
+            }
+
+            // check for fleeing/forced movement
+            if (a_line == "You flee head over heels." || Patterns::matchMoveForcePatterns( a_line ) ) {
+            	event.fleeing = true;
+            }
+
 
             // check for scouting
             if (a_line.startsWith("You quietly scout ") == true) {

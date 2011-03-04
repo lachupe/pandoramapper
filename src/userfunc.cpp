@@ -188,12 +188,12 @@ const struct user_command_type user_commands[] = {
    "    Examples: minfo / minfo 120\r\n\r\n"
    "    This command displays everything know about current room. Roomname, id, flags,\r\n"
    "room description, exits, connections and last update date.\r\n"},
-  {"north",         usercmd_move,         NORTH,          USERCMD_FLAG_INSTANT,   NULL, NULL},
-  {"east",          usercmd_move,         EAST,           USERCMD_FLAG_INSTANT,   NULL, NULL},
-  {"south",         usercmd_move,         SOUTH,          USERCMD_FLAG_INSTANT,   NULL, NULL},
-  {"west",          usercmd_move,         WEST,           USERCMD_FLAG_INSTANT,   NULL, NULL},
-  {"up",            usercmd_move,         UP,             USERCMD_FLAG_INSTANT,   NULL, NULL},
-  {"down",          usercmd_move,         DOWN,           USERCMD_FLAG_INSTANT,   NULL, NULL},
+  {"north",         usercmd_move,         NORTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"east",          usercmd_move,         EAST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"south",         usercmd_move,         SOUTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"west",          usercmd_move,         WEST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"up",            usercmd_move,         UP,             USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"down",          usercmd_move,         DOWN,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
   {"look",          usercmd_move,         USER_MOVE_LOOK, USERCMD_FLAG_INSTANT,   NULL, NULL},
   {"examine",       usercmd_move,         USER_MOVE_EXAMINE, USERCMD_FLAG_INSTANT,   NULL, NULL},
   {"mmerge",        usercmd_mmerge,       0,    USERCMD_FLAG_SYNC | USERCMD_FLAG_REDRAW,
@@ -1638,13 +1638,42 @@ USERCMD(usercmd_move)
   /*firstly - send the command futher to mud, as if it matches */
   /* used commands - it wont be automatically send futher */
 
+  // for normal game - append the command to the commands queue of the engine
+
+  dir = -1;
+
+  switch (subcmd)
+  {
+        case  NORTH:
+                dir = NORTH;
+                break;
+        case  EAST:
+                dir = EAST;
+                break;
+        case  SOUTH:
+                dir = SOUTH;
+                break;
+        case  WEST:
+                dir = WEST;
+                break;
+        case  UP:
+                dir = UP;
+                break;
+        case  DOWN:
+                dir = DOWN;
+                break;
+  }
+
+  if (dir != -1)
+	  engine->addMovementCommand( dir );
+
   if (proxy->isMudEmulation()) {
 
     if (stacker.amount() == 0) {
         send_to_user( "You are in an undefined position.\r\n");
         send_to_user( "Use mgoto <room_id> to go to some place...\r\n");
 
-	send_prompt();
+        send_prompt();
         return USER_PARSE_SKIP;
     }
     r = stacker.first();
@@ -1654,25 +1683,6 @@ USERCMD(usercmd_move)
 
     switch (subcmd)
     {
-
-          case  NORTH:
-                  dir = NORTH;
-                  break;
-          case  EAST:
-                  dir = EAST;
-                  break;
-          case  SOUTH:
-                  dir = SOUTH;
-                  break;
-          case  WEST:
-                  dir = WEST;
-                  break;
-          case  UP:
-                  dir = UP;
-                  break;
-          case  DOWN:
-                  dir = DOWN;
-                  break;
           case USER_MOVE_LOOK:
           case USER_MOVE_EXAMINE:
                   r->sendRoom();

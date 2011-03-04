@@ -131,6 +131,11 @@ class Cconfigurator : public QObject {
 
 public:
 
+    /* movement patterns */
+    QList<QByteArray> moveForcePatterns;
+    QList<QByteArray> moveCancelPatterns;
+
+
     /* spells */
     vector<TSpell>  spells;
     QByteArray      spells_pattern;

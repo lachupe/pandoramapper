@@ -71,6 +71,7 @@ class RendererWidget : public QGLWidget
 
     GLuint selectBuf[MAXHITS];
     void glDrawGroupMarkers();
+    void glDrawPrespamLine();
     void glDrawMarkers();
     void drawMarker(int, int, int, int);
     void glDrawRoom(CRoom *p);

@@ -38,6 +38,8 @@ class Event   {
             terrain = other.terrain;
             prompt = other.prompt;
             movement = other.movement;
+            fleeing = other.fleeing;
+            movementBlocker = other.movementBlocker;
         }
 
         Event &operator=(const Event &other) 
@@ -52,6 +54,8 @@ class Event   {
                 terrain = other.terrain;
                 prompt = other.prompt;
                 movement = other.movement;
+                fleeing = other.fleeing;
+                movementBlocker = other.movementBlocker;
             }
             return *this;    // Return ref for multiple assignment            
         }
@@ -65,7 +69,9 @@ class Event   {
             scout = false;
             blind = false;
             movement = false;
+            fleeing = false;
             terrain = -1;
+            movementBlocker = false;
         }
 
         QByteArray dir;
@@ -74,7 +80,9 @@ class Event   {
         QByteArray exits;
         bool       blind;         /* fog, no light, blind flag */
         bool       scout;
-        bool       movement;    
+        bool       movement;
+        bool	   fleeing;	/* this movement was caused by fleeing */
+        bool	   movementBlocker;
         char       terrain;
         QByteArray prompt;
 };

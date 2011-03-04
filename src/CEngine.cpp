@@ -117,6 +117,16 @@ void CEngine::tryDir()
         return;
     }
 
+    CCommand cmd = commandQueue.peek();
+    if (cmd.timer.elapsed() > 5000) {
+    	print_debug(DEBUG_ANALYZER, "The command queue has head entry with lifetime over 5 seconds. Resetting");
+    	commandQueue.clear();
+    } else if (cmd.dir == dir && !event.fleeing ) {
+    	// we moved in awaited direction
+    	commandQueue.dequeue();
+    }
+
+
     if (stacker.amount() == 0) {
         print_debug(DEBUG_ANALYZER, "leaving. No candidates in stack to check. This results in FULL RESYNC.");
         return;
@@ -126,9 +136,9 @@ void CEngine::tryDir()
         room = stacker.get(i);
         if (room->isConnected(dir)) {
             candidate = room->exits[dir];
-            if  (testRoom(candidate) )
+            if  (testRoom(candidate) ) {
                 stacker.put(candidate);
-
+            }
 
         } else {
             if (stacker.amount() == 1 && mapping)  {
@@ -161,8 +171,8 @@ void CEngine::tryDir()
         }
     }
 
-    print_debug(DEBUG_ANALYZER, "leaving tryDir");
 
+    print_debug(DEBUG_ANALYZER, "leaving tryDir");
 }
 
 /* now try all dirs, only removes other rooms, if there is a full 100% fit for new data */
@@ -175,6 +185,7 @@ void CEngine::tryAllDirs()
     CRoom *candidate;
 
     mappingOff();
+
     print_debug(DEBUG_ANALYZER, "in try_dir_all_dirs");
     if (stacker.amount() == 0) {
         print_debug(DEBUG_ANALYZER, "leaving. No candidates in stack to check. This results in FULL RESYNC.");
@@ -248,6 +259,10 @@ void CEngine::parseEvent()
 {
     print_debug(DEBUG_ANALYZER, "in parseEvent()");
 
+    if (event.movementBlocker) {
+    	commandQueue.dequeue();
+    	return;
+    }
 
     if (event.name != "") {
         print_debug(DEBUG_ANALYZER, "Converting Room Name to ascii format");
@@ -290,7 +305,6 @@ void CEngine::parseEvent()
         event.blind = true;
     }
 
-
     if (event.name == "" && event.blind == false) {
         print_debug(DEBUG_ANALYZER, "EMPTY name and no blind set. Assuming addedroom-data update incoming.");
         if (addedroom) {
@@ -304,10 +318,13 @@ void CEngine::parseEvent()
 
     if (event.movement == true) {
         last_movement = event.dir;
-    	if (event.dir =="")
+    	if (event.dir =="") {
             tryAllDirs();
-        else
+            // command's queue is useless then, no?
+            commandQueue.clear();
+    	} else {
             tryDir();
+    	}
     } else {
         if (event.name != "")
             tryLook();
@@ -671,6 +688,8 @@ void CEngine::printStacks()
 void CEngine::clear()
 {
     eventPipe.clear();
+    commandQueue.clear();
+
     print_debug(DEBUG_ANALYZER, "Engine INIT.\r\n");
     mapping =                0;
     mgoto             =      0;
@@ -710,3 +729,11 @@ CRegion *CEngine::get_last_region()
     return last_region;
 }
 
+
+QVector<unsigned int> *CEngine::getPrespammedDirs()
+{
+    if ( commandQueue.isEmpty() || stacker.amount() != 1 )
+		return NULL; // return an empty list
+
+    return commandQueue.getPrespam( stacker.get(0) );
+}
