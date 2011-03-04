@@ -28,7 +28,9 @@ FORMS += src/configedit.ui \
     src/movementdialog.ui \
     src/roomedit.ui \
     src/spellsdialog.ui
-HEADERS += src/CActionManager.h \
+HEADERS += src/patterns.h \
+    src/CCommandQueue.h \
+    src/CActionManager.h \
     src/CConfigurator.h \
     src/CDispatcher.h \
     src/CEngine.h \
@@ -62,7 +64,8 @@ HEADERS += src/CActionManager.h \
     src/userfunc.h \
     src/utils.h \
     src/xml2.h
-SOURCES += src/CActionManager.cpp \
+SOURCES += src/patterns.cpp \
+    src/CActionManager.cpp \
     src/CConfigurator.cpp \
     src/CDispatcher.cpp \
     src/CEngine.cpp \
