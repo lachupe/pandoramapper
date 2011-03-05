@@ -29,7 +29,7 @@ CGroupChar::CGroupChar(QTreeWidget* t) :
 	print_debug(DEBUG_GROUP, "GroupChar Constructor");
 
 	name = "Fistandantilus";
-	pos = 0;
+	pos = 1;
 	hp = 999;
 	maxhp = 999;
 	moves = 999;
@@ -55,11 +55,14 @@ CGroupChar::CGroupChar(QTreeWidget* t) :
 	sanc_elapsed = 0;
 	bless_elapsed = 0;
 
+	color = conf->getGroupManagerColor();
 
 	status = NORMAL;
 
 	charItem = new QTreeWidgetItem(charTable);
 	statusItem = new QTreeWidgetItem(charTable);
+
+	hidden = false;
 
 	print_debug(DEBUG_GROUP, "GroupChar Constructor done.");
 }
@@ -68,6 +71,14 @@ CGroupChar::~CGroupChar()
 {
 	delete charItem;
 	delete statusItem;
+}
+
+void CGroupChar::setHidden(bool b)
+{
+	hidden = b;
+	charItem->setHidden(b);
+	statusItem->setHidden(b);
+	//charTable->collapseItem(charItem);
 }
 
 void CGroupChar::setNameField(QString name)
@@ -111,7 +122,12 @@ void CGroupChar::updateSpells()
 {
     for (unsigned int p = 0; p < conf->spells.size(); p++) {
     	if (conf->spells[p].name == "armour") {
-			arm = conf->spells[p].up || conf->spells[p].silently_up;
+			bool arm_new = conf->spells[p].up || conf->spells[p].silently_up;
+			if (arm & !arm_new)
+				printf("ARMOUR SPELL WENT DOWN\r\n");
+			if (!arm && arm_new)
+				printf("ARMOUR UP!\r\n");
+			arm = arm_new;
 			continue;
     	}
     	if (conf->spells[p].name == "breath of briskness") {
@@ -133,7 +149,12 @@ void CGroupChar::updateSpells()
 			continue;
     	}
     	if (conf->spells[p].name == "sanctuary") {
-			sanc = conf->spells[p].up || conf->spells[p].silently_up;
+			bool sanc_new = conf->spells[p].up || conf->spells[p].silently_up;
+			if (sanc & !sanc_new)
+				printf("SANC SPELL WENT DOWN\r\n");
+			if (!sanc && sanc_new)
+				printf("SANC UP!\r\n");
+			sanc = sanc_new;
 			tsanc = conf->spells[p].timer;
 			sanc_elapsed = 0;
 			continue;

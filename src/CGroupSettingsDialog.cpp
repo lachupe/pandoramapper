@@ -46,6 +46,7 @@ void CGroupSettingsDialog::run()
 	lineEdit_remoteHost->setText( conf->getGroupManagerHost() );
 	lineEdit_localPort->setText( QString("%1").arg( conf->getGroupManagerLocalPort() ) );
 	lineEdit_remotePort->setText( QString("%1").arg( conf->getGroupManagerRemotePort() ) );
+	checkBox_showSelf->setChecked( conf->getGroupManagerShowSelf() );
 }
 
 void CGroupSettingsDialog::accept()
@@ -81,6 +82,15 @@ void CGroupSettingsDialog::accept()
 		conf->setGroupManagerLocalPort(localPort);
 		if (group->getType() == CGroupCommunicator::Server)
 			group->reconnect();
+	}
+
+	bool showSelf = checkBox_showSelf->isChecked();
+	if (showSelf != conf->getGroupManagerShowSelf()) {
+		conf->setGroupManagerShowSelf(showSelf);
+		if (showSelf)
+			group->addSelf();
+		else
+			group->hideSelf();
 	}
 
     done(Accepted);

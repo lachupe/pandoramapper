@@ -125,7 +125,8 @@ class Cconfigurator : public QObject {
     int	 groupManagerRemotePort;
     QByteArray groupManagerHost;
     QByteArray groupManagerCharName;
-    bool showGroupManager;
+    bool groupManagerShowManager;
+    bool groupManagerShowSelf;
     QRect groupManagerRect;
     QColor groupManagerColor;
 
@@ -152,7 +153,9 @@ public:
     int getGroupManagerRemotePort() { return groupManagerRemotePort; }
     QByteArray getGroupManagerHost() { return groupManagerHost; }
     QByteArray getGroupManagerCharName() { return groupManagerCharName; }
-    bool getShowGroupManager() { return showGroupManager; }
+    bool getGroupManagerShowManager() { return groupManagerShowManager; }
+    bool getGroupManagerShowSelf() { return groupManagerShowSelf; }
+    bool getShowGroupManager() { return groupManagerShowManager; }
     QRect getGroupManagerRect() { return groupManagerRect; }
     QColor getGroupManagerColor() { return groupManagerColor; }
 
@@ -161,7 +164,8 @@ public:
     void setGroupManagerRemotePort(int val) { groupManagerRemotePort = val; setConfigModified(true); }
     void setGroupManagerHost(QByteArray val) { groupManagerHost = val; setConfigModified(true); }
     void setGroupManagerCharName(QByteArray val) { groupManagerCharName = val; setConfigModified(true); }
-    void setShowGroupManager(bool b) { showGroupManager = b; }
+    void setGroupManagerShowManager(bool b) { groupManagerShowManager = b; }
+    void setGroupManagerShowSelf(bool b) { groupManagerShowSelf = b; setConfigModified(true); }
     void setGroupManagerRect(QRect r) { groupManagerRect = r; setConfigModified(true); }
     void setGroupManagerColor(QColor c) { groupManagerColor = c; setConfigModified(true); }
 

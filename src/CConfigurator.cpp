@@ -107,14 +107,15 @@ Cconfigurator::Cconfigurator()
     groupManagerRemotePort = 4243;
     groupManagerHost = "localhost";
     groupManagerCharName = "Aza";
-    showGroupManager = false;
+    groupManagerShowManager = false;
     groupManagerRect.setRect(0, 0, 0, 0);  // means autodetect
     groupManagerColor = QColor("#F28003");
+    groupManagerShowSelf = false;
 
     setStartupMode(0);
     setNoteColor("#F28003");
 
-                     //moveForcePatterns.append("#=You flee head over heels.");
+    moveForcePatterns.append("#=You flee head over heels.");
 	moveForcePatterns.append("#=You are borne along by a strong current.");
 	moveForcePatterns.append("#?leads you out");
 	//moveForcePatterns.append("#=You are dead! Sorry...");
@@ -608,11 +609,12 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
   grpManager += "Off";
 
 
-  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" charColor=\"%s\" localPort=\"%i\" remotePort=\"%i\">\r\n",
+  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" charColor=\"%s\" localPort=\"%i\" remotePort=\"%i\" showSelf=\"%s\">\r\n",
                   (const char *) grpManager.toAscii(), (const char *) getGroupManagerHost(),
                   (const char *) getGroupManagerCharName(),
                   (const char *) getGroupManagerColor().name().toAscii(),
-                  getGroupManagerLocalPort(), getGroupManagerRemotePort() );
+                  getGroupManagerLocalPort(), getGroupManagerRemotePort(),
+                  ON_OFF( getGroupManagerShowSelf() ) );
 
   window = renderer_window->getGroupManagerRect();
   fprintf(f, "  <groupManagerGUI show=\"%s\"  x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n",
@@ -696,18 +698,6 @@ ConfigParser::ConfigParser()
   : QXmlDefaultHandler()
 {
 }
-
-
-/*bool ConfigParser::endElement( const QString& , const QString& , const QString&)
-{
-    return TRUE;
-}
-*/
-/*bool ConfigParser::characters( const QString& ch)
-{
-  return TRUE;
-}
-*/
 
 bool ConfigParser::startElement( const QString& , const QString& ,
                                     const QString& qName,
@@ -825,6 +815,13 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         s = attributes.value("remotePort");
         conf->setGroupManagerRemotePort(s.toInt() );
 
+        s = attributes.value("showSelf");
+        s = s.toLower();
+        if (s == "on")
+            conf->setGroupManagerShowSelf(true);
+        else
+            conf->setGroupManagerShowSelf(false);
+
 
     } else if (qName == "groupManagerGUI") {
 
@@ -832,9 +829,9 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         s = attributes.value("show");
         s = s.toLower();
         if (s == "on")
-            conf->setShowGroupManager(true);
+            conf->setGroupManagerShowManager(true);
         else
-            conf->setShowGroupManager(false);
+            conf->setGroupManagerShowManager(false);
 
         int x = 0;
         int y = 0;

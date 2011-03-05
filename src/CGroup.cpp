@@ -41,7 +41,7 @@ CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
         x = conf->getWindowRect().x() - (rect.width() / 3) ;
         y = conf->getWindowRect().y();
         width = rect.width() / 3;
-        height = conf->getWindowRect().height() / 2;
+        height = conf->getWindowRect().height() / 4;
 
         conf->setGroupManagerRect( QRect(x, y, width, height) );
     }
@@ -72,14 +72,10 @@ CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
 	CGroupChar *ch = new CGroupChar(tree);
 
 	chars.clear();
-	ch->setName("Fistandantilus");
-	ch->setPosition(1); // FIXME ... or does not really matter.
-	ch->setColor(conf->getGroupManagerColor());
 	chars.append(ch);
 	self = ch;
 	ch->updateLabels();
 
-	//
 	tree->resizeColumnToContents(0);
 	tree->resizeColumnToContents(1);
 	tree->resizeColumnToContents(2);
@@ -89,46 +85,48 @@ CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
 	tree->resizeColumnToContents(6);
 	tree->resizeColumnToContents(7);
 
+
 	ch->setName(name);
+
 
 
 	print_debug(DEBUG_GROUP, "Starting up the GroupManager.\r\n");
 	network = new CGroupCommunicator(CGroupCommunicator::Off, this);
 	network->changeType(conf->getGroupManagerState());
 
-
-/*
-    QRect rect = app.desktop()->availableGeometry(-1);
-    if (conf->get_window_rect().x() == 0 || conf->get_window_rect().x() >= rect.width() ||
-        conf->get_window_rect().y() >= rect.height() ) {
-        print_debug(DEBUG_SYSTEM && DEBUG_INTERFACE, "Autosettings for window size and position");
-        int x, y, height, width;
-
-        x = rect.width() / 3 * 2;
-        y = 0;
-        height = rect.height() / 3;
-        width = rect.width() - x;
-
-        conf->set_window_rect( x, y, width, height);
-    }
-*/
-
-
     if (conf->getShowGroupManager() == false)
     	hide();
 
+	if (conf->getGroupManagerShowSelf() == false)
+		hideSelf();
 
     // initialize timed updates of the group manager frame
 
     //startTimer( 0 );                            // run continuous timer
     QTimer * counter = new QTimer( this );
     connect( counter, SIGNAL(timeout()), this, SLOT(updateGroupManagerWindow()) );
-    counter->start( 1000 );
+    counter->start( 500 );
 
 
 	print_debug(DEBUG_GROUP, "Leaving the GroupManager constructor");
 }
 
+void CGroup::hideSelf()
+{
+	self->setHidden( true );
+	if (chars.contains(self) == true) {
+		removeChar(conf->getGroupManagerCharName());
+	}
+}
+
+
+void CGroup::addSelf()
+{
+	self->setHidden( false );
+	if (chars.contains(self) != true) {
+		chars.append(self);
+	}
+}
 
 void CGroup::setType(int newState)
 {
@@ -209,9 +207,6 @@ bool CGroup::addChar(QDomNode node)
 				(const char *) newChar->getName());
 		chars.append(newChar);
 
-
-//		layout->addWidget( newChar->getCharFrame());
-
 		return true;
 	}
 }
@@ -221,8 +216,10 @@ void CGroup::removeChar(QByteArray name)
 	CGroupChar *ch;
 
 
+	/*
 	if (name == conf->getGroupManagerCharName())
-		return; // just in case... should never happen
+		return;
+	*/
 
 	for (int i = 0; i < chars.size(); i++)
 		if (chars[i]->getName() == name) {
@@ -230,8 +227,9 @@ void CGroup::removeChar(QByteArray name)
 			ch = chars[i];
 			chars.remove(i);
 
-//			layout->removeWidget( ch->getCharFrame() );
-			delete ch;
+			if (name != conf->getGroupManagerCharName())
+				delete ch;
+
 		}
 }
 

@@ -47,6 +47,7 @@ class CGroupChar
 
 	QTreeWidgetItem*	charItem;
 	QTreeWidgetItem*	statusItem;
+	bool 				hidden;
 
 	bool	arm;
 	bool	shld;
@@ -95,6 +96,9 @@ public:
 
 	void updateSpells();
 
+	void setHidden(bool b);
+	bool isHidden() { return hidden; }
+
 	QTreeWidgetItem *getCharItem() { return charItem; }
 
 
@@ -120,7 +124,6 @@ public:
 	}
 
 private:
-
     QTreeWidget* charTable;
 };
 

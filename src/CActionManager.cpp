@@ -252,8 +252,8 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
 
     groupShowHideAct = new QAction(tr("Show/Hide Manager"), this );
     connect(groupShowHideAct, SIGNAL(triggered()), this, SLOT(groupHide()), Qt::QueuedConnection);
-    conf->setShowGroupManager( !conf->getShowGroupManager() );
-    if (conf->getShowGroupManager() ) {
+    conf->setGroupManagerShowManager( !conf->getGroupManagerShowManager() );
+    if (conf->getGroupManagerShowManager() ) {
     	groupShowHideAct->setText("Hide");
     } else {
     	groupShowHideAct->setText("Show");
@@ -311,7 +311,7 @@ void CActionManager::groupServer(bool b)
 void CActionManager::setShowGroupManager(bool b)
 {
     print_debug(DEBUG_INTERFACE, "Changing the groupManager visibility");
-	conf->setShowGroupManager(b);
+	conf->setGroupManagerShowManager(b);
 	if (b) {
     	groupShowHideAct->setText("Hide Manager");
         parent->setShowGroupManager(b);

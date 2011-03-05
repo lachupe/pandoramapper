@@ -618,7 +618,8 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             }
 
             // check for fleeing/forced movement
-            if (a_line == "You flee head over heels." || Patterns::matchMoveForcePatterns( a_line ) ) {
+            // a_line == "You flee head over heels." ||
+            if (Patterns::matchMoveForcePatterns( a_line ) ) {
             	event.fleeing = true;
             }
 

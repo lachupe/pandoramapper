@@ -397,6 +397,13 @@ void RendererWidget::glDrawPrespamLine()
         prevy = dy;
         prevz = dz;
 	}
+
+	// and draw a cone in the last room
+	glTranslatef(prevx, prevy, prevz + 0.2f);
+	drawCone();
+
+	// dispose
+	delete line;
 }
 
 

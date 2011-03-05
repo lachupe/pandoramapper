@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>SpellsDialog</class>
- <widget class="QDialog" name="SpellsDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="SpellsDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,117 +10,117 @@
     <height>599</height>
    </rect>
   </property>
-  <property name="minimumSize" >
+  <property name="minimumSize">
    <size>
     <width>688</width>
     <height>599</height>
    </size>
   </property>
-  <property name="maximumSize" >
+  <property name="maximumSize">
    <size>
     <width>688</width>
     <height>599</height>
    </size>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Pattern Editor</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QVBoxLayout">
    <item>
-    <widget class="QListWidget" name="listWidget" />
+    <widget class="QListWidget" name="listWidget"/>
    </item>
    <item>
-    <widget class="QFrame" name="frame" >
-     <property name="frameShape" >
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="frameShadow" >
+     <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" >
+     <layout class="QVBoxLayout">
       <item>
-       <layout class="QHBoxLayout" >
+       <layout class="QHBoxLayout">
         <item>
-         <widget class="QLabel" name="label" >
-          <property name="text" >
+         <widget class="QLabel" name="label">
+          <property name="text">
            <string>&amp;Spell name and pattern for Affect:</string>
           </property>
-          <property name="buddy" >
+          <property name="buddy">
            <cstring>lineEdit_name</cstring>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_name" />
+         <widget class="QLineEdit" name="lineEdit_name"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" >
+       <layout class="QHBoxLayout">
         <item>
-         <widget class="QLabel" name="label_2" >
-          <property name="text" >
+         <widget class="QLabel" name="label_2">
+          <property name="text">
            <string>&amp;Up message:</string>
           </property>
-          <property name="buddy" >
+          <property name="buddy">
            <cstring>lineEdit_up_mes</cstring>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_up_mes" />
+         <widget class="QLineEdit" name="lineEdit_up_mes"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" >
+       <layout class="QHBoxLayout">
         <item>
-         <widget class="QLabel" name="label_3" >
-          <property name="text" >
+         <widget class="QLabel" name="label_3">
+          <property name="text">
            <string>&amp;Refresh message:</string>
           </property>
-          <property name="buddy" >
+          <property name="buddy">
            <cstring>lineEdit_refresh_mes</cstring>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_refresh_mes" />
+         <widget class="QLineEdit" name="lineEdit_refresh_mes"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" >
+       <layout class="QHBoxLayout">
         <item>
-         <widget class="QLabel" name="label_4" >
-          <property name="text" >
+         <widget class="QLabel" name="label_4">
+          <property name="text">
            <string>&amp;Down message:</string>
           </property>
-          <property name="buddy" >
+          <property name="buddy">
            <cstring>lineEdit_down_mes</cstring>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_down_mes" />
+         <widget class="QLineEdit" name="lineEdit_down_mes"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" >
+       <layout class="QHBoxLayout">
         <item>
-         <widget class="QCheckBox" name="checkBox_addon" >
-          <property name="text" >
+         <widget class="QCheckBox" name="checkBox_addon">
+          <property name="text">
            <string>&amp;Addon type (add this in affects)</string>
           </property>
          </widget>
         </item>
         <item>
          <spacer>
-          <property name="orientation" >
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>40</width>
             <height>20</height>
@@ -128,8 +129,8 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_save" >
-          <property name="text" >
+         <widget class="QPushButton" name="pushButton_save">
+          <property name="text">
            <string>Save</string>
           </property>
          </widget>
@@ -140,20 +141,20 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
-      <widget class="QPushButton" name="pushButton_add" >
-       <property name="text" >
+      <widget class="QPushButton" name="pushButton_add">
+       <property name="text">
         <string>Add</string>
        </property>
       </widget>
      </item>
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -162,18 +163,18 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_edit" >
-       <property name="text" >
+      <widget class="QPushButton" name="pushButton_edit">
+       <property name="text">
         <string>Edit</string>
        </property>
       </widget>
      </item>
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -182,8 +183,8 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_remove" >
-       <property name="text" >
+      <widget class="QPushButton" name="pushButton_remove">
+       <property name="text">
         <string>Remove</string>
        </property>
       </widget>
@@ -191,13 +192,13 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>131</width>
          <height>31</height>
@@ -206,15 +207,15 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="okButton" >
-       <property name="text" >
+      <widget class="QPushButton" name="okButton">
+       <property name="text">
         <string>OK</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="cancelButton" >
-       <property name="text" >
+      <widget class="QPushButton" name="cancelButton">
+       <property name="text">
         <string>Cancel</string>
        </property>
       </widget>
@@ -245,11 +246,11 @@
    <receiver>SpellsDialog</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>278</x>
      <y>253</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>96</x>
      <y>254</y>
     </hint>
@@ -261,11 +262,11 @@
    <receiver>SpellsDialog</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>369</x>
      <y>253</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>179</x>
      <y>282</y>
     </hint>

@@ -54,6 +54,8 @@ public:
 	bool isConnected() { return network->isConnected(); }
 	void reconnect() { resetChars();  network->reconnect(); }
 
+	void addSelf();
+	void hideSelf();
 	bool addChar(QDomNode blob);
 	void removeChar(QByteArray name);
 	void removeChar(QDomNode node);
