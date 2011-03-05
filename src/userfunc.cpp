@@ -559,9 +559,27 @@ USERCMD(usercmd_maddroom)
   return USER_PARSE_SKIP;
 }
 
+#define GET_INT_ARGUMENT(arg, value) \
+  if (!is_integer(arg)) {               \
+    send_to_user("--[ argument %s is not an integer as its supposed to be.\r\n", arg); \
+    send_prompt(); \
+    return USER_PARSE_SKIP;             \
+  }                                             \
+  value = atoi(arg);
+
+
+
 
 USERCMD(usercmd_maction)
 {
+  #define MACTION_SEND_DOOR(door, dir)  \
+  if (!local) { \
+    if (strlen(original) != 0) strcat(original, "\n"); \
+  	  sprintf(original+strlen(original), "%s %s %s", arg, (const char *) door , short_exits[dir]); \
+  } \
+  send_to_user("%s %s %s\r\n", arg, (const char *) door , short_exits[dir]);
+
+
   char *p;
   char arg[MAX_STR_LEN];
   CRoom *r;
@@ -612,27 +630,34 @@ USERCMD(usercmd_maction)
 
   original[0] = 0;      /* nullify the incoming line and get ready to put generated commands */
 
+
   if (stacker.amount() == 0) {
-    if (dir == -1) {
-      send_to_user("--[ undefined position. can not operate with secrets.\r\n");
-      send_prompt();
-      return USER_PARSE_SKIP;
-    }
-
-    send_to_user("%s exit %s\r\n", arg, short_exits[dir]);
-
-    if (local) {
-      send_prompt();
-      return USER_PARSE_SKIP;
-    } else  {
-//      send_to_mud("%s exit %s\n", arg, short_exits[dir]);
-      sprintf(original+strlen(original), "%s exit %s", arg, short_exits[dir]);
-      return USER_PARSE_DONE;
-    }
+	  exit = 1;
+  } else {
+	  exit = 0;
   }
 
+  /* for the case of prespam and sync, try to follow */
+  QVector<unsigned int> *prespam = engine->getPrespammedDirs();
+  if (prespam != NULL && dir != -1) {
+	  // follow-up all dirs and use the last one for maction
 
-  exit = 0;             /* this flag is for 'action exit' when there are several rooms */
+	  // get the last room
+      CRoom *p = Map.getRoom( prespam->at( prespam->size() - 1 ) );
+      if (p->isDoorSecret(dir) == true) {
+    	  MACTION_SEND_DOOR(p->getDoor(dir), dir);
+      } else {
+    	  MACTION_SEND_DOOR("exit", dir);
+      }
+
+      delete prespam;
+
+      if (local) {
+        send_prompt();
+        return USER_PARSE_SKIP;
+      }
+      return USER_PARSE_DONE;
+  }
 
   /* get the door names */
   for (i = 0; i < stacker.amount(); i++) {
@@ -643,25 +668,14 @@ USERCMD(usercmd_maction)
 
       for (z = 0; z <= 5; z++)
         if (r->isDoorSecret(z) == true) {
-          if (!local) {
-            //send_to_mud("%s %s %s\n", arg, r->doors[z] , short_exits[z]);
-            if (strlen(original) != 0) strcat(original, "\n");
-            sprintf(original+strlen(original), "%s %s %s", arg, (const char *) r->getDoor(z) , short_exits[z]);
-          }
-          send_to_user("%s %s %s\r\n", arg, (const char *) r->getDoor(z) , short_exits[z]);
+        	MACTION_SEND_DOOR(r->getDoor(dir), z);
         }
 
     } else {
-
-      if (r->isDoorSecret(dir) == false) {
-        exit = 1;         /* set the flag that 'exit' exit should be opened */
+      if (r->isDoorSecret(dir) == true) {
+    	  MACTION_SEND_DOOR(r->getDoor(dir), dir);
       } else {
-        if (!local) {
-          //send_to_mud("%s %s %s\n", arg, r->doors[dir] , short_exits[dir]);
-          if (strlen(original) != 0) strcat(original, "\n");
-          sprintf(original+strlen(original), "%s %s %s", arg, (const char *) r->getDoor(dir) , short_exits[dir]);
-        }
-        send_to_user("%s %s %s\r\n", arg, (const char *) r->getDoor(dir) , short_exits[dir]);
+          exit = 1;         /* set the flag that 'exit' exit should be opened */
       }
 
     }
@@ -671,12 +685,7 @@ USERCMD(usercmd_maction)
 
   /* open the exit only once */
   if (exit && dir != -1) {
-    if (!local) {
-      //send_to_mud("%s %s %s\n", arg, "exit", short_exits[dir]);
-      if (strlen(original) != 0) strcat(original, "\n");
-      sprintf(original+strlen(original), "%s %s %s", arg, "exit", short_exits[dir]);
-    }
-    send_to_user("%s %s %s\r\n", arg, "exit", short_exits[dir]);
+    MACTION_SEND_DOOR("exit", dir);
   }
 
   if (local) {

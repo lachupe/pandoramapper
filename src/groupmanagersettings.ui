@@ -100,6 +100,20 @@
     </spacer>
    </item>
    <item>
+    <widget class="QCheckBox" name="checkBox">
+     <property name="text">
+      <string>CheckBox</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="checkBox_2">
+     <property name="text">
+      <string>CheckBox</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout">
      <item>
       <spacer>
