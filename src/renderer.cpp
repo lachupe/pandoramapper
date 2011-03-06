@@ -87,33 +87,40 @@ RendererWidget::RendererWidget( QWidget *parent )
 
 void RendererWidget::initializeGL()
 {
-  unsigned int i;
+unsigned int i;
 
-  setMouseTracking(true);
+	setMouseTracking(true);
 
-  //textFont = new QFont("Times", 10, QFont::Bold);
-  
-  glShadeModel(GL_SMOOTH);
-  glClearColor (0.0, 0.0, 0.0, 0.0);	/* This Will Clear The Background Color To Black */
-  glPointSize (4.0);		/* Add point size, to make it clear */
-  glLineWidth (2.0);		/* Add line width,   ditto */
+	//textFont = new QFont("Times", 10, QFont::Bold);
 
-  glEnable(GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  
-  glEnable(GL_LINE_SMOOTH);    
-  glEnable(GL_POLYGON_SMOOTH);  
+	glShadeModel(GL_SMOOTH);
+	glClearColor (0.0, 0.0, 0.0, 0.0);	/* This Will Clear The Background Color To Black */
+	glPointSize (4.0);		/* Add point size, to make it clear */
+	glLineWidth (2.0);		/* Add line width,   ditto */
 
-  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-  glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-  glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-    
+	glEnable(GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    
-//    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_TEXTURE_ENV_MODE_REPLACE);
-  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-  glPixelStorei(GL_RGBA, 1);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_POLYGON_SMOOTH);
+
+	glEnable(GL_MULTISAMPLE);
+    GLint bufs;
+    GLint samples;
+    glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
+    glGetIntegerv(GL_SAMPLES, &samples);
+    printf("Using %d buffers and %d samples", bufs, samples);
+
+
+
+	//    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_TEXTURE_ENV_MODE_REPLACE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glPixelStorei(GL_RGBA, 1);
 
 
     print_debug(DEBUG_RENDERER, "in init()");

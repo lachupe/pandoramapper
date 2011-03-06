@@ -272,17 +272,19 @@ int main(int argc, char *argv[])
         conf->setWindowRect( x, y, width, height);
     }
 
-    renderer_window = new CMainWindow( 0 );
 
-    QGLFormat f;
+    QGLFormat f = QGLFormat::defaultFormat();
     f.setDoubleBuffer( true );
     f.setDirectRendering( true );
     f.setRgba( true );
     f.setDepth( true );
-    f.setSampleBuffers( true );
+    if (conf->getMultisampling())
+    	f.setSampleBuffers( true );
+    //f.setSamples(4);
 
     QGLFormat::setDefaultFormat( f );
 
+    renderer_window = new CMainWindow( 0 );
 
     renderer_window->show();
 

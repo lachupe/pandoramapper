@@ -22,17 +22,12 @@
 #define CONFIGURATOR_H
 /* configurator */
 
-#include <vector>
 #include <QXmlDefaultHandler>
 #include <QGLWidget>
 #include <QTime>
 
+#include <vector>
 #include "CRoom.h"
-
-#define ACMD(name)  void Cconfigurator::name(char *line)
-#define DEF_ACMD(name) void name(char *line)
-
-#define NUM_CONFIG_COMMANDS     23
 
 using namespace std;
 
@@ -93,6 +88,7 @@ class Cconfigurator : public QObject {
     bool displayRegionsRenderer;
     bool showRegionsInfo;
     bool showNotesRenderer;
+    bool multisampling;
 
     int startupMode; /* 0 for select, 1 for move */
     QByteArray noteColor;
@@ -129,6 +125,9 @@ class Cconfigurator : public QObject {
     bool groupManagerShowSelf;
     QRect groupManagerRect;
     QColor groupManagerColor;
+    bool 	groupManagerNotifyArmour;
+    bool 	groupManagerNotifySanc;
+
 
 public:
 
@@ -138,7 +137,7 @@ public:
 
 
     /* spells */
-    vector<TSpell>  spells;
+    std::vector<TSpell>  spells;
     QByteArray      spells_pattern;
     void addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon);
     void addSpell(TSpell s);
@@ -155,9 +154,11 @@ public:
     QByteArray getGroupManagerCharName() { return groupManagerCharName; }
     bool getGroupManagerShowManager() { return groupManagerShowManager; }
     bool getGroupManagerShowSelf() { return groupManagerShowSelf; }
-    bool getShowGroupManager() { return groupManagerShowManager; }
     QRect getGroupManagerRect() { return groupManagerRect; }
     QColor getGroupManagerColor() { return groupManagerColor; }
+    bool getGroupManagerNotifySanc() { return groupManagerNotifySanc; }
+    bool getGroupManagerNotifyArmour() { return groupManagerNotifyArmour; }
+
 
     void setGroupManagerState(int val) { groupManagerState = val; setConfigModified(true); }
     void setGroupManagerLocalPort(int val) { groupManagerLocalPort = val; setConfigModified(true); }
@@ -168,6 +169,8 @@ public:
     void setGroupManagerShowSelf(bool b) { groupManagerShowSelf = b; setConfigModified(true); }
     void setGroupManagerRect(QRect r) { groupManagerRect = r; setConfigModified(true); }
     void setGroupManagerColor(QColor c) { groupManagerColor = c; setConfigModified(true); }
+    void setGroupManagerNotifySanc(bool b) { groupManagerNotifySanc = b; setConfigModified(true); }
+    void setGroupManagerNotifyArmour(bool b) { groupManagerNotifyArmour = b; setConfigModified(true); }
 
     /* texture and sectors stuff */
     vector<struct roomSectorsData> sectors;
@@ -225,6 +228,8 @@ public:
     void setRegionsAutoReplace(bool b);
     void setDisplayRegionsRenderer(bool b);
     void setShowRegionsInfo(bool b);
+    void setMultisampling(bool b) { multisampling = b; setConfigModified(true); }
+
 
     void setStartupMode(int i);
     int getStartupMode();
@@ -255,6 +260,7 @@ public:
     bool getRegionsAutoReplace();
     bool getDisplayRegionsRenderer();
     bool getShowRegionsInfo();
+    bool getMultisampling() { return multisampling; }
 
     bool getShowNotesRenderer() { return showNotesRenderer; }
 

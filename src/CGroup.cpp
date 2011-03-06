@@ -69,7 +69,7 @@ CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
     raise();
 
 
-	CGroupChar *ch = new CGroupChar(tree);
+	CGroupChar *ch = new CGroupChar(this, tree);
 
 	chars.clear();
 	chars.append(ch);
@@ -94,7 +94,7 @@ CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
 	network = new CGroupCommunicator(CGroupCommunicator::Off, this);
 	network->changeType(conf->getGroupManagerState());
 
-    if (conf->getShowGroupManager() == false)
+    if (conf->getGroupManagerShowManager() == false)
     	hide();
 
 	if (conf->getGroupManagerShowSelf() == false)
@@ -181,7 +181,7 @@ QByteArray CGroup::getNameFromBlob(QDomNode blob)
 {
 	CGroupChar *newChar;
 
-	newChar = new CGroupChar(tree);
+	newChar = new CGroupChar(this, tree);
 	newChar->updateFromXML(blob);
 
 	QByteArray name = newChar->getName();
@@ -195,7 +195,7 @@ bool CGroup::addChar(QDomNode node)
 {
 	CGroupChar *newChar;
 
-	newChar = new CGroupChar(tree);
+	newChar = new CGroupChar(this, tree);
 	newChar->updateFromXML(node);
 	if ( isNamePresent(newChar->getName()) == true || newChar->getName() == "") {
 		print_debug(DEBUG_GROUP, "Adding new char FAILED. the name %s already existed.",

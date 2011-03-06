@@ -18,13 +18,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "CGroup.h"
 #include "CGroupChar.h"
 #include "utils.h"
 #include "CRoomManager.h"
 #include "CConfigurator.h"
 
-CGroupChar::CGroupChar(QTreeWidget* t) :
-	charTable(t)
+CGroupChar::CGroupChar(CGroup *_parent, QTreeWidget* t) :
+	parent(_parent), charTable(t)
 {
 	print_debug(DEBUG_GROUP, "GroupChar Constructor");
 
@@ -123,10 +124,12 @@ void CGroupChar::updateSpells()
     for (unsigned int p = 0; p < conf->spells.size(); p++) {
     	if (conf->spells[p].name == "armour") {
 			bool arm_new = conf->spells[p].up || conf->spells[p].silently_up;
-			if (arm & !arm_new)
-				printf("ARMOUR SPELL WENT DOWN\r\n");
-			if (!arm && arm_new)
-				printf("ARMOUR UP!\r\n");
+			if (arm & !arm_new && conf->getGroupManagerNotifyArmour() ) {
+				parent->sendGTell("My ARMOUR is DOWN!");
+			}
+			if (!arm && arm_new && conf->getGroupManagerNotifyArmour()) {
+				parent->sendGTell("Armour spell restored!");
+			}
 			arm = arm_new;
 			continue;
     	}
@@ -150,10 +153,10 @@ void CGroupChar::updateSpells()
     	}
     	if (conf->spells[p].name == "sanctuary") {
 			bool sanc_new = conf->spells[p].up || conf->spells[p].silently_up;
-			if (sanc & !sanc_new)
-				printf("SANC SPELL WENT DOWN\r\n");
-			if (!sanc && sanc_new)
-				printf("SANC UP!\r\n");
+			if (sanc & !sanc_new && conf->getGroupManagerNotifySanc())
+				parent->sendGTell("My SANC is DOWN!");
+			if (!sanc && sanc_new && conf->getGroupManagerNotifySanc())
+				parent->sendGTell("Sanc spell is up!");
 			sanc = sanc_new;
 			tsanc = conf->spells[p].timer;
 			sanc_elapsed = 0;

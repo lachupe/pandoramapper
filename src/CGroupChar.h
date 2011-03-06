@@ -30,8 +30,11 @@
 #include <QTreeWidgetItem>
 #include <QTime>
 
+
 class CGroupChar
 {
+	CGroup *parent;
+
 	unsigned int pos;
 	QByteArray name;
 	QByteArray textHP;
@@ -77,7 +80,7 @@ class CGroupChar
 
 public:
 	enum Char_States { NORMAL, BASHED, INCAPACITATED, DEAD };
-	CGroupChar(QTreeWidget*);
+	CGroupChar(CGroup *parent, QTreeWidget*);
 	virtual ~CGroupChar();
 
 	QByteArray getName() { return name; }

@@ -26,6 +26,7 @@
 #include <QXmlDefaultHandler>
 #include <QGLWidget>
 #include <QMutex>
+#include <QSettings>
 
 #include "defines.h"
 #include "CRoom.h"
@@ -52,7 +53,6 @@ Cconfigurator::Cconfigurator()
     remoteHost = "";
     remotePort = 0;
     databaseModified = false;
-    setConfigModified(false);
 
     userWindowRect.setRect(0, 0, 0, 0);  // means autodetect
     angleX = 0;
@@ -76,6 +76,8 @@ Cconfigurator::Cconfigurator()
 
     setNameQuote(10);
     setDescQuote(10);
+
+    multisampling = true;
 
     setRegionsAutoReplace( false );
     setRegionsAutoSet( false );
@@ -111,6 +113,8 @@ Cconfigurator::Cconfigurator()
     groupManagerRect.setRect(0, 0, 0, 0);  // means autodetect
     groupManagerColor = QColor("#F28003");
     groupManagerShowSelf = false;
+    groupManagerNotifyArmour = true;
+    groupManagerNotifySanc = true;
 
     setStartupMode(0);
     setNoteColor("#F28003");
@@ -122,6 +126,7 @@ Cconfigurator::Cconfigurator()
 	moveForcePatterns.append("#<Your feet slip, making you fall to the");
 	moveForcePatterns.append("#<Suddenly an explosion of ancient rhymes");
 
+	moveCancelPatterns.append("#=Your cannot ride there.");
 	moveCancelPatterns.append("#=Your boat cannot enter this place.");
 	moveCancelPatterns.append("#>steps in front of you.");
 	moveCancelPatterns.append("#>bars your way.");
@@ -154,6 +159,7 @@ Cconfigurator::Cconfigurator()
 	moveCancelPatterns.append("#>is too difficult.");
 
 
+    setConfigModified(false);
 }
 
 
@@ -544,6 +550,9 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 
   configPath = path;
   configFile = filename;
+
+
+  // try loading QSettings
   return 1;
 }
 
@@ -552,6 +561,22 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
   FILE *f;
   unsigned int i;
   QRect window;
+
+  // try QSettings
+  QSettings conf(path + "configuration.ini", QSettings::IniFormat);
+
+  conf.beginGroup("General");
+  conf.setValue("localport", getLocalPort());
+  conf.endGroup();
+
+  conf.beginGroup("Movement tracking");
+  conf.beginWriteArray("Cancel Patterns");
+  for (int i = 0; i < moveCancelPatterns.size(); ++i) {
+	  conf.setArrayIndex(i);
+	  conf.setValue("pattern", moveCancelPatterns.at(i));
+  }
+  conf.endArray();
+  conf.endGroup();
 
   configFile = filename;
   configPath = path;
@@ -609,20 +634,20 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
   grpManager += "Off";
 
 
-  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" charColor=\"%s\" localPort=\"%i\" remotePort=\"%i\" showSelf=\"%s\">\r\n",
+  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" charColor=\"%s\" localPort=\"%i\" remotePort=\"%i\" showSelf=\"%s\" notifyArm=\"%s\" notifySanc=\"%s\">\r\n",
                   (const char *) grpManager.toAscii(), (const char *) getGroupManagerHost(),
                   (const char *) getGroupManagerCharName(),
                   (const char *) getGroupManagerColor().name().toAscii(),
                   getGroupManagerLocalPort(), getGroupManagerRemotePort(),
-                  ON_OFF( getGroupManagerShowSelf() ) );
+                  ON_OFF( getGroupManagerShowSelf() ), ON_OFF(getGroupManagerNotifyArmour()), ON_OFF(getGroupManagerNotifySanc()) );
 
   window = renderer_window->getGroupManagerRect();
   fprintf(f, "  <groupManagerGUI show=\"%s\"  x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n",
-		  ON_OFF( getShowGroupManager() ), window.x(), window.y(), window.height(), window.width() );
+		  ON_OFF( getGroupManagerShowManager() ), window.x(), window.y(), window.height(), window.width() );
 
   window = renderer_window->geometry();
-  fprintf(f, "  <window x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n",
-            window.x(), window.y(), window.height(), window.width() );
+  fprintf(f, "  <window x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\" multisampling=\"%s\">\r\n",
+            window.x(), window.y(), window.height(), window.width(), ON_OFF(getMultisampling()) );
 
 
   angleX = renderer_window->renderer->angleX;
@@ -788,14 +813,6 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         return TRUE;
     } else if (qName == "groupManager") {
     	s = attributes.value("state");
-    	/* TEMP
-    	if (s == "Server") {
-    		conf->setGroupManagerState(CGroupCommunicator::Server);
-    	} else if (s == "Client") {
-    		conf->setGroupManagerState(CGroupCommunicator::Client);
-    	} else
-    		conf->setGroupManagerState(CGroupCommunicator::Off);
-		*/
 		conf->setGroupManagerState(CGroupCommunicator::Off);
 
 
@@ -821,6 +838,18 @@ bool ConfigParser::startElement( const QString& , const QString& ,
             conf->setGroupManagerShowSelf(true);
         else
             conf->setGroupManagerShowSelf(false);
+
+        s = attributes.value("notifyArm");
+        s = s.toLower();
+        conf->setGroupManagerNotifySanc(true);
+        if (s == "off")
+            conf->setGroupManagerNotifySanc(false);
+
+        s = attributes.value("notifySanc");
+        s = s.toLower();
+        conf->setGroupManagerNotifySanc(true);
+        if (s == "off")
+            conf->setGroupManagerNotifySanc(false);
 
 
     } else if (qName == "groupManagerGUI") {
@@ -1044,6 +1073,13 @@ bool ConfigParser::startElement( const QString& , const QString& ,
         conf->setWindowRect(x, y, width, height);
         print_debug(DEBUG_CONFIG, "Loaded window settins: x %i, y %i, height %i, width %i",
                         x, y, height, width);
+
+        s = attributes.value("multisampling");
+        s = s.toLower();
+        conf->setMultisampling(false);
+        if (s == "on")
+            conf->setMultisampling(true);
+
 
         return TRUE;
     } else if (qName == "rendererangles") {

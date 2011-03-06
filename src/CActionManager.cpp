@@ -330,7 +330,7 @@ void CActionManager::groupClearSpells()
 
 void CActionManager::groupHide()
 {
-	setShowGroupManager( !conf->getShowGroupManager() );
+	setShowGroupManager( !conf->getGroupManagerShowManager() );
 }
 
 void CActionManager::groupSettings()

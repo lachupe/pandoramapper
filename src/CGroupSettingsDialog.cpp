@@ -47,6 +47,8 @@ void CGroupSettingsDialog::run()
 	lineEdit_localPort->setText( QString("%1").arg( conf->getGroupManagerLocalPort() ) );
 	lineEdit_remotePort->setText( QString("%1").arg( conf->getGroupManagerRemotePort() ) );
 	checkBox_showSelf->setChecked( conf->getGroupManagerShowSelf() );
+	checkBox_notifyArm->setChecked( conf->getGroupManagerNotifyArmour() );
+	checkBox_notifySanc->setChecked( conf->getGroupManagerNotifySanc() );
 }
 
 void CGroupSettingsDialog::accept()
@@ -92,6 +94,17 @@ void CGroupSettingsDialog::accept()
 		else
 			group->hideSelf();
 	}
+
+	bool notifyArm = checkBox_notifyArm->isChecked();
+	if (notifyArm != conf->getGroupManagerNotifyArmour() ) {
+		conf->setGroupManagerNotifyArmour(notifyArm);
+	}
+
+	bool notifySanc = checkBox_notifyArm->isChecked();
+	if (notifySanc != conf->getGroupManagerNotifySanc() ) {
+		conf->setGroupManagerNotifySanc(notifySanc);
+	}
+
 
     done(Accepted);
 }
