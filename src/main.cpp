@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     int     override_local_port = 0;
     char    override_remote_host[MAX_STR_LEN] = "";
     int     override_remote_port = 0;
-    char    configfile[MAX_STR_LEN] = "configs/mume.xml";
+    char    configfile[MAX_STR_LEN] = "configs/mume.ini";
     int     default_local_port = 3000;
     int     default_remote_port = 4242;
     int     mud_emulation = 0;

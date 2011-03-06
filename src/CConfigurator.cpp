@@ -47,126 +47,23 @@ Cconfigurator::Cconfigurator()
 
     print_debug(DEBUG_CONFIG, "in configurator constructor");
 
-    /* data */
-    baseFile = "";
-    localPort = 0;
-    remoteHost = "";
-    remotePort = 0;
-    databaseModified = false;
-
-    userWindowRect.setRect(0, 0, 0, 0);  // means autodetect
-    angleX = 0;
-    angleY = 0;
-    angleZ = 0;
-    userX = 0;
-    userY = 0;
-    userZ = 0;
-
-    visibleLayers = 5;
-
-    setAutorefresh(true);          /* default values */
-    setAutomerge(true);
-    setAngrylinker(true);
-    setExitsCheck(false);
-    setTerrainCheck(true);
-    setAlwaysOnTop(true);
-
-    setDetailsVisibility(500);
-    setTextureVisibility(300);
-
-    setNameQuote(10);
-    setDescQuote(10);
-
-    multisampling = true;
-
     setRegionsAutoReplace( false );
     setRegionsAutoSet( false );
 
-    setShowRegionsInfo( true );
-    setDisplayRegionsRenderer( true );
-    setShowNotesRenderer( true );
 
-    setSelectOAnyLayer( true );
+    /* data */
+    databaseModified = false;
 
-    /* colours */
-
-    /* patterns */
-    setExitsPattern("Exits:");
-
-    struct roomSectorsData first;
-
-    first.pattern = 0;
-    first.desc = "NONE";
-    first.texture = 1;
-    first.gllist = 1;
-    sectors.push_back(first);
-
-    spells_pattern = "Affected by:";
-
-    // group Manager
-    groupManagerState = CGroupCommunicator::Off;
-    groupManagerLocalPort = 4243;
-    groupManagerRemotePort = 4243;
-    groupManagerHost = "localhost";
-    groupManagerCharName = "Aza";
-    groupManagerShowManager = false;
-    groupManagerRect.setRect(0, 0, 0, 0);  // means autodetect
-    groupManagerColor = QColor("#F28003");
-    groupManagerShowSelf = false;
-    groupManagerNotifyArmour = true;
-    groupManagerNotifySanc = true;
-
-    setStartupMode(0);
-    setNoteColor("#F28003");
-
-    moveForcePatterns.append("#=You flee head over heels.");
-	moveForcePatterns.append("#=You are borne along by a strong current.");
-	moveForcePatterns.append("#?leads you out");
-	//moveForcePatterns.append("#=You are dead! Sorry...");
-	moveForcePatterns.append("#<Your feet slip, making you fall to the");
-	moveForcePatterns.append("#<Suddenly an explosion of ancient rhymes");
-
-	moveCancelPatterns.append("#=Your cannot ride there.");
-	moveCancelPatterns.append("#=Your boat cannot enter this place.");
-	moveCancelPatterns.append("#>steps in front of you.");
-	moveCancelPatterns.append("#>bars your way.");
-	moveCancelPatterns.append("#=Maybe you should get on your feet first?");
-	moveCancelPatterns.append("#<Alas, you cannot go that way...");
-	moveCancelPatterns.append("#<You need to swim");
-	moveCancelPatterns.append("#=You failed swimming there.");
-	moveCancelPatterns.append("#<You failed to climb there");
-	moveCancelPatterns.append("#=No way! You are fighting for your life!");
-	moveCancelPatterns.append("#<Nah...");
-	moveCancelPatterns.append("#<You are too exhausted.");
-	moveCancelPatterns.append("#>is too exhausted.");
-	moveCancelPatterns.append("#=PANIC! You couldn't escape!");
-	moveCancelPatterns.append("#=PANIC! You can't quit the fight!");
-	moveCancelPatterns.append("#<ZBLAM");
-	moveCancelPatterns.append("#<Oops!");
-	moveCancelPatterns.append("#>seems to be closed.");
-	moveCancelPatterns.append("#>ou need to climb to go there.");
-	moveCancelPatterns.append("#=In your dreams, or what?");
-	moveCancelPatterns.append("#<You'd better be swimming");
-	moveCancelPatterns.append("#=You unsuccessfully try to break through the ice.");
-	moveCancelPatterns.append("#=Your mount refuses to follow your orders!");
-	moveCancelPatterns.append("#<You are too exhausted to ride");
-	moveCancelPatterns.append("#=You can't go into deep water!");
-	moveCancelPatterns.append("#=You don't control your mount!");
-	moveCancelPatterns.append("#=Your mount is too sensible to attempt such a feat.");
-	moveCancelPatterns.append("#?* prevents you from going *.");
-	moveCancelPatterns.append("#=Scouting in that direction is impossible.");
-	moveCancelPatterns.append("#<You stop moving towards");
-	moveCancelPatterns.append("#>is too difficult.");
-
-
+    resetCurrentConfig();
     setConfigModified(false);
 }
-
 
 void Cconfigurator::resetCurrentConfig()
 {
     sectors.clear();
     spells.clear();
+    moveCancelPatterns.clear();
+    moveForcePatterns.clear();
 
     struct roomSectorsData first;
 
@@ -175,6 +72,278 @@ void Cconfigurator::resetCurrentConfig()
     first.texture = 1;
     first.gllist = 1;
     sectors.push_back(first);
+}
+
+
+int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
+{
+  unsigned int i;
+
+  // try QSettings
+  QSettings conf(path + filename, QSettings::IniFormat);
+
+  conf.beginGroup("General");
+  conf.setValue("mapFile", getBaseFile());
+  conf.setValue("windowRect", renderer_window->geometry() );
+  conf.setValue("alwaysOnTop", getAlwaysOnTop() );
+  conf.setValue("startupMode", getStartupMode() );
+  conf.endGroup();
+
+  conf.beginGroup("Networking");
+  conf.setValue("localPort", getLocalPort() );
+  conf.setValue("remoteHost", getRemoteHost() );
+  conf.setValue("remotePort", getRemotePort() );
+  conf.endGroup();
+
+  conf.beginGroup("OpenGL");
+  conf.setValue("texturesVisibility", getTextureVisibility() );
+  conf.setValue("detailsVisibility", getDetailsVisibility() );
+  conf.setValue("visibleLayers", getVisibleLayers() );
+  conf.setValue("showNotes", getShowNotesRenderer() );
+  conf.setValue("showRegions", getShowRegionsInfo() );
+  conf.setValue("displayRegions", getDisplayRegionsRenderer() );
+  conf.setValue("multisampling", getMultisampling() );
+  conf.setValue("selectOnAnyLayer", getSelectOAnyLayer());
+  conf.setValue("angleX", angleX );
+  conf.setValue("angleY", angleY );
+  conf.setValue("angleZ", angleZ );
+  conf.setValue("userX", userX );
+  conf.setValue("userY", userY );
+  conf.setValue("userZ", userZ );
+  conf.beginWriteArray("Textures");
+  conf.setValue("noteColor", getNoteColor() );
+  for (unsigned int i = 0; i < sectors.size(); ++i) {
+	  conf.setArrayIndex(i);
+	  conf.setValue("handle", sectors[i].desc);
+	  conf.setValue("file", sectors[i].filename);
+	  conf.setValue("pattern", sectors[i].pattern);
+
+  }
+  conf.endArray();
+  conf.endGroup();
+
+  conf.beginGroup("Engine");
+  conf.setValue("checkExits", getExitsCheck() );
+  conf.setValue("checkTerrain", getTerrainCheck() );
+  conf.setValue("briefmode", getBriefMode() );
+  conf.setValue("autoMerge", getAutomerge() );
+  conf.setValue("angryLinker", getAngrylinker() );
+  conf.setValue("dualLinker", getDuallinker() );
+  conf.setValue("autoRefresh", getAutorefresh() );
+  conf.setValue("roomNameQuote", getNameQuote() );
+  conf.setValue("descQuote", getDescQuote() );
+  conf.endGroup();
+
+  conf.beginGroup("Patterns");
+  conf.setValue("exitsPattern", getExitsPattern());
+  conf.setValue("spellsEffectPattern", spells_pattern);
+  conf.setValue( "scorePattern", getScorePattern() );
+  conf.setValue( "scorePatternShort", getShortScorePattern() );
+  conf.endGroup();
+
+
+
+  conf.beginGroup("GroupManager");
+  conf.setValue("remoteHost", getGroupManagerHost() );
+  conf.setValue("remotePort", getGroupManagerRemotePort() );
+  conf.setValue("localServerPort", getGroupManagerLocalPort() );
+  conf.setValue("charName", getGroupManagerCharName() );
+  conf.setValue("charColor", getGroupManagerColor().name() );
+  conf.setValue("showSelf", getGroupManagerShowSelf() );
+  conf.setValue("notifyArm", getGroupManagerNotifyArmour() );
+  conf.setValue("notifySanc", getGroupManagerNotifySanc() );
+  conf.setValue("showGroupManager", getGroupManagerShowManager() );
+
+  conf.setValue("windowRect", renderer_window->getGroupManagerRect() );
+
+  conf.endGroup();
+
+
+  conf.beginWriteArray("Spells");
+  for (unsigned int i = 0; i < spells.size(); ++i) {
+	  conf.setArrayIndex(i);
+	  conf.setValue("addon", spells[i].addon);
+	  conf.setValue("name", spells[i].name);
+	  conf.setValue("upMessage", spells[i].up_mes);
+	  conf.setValue("refreshMessage", spells[i].refresh_mes);
+	  conf.setValue("downMessage", spells[i].down_mes);
+  }
+  conf.endArray();
+
+
+
+  conf.beginGroup("Movement tracking");
+  conf.beginWriteArray("Cancel Patterns");
+  for (int i = 0; i < moveCancelPatterns.size(); ++i) {
+	  conf.setArrayIndex(i);
+	  conf.setValue("pattern", moveCancelPatterns.at(i));
+  }
+  conf.endArray();
+  conf.beginWriteArray("Force Patterns");
+  for (int i = 0; i < moveForcePatterns.size(); ++i) {
+	  conf.setArrayIndex(i);
+	  conf.setValue("pattern", moveForcePatterns.at(i));
+  }
+  conf.endArray();
+  conf.endGroup();
+
+
+  conf.beginWriteArray("Debug Settings");
+  i = 0;
+  while (debug_data[i].name) {
+	  conf.setArrayIndex(i);
+	  conf.setValue("name", debug_data[i].name);
+	  conf.setValue("state", debug_data[i].state);
+
+      i++;
+  }
+  conf.endArray();
+
+  configFile = filename;
+  configPath = path;
+
+  setConfigModified(false);
+  return true;
+}
+
+
+
+int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
+{
+	int size;
+	QSettings conf(path + filename, QSettings::IniFormat);
+
+	conf.beginGroup("General");
+	setBaseFile( conf.value("mapFile", "database/mume.xml").toByteArray() );
+	setWindowRect( conf.value("windowRect").toRect() );
+	setAlwaysOnTop( conf.value("alwaysOnTop", true ).toBool() );
+	setStartupMode( conf.value("startupMode", 1).toInt() );
+	conf.endGroup();
+
+	conf.beginGroup("Networking");
+	setLocalPort( conf.value("localPort", 4242).toInt() );
+	setRemoteHost( conf.value("remoteHost", "193.134.218.111").toByteArray() );
+	setRemotePort( conf.value("remotePort", 443).toInt() );
+	conf.endGroup();
+
+	conf.beginGroup("OpenGL");
+	setTextureVisibility( conf.value("texturesVisibility", 500).toInt() );
+	setDetailsVisibility( conf.value("detailsVisibility", 300).toInt() );
+	setVisibleLayers( conf.value("visibleLayers", 5).toInt() );
+	setShowNotesRenderer( conf.value("showNotes", true).toBool() );
+	setShowRegionsInfo( conf.value("showRegions", false). toBool() );
+	setDisplayRegionsRenderer( conf.value("displayRegions", false).toBool() );
+	setMultisampling( conf.value("multisampling", true).toBool() );
+	setSelectOAnyLayer( conf.value("selectOnAnyLayer", true).toBool() );
+
+    setRendererAngles(conf.value("angleX", 0).toFloat(), conf.value("angleY", 0).toFloat(), conf.value("angleZ", 0).toFloat());
+    setRendererPosition(conf.value("userX", 0).toFloat(), conf.value("userY", 0).toFloat(), conf.value("userZ", 0).toFloat());
+    setNoteColor( conf.value("noteColor", "#F28003").toByteArray() );
+
+    size = conf.beginReadArray("Textures");
+	for (int i = 0; i < size; ++i) {
+	  conf.setArrayIndex(i);
+      addTexture(conf.value("handle").toByteArray(),  conf.value("file").toByteArray(),  (char) conf.value("pattern").toInt());
+	}
+	conf.endArray();
+	conf.endGroup();
+
+	conf.beginGroup("Engine");
+	setExitsCheck( conf.value("checkExits", false).toBool() );
+	setTerrainCheck( conf.value("checkTerrain", true).toBool() );
+	setBriefMode( conf.value("briefmode", true ).toBool() );
+	setAutomerge( conf.value("autoMerge", true ).toBool() );
+	setAngrylinker( conf.value("angryLinker", true ).toBool() );
+	setDuallinker( conf.value("dualLinker", false ).toBool() );
+	setAutorefresh( conf.value("autoRefresh", true ).toBool() );
+	setNameQuote( conf.value("roomNameQuote", 10 ).toInt() );
+	setDescQuote( conf.value("descQuote", 10 ).toInt() );
+
+	setRegionsAutoReplace( conf.value("regionsAutoReplace", false ).toBool() );
+	setRegionsAutoSet( conf.value("regionsAutoSet", false ).toBool() );
+	conf.endGroup();
+
+    conf.beginGroup("Patterns");
+    setExitsPattern( conf.value("exitsPattern", "Exits: ").toByteArray() );
+    spells_pattern = conf.value("spellsEffectPattern", "Affected by:").toByteArray();
+    setScorePattern( conf.value("scorePattern", "[0-9]*/* hits, */* mana, and */* moves.").toByteArray()  );
+    setShortScorePattern( conf.value("scorePatternShort", "[0-9]*/* hits and */* moves.").toByteArray() );
+	conf.endGroup();
+
+
+	conf.beginGroup("GroupManager");
+	setGroupManagerHost( conf.value("remoteHost", "localhost").toByteArray() );
+	setGroupManagerRemotePort( conf.value("remotePort", 4243 ).toInt() );
+	setGroupManagerLocalPort( conf.value("localServerPort", 4243 ).toInt() );
+	setGroupManagerCharName( conf.value("charName", "Charname" ).toByteArray() );
+	setGroupManagerColor( QColor( conf.value("charColor", "#F28003").toString() ) );
+	setGroupManagerShowSelf( conf.value("showSelf", false ).toBool() );
+	setGroupManagerNotifyArmour( conf.value("notifyArm", true ).toBool() );
+	setGroupManagerNotifySanc( conf.value("notifySanc", true ).toBool() );
+	setGroupManagerShowManager( conf.value("showGroupManager", true ).toBool() );
+	setGroupManagerRect( conf.value("windowRect").toRect() );
+	conf.endGroup();
+
+
+	size = conf.beginReadArray("Spells");
+	for (int i = 0; i < size; ++i) {
+	  conf.setArrayIndex(i);
+	  TSpell spell;
+
+      spell.up = false;
+      spell.silently_up = false;
+	  spell.addon = conf.value("addon", 0).toInt();
+	  spell.name = conf.value("name").toByteArray();
+	  spell.up_mes = conf.value("upMessage").toByteArray();
+	  spell.refresh_mes = conf.value("refreshMessage").toByteArray();
+	  spell.down_mes = conf.value("downMessage").toByteArray();
+
+      addSpell(spell);
+	}
+	conf.endArray();
+
+
+	conf.beginGroup("Movement tracking");
+	size = conf.beginReadArray("Cancel Patterns");
+	for (int i = 0; i < size; ++i) {
+	  conf.setArrayIndex(i);
+	  moveCancelPatterns.append( conf.value("pattern").toByteArray() );
+	}
+	conf.endArray();
+	size = conf.beginReadArray("Force Patterns");
+	for (int i = 0; i < size; ++i) {
+	  conf.setArrayIndex(i);
+	  moveForcePatterns.append( conf.value("pattern").toByteArray() );
+	}
+	conf.endArray();
+	conf.endGroup();
+
+	size = conf.beginReadArray("Debug Settings");
+	for (int i = 0; i < size; ++i) {
+	  conf.setArrayIndex(i);
+
+	  QString s = conf.value("name").toString();
+
+	  unsigned int z = 0;
+      while (debug_data[z].name != NULL) {
+          if (debug_data[z].name == s)
+              break;
+          z++;
+      }
+      if (debug_data[z].name == NULL) {
+          print_debug(DEBUG_CONFIG, "Warning, %s is a wrong debug descriptor/name!", qPrintable(s));
+          continue;
+      }
+
+      debug_data[i].state = conf.value("state", 0 ).toInt();
+	}
+	conf.endArray();
+
+	configFile = filename;
+	configPath = path;
+
+	setConfigModified(false);
+	return true;
 }
 
 /* ---------------- PATTERNS and REGEXPS GENERATION --------------- */
@@ -469,7 +638,6 @@ QByteArray Cconfigurator::getNoteColor()
     return noteColor;
 }
 
-
 int Cconfigurator::loadTexture(struct roomSectorsData *p)
 {
     QImage tex1, buf1;
@@ -520,608 +688,5 @@ int Cconfigurator::loadTexture(struct roomSectorsData *p)
         glEndList();
     }
     return 1;
-}
-
-
-int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
-{
-  QFile xmlFile(path+filename);
-  QXmlInputSource source( &xmlFile );
-
-  if (xmlFile.exists() == false) {
-      print_debug(DEBUG_CONFIG, "ERROR: The config file %s does NOT exist!", (const char*) (path+filename) );
-      return 0;
-  }
-
-  QXmlSimpleReader reader;
-
-  ConfigParser * handler = new ConfigParser();
-  reader.setContentHandler( handler );
-
-  resetCurrentConfig();
-
-
-  print_debug(DEBUG_CONFIG, "Reading the config file %s", (const char *) (path+filename));
-  fflush(stdout);
-  reader.parse( source );
-  print_debug(DEBUG_CONFIG, "done.");
-  setConfigModified(false);
-
-
-  configPath = path;
-  configFile = filename;
-
-
-  // try loading QSettings
-  return 1;
-}
-
-int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
-{
-  FILE *f;
-  unsigned int i;
-  QRect window;
-
-  // try QSettings
-  QSettings conf(path + "configuration.ini", QSettings::IniFormat);
-
-  conf.beginGroup("General");
-  conf.setValue("localport", getLocalPort());
-  conf.endGroup();
-
-  conf.beginGroup("Movement tracking");
-  conf.beginWriteArray("Cancel Patterns");
-  for (int i = 0; i < moveCancelPatterns.size(); ++i) {
-	  conf.setArrayIndex(i);
-	  conf.setValue("pattern", moveCancelPatterns.at(i));
-  }
-  conf.endArray();
-  conf.endGroup();
-
-  configFile = filename;
-  configPath = path;
-
-  f = fopen((const char *) path + filename, "w");
-  if (f == NULL) {
-    print_debug(DEBUG_XML, "XML: Error - can not open the file: %s.", (const char *) filename);
-    return -1;
-  }
-
-  fprintf(f, "<config>\r\n");
-  fprintf(f, "  <localport port=\"%i\">\r\n", getLocalPort());
-  fprintf(f, "  <remotehost hostname=\"%s\" port=\"%i\">\r\n",
-                  (const char *) getRemoteHost(),
-                  getRemotePort() );
-  fprintf(f, "  <basefile filename=\"%s\">\r\n",
-                  (const char *) getBaseFile() );
-
-  fprintf(f, "  <GLvisibility textures=\"%i\" details=\"%i\" shownotes=\"%s\" layers=\"%i\">\r\n",
-                  getTextureVisibility(),  getDetailsVisibility(), ON_OFF(getShowNotesRenderer()),
-                  getVisibleLayers() );
-
-  fprintf(f, "  <analyzers exits=\"%s\"  terrain=\"%s\">\r\n",
-                  ON_OFF(getExitsCheck() ), ON_OFF(getTerrainCheck() ) );
-
-  fprintf(f, "  <engineflags briefmode=\"%s\" automerge=\"%s\"  angrylinker=\"%s\" duallinker=\"%s\">\r\n",
-                  ON_OFF(getBriefMode()),
-                  ON_OFF(getAutomerge() ), ON_OFF( getAngrylinker()),
-                  ON_OFF(getDuallinker() ) );
-
-
-  fprintf(f, "  <regionsflags displayinrenderer=\"%s\" showinfo=\"%s\">\r\n",
-                  ON_OFF(getDisplayRegionsRenderer()),
-                  ON_OFF(getShowRegionsInfo()) );
-
-
-  fprintf(f, "  <guisettings always_on_top=\"%s\">\r\n",
-                  ON_OFF(getAlwaysOnTop()) );
-
-  QString grpManager;
-  /*
-  switch (getGroupManagerState()) {
-	case CGroupCommunicator::Client :
-		grpManager += "Client";
-		break;
-	case CGroupCommunicator::Server :
-		grpManager += "Server";
-		break;
-	default:
-		grpManager += "Off";
-		break;
-  }
-  */
-  // instant connection does not work atm
-  grpManager += "Off";
-
-
-  fprintf(f, "  <groupManager state=\"%s\" host=\"%s\" charName=\"%s\" charColor=\"%s\" localPort=\"%i\" remotePort=\"%i\" showSelf=\"%s\" notifyArm=\"%s\" notifySanc=\"%s\">\r\n",
-                  (const char *) grpManager.toAscii(), (const char *) getGroupManagerHost(),
-                  (const char *) getGroupManagerCharName(),
-                  (const char *) getGroupManagerColor().name().toAscii(),
-                  getGroupManagerLocalPort(), getGroupManagerRemotePort(),
-                  ON_OFF( getGroupManagerShowSelf() ), ON_OFF(getGroupManagerNotifyArmour()), ON_OFF(getGroupManagerNotifySanc()) );
-
-  window = renderer_window->getGroupManagerRect();
-  fprintf(f, "  <groupManagerGUI show=\"%s\"  x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\">\r\n",
-		  ON_OFF( getGroupManagerShowManager() ), window.x(), window.y(), window.height(), window.width() );
-
-  window = renderer_window->geometry();
-  fprintf(f, "  <window x=\"%i\" y=\"%i\" height=\"%i\" width=\"%i\" multisampling=\"%s\">\r\n",
-            window.x(), window.y(), window.height(), window.width(), ON_OFF(getMultisampling()) );
-
-
-  angleX = renderer_window->renderer->angleX;
-  angleY = renderer_window->renderer->angleY;
-  angleZ = renderer_window->renderer->angleZ;
-  fprintf(f, "  <rendererangles anglex=\"%f\" angley=\"%f\" anglez=\"%f\">\r\n",
-                angleX, angleY, angleZ);
-
-  userX = renderer_window->renderer->userX;
-  userY = renderer_window->renderer->userY;
-  userZ = renderer_window->renderer->userZ;
-  fprintf(f, "  <rendererpositions userx=\"%f\" usery=\"%f\" userz=\"%f\">\r\n",
-        userX, userY, userZ);
-
-
-  fprintf(f, "  <refresh auto=\"%s\" roomnamequote=\"%i\" descquote=\"%i\">\r\n",
-                  ON_OFF( getAutorefresh() ), getNameQuote(), getDescQuote() );
-
-  QString ch;
-  for (i = 1; i < sectors.size(); i++) {
-      if (sectors[i].pattern == '<')
-          ch = "&lt;";
-      else if (sectors[i].pattern == '>')
-          ch = "&gt;";
-      else if (sectors[i].pattern == '&')
-          ch = "&amp;";
-      else if (sectors[i].pattern == '\'')
-          ch = "&apos;";
-      else if (sectors[i].pattern == '"')
-          ch = "&quot";
-      else
-          ch = sectors[i].pattern;
-
-      fprintf(f, "  <texture handle=\"%s\" file=\"%s\" pattern=\"%s\">\r\n",
-                  (const char *) sectors[i].desc,
-                  (const char *) sectors[i].filename, qPrintable(ch));
-
-  }
-
-  for (i = 0; i < spells.size(); i++) {
-        fprintf(f, "  <spell addon=\"%s\" name=\"%s\" up=\"%s\" refresh=\"%s\" down=\"%s\">\r\n",
-                    YES_NO(spells[i].addon),
-                    (const char *) spells[i].name,
-                    (const char *) spells[i].up_mes,
-                    (const char *) spells[i].refresh_mes,
-                    (const char *) spells[i].down_mes);
-  }
-
-
-  i = 0;
-  while (debug_data[i].name) {
-      fprintf(f, "  <debug name=\"%s\"  state=\"%s\">\r\n", debug_data[i].name, ON_OFF(debug_data[i].state));
-      i++;
-  }
-
-  fprintf(f, "  <misc startupmode=\"%d\" notecolor=\"%s\">\r\n",
-          getStartupMode(), (const char*)getNoteColor());
-
-  /* PUT ENGINE CONFIG SAVING THERE ! */
-
-  setConfigModified(false);
-  fprintf(f, "</config>\r\n");
-  fflush(f);
-  fclose(f);
-  return 1;
-}
-
-
-/* --------------- HERE COMES THE XML READER FOR CONFIG FILES -------------- */
-
-
-ConfigParser::ConfigParser()
-  : QXmlDefaultHandler()
-{
-}
-
-bool ConfigParser::startElement( const QString& , const QString& ,
-                                    const QString& qName,
-                                    const QXmlAttributes& attributes)
-{
-    if (qName == "localport") {
-        if (attributes.length() < 1) {
-            print_debug(DEBUG_CONFIG, "(localport token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("port");
-        conf->setLocalPort(s.toInt() );
-
-        return TRUE;
-    } else if (qName == "remotehost") {
-        if (attributes.length() < 2) {
-            print_debug(DEBUG_CONFIG, "(remotehost token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("hostname");
-        conf->setRemoteHost(s.toAscii() );
-
-        s = attributes.value("port");
-        conf->setRemotePort(s.toInt() );
-        return TRUE;
-    } else if (qName == "basefile") {
-        if (attributes.length() < 1) {
-            print_debug(DEBUG_CONFIG, "(basefile token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("filename");
-        conf->setBaseFile(s.toAscii() );
-
-        return TRUE;
-    } else if (qName == "GLvisibility") {
-        if (attributes.length() < 2) {
-            print_debug(DEBUG_CONFIG, "(GLvisibility token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("textures");
-        conf->setTextureVisibility(s.toInt() );
-        s = attributes.value("details");
-        conf->setDetailsVisibility(s.toInt() );
-
-        s = attributes.value("shownotes");
-        s = s.toLower();
-        if (s == "on")
-            conf->setShowNotesRenderer( true);
-        else
-            conf->setShowNotesRenderer( false);
-
-        s = attributes.value("layers");
-        conf->setVisibleLayers(s.toInt() );
-
-
-        print_debug(DEBUG_CONFIG, "OpenGL visibility ranges set to %i (texture) and %i (details).",
-                    conf->getTextureVisibility(), conf->getDetailsVisibility() );
-
-        return TRUE;
-    } else if (qName == "analyzers") {
-        if (attributes.length() < 2) {
-            print_debug(DEBUG_CONFIG, "(analyzers token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("exits");
-        s = s.toLower();
-        if (s == "on")
-            conf->setExitsCheck(true);
-        else
-            conf->setExitsCheck(false);
-
-        s = attributes.value("terrain");
-        s = s.toLower();
-        if (s == "on")
-            conf->setTerrainCheck(true);
-        else
-            conf->setTerrainCheck(false);
-
-
-        print_debug(DEBUG_CONFIG, "Analyzers: desc ON, exits %s, terrain %s.",
-                    ON_OFF(conf->getExitsCheck() ), ON_OFF(conf->getTerrainCheck()) );
-
-        return TRUE;
-    } else if (qName == "groupManager") {
-    	s = attributes.value("state");
-		conf->setGroupManagerState(CGroupCommunicator::Off);
-
-
-    	s = attributes.value("host");
-        conf->setGroupManagerHost(s.toAscii());
-
-
-    	s = attributes.value("charColor");
-        conf->setGroupManagerColor(QColor(s));
-
-    	s = attributes.value("charName");
-        conf->setGroupManagerCharName(s.toAscii());
-
-        s = attributes.value("localPort");
-        conf->setGroupManagerLocalPort(s.toInt() );
-
-        s = attributes.value("remotePort");
-        conf->setGroupManagerRemotePort(s.toInt() );
-
-        s = attributes.value("showSelf");
-        s = s.toLower();
-        if (s == "on")
-            conf->setGroupManagerShowSelf(true);
-        else
-            conf->setGroupManagerShowSelf(false);
-
-        s = attributes.value("notifyArm");
-        s = s.toLower();
-        conf->setGroupManagerNotifySanc(true);
-        if (s == "off")
-            conf->setGroupManagerNotifySanc(false);
-
-        s = attributes.value("notifySanc");
-        s = s.toLower();
-        conf->setGroupManagerNotifySanc(true);
-        if (s == "off")
-            conf->setGroupManagerNotifySanc(false);
-
-
-    } else if (qName == "groupManagerGUI") {
-
-   		// BURP
-        s = attributes.value("show");
-        s = s.toLower();
-        if (s == "on")
-            conf->setGroupManagerShowManager(true);
-        else
-            conf->setGroupManagerShowManager(false);
-
-        int x = 0;
-        int y = 0;
-        int height = 0;
-        int width = 0;
-        x = attributes.value("x").toInt();
-        y = attributes.value("y").toInt();
-        height = attributes.value("height").toInt();
-        width = attributes.value("width").toInt();
-
-        conf->setGroupManagerRect(  QRect(x, y, width, height) );
-        print_debug(DEBUG_CONFIG, "Loaded groupManager window settins: x %i, y %i, height %i, width %i",
-                        x, y, height, width);
-
-    } else if (qName == "guisettings") {
-        if (attributes.length() < 1) {
-            print_debug(DEBUG_CONFIG, "(guisettings token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("always_on_top");
-        s = s.toLower();
-        if (s == "on")
-            conf->setAlwaysOnTop(true);
-        else
-            conf->setAlwaysOnTop(false);
-
-        print_debug(DEBUG_CONFIG, "GUI settings: always_on_top %s.", ON_OFF(conf->getAlwaysOnTop()) );
-
-        return TRUE;
-    } else if (qName == "regionsflags") {
-        if (attributes.length() < 1) {
-            print_debug(DEBUG_CONFIG, "(guisettings token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("displayinrenderer");
-        s = s.toLower();
-        if (s == "on")
-            conf->setDisplayRegionsRenderer(true);
-        else
-            conf->setDisplayRegionsRenderer(false);
-
-        s = attributes.value("showinfo");
-        s = s.toLower();
-        if (s == "on")
-            conf->setShowRegionsInfo(true);
-        else
-            conf->setShowRegionsInfo(false);
-
-
-
-        print_debug(DEBUG_CONFIG, "GUI settings: always_on_top %s.", ON_OFF(conf->getAlwaysOnTop()) );
-
-        return TRUE;
-    } else if (qName == "engineflags") {
-        if (attributes.length() < 3) {
-            print_debug(DEBUG_CONFIG, "(engineflags token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("briefmode");
-        s = s.toLower();
-//        printf("The brief mode setting : %s\r\n", qPrintable(s) );
-        if (s == "on")
-            conf->setBriefMode(true);
-        else
-            conf->setBriefMode(false);
-
-        s = attributes.value("automerge");
-        s = s.toLower();
-        if (s == "on")
-            conf->setAutomerge(true);
-        else
-            conf->setAutomerge(false);
-
-        s = attributes.value("angrylinker");
-        s = s.toLower();
-        if (s == "on")
-            conf->setAngrylinker(true);
-        else
-            conf->setAngrylinker(false);
-
-        s = attributes.value("duallinker");
-        s = s.toLower();
-        if (s == "on")
-            conf->setDuallinker(true);
-        else
-            conf->setDuallinker(false);
-
-
-
-        print_debug(DEBUG_CONFIG, "Engine flags: briefmode %s, automerge %s, angrylinker %s.",
-               ON_OFF(conf->getBriefMode()), ON_OFF(conf->getAutomerge()),
-                ON_OFF(conf->getAngrylinker()), ON_OFF(conf->getDuallinker()) );
-
-        return TRUE;
-    } else if (qName == "refresh") {
-        if (attributes.length() < 3) {
-            print_debug(DEBUG_CONFIG, "(refresh token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("auto");
-        s = s.toLower();
-        if (s == "on")
-            conf->setAutorefresh(true);
-        else
-            conf->setAutorefresh(false);
-
-        s = attributes.value("roomnamequote");
-        conf->setNameQuote(s.toInt());
-        s = attributes.value("descquote");
-        conf->setDescQuote(s.toInt());
-
-        print_debug(DEBUG_CONFIG, "Autorefresh settings: automatic refresh %s, roomname quote %i, desc quote %i.",
-                ON_OFF(conf->getAutorefresh()), conf->getNameQuote(),
-                conf->getDescQuote() );
-        return TRUE;
-    } else if (qName == "texture") {
-        if (attributes.length() < 2) {
-            print_debug(DEBUG_CONFIG, "(texture token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("handle");
-        s.toUpper();
-        texture.desc = s.toAscii();
-
-        s = attributes.value("file");
-        texture.filename = s.toAscii();
-
-        s = attributes.value("pattern");
-        texture.pattern = s[0].toAscii();
-
-        conf->addTexture(texture.desc, texture.filename, texture.pattern);
-//        printf("Added texture: desc %s, file %s, pattern %c.\r\n",
-//              (const char *) texture.desc, (const char *) texture.filename, texture.pattern);
-
-
-//        flag = TEXTURE;         /* get the inner data ! */
-        return TRUE;
-    } else if (qName == "spell") {
-        if (attributes.length() < 4) {
-            print_debug(DEBUG_CONFIG, "(pattern token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        spell.up = false;
-        spell.silently_up = false;
-        s = attributes.value("addon");
-        s = s.toLower();
-        spell.addon = false;
-        if (s == "yes")
-          spell.addon = true;
-
-
-        s = attributes.value("name");
-        spell.name = s.toAscii();
-
-        s = attributes.value("up");
-        spell.up_mes = s.toAscii();
-
-        s = attributes.value("refresh");
-        spell.refresh_mes = s.toAscii();
-
-        s = attributes.value("down");
-        spell.down_mes = s.toAscii();
-
-        conf->addSpell(spell);
-        return TRUE;
-    } else if (qName == "debug") {
-        if (attributes.length() < 1) {
-            print_debug(DEBUG_CONFIG, "(texture token) Not enough attributes in XML file!");
-            exit(1);
-        }
-
-        s = attributes.value("name");
-        unsigned int i = 0;
-        while (debug_data[i].name != NULL) {
-            if (debug_data[i].name == s)
-                break;
-            i++;
-        }
-        if (debug_data[i].name == NULL) {
-            print_debug(DEBUG_CONFIG, "Warning, %s is a wrong debug descriptor/name!", qPrintable(s));
-            return TRUE;
-        }
-
-        s = attributes.value("state");
-        s = s.toLower();
-        if (s == "on")
-            debug_data[i].state = 1;
-        else
-            debug_data[i].state = 0;
-
-//        printf("Debug option %s is now %s.\r\n", debug_data[i].name, ON_OFF(debug_data[i].state) );
-        return TRUE;
-    } else if (qName == "window") {
-        int x = 0;
-        int y = 0;
-        int height = 0;
-        int width = 0;
-
-        x = attributes.value("x").toInt();
-        y = attributes.value("y").toInt();
-        height = attributes.value("height").toInt();
-        width = attributes.value("width").toInt();
-
-        conf->setWindowRect(x, y, width, height);
-        print_debug(DEBUG_CONFIG, "Loaded window settins: x %i, y %i, height %i, width %i",
-                        x, y, height, width);
-
-        s = attributes.value("multisampling");
-        s = s.toLower();
-        conf->setMultisampling(false);
-        if (s == "on")
-            conf->setMultisampling(true);
-
-
-        return TRUE;
-    } else if (qName == "rendererangles") {
-        float x = 0;
-        float y = 0;
-        float z = 0;
-
-        x = attributes.value("anglex").toFloat();
-        y = attributes.value("angley").toFloat();
-        z = attributes.value("anglez").toFloat();
-
-        conf->setRendererAngles(x,y,z);
-
-        print_debug(DEBUG_CONFIG, "Loaded renderer angles : x %f, y %f, z %f",x, y, z);
-        return TRUE;
-    } else if (qName == "rendererpositions") {
-        float x = 0;
-        float y = 0;
-        float z = 0;
-
-        x = attributes.value("userx").toFloat();
-        y = attributes.value("usery").toFloat();
-        z = attributes.value("userz").toFloat();
-
-        conf->setRendererPosition(x,y,z);
-
-        print_debug(DEBUG_CONFIG, "Loaded renderer shift : x %f, y %f, z %f",x, y, z);
-        return TRUE;
-
-    } else if (qName == "misc") {
-        int startup_mode = 0;
-        startup_mode = attributes.value("startupmode").toInt();
-        conf->setStartupMode(startup_mode);
-        print_debug(DEBUG_CONFIG, "Set startup mode: %d", startup_mode);
-
-        QByteArray note_color = (QByteArray)attributes.value("notecolor").toAscii();
-        conf->setNoteColor(note_color);
-        print_debug(DEBUG_CONFIG, "Set note color: %d", (const char*)note_color);
-
-        return TRUE;
-    }
-
-  return TRUE;
 }
 

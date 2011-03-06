@@ -95,7 +95,10 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>GroupBox</string>
+      <string>GTell Notifications</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">

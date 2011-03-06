@@ -57,9 +57,8 @@ Cdispatcher::Cdispatcher()
     scouting = false;
     event.clear();
 
-    scoreExp.setPattern("[0-9]*/* hits, */* mana, and */* moves.");
-    scoreTrollExp.setPattern("[0-9]*/* hits and */* moves.");
-
+    scoreExp.setPattern(conf->getScorePattern() );
+    scoreTrollExp.setPattern(conf->getShortScorePattern() );
     scoreExp.setPatternSyntax(QRegExp::Wildcard);
     scoreTrollExp.setPatternSyntax(QRegExp::Wildcard);
 }
@@ -209,10 +208,8 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
 
     /* put back the leftovers */
     if (c.fragment != "") {
-//        printf("Adding lost fragment, ...%s...", (const char *) c.fragment);
         line = c.fragment;
     }
-//    printf("Subchars : ...%s...\r\n", (const char*) c.subchars);
 
     stop = (unsigned char *) (c.buffer + c.length);
     for (s = (unsigned char *) c.buffer;  s != stop; s++) {
@@ -450,8 +447,6 @@ QByteArray Cdispatcher::cutColours(QByteArray line)
     int i;
     bool skip = false;
 
-    print_debug(DEBUG_DISPATCHER, "Called cutColours");
-
     for (i =0; i < line.length(); i++) {
         if (line.at(i) == '|' || line.at(i) == '-' || line.at(i) == '\\' || line.at(i) == '/')
             if ((i+1) < line.length() && line.at(i+1) == 0x8) {
@@ -475,7 +470,6 @@ QByteArray Cdispatcher::cutColours(QByteArray line)
         res.append(line.at(i));
     }
 
-    print_debug(DEBUG_DISPATCHER, "returning");
     return res;
 }
 
@@ -500,8 +494,6 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
 
     print_debug(DEBUG_DISPATCHER, "analyzerMudStream(): starting");
     print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
-
-
 
     dispatchBuffer(c);
 

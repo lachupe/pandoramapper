@@ -42,7 +42,6 @@ HEADERS += src/patterns.h \
     src/CGroupCommunicator.h \
     src/CGroupServer.h \
     src/CGroupSettingsDialog.h \
-    src/CGroupStatus.h \
     src/CLogDialog.h \
     src/CMovementDialog.h \
     src/CRegion.h \
@@ -91,7 +90,6 @@ SOURCES += src/patterns.cpp \
     src/userfunc.cpp \
     src/utils.cpp \
     src/xml2.cpp \
-    src/CGroupStatus.cpp \
     src/CGroupSettingsDialog.cpp \
     src/CGroupChar.cpp \
     src/CGroupCommunicator.cpp \

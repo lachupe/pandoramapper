@@ -128,6 +128,8 @@ class Cconfigurator : public QObject {
     bool 	groupManagerNotifyArmour;
     bool 	groupManagerNotifySanc;
 
+    QByteArray scorePattern;
+    QByteArray scorePatternShort;
 
 public:
 
@@ -198,7 +200,10 @@ public:
     /* patterns */
     QByteArray getExitsPattern() { return exitsPattern; }
     void setExitsPattern(QByteArray str);
-
+    QByteArray getScorePattern() { return scorePattern; }
+    QByteArray getShortScorePattern() { return scorePatternShort; }
+    void setScorePattern(QByteArray str) { scorePattern = str; setConfigModified(true); }
+    void setShortScorePattern(QByteArray str) { scorePatternShort = str; setConfigModified(true); }
 
     QRegExp getExitsExpr() { return exitsExpr; }
 
@@ -301,28 +306,5 @@ signals:
 };
 
 extern class Cconfigurator *conf;
-
-
-class ConfigParser : public QXmlDefaultHandler {
-public:
-  ConfigParser();
-//  bool characters(const QString& ch);
-
-  bool startElement( const QString&, const QString&, const QString& ,
-		     const QXmlAttributes& );
-//  bool endElement( const QString&, const QString&, const QString& );
-private:
-//  enum { TEXTURE };
-  /* some flags */
-  //int flag;
-  QString s;
-
-  struct roomSectorsData texture;
-  TSpell   spell;
-
-  int i;
-};
-
-
 
 #endif

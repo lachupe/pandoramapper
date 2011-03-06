@@ -164,6 +164,12 @@ void CGroupCommunicator::errorInConnection(CGroupClient *connection)
 		case QAbstractSocket::ProxyAuthenticationRequiredError:
 		case QAbstractSocket::UnknownSocketError:
 		case QAbstractSocket::UnfinishedSocketOperationError:
+		case QAbstractSocket::SslHandshakeFailedError:
+		case QAbstractSocket::ProxyConnectionClosedError:
+		case QAbstractSocket::ProxyConnectionRefusedError:
+		case QAbstractSocket::ProxyConnectionTimeoutError:
+		case QAbstractSocket::ProxyNotFoundError:
+		case QAbstractSocket::ProxyProtocolError:
 			getGroup()->connectionError("Network Error ");
 			break;
 	}
