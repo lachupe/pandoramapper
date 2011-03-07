@@ -54,6 +54,8 @@ Cconfigurator::Cconfigurator()
     /* data */
     databaseModified = false;
 
+    groupManagerState = CGroupCommunicator::Off;
+
     resetCurrentConfig();
     setConfigModified(false);
 }

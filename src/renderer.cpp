@@ -112,13 +112,15 @@ unsigned int i;
 	glEnable(GL_POLYGON_SMOOTH);
 
 	glEnable(GL_MULTISAMPLE);
-	/*
-	GLint bufs;
-    GLint samples;
-    glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
-    glGetIntegerv(GL_SAMPLES, &samples);
-    printf("Using %d buffers and %d samples", bufs, samples);
-	*/
+
+	#ifdef GL_SAMPLE_BUFFERS
+		GLint bufs;
+		GLint samples;
+		glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
+		glGetIntegerv(GL_SAMPLES, &samples);
+		print_debug(DEBUG_SYSTEM, "Using %d buffers and %d samples", bufs, samples);
+		printf("Using %d buffers and %d samples", bufs, samples);
+	#endif
 
 
 	//    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_TEXTURE_ENV_MODE_REPLACE);

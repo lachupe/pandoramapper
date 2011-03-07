@@ -6,8 +6,10 @@ CONFIG += qt \
     opengl \
     warn_on \
     thread
-CONFIG += debug
-# CONFIG += qt_integration_plugin
+
+CONFIG += qt_integration_plugin
+#CONFIG += debug_and_release
+    
 QT += xml \
     opengl \
     gui \
@@ -96,11 +98,16 @@ SOURCES += src/patterns.cpp \
     src/CGroupServer.cpp \
     src/CGroup.cpp
 TARGET = pandora
+
+unix:!macx{
+	DESTDIR = release/ 
+}
+
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 win32:LIBS += -lwsock32
 unix:LIBS += -lm
 
-QMAKE_CXXFLAGS_RELEASE += -O2 \
-    -pipe \
-    $$CFLAGS_VAR
-QMAKE_CXXFLAGS_DEBUG += $$CFLAGS_VAR
+#QMAKE_CXXFLAGS_RELEASE += -O2 \
+#    -pipe \
+#    $$CFLAGS_VAR
+#QMAKE_CXXFLAGS_DEBUG += $$CFLAGS_VAR
