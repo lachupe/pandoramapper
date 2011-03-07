@@ -7,8 +7,7 @@ CONFIG += qt \
     warn_on \
     thread
 CONFIG += debug
-
-# CONFIG += release
+# CONFIG += qt_integration_plugin
 QT += xml \
     opengl \
     gui \
@@ -96,17 +95,11 @@ SOURCES += src/patterns.cpp \
     src/CGroupClient.cpp \
     src/CGroupServer.cpp \
     src/CGroup.cpp
-TARGET = release/pandora
+TARGET = pandora
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 win32:LIBS += -lwsock32
 unix:LIBS += -lm
 
-# !debug:unix:QMAKE_POST_LINK = strip \
-# $(TARGET)
-# SVN_REVISION = $$system("svn info | grep Revision | sed s/Revision:\ //")
-# !isEmpty(SVN_REVISION):DEFINES += SVN_REVISION=108
-# CFLAGS_VAR = $$system(pkg-config --cflags OGRE)
-# CLIBS_VAR = $$system(pkg-config --libs OGRE)
 QMAKE_CXXFLAGS_RELEASE += -O2 \
     -pipe \
     $$CFLAGS_VAR

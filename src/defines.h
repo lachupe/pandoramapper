@@ -21,6 +21,8 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+#define SVN_REVISION	174
+
 class QString;
 
 #define MAX_ROOMS       35000		/* maximal amount of rooms */

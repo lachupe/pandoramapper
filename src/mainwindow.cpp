@@ -74,6 +74,11 @@ CMainWindow::CMainWindow(QWidget *parent)
     renderer =  new RendererWidget( this );
     setCentralWidget( renderer );
 
+    if (!renderer->format().sampleBuffers()) {
+    	print_debug(DEBUG_SYSTEM, "This system does not have sample buffer support.");
+    	printf("This system does not have sample buffer support.");
+     }
+
     setGeometry( conf->getWindowRect() );
 
     connect(proxy, SIGNAL(connectionEstablished()), actionManager, SLOT(enable_online_actions()), Qt::QueuedConnection );

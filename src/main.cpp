@@ -22,10 +22,6 @@
 
 #include <QApplication>
 
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <QThread>
 #include <QMutex>
 #include <QObject>

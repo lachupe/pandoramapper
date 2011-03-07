@@ -18,8 +18,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <cstdio>
-#include <cstdlib>
 
 #include <QFont>
 #include <QGLWidget>
@@ -43,6 +41,10 @@
 #include "userfunc.h"
 #include "CGroupChar.h"
 
+
+#ifndef GL_MULTISAMPLE
+#define GL_MULTISAMPLE  0x809D
+#endif
 
 #if defined(Q_CC_MSVC)
 #pragma warning(disable:4305) // init: truncation from const double to float
@@ -110,12 +112,13 @@ unsigned int i;
 	glEnable(GL_POLYGON_SMOOTH);
 
 	glEnable(GL_MULTISAMPLE);
-    GLint bufs;
+	/*
+	GLint bufs;
     GLint samples;
     glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
     glGetIntegerv(GL_SAMPLES, &samples);
     printf("Using %d buffers and %d samples", bufs, samples);
-
+	*/
 
 
 	//    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_TEXTURE_ENV_MODE_REPLACE);

@@ -22,6 +22,7 @@
 #ifndef CACTIONMANAGER_H
 #define CACTIONMANAGER_H
 
+
 #include <QMainWindow>
 
 class CMainWindow;
