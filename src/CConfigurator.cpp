@@ -112,8 +112,10 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
   conf.setValue("userX", userX );
   conf.setValue("userY", userY );
   conf.setValue("userZ", userZ );
-  conf.beginWriteArray("Textures");
   conf.setValue("noteColor", getNoteColor() );
+  conf.setValue("drawPrespam", getDrawPrespam());
+
+  conf.beginWriteArray("Textures");
   for (unsigned int i = 0; i < sectors.size(); ++i) {
 	  conf.setArrayIndex(i);
 	  conf.setValue("handle", sectors[i].desc);
@@ -134,6 +136,8 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
   conf.setValue("autoRefresh", getAutorefresh() );
   conf.setValue("roomNameQuote", getNameQuote() );
   conf.setValue("descQuote", getDescQuote() );
+  conf.setValue("mactionUsesPrespam", getMactionUsesPrespam());
+  conf.setValue("prespamTTL", getPrespamTTL());
   conf.endGroup();
 
   conf.beginGroup("Patterns");
@@ -241,6 +245,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
     setRendererAngles(conf.value("angleX", 0).toFloat(), conf.value("angleY", 0).toFloat(), conf.value("angleZ", 0).toFloat());
     setRendererPosition(conf.value("userX", 0).toFloat(), conf.value("userY", 0).toFloat(), conf.value("userZ", 0).toFloat());
     setNoteColor( conf.value("noteColor", "#F28003").toByteArray() );
+    setDrawPrespam(  conf.value("drawPrespam", true).toBool() );
 
     size = conf.beginReadArray("Textures");
 	for (int i = 0; i < size; ++i) {
@@ -260,9 +265,11 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 	setAutorefresh( conf.value("autoRefresh", true ).toBool() );
 	setNameQuote( conf.value("roomNameQuote", 10 ).toInt() );
 	setDescQuote( conf.value("descQuote", 10 ).toInt() );
-
 	setRegionsAutoReplace( conf.value("regionsAutoReplace", false ).toBool() );
 	setRegionsAutoSet( conf.value("regionsAutoSet", false ).toBool() );
+	setMactionUsesPrespam( conf.value("mactionUsesPrespam", true).toBool() );
+	setPrespamTTL( conf.value("prespamTTL", 750).toInt() );
+
 	conf.endGroup();
 
     conf.beginGroup("Patterns");

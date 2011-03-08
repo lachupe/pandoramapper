@@ -61,6 +61,8 @@ RendererWidget::RendererWidget( QWidget *parent )
      : QGLWidget( parent )
 {
 
+
+
   print_debug(DEBUG_RENDERER , "in renderer constructor");
 
   angleX = conf->getRendererAngleX();
@@ -364,6 +366,8 @@ void RendererWidget::glDrawMarkers()
 
 void RendererWidget::glDrawPrespamLine()
 {
+	if (!conf->getDrawPrespam())
+		return;
 	QVector<unsigned int> *line = engine->getPrespammedDirs();
     int prevx, prevy, prevz, dx, dy, dz;
 

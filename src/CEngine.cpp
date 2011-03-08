@@ -118,9 +118,10 @@ void CEngine::tryDir()
     }
 
     CCommand cmd = commandQueue.peek();
-    if (cmd.timer.elapsed() > 5000) {
+    if (cmd.timer.elapsed() > conf->getPrespamTTL() ) {
     	print_debug(DEBUG_ANALYZER, "The command queue has head entry with lifetime over 5 seconds. Resetting");
     	commandQueue.clear();
+    	toggle_renderer_reaction();
     } else if (cmd.dir == dir && !event.fleeing ) {
     	// we moved in awaited direction
     	commandQueue.dequeue();
@@ -260,7 +261,9 @@ void CEngine::parseEvent()
     print_debug(DEBUG_ANALYZER, "in parseEvent()");
 
     if (event.movementBlocker) {
+    	// notify renderer to remove all the unnecessary line drawn
     	commandQueue.dequeue();
+    	toggle_renderer_reaction();
     	return;
     }
 
@@ -729,7 +732,7 @@ CRegion *CEngine::get_last_region()
     return last_region;
 }
 
-
+// this method ensures that we are in sync!
 QVector<unsigned int> *CEngine::getPrespammedDirs()
 {
     if ( commandQueue.isEmpty() || stacker.amount() != 1 )

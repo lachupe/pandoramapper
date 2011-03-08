@@ -362,19 +362,13 @@ void CGroup::gotKicked(QDomNode message)
 	}
 
 	QDomElement text = e.toElement();
-	print_debug(DEBUG_GROUP, "You got kicked! Reason [nodename %s] : %s",
-			(const char *) text.nodeName().toAscii(),
-			(const char *) text.text().toAscii());
-
 	// somehow this always leads to crash! :-(
 	//QMessageBox::critical(this, "groupManager", QString("You got kicked! Reason: %1.").arg(text.text()));
 
-	print_debug(DEBUG_GROUP, "You got kicked! Reason [nodename %s] : %s",
-			(const char *) text.nodeName().toAscii(),
+	print_debug(DEBUG_GROUP, "You got kicked! Reason: %s",
 			(const char *) text.text().toAscii());
 
-	send_to_user("--[ You got kicked! Reason [nodename %s] : %s",
-			(const char *) text.nodeName().toAscii(),
+	send_to_user("--[ You got kicked! Reason: %s",
 			(const char *) text.text().toAscii());
 
 	send_to_user("\r\n");

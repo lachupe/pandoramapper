@@ -18,9 +18,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <QMutex>
 
 #include "CRoomManager.h"
@@ -637,26 +634,28 @@ USERCMD(usercmd_maction)
 	  exit = 0;
   }
 
-  /* for the case of prespam and sync, try to follow */
-  QVector<unsigned int> *prespam = engine->getPrespammedDirs();
-  if (prespam != NULL && dir != -1) {
-	  // follow-up all dirs and use the last one for maction
+  if (dir != -1 && conf->getMactionUsesPrespam()) {
+	  /* for the case of prespam and sync, try to follow */
+	  QVector<unsigned int> *prespam = engine->getPrespammedDirs();
+	  if (prespam != NULL && dir != -1) {
+		  // follow-up all dirs and use the last one for maction
 
-	  // get the last room
-      CRoom *p = Map.getRoom( prespam->at( prespam->size() - 1 ) );
-      if (p->isDoorSecret(dir) == true) {
-    	  MACTION_SEND_DOOR(p->getDoor(dir), dir);
-      } else {
-    	  MACTION_SEND_DOOR("exit", dir);
-      }
+		  // get the last room
+	      CRoom *p = Map.getRoom( prespam->at( prespam->size() - 1 ) );
+	      if (p->isDoorSecret(dir) == true) {
+	    	  MACTION_SEND_DOOR(p->getDoor(dir), dir);
+	      } else {
+	    	  MACTION_SEND_DOOR("exit", dir);
+	      }
 
-      delete prespam;
+	      delete prespam;
 
-      if (local) {
-        send_prompt();
-        return USER_PARSE_SKIP;
-      }
-      return USER_PARSE_DONE;
+	      if (local) {
+	        send_prompt();
+	        return USER_PARSE_SKIP;
+	      }
+	      return USER_PARSE_DONE;
+	  }
   }
 
   /* get the door names */
@@ -1423,7 +1422,6 @@ USERCMD(usercmd_msave)
 USERCMD(usercmd_mload)
 {
   char *p;
-  char arg[MAX_STR_LEN];
 
   userfunc_print_debug;
 

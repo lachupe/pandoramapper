@@ -72,7 +72,6 @@ class Cconfigurator : public QObject {
     int         remotePort;
     bool        databaseModified;
 
-
     bool autorefresh;             /* automatic room desc refresh */
     bool automerge;               /* automatic twins merging based on roomdesc */
     bool angrylinker;             /* automatic linking based on coordinates */
@@ -131,7 +130,19 @@ class Cconfigurator : public QObject {
     QByteArray scorePattern;
     QByteArray scorePatternShort;
 
+
+    bool	drawPrespam;
+    bool	mactionUsesPrespam;
+    int		prespamTTL; /* in ms */
 public:
+    /* prespam config */
+    bool getDrawPrespam() { return drawPrespam; }
+    bool getMactionUsesPrespam() { return mactionUsesPrespam; }
+    int getPrespamTTL() { return prespamTTL; }
+
+    void setDrawPrespam( bool b) { drawPrespam = b; setConfigModified(true); }
+    void setMactionUsesPrespam( bool b) { mactionUsesPrespam = b; setConfigModified(true); }
+    void setPrespamTTL( int ms ) { prespamTTL = ms; setConfigModified(true); }
 
     /* movement patterns */
     QList<QByteArray> moveForcePatterns;
@@ -270,9 +281,9 @@ public:
     bool getShowNotesRenderer() { return showNotesRenderer; }
 
     // App Window size
-    void setWindowRect(QRect rect) { userWindowRect = rect; setConfigModified(true);  }
+    void setWindowRect(QRect rect) { userWindowRect = rect; }
     void setWindowRect(int x, int y, int width, int height)
-        { userWindowRect.setRect(x, y, width, height); setConfigModified(true);  }
+        { userWindowRect.setRect(x, y, width, height); }
     QRect getWindowRect() {return userWindowRect; }
 
     // renderer settings
