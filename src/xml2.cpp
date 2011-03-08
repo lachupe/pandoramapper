@@ -319,10 +319,10 @@ void CRoomManager::saveMap(QString filename)
             fprintf(f, "    <region name=\"%s\">\n", (const char *) region->getName() );
             
             doors = region->getAllDoors();
-            QMapIterator<QByteArray, QByteArray> i(doors);
-            while (i.hasNext()) {
-                i.next();
-                fprintf(f, "      <alias name=\"%s\" door=\"%s\"/>\n",  (const char *)  i.key(), (const char *) i.value() );
+            QMapIterator<QByteArray, QByteArray> iter(doors);
+            while (iter.hasNext()) {
+                iter.next();
+                fprintf(f, "      <alias name=\"%s\" door=\"%s\"/>\n",  (const char *)  iter.key(), (const char *) iter.value() );
             }
             fprintf(f, "    </region>\n");
         }
