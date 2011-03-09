@@ -78,7 +78,7 @@ void CRoomManager::loadMap( QString filename)
   print_debug(DEBUG_XML, "reading xml ...");
   fflush(stdout);
 
-  lockForWrite();
+//  lockForWrite();
   reader.parse( source );
 
   
@@ -110,7 +110,7 @@ void CRoomManager::loadMap( QString filename)
 	  print_debug(DEBUG_XML, "done.");
   }
 
-  unlock();
+//  unlock();
 
   delete handler;
   return;
@@ -295,7 +295,7 @@ void CRoomManager::saveMap(QString filename)
     return;
   }
 
-  QReadLocker locker(&mapLock);
+//  QReadLocker locker(&mapLock);
   
   QProgressDialog progress("Saving the database...", "Abort Saving", 0, size(), renderer_window);
   progress.setWindowModality(Qt::WindowModal);

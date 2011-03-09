@@ -57,7 +57,7 @@ void CRoomManager::clearAllSecrets()
     stacker.swap();
 
 
-    lockForWrite();
+    //lockForWrite();
     while (stacker.amount() != 0) {
         for (i = 0; i < stacker.amount(); i++) {
             r = stacker.get(i);
@@ -98,7 +98,7 @@ void CRoomManager::clearAllSecrets()
 
     }
 
-    unlock();
+    //unlock();
 }
 
 
@@ -108,7 +108,7 @@ bool CRoomManager::isDuplicate(CRoom *addedroom)
     unsigned int i;
     int j;
 
-    QWriteLocker locker(&mapLock);
+    //QWriteLocker locker(&mapLock);
 
     print_debug(DEBUG_ANALYZER, "Room-desc check for new room");
 
@@ -175,7 +175,7 @@ CRoom* CRoomManager::findDuplicateRoom(CRoom *orig)
 {
 	CRoom* t;
 
-	QWriteLocker locker(&mapLock);
+//	QWriteLocker locker(&mapLock);
     for (unsigned int i = 0; i < size(); i++) {
         t = rooms[i];
         if (orig->id == t->id || t->isDescSet() == false || t->isNameSet() == false ) {
@@ -199,7 +199,7 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
   CRoom *p;
 
   print_debug(DEBUG_ROOMS, "entering tryMergeRooms...");
-  QWriteLocker locker(&mapLock);
+//  QWriteLocker locker(&mapLock);
 
   if (j == -1) {
     /* oneway ?! */
@@ -268,7 +268,7 @@ void CRoomManager::addRoomNonsorted(CRoom *room)
 
 void CRoomManager::addRoom(CRoom *room)
 {
-	QWriteLocker locker(&mapLock);
+//	QWriteLocker locker(&mapLock);
 	addRoomNonsorted(room);
 }
 /* ------------ addroom ENDS ---------- */
@@ -282,7 +282,7 @@ CRoomManager::CRoomManager()
 
 void CRoomManager::init()
 {
-	QWriteLocker locker(&mapLock);
+//	QWriteLocker locker(&mapLock);
 
     print_debug(DEBUG_ROOMS,"Roommanager INIT.\r\n");
 
@@ -372,7 +372,7 @@ QList<CRegion *> CRoomManager::getAllRegions()
 void CRoomManager::reinit()
 {
 //	unlock();
-	QWriteLocker locker(&mapLock);
+//	QWriteLocker locker(&mapLock);
 
 	next_free = 1;
     {
@@ -567,7 +567,7 @@ QList<int> CRoomManager::searchNames(QString s, Qt::CaseSensitivity cs)
 {
     QList<int> results;
 
-	QReadLocker locker(&mapLock);
+//	QReadLocker locker(&mapLock);
 
     for (int i = 0; i < rooms.size(); i++) {
         if (QString(rooms[i]->getName()).contains(s, cs)) {
@@ -582,7 +582,7 @@ QList<int> CRoomManager::searchDescs(QString s, Qt::CaseSensitivity cs)
 {
     QList<int> results;
 
-    QReadLocker locker(&mapLock);
+//    QReadLocker locker(&mapLock);
 
     for (int i = 0; i < rooms.size(); i++) {
         if (QString(rooms[i]->getDesc()).contains(s, cs)) {
@@ -597,7 +597,7 @@ QList<int> CRoomManager::searchNotes(QString s, Qt::CaseSensitivity cs)
 {
     QList<int> results;
 
-    QReadLocker locker(&mapLock);
+//    QReadLocker locker(&mapLock);
 
 	for (int i = 0; i < rooms.size(); i++) {
         if (QString(rooms[i]->getNote()).contains(s, cs)) {
@@ -612,7 +612,7 @@ QList<int> CRoomManager::searchExits(QString s, Qt::CaseSensitivity cs)
 {
     QList<int> results;
 
-    QReadLocker locker(&mapLock);
+//    QReadLocker locker(&mapLock);
 
     for (int i = 0; i < rooms.size(); i++) {
         for (int j = 0; j <= 5; j++) {

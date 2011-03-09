@@ -173,12 +173,12 @@ void RendererWidget::display(void)
 {
   if (redraw) {
 	  
-    if (Map.tryLockForRead() == false) {
-    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
-    	QTimer::singleShot( 100, this, SLOT(paintGL()) );
-    	return;
-    } else 
-    	Map.unlock();
+//    if (Map.tryLockForRead() == false) {
+//    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
+//    	QTimer::singleShot( 100, this, SLOT(paintGL()) );
+//    	return;
+//    } else
+//    	Map.unlock();
     
   
     QTime t;
@@ -197,12 +197,12 @@ void RendererWidget::paintGL()
 {
     print_debug(DEBUG_RENDERER, "in paintGL()");
 
-    if (Map.tryLockForRead() == false) {
-    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
-    	QTimer::singleShot( 100, this, SLOT(paintGL()) );
-    	return;
-    } else 
-    	Map.unlock();
+//    if (Map.tryLockForRead() == false) {
+//    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
+//    	QTimer::singleShot( 100, this, SLOT(paintGL()) );
+//    	return;
+//    } else
+//    	Map.unlock();
 
 
     QTime t;
@@ -928,7 +928,7 @@ void RendererWidget::draw(void)
     
     // Way too sensitive application. No changes should be allowed while drawing!
     // LOCK IT 
-    Map.lockForRead();
+//    Map.lockForRead();
     plane = Map.getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
@@ -953,7 +953,7 @@ void RendererWidget::draw(void)
         glDrawCSquare(plane->squares, GL_RENDER);
         plane = plane->next;
     }
-    Map.unlock();
+//    Map.unlock();
 
     
 //    print_debug(DEBUG_RENDERER, "Drawn %i rooms, after dot elimination %i, %i square frustum checks done", 
@@ -1025,7 +1025,7 @@ void RendererWidget::renderPickupObjects()
 //    print_debug(DEBUG_RENDERER, "drawing %i rooms", Map.size());
 
     // Sensitive ! lock for WRITE!
-    Map.lockForRead();
+//    Map.lockForRead();
     plane = Map.getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
@@ -1040,7 +1040,7 @@ void RendererWidget::renderPickupObjects()
         glDrawCSquare(plane->squares, GL_SELECT);
         plane = plane->next;
     }
-    Map.unlock();
+//    Map.unlock();
 }
 
 

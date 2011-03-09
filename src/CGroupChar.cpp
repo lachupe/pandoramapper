@@ -308,16 +308,13 @@ void CGroupChar::updateLabels()
 	  if (pos == 0) {
 		  setField(1, "The position of this users is unknown");
 	  } else {
-		  if (Map.tryLockForRead() == true) {
-			    CRoom *r = Map.getRoom(pos);
-				if (r == NULL)
-					setField(1, "The position of this users is unknown");
-				else
-					setField(1,  r->getName());
+			CRoom *r = Map.getRoom(pos);
+			if (r == NULL)
+				setField(1, "The position of this users is unknown");
+			else
+				setField(1,  r->getName());
 
-				// QString("%1:%2").arg(r->id).arg( QString(r->getName()) )
-			    Map.unlock();
-			}
+			// QString("%1:%2").arg(r->id).arg( QString(r->getName()) )
 	  }
 
 	  setScoreFields();

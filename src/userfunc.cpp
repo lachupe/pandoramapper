@@ -321,12 +321,12 @@ const struct user_command_type user_commands[] = {
     {"mregion",              usercmd_mregion,        0,      USERCMD_FLAG_REDRAW,
       "Region's system subcommands entry point",
       "    Usage: mregion \r\n\r\n"
-      "blabla2.\r\n"},
+      "\r\n"},
 
     {"mtimer",              usercmd_mtimer,        0,      USERCMD_FLAG_INSTANT,
         "Setup and addon timer ",
         "    Usage: mtimer <start|stop> <timers-name>\r\n\r\n"
-        "blabla.\r\n"},
+        "\r\n"},
 
 
   {NULL, NULL, 0, 0, NULL, NULL}

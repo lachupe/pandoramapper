@@ -38,7 +38,6 @@ class CSquare;
 
 class CRoomManager : public QObject {
 	Q_OBJECT
-	QReadWriteLock mapLock;
 
 	QList<CRegion *>    regions;
     QVector<CRoom* > rooms;   		/* rooms */
@@ -65,19 +64,7 @@ public:
     virtual ~CRoomManager();
     void init();
     void reinit();			/* reinitializer/utilizer */
-    void lockForRead() {
-    	mapLock.lockForRead();
-    }
-    void lockForWrite() {
-    	mapLock.lockForWrite();
-    }
-    void unlock() {
-    	mapLock.unlock();
-    }
-    bool tryLockForRead() { return mapLock.tryLockForRead(); }
-    bool tryLockForWrite() { return mapLock.tryLockForWrite(); }
 
-    // make sure you LOCK before you use those lists ... !
     QVector<CRoom* > getRooms() { return rooms; }
     CPlane* getPlanes() { return planes; }
 
@@ -101,12 +88,10 @@ public:
 
 
     inline CRoom* getRoom(unsigned int id)        {
-    	QReadLocker locker(&mapLock);
     	return getRoomUnlocked(id);
     }
 
     inline QByteArray getName(unsigned int id)  {
-    	QReadLocker locker(&mapLock);
     	return getNameUnlocked(id); // this GOT to be inlined!
     }
 
@@ -122,8 +107,8 @@ public:
 
     QList<CRegion *> getAllRegions();
 
-    void deleteRoom(CRoom* r, int mode) { lockForWrite(); deleteRoomUnlocked(r, mode); unlock(); }
-    void smallDeleteRoom(CRoom* r) { lockForWrite(); smallDeleteRoomUnlocked(r); unlock(); }
+    void deleteRoom(CRoom* r, int mode) { deleteRoomUnlocked(r, mode); }
+    void smallDeleteRoom(CRoom* r) { smallDeleteRoomUnlocked(r); }
 
     QList<int> searchNames(QString s, Qt::CaseSensitivity cs);
     QList<int> searchDescs(QString s, Qt::CaseSensitivity cs);

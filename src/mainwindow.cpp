@@ -460,12 +460,12 @@ void CMainWindow::keyReleaseEvent( QKeyEvent *k )
 
 void CMainWindow::mousePressEvent( QMouseEvent *e )
 {
-    if (Map.tryLockForRead() == false) {
-    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
-    	QTimer::singleShot( 100, this, SLOT(mousePressEvent(e)) );
-    	return;
-    } else
-    	Map.unlock();
+//    if (Map.tryLockForRead() == false) {
+//    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
+//    	QTimer::singleShot( 100, this, SLOT(mousePressEvent(e)) );
+//    	return;
+//    } else
+//    	Map.unlock();
 
 
 
@@ -518,12 +518,12 @@ void CMainWindow::createContextMenu( QMouseEvent *e )
     QMenu menu(this);
     QString roomName;
 
-    if (Map.tryLockForRead() == false) {
-    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
-    	QTimer::singleShot( 100, this, SLOT(createContextMenu(e)) );
-    	return;
-    } else
-    	Map.unlock();
+//    if (Map.tryLockForRead() == false) {
+//    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
+//    	QTimer::singleShot( 100, this, SLOT(createContextMenu(e)) );
+//    	return;
+//    } else
+//    	Map.unlock();
 
 
     if (renderer->doSelect( mousePosInRenderer( e->pos() ), id )) {

@@ -19,13 +19,6 @@
  */
 
 /* utilities, string functions and stuff */
-#include <cstdio>
-#include <cstring>
-#include <cctype>
-#include <cstdarg>
-#include <ctime>
-#include <cstdlib>
-
 #include "defines.h"
 #include "CConfigurator.h"
 #include "CEngine.h"
@@ -87,8 +80,7 @@ const boolean_struct input_booleans[] = {
   {NULL, FALSE}
 };
 
-char    timer_ken[MAX_INPUT_LENGTH];
-double  timer_now;
+QTime debug_timer;
 
 int write_to_channel(int mode, const char *format, va_list args);
 
@@ -109,6 +101,7 @@ int write_debug(unsigned int flag, const char *format, va_list args)
 
 
     if (logfile == NULL) {
+    	debug_timer.start();
 
         QString fileName = QString("logs/" + QDateTime::currentDateTime().toString("dd.MM.yyyy-hh.mm.ss") + ".txt");
         printf("Using the LOGFILE : %s\r\n", (const char *) fileName.toAscii() );
@@ -127,7 +120,7 @@ int write_debug(unsigned int flag, const char *format, va_list args)
 
     for (i = 0; debug_data[i].name; i++)
         if (IS_SET(flag, debug_data[i].flag) && debug_data[i].state) {
-        fprintf(logfile, "%s: %s\r\n", debug_data[i].title, txt);
+        fprintf(logfile, "[%i] %s: %s\r\n", debug_timer.elapsed(), debug_data[i].title, txt);
         fflush(logfile);
         if (IS_SET(flag, DEBUG_TOUSER) )
             send_to_user("--[ %s: %s\r\n", debug_data[i].title, txt);

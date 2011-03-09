@@ -236,12 +236,12 @@ void CEngine::slotRunEngine()
     // just ignore the even it the system is blocking.
     // supposedly the event will be repeated sometime later =)
     // for engine and userland redraw this does not matter much
-    if (Map.tryLockForRead() == false) {
-    	print_debug(DEBUG_GENERAL, "slotRunEngine tried to block the eventQueue. Delayed.");
-    	QTimer::singleShot( 50, this, SLOT(slotRunEngine()) );
-    	return;
-    } else
-    	Map.unlock();
+//    if (Map.tryLockForRead() == false) {
+//    	print_debug(DEBUG_GENERAL, "slotRunEngine tried to block the eventQueue. Delayed.");
+//    	QTimer::singleShot( 50, this, SLOT(slotRunEngine()) );
+//    	return;
+//    } else
+//    	Map.unlock();
 
 
     if (userland_parser->is_empty()) {
@@ -543,7 +543,7 @@ void CEngine::angryLinker(CRoom *r)
   // if you are performing the full run over all rooms, it's better
   // to lock the Map completely.
   // else the other thread might delete the room you are examining at the moment!
-  Map.lockForWrite();
+  //Map.lockForWrite();
 
 
   QVector<CRoom *> rooms = Map.getRooms();
@@ -664,7 +664,7 @@ void CEngine::angryLinker(CRoom *r)
       }
   }
 
-  Map.unlock();
+  //Map.unlock();
 }
 
 

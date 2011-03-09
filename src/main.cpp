@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
 
     QGLFormat::setDefaultFormat( f );
 
-    renderer_window = new CMainWindow( 0 );
+    renderer_window = new CMainWindow;
 
     renderer_window->show();
 
