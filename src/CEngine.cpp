@@ -670,7 +670,7 @@ void CEngine::angryLinker(CRoom *r)
 
 void CEngine::printStacks()
 {
-    char line[MAX_DATA_LEN];
+    char line[2048];
     QByteArray s;
 
     send_to_user(" -----------------------------\n");

@@ -29,7 +29,6 @@ class QString;
 
 
 #define MAX_STR_LEN     400
-#define MAX_DATA_LEN 3072
 #define MAX_LINES_DESC  20
 
 #define NORTH           0

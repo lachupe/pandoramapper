@@ -492,7 +492,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
     char *buf;
     QByteArray scoreLine;
 
-    print_debug(DEBUG_DISPATCHER, "analyzerMudStream(): starting");
+    print_debug(DEBUG_DISPATCHER, "analyzeMudStream(): starting");
     print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
 
     dispatchBuffer(c);
@@ -566,6 +566,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                     print_debug(DEBUG_DISPATCHER, "prompt, dropping the scouting flag");
                 }
                 event.prompt = cutColours(event.prompt);
+                // TODO: this prompt setting might be dangerous and non-thread safe!
                 engine->setPrompt(event.prompt);
                 proxy->sendPromptLineEvent(event.prompt);
                 event.terrain = parseTerrain(event.prompt);
@@ -764,7 +765,7 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
     buf = c.buffer;
     new_len = 0;
 
-    print_debug(DEBUG_DISPATCHER, "abalyzeUserStream() starting");
+    print_debug(DEBUG_DISPATCHER, "analyzeUserStream() starting");
     print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
 
 //    printf("---------- user input -----------\r\n");

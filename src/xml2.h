@@ -55,7 +55,6 @@ private:
   QProgressDialog *progress;
   unsigned int currentMaximum;
 
-  char data[MAX_DATA_LEN];
   QString s;
 
 
