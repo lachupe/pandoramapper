@@ -18,11 +18,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-/* rewritten analyzer engine. */
-//#include <cstdio>
-//#include <cstdlib>
-//#include <cstring>
-//#include <ctype.h>
 #include <QMutex>
 #include <QTime>
 #include <QTimer>

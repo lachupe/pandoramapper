@@ -106,12 +106,12 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
   conf.setValue("displayRegions", getDisplayRegionsRenderer() );
   conf.setValue("multisampling", getMultisampling() );
   conf.setValue("selectOnAnyLayer", getSelectOAnyLayer());
-  conf.setValue("angleX", angleX );
-  conf.setValue("angleY", angleY );
-  conf.setValue("angleZ", angleZ );
-  conf.setValue("userX", userX );
-  conf.setValue("userY", userY );
-  conf.setValue("userZ", userZ );
+  conf.setValue("angleX", (double) angleX );
+  conf.setValue("angleY", (double) angleY );
+  conf.setValue("angleZ", (double) angleZ );
+  conf.setValue("userX", (double) userX );
+  conf.setValue("userY", (double) userY );
+  conf.setValue("userZ", (double) userZ );
   conf.setValue("noteColor", getNoteColor() );
   conf.setValue("drawPrespam", getDrawPrespam());
 
@@ -242,6 +242,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 	setMultisampling( conf.value("multisampling", true).toBool() );
 	setSelectOAnyLayer( conf.value("selectOnAnyLayer", true).toBool() );
 
+	printf("Reading the angles\r\n");
     setRendererAngles(conf.value("angleX", 0).toFloat(), conf.value("angleY", 0).toFloat(), conf.value("angleZ", 0).toFloat());
     setRendererPosition(conf.value("userX", 0).toFloat(), conf.value("userY", 0).toFloat(), conf.value("userZ", 0).toFloat());
     setNoteColor( conf.value("noteColor", "#F28003").toByteArray() );

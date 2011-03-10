@@ -357,6 +357,8 @@ void Userland::parse_command()
 
   print_debug(DEBUG_USERFUNC, "in parseCommand");
 
+  printf("THREAD PARSE COMMAND: %i\r\n", QThread::currentThreadId());
+
 
   queue_mutex.lock();
   t = commands_queue.front();
@@ -364,6 +366,9 @@ void Userland::parse_command()
   queue_mutex.unlock();
 
   ((*user_commands[t.id].command_pointer) (t.id, user_commands[t.id].subcmd, t.arg, t.arg));
+
+  if (IS_SET(user_commands[t.id].flags, USERCMD_FLAG_REDRAW))
+    toggle_renderer_reaction();
 
   print_debug(DEBUG_USERFUNC, "leaving parseCommand");
 }
@@ -377,6 +382,8 @@ int Userland::parse_user_input_line(const char *line)
 //  int parse_result;
 
   print_debug(DEBUG_USERFUNC, "in parse_user_input_line");
+
+  printf("THREAD USER INPUT PARSER: %i\r\n", QThread::currentThreadId());
 
 
   p = skip_spaces(line);
@@ -400,14 +407,14 @@ int Userland::parse_user_input_line(const char *line)
       result = USER_PARSE_SKIP;
       if (IS_SET(user_commands[i].flags, USERCMD_FLAG_INSTANT)) {
         result = ((*user_commands[i].command_pointer) (i, user_commands[i].subcmd, p, (char *) line));
+        if (IS_SET(user_commands[i].flags, USERCMD_FLAG_REDRAW))
+          toggle_renderer_reaction();
       }
       else {
         userland_parser->add_command(i, p);
       }
 
 
-      if (IS_SET(user_commands[i].flags, USERCMD_FLAG_REDRAW))
-        toggle_renderer_reaction();
 
 //      if (renderer_window)
 //        renderer_window->update_status_bar();
@@ -874,9 +881,8 @@ USERCMD(usercmd_mgoto)
         }
     }
 
-    renderer_window->renderer->userX = 0;
-    renderer_window->renderer->userY = 0;
-//    renderer_window->renderer->userz = 0;
+    renderer_window->renderer->setUserX(0, true);
+    renderer_window->renderer->setUserY(0, true);
 
 
     engine->setMgoto(true);  /* ignore prompt while we are in mgoto mode */
@@ -1841,7 +1847,7 @@ USERCMD(usercmd_mregion)
                 }
 
                 if (local) {
-		    send_prompt();
+                	send_prompt();
                     return USER_PARSE_SKIP;
                 } else {
                     return USER_PARSE_DONE;

@@ -211,6 +211,7 @@ void Proxy::run()
     mud.clear();
     user.clear();
     dispatcher = new Cdispatcher();
+    printf("THREAD PROXY: %i\r\n", QThread::currentThreadId());
     loop();
 }
 

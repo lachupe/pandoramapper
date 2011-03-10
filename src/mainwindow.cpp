@@ -75,8 +75,8 @@ CMainWindow::CMainWindow(QWidget *parent)
     setCentralWidget( renderer );
 
     if (!renderer->format().sampleBuffers()) {
-    	print_debug(DEBUG_SYSTEM, "This system does not have sample buffer support.");
-    	printf("This system does not have sample buffer support.");
+    	print_debug(DEBUG_SYSTEM, "This system does not have sample buffer support.\r\n");
+    	printf("This system does not have sample buffer support.\r\n");
      }
 
     setGeometry( conf->getWindowRect() );
@@ -348,57 +348,57 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
     switch ( k->key() ) {
 
         case Qt::Key_X :
-            renderer->userZ += 1;
+        	renderer->setUserZ( renderer->getUserZ() + 1);
             toggle_renderer_reaction();
             break;
 
          case Qt::Key_Y:
-            renderer->userZ -= 1;
+          	renderer->setUserZ( renderer->getUserZ() - 1);
             toggle_renderer_reaction();
             break;
 
          case Qt::Key_Q:
-            renderer->userX -= 1;
+           	renderer->setUserX( renderer->getUserX() - 1);
             toggle_renderer_reaction();
             break;
 
          case Qt::Key_W:
-            renderer->userX += 1;
+            	renderer->setUserX( renderer->getUserX() + 1);
             toggle_renderer_reaction();
             break;
 
          case Qt::Key_A:
-            renderer->userY += 1;
+           	renderer->setUserY( renderer->getUserY() + 1);
             toggle_renderer_reaction();
             break;
 
          case Qt::Key_S:
-            renderer->userY -= 1;
+           	renderer->setUserY( renderer->getUserY() - 1);
             toggle_renderer_reaction();
             break;
 
         case Qt::Key_Up:
-            renderer->angleX += 5;
+           	renderer->setAngleX( renderer->getAngleX() + 5);
             toggle_renderer_reaction();
             break;
         case Qt::Key_Down:
-            renderer->angleX -= 5;
+           	renderer->setAngleX( renderer->getAngleX() - 5);
             toggle_renderer_reaction();
             break;
         case Qt::Key_Left:
-            renderer->angleY -= 5;
+           	renderer->setAngleY( renderer->getAngleY() - 5);
             toggle_renderer_reaction();
             break;
         case Qt::Key_Right:
-            renderer->angleY += 5;
+           	renderer->setAngleY( renderer->getAngleY() + 5);
             toggle_renderer_reaction();
             break;
         case Qt::Key_PageUp:
-            renderer->angleZ += 5;
+           	renderer->setAngleZ( renderer->getAngleZ() + 5);
             toggle_renderer_reaction();
             break;
         case Qt::Key_PageDown:
-            renderer->angleZ -= 5;
+           	renderer->setAngleZ( renderer->getAngleZ() - 5);
             toggle_renderer_reaction();
             break;
 
@@ -412,14 +412,8 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
             toggle_renderer_reaction();
             break;
 
-         case Qt::Key_Escape:
-            renderer->angleY = 0;
-            renderer->angleX = 0;
-            renderer->angleZ = 0;
-            renderer->userX = 0;
-            renderer->userY = 0;
-            renderer->userZ = BASE_Z;
-            renderer->userLayerShift = 0;
+        case Qt::Key_Escape:
+        	renderer->resetViewSettings();
             toggle_renderer_reaction();
             break;
 
@@ -460,15 +454,6 @@ void CMainWindow::keyReleaseEvent( QKeyEvent *k )
 
 void CMainWindow::mousePressEvent( QMouseEvent *e )
 {
-//    if (Map.tryLockForRead() == false) {
-//    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
-//    	QTimer::singleShot( 100, this, SLOT(mousePressEvent(e)) );
-//    	return;
-//    } else
-//    	Map.unlock();
-
-
-
     mouseState.oldPos = e->pos();
     mouseState.origPos = e->pos();
 
@@ -619,14 +604,14 @@ void CMainWindow::mouseMoveEvent( QMouseEvent *e)
 
     if (toolMode == MoveMode) {
         if (mouseState.LeftButtonPressed) {
-            renderer->userX += (float) dist_x / 10.0;
-            renderer->userY -= (float) dist_y / 10.0;
+        	renderer->setUserX( renderer->getUserX() + (float) dist_x / 10.0);
+        	renderer->setUserY( renderer->getUserY() - (float) dist_y / 10.0);
             toggle_renderer_reaction();
 
             mouseState.oldPos = pos;
         } else if (mouseState.RightButtonPressed) {
-            renderer->angleX += dist_y;
-            renderer->angleY += dist_x;
+        	renderer->setAngleX( renderer->getAngleX() + dist_y );
+        	renderer->setAngleY( renderer->getAngleY() + dist_x );
 
             toggle_renderer_reaction();
             mouseState.oldPos = pos;
@@ -640,7 +625,8 @@ void CMainWindow::wheelEvent(QWheelEvent *e)
 
     delta = e->delta();
 
-    renderer->userZ += delta / 120;
+    renderer->setUserZ( renderer->getUserZ() + (delta / 120));
+
     toggle_renderer_reaction();
 }
 

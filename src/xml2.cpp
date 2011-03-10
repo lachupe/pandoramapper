@@ -66,7 +66,7 @@ void CRoomManager::loadMap( QString filename)
   
   unsigned int currentMaximum = 22000;
   QProgressDialog progress("Loading the database...", "Abort Loading", 0, currentMaximum, renderer_window);
-  progress.setWindowModality(Qt::WindowModal);
+  progress.setWindowModality(Qt::ApplicationModal);
   progress.show();
 
 

@@ -22,8 +22,6 @@
 #define MPILEN		4	/* strlen(MPI) */
 
 
-//#include <cstdio>
-//#include <cstring>
 #include <qregexp.h>
 
 //#include <arpa/telnet.h>
@@ -613,6 +611,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             // check for fleeing/forced movement
             // a_line == "You flee head over heels." ||
             if (Patterns::matchMoveForcePatterns( a_line ) ) {
+            	// well, for now i ignore the fact that all the rest of the patterns is not fleeing ...
             	event.fleeing = true;
             }
 

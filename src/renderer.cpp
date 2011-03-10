@@ -65,12 +65,13 @@ RendererWidget::RendererWidget( QWidget *parent )
 
   print_debug(DEBUG_RENDERER , "in renderer constructor");
 
+  printf("Setting the angles and positions\r\n");
+
   angleX = conf->getRendererAngleX();
   angleY = conf->getRendererAngleY();
   angleZ = conf->getRendererAngleZ();
   userX = (GLfloat) conf->getRendererPositionX();
   userY = (GLfloat) conf->getRendererPositionY();
-    
   userZ = (GLfloat) conf->getRendererPositionZ();	/* additional shift added by user */
 
   if (userZ == 0)
@@ -157,7 +158,7 @@ void RendererWidget::setupViewingModel(  int width, int height )
 void RendererWidget::resizeGL( int width, int height )
 {
     print_debug(DEBUG_RENDERER, "in resizeGL()");
-  
+
     glViewport (0, 0, (GLint) width, (GLint) height);	
     glMatrixMode (GL_PROJECTION);	
     glLoadIdentity ();		
@@ -165,37 +166,30 @@ void RendererWidget::resizeGL( int width, int height )
     setupViewingModel( width, height );
     
     redraw = true;
-//    display();
+    // for some reason this is needed on windows
+    display();
 }
 
 
 void RendererWidget::display(void)
 {
-  if (redraw) {
-	  
-//    if (Map.tryLockForRead() == false) {
-//    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
-//    	QTimer::singleShot( 100, this, SLOT(paintGL()) );
-//    	return;
-//    } else
-//    	Map.unlock();
-    
-  
-    QTime t;
-    t.start();
+	if (redraw) {
+		QTime t;
+		t.start();
 
-    
-    draw();
-    
-    
-    print_debug(DEBUG_RENDERER, "Rendering's done. Time elapsed %d ms", t.elapsed());
-  }  
+		draw();
+
+		print_debug(DEBUG_RENDERER, "Rendering's done. Time elapsed %d ms", t.elapsed());
+	}
 }
 
 
 void RendererWidget::paintGL()
 {
     print_debug(DEBUG_RENDERER, "in paintGL()");
+
+
+
 
 //    if (Map.tryLockForRead() == false) {
 //    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
@@ -876,6 +870,7 @@ void RendererWidget::draw(void)
     const float alphaChannelTable[] = { 0.85, 0.4, 0.37, 0.28, 0.25, 0.15, 0.15, 0.13, 0.1, 0.1, 0.1};
 //                                       0    1     2      3    4      5     6    7    8     9    10 
 
+    printf("THREAD PaintGL: %i\r\n", QThread::currentThreadId());
 
     
     redraw = false;

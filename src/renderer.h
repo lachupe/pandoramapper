@@ -57,18 +57,13 @@ class RendererWidget : public QGLWidget
     GLuint        global_list;
     int           curx;
     int           cury;
-    int           curz;			/* current rooms position */
-    CFrustum       frustum;
-//    QFont         textFont;
-    
-    int           lowerZ;
-    int           upperZ;
-    
-    QList< Billboard * > billboards;
-
+    int           curz;
+    CFrustum frustum;
+    int lowerZ;
+    int upperZ;
+    QList<Billboard*> billboards;
     unsigned int last_drawn_marker;
     unsigned int last_drawn_trail;
-
     GLuint selectBuf[MAXHITS];
     void glDrawGroupMarkers();
     void glDrawPrespamLine();
@@ -76,56 +71,137 @@ class RendererWidget : public QGLWidget
     void drawMarker(int, int, int, int);
     void glDrawRoom(CRoom *p);
     void glDrawCSquare(CSquare *p, int renderingMode);
-    
-    
-    void setupViewingModel(  int width, int height  );
-    void renderPickupObjects();  
+    void setupViewingModel(int width, int height);
+    void renderPickupObjects();
     void renderPickupRoom(CRoom *p);
-
-
-    // this sets curx, cury, curz based on hrm internal rules
     void setupNewBaseCoordinates();
-
     void draw();
     void drawCone();
-
+    GLfloat angleY;
+    GLfloat angleX;
+    GLfloat angleZ;
+    float userX;
+    float userY;
+    float userZ;
+    int userLayerShift;
 public:
-    GLfloat       angleY;
-    GLfloat       angleX;
-    GLfloat       angleZ;
-    float         userX;
-    float         userY;
-    float         userZ;		/* additional shift added by user */
-    int           userLayerShift;       // this affect curz.
-    
-    int           current_plane_z;        
-    GLuint        basic_gllist;
-    
-    bool          redraw;       
-
-    int           rooms_drawn_csquare;
-    int           rooms_drawn_total;
-
+    int current_plane_z;
+    GLuint basic_gllist;
+    bool redraw;
+    int rooms_drawn_csquare;
+    int rooms_drawn_total;
     unsigned int deletedRoom;
-
-    
-    RendererWidget( QWidget *parent = 0);
-    
-    
-    
-    
+    RendererWidget(QWidget *parent = 0);
     void initializeGL();
-    void resizeGL( int width, int height );
-    void changeUserLayerShift(int byValue) { userLayerShift += byValue; curz += byValue; }
-    
-    bool doSelect(QPoint pos, unsigned int &id);
-    void centerOnRoom(unsigned int id);
+    void resizeGL(int width, int height);
+    void changeUserLayerShift(int byValue)
+    {
+        userLayerShift += byValue;
+        curz += byValue;
+    }
 
-    
+    bool doSelect(QPoint pos, unsigned int & id);
+    void centerOnRoom(unsigned int id);
+public:
+
+    void resetViewSettings() {
+    	angleY = 0;
+        angleX = 0;
+        angleZ = 0;
+        conf->setRendererAngles(angleX,angleY,angleZ);
+        userX = 0;
+        userY = 0;
+        userZ = BASE_Z;
+        conf->setRendererPosition(userX,userY,userZ);
+        userLayerShift = 0;
+    }
+
+    GLfloat getAngleX() const
+    {
+        return angleX;
+    }
+
+    GLfloat getAngleY() const
+    {
+        return angleY;
+    }
+
+    GLfloat getAngleZ() const
+    {
+        return angleZ;
+    }
+
+    int getUserLayerShift() const
+    {
+        return userLayerShift;
+    }
+
+    float getUserX() const
+    {
+        return userX;
+    }
+
+    float getUserY() const
+    {
+        return userY;
+    }
+
+    float getUserZ() const
+    {
+        return userZ;
+    }
+
+    void setAngleX(GLfloat angleX, bool dontsave = false)
+    {
+        this->angleX = angleX;
+        if (!dontsave)
+        	conf->setRendererAngles(angleX,angleY,angleZ);
+    }
+
+    void setAngleY(GLfloat angleY, bool dontsave = false)
+    {
+        this->angleY = angleY;
+        if (!dontsave)
+        	conf->setRendererAngles(angleX,angleY,angleZ);
+    }
+
+    void setAngleZ(GLfloat angleZ, bool dontsave = false)
+    {
+        this->angleZ = angleZ;
+        if (!dontsave)
+        	conf->setRendererAngles(angleX,angleY,angleZ);
+    }
+
+    void setUserLayerShift(int userLayerShift)
+    {
+        this->userLayerShift = userLayerShift;
+    }
+
+    void setUserX(float userX, bool dontsave = false)
+    {
+        this->userX = userX;
+        if (!dontsave)
+        	conf->setRendererPosition(userX,userY,userZ);
+    }
+
+    void setUserY(float userY, bool dontsave = false)
+    {
+        this->userY = userY;
+        if (!dontsave)
+            conf->setRendererPosition(userX,userY,userZ);
+    }
+
+    void setUserZ(float userZ, bool dontsave = false)
+    {
+        this->userZ = userZ;
+        if (!dontsave)
+            conf->setRendererPosition(userX,userY,userZ);
+    }
+
 public slots:
-	void paintGL();
-    void display(void);
-    
+	void display(void);
+    void paintGL();
+
 signals:
 	void updateCharPosition(unsigned int);
 };

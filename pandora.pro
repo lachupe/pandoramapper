@@ -7,8 +7,8 @@ CONFIG += qt \
     warn_on \
     thread
 
-CONFIG += qt_integration_plugin
-#CONFIG += debug_and_release
+#CONFIG += qt_integration_plugin
+CONFIG += debug_and_release
     
 QT += xml \
     opengl \
