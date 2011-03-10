@@ -291,6 +291,17 @@ void CGroup::updateCharPosition(QDomNode blob)
 		toggle_renderer_reaction(); // issue a redraw
 }
 
+
+void CGroup::updateCharState(QDomNode blob)
+{
+	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
+	if (ch == NULL)
+		return;
+
+	ch->updateStateFromXML(blob);
+}
+
+
 void CGroup::updateCharScore(QDomNode blob)
 {
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
@@ -299,6 +310,7 @@ void CGroup::updateCharScore(QDomNode blob)
 
 	ch->updateScoreFromXML(blob);
 }
+
 
 void CGroup::updateCharPrompt(QDomNode blob)
 {
@@ -542,3 +554,31 @@ void CGroup::parseStateChangeLine(int message, QByteArray line)
 
 }
 
+void CGroup::returnToLife()
+{
+	printf("Back to Life!\r\n");
+
+	// lever down the dead state
+	self->setState(CGroupChar::STANDING);
+	// and issue the usual procedure
+	setCharState(ignoredState);
+}
+
+
+void CGroup::setCharState(int state)
+{
+	if (self->getState() == CGroupChar::DEAD) {
+		ignoredState = state;
+		printf("Ignoring state change. Showing dead for the next 30 seconds.\r\n");
+		return;
+	}
+	if (self->getState() != state) {
+		printf("Setting new state: %i\r\n", state);
+		self->setState(state);
+		issueLocalCharStateUpdate();
+
+		if (state == CGroupChar::DEAD)
+			// one minute cooldown for DEAD state
+			QTimer::singleShot(60000, this, SLOT( returnToLife() ) );
+	}
+}

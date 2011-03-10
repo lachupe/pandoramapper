@@ -142,6 +142,7 @@ public:
         void sendScoreLineEvent(QByteArray data);
         void sendPromptLineEvent(QByteArray data);
         void sendSpellsUpdatedEvent() { emit sendSpellsUpdate(); }
+        void sendCharStateUpdatedEvent(int state) { emit sendCharStateUpdate(state); }
 signals:
     void connectionEstablished();
     void connectionLost();
@@ -151,6 +152,8 @@ signals:
 	void sendScoreLine(QByteArray);
 	void sendPromptLine(QByteArray);
 	void sendSpellsUpdate();
+	void sendCharStateUpdate(int);
+
 };
 
 /* PROX THREAD ENDS */

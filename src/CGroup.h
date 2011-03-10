@@ -37,12 +37,11 @@ class CGroup : public QDialog
 {
 	Q_OBJECT
 
+	QTime deadTimer;
+	int ignoredState;
+
 	void resetAllChars();
 public:
-
-	enum StateMessages { NORMAL, FIGHTING, RESTING, SLEEPING, CASTING, INCAP, DEAD, BLIND, UNBLIND };
-
-
 	CGroup(QByteArray name, QWidget *parent);
 	virtual ~CGroup();
 
@@ -66,6 +65,10 @@ public:
 	void updateCharPosition(QDomNode blob);
 	void updateCharScore(QDomNode blob);
 	void updateCharPrompt(QDomNode blob);
+	void updateCharState(QDomNode blob);
+
+	// remove the DEAD state from the char
+	void returnToLife();
 
 	CGroupCommunicator *getCommunicator() { return network; }
 
@@ -82,6 +85,8 @@ public:
 	void issueLocalCharScoreUpdate() { 	network->sendCharScoreUpdate(self->scoreToXML()); }
 	void issueLocalCharPromptUpdate() { 	network->sendCharPromptUpdate(self->promptToXML()); }
 	void issueLocalCharPositionUpdate() { 	network->sendCharPositionUpdate(self->positionToXML()); }
+	void issueLocalCharStateUpdate() { 		network->sendCharStateUpdate(self->stateToXML()); }
+
 
 	void gTellArrived(QDomNode node);
 
@@ -99,6 +104,8 @@ public slots:
 	void serverStartupFailed(QString message);
 	void gotKicked(QDomNode message);
 	void setCharPosition(unsigned int pos);
+	void setCharState(int state);
+
 
 	void closeEvent( QCloseEvent * event ) { hide(); event->accept(); emit hides();}
 	void sendGTell(QByteArray tell); // sends gtell from local user

@@ -37,7 +37,7 @@ CGroupChar::CGroupChar(CGroup *_parent, QTreeWidget* t) :
 	maxmoves = 999;
 	mana = 999;
 	maxmana = 999;
-	state = NORMAL;
+	state = STANDING;
 	textHP = "Healthy";
 	textMana = "Burning";
 	textMoves = "Exhausted";
@@ -58,7 +58,6 @@ CGroupChar::CGroupChar(CGroup *_parent, QTreeWidget* t) :
 
 	color = conf->getGroupManagerColor();
 
-	status = NORMAL;
 
 	charItem = new QTreeWidgetItem(charTable);
 	statusItem = new QTreeWidgetItem(charTable);
@@ -277,27 +276,42 @@ void CGroupChar::setScoreFields()
 	statusItem->setText(4, QString("%1/%2").arg(moves).arg(maxmoves));
 }
 
-void CGroupChar::setStatusFields()
+void CGroupChar::setStateFields()
 {
-	  statusItem->setTextAlignment(1, Qt::AlignCenter);
-	  statusItem->setText(1, "STANDING");
+	statusItem->setTextAlignment(1, Qt::AlignCenter);
 
-/*
 	switch (state) {
-		case BASHED:
-			labelState->setText("BASHED");
-		break;
-		case INCAPACITATED:
-			labelState->setText("INCAP");
-		break;
-		case DEAD:
-			labelState->setText("DEAD");
-		break;
-		default:
-			labelState->setText("Normal");
+		case STANDING:
+			statusItem->setBackgroundColor(1, Qt::white);
+			statusItem->setText(1, "STANDING");
 			break;
+		case ENGAGED:
+			statusItem->setBackgroundColor(1, Qt::yellow);
+			statusItem->setText(1, "ENGAGED");
+			break;
+		case BASHED:
+			statusItem->setBackgroundColor(1, Qt::red);
+			statusItem->setText(1, "BASHED");
+		break;
+		case SLEEPING:
+			statusItem->setBackgroundColor(1, Qt::blue);
+			statusItem->setText(1, "SLEEPING");
+			break;
+		case RESTING:
+			statusItem->setBackgroundColor(1, Qt::gray);
+			statusItem->setText(1, "RESTING");
+			break;
+		case DEAD:
+			statusItem->setBackgroundColor(1, Qt::black);
+			statusItem->setText(1, "DEAD");
+			break;
+		case INCAP:
+			statusItem->setBackgroundColor(1, Qt::magenta);
+			statusItem->setText(1, "INCAP");
+		break;
 	}
-*/
+
+
 }
 
 void CGroupChar::updateLabels()
@@ -319,7 +333,7 @@ void CGroupChar::updateLabels()
 
 	  setScoreFields();
 	  setSpellsFields();
-	  setStatusFields();
+	  setStateFields();
 
 
 }
@@ -596,6 +610,18 @@ QDomNode CGroupChar::scoreToXML()
 }
 
 
+QDomNode CGroupChar::stateToXML()
+{
+	QDomDocument doc("charinfo");
+
+	QDomElement root = doc.createElement("playerData");
+	root.setAttribute("state", state );
+
+	doc.appendChild(root);
+	return root;
+}
+
+
 
 bool CGroupChar::updatePositionFromXML(QDomNode node)
 {
@@ -684,6 +710,33 @@ bool CGroupChar::updateScoreFromXML(QDomNode node)
 }
 
 
+bool CGroupChar::updateStateFromXML(QDomNode node)
+{
+	bool updated;
+
+	updated = false;
+    if (node.nodeName() != "playerData") {
+    	print_debug(DEBUG_GROUP, "Called updateScoreFromXML with wrong node. The name does not fit.");
+    	return false;
+    }
+
+   	int newval;
+
+   	QDomElement e = node.toElement();
+
+	newval  = e.attribute("state").toInt();
+	if (newval != state) {
+		updated = true;
+		state = newval;
+	}
+
+   	if (updated == true)
+   		updateLabels();
+
+	return updated; // hrmpf!
+}
+
+
 
 bool CGroupChar::updatePromptFromXML(QDomNode node)
 {
@@ -723,6 +776,5 @@ bool CGroupChar::updatePromptFromXML(QDomNode node)
 
 	return updated; // hrmpf!
 }
-
 
 

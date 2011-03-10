@@ -215,6 +215,10 @@ CMainWindow::CMainWindow(QWidget *parent)
     connect(proxy, SIGNAL(sendScoreLine(QByteArray)), groupManager, SLOT( parseScoreInformation(QByteArray) ),  Qt::QueuedConnection );
     connect(proxy, SIGNAL(sendPromptLine(QByteArray)), groupManager, SLOT( parsePromptInformation(QByteArray) ),  Qt::QueuedConnection );
     connect(proxy, SIGNAL(sendSpellsUpdate()), groupManager, SLOT( updateSpellsInfo() ),  Qt::QueuedConnection );
+
+    connect(proxy, SIGNAL(sendCharStateUpdate(int)), groupManager, SLOT( setCharState(int) ),  Qt::QueuedConnection );
+
+
     CGroupCommunicator *communicator = groupManager->getCommunicator();
     connect(communicator, SIGNAL(typeChanged(int)), actionManager, SLOT(groupManagerTypeChanged(int)), Qt::QueuedConnection  );
 

@@ -338,6 +338,8 @@ void CGroupCommunicator::retrieveDataClient(CGroupClient *conn, int message, QDo
 					getGroup()->updateCharPrompt(data.firstChildElement());
 				} else if (message == CHAR_SCORE) {
 					getGroup()->updateCharScore(data.firstChildElement());
+				} else if (message == CHAR_STATE) {
+					getGroup()->updateCharState(data.firstChildElement());
 				} else {
 					// ERROR: unexpected message marker!
 					// try to ignore?
@@ -411,6 +413,9 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QDo
 				} else if (message == CHAR_SCORE) {
 					getGroup()->updateCharScore(data.firstChildElement());
 					relayMessage(conn, CHAR_SCORE, data.firstChildElement());
+				} else if (message == CHAR_STATE) {
+					getGroup()->updateCharState(data.firstChildElement());
+					relayMessage(conn, CHAR_STATE, data.firstChildElement());
 				} else if (message == CHAR_PROMPT) {
 					getGroup()->updateCharPrompt(data.firstChildElement());
 					relayMessage(conn, CHAR_PROMPT, data.firstChildElement());
@@ -639,6 +644,26 @@ void CGroupCommunicator::sendCharUpdate(QDomNode blob)
    		sendMessage((CGroupClient *)peer, UPDATE_CHAR, blob);
 	if (type == Server) {
 		QByteArray message = formMessageBlock(UPDATE_CHAR, blob);
+		CGroupServer *serv = (CGroupServer *) peer;
+		serv->sendToAll(message);
+	}
+}
+
+void CGroupCommunicator::sendCharStateUpdate(CGroupClient *conn, QDomNode blob)
+{
+	sendMessage(conn, CHAR_STATE, blob);
+}
+
+
+
+void CGroupCommunicator::sendCharStateUpdate(QDomNode blob)
+{
+	if (type == Off)
+		return;
+   	if (type == Client)
+   		sendMessage((CGroupClient *)peer, CHAR_STATE, blob);
+	if (type == Server) {
+		QByteArray message = formMessageBlock(CHAR_SCORE, blob);
 		CGroupServer *serv = (CGroupServer *) peer;
 		serv->sendToAll(message);
 	}

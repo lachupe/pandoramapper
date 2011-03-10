@@ -30,7 +30,6 @@
 #include <QTreeWidgetItem>
 #include <QTime>
 
-
 class CGroupChar
 {
 	CGroup *parent;
@@ -60,8 +59,6 @@ class CGroupChar
 	bool	sanc;
 	bool	blind;
 
-	int 	status;
-
 	int 	blind_elapsed;
 	int 	sanc_elapsed;
 	int 	bless_elapsed;
@@ -73,29 +70,34 @@ class CGroupChar
 	void setField(int i, QString name);
 	void setSpellsFields();
 	void setScoreFields();
-	void setStatusFields();
+	void setStateFields();
 
 	QString calculateTimeElapsed(QTime& timer, int delay);
 
-
 public:
-	enum Char_States { NORMAL, BASHED, INCAPACITATED, DEAD };
+	enum States { STANDING = 0, ENGAGED, BASHED, SLEEPING, RESTING, DEAD, INCAP };
 	CGroupChar(CGroup *parent, QTreeWidget*);
 	virtual ~CGroupChar();
 
 	QByteArray getName() { return name; }
 	void setName(QByteArray _name) { name = _name; }
 	void setColor(QColor col) { color = col; updateLabels(); }
+	void setState(int state) { this->state = state;}
+	int getState() { return state; }
 	QColor getColor() { return color; }
 	QDomNode toXML();
 	QDomNode promptToXML();
 	QDomNode positionToXML();
 	QDomNode scoreToXML();
+	QDomNode stateToXML();
+
 
 	bool updateFromXML(QDomNode blob);
 	bool updatePositionFromXML(QDomNode blob);
 	bool updatePromptFromXML(QDomNode blob);
 	bool updateScoreFromXML(QDomNode blob);
+	bool updateStateFromXML(QDomNode node);
+
 
 	void updateSpells();
 

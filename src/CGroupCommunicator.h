@@ -47,7 +47,7 @@ class CGroupCommunicator : public QObject
 					PROT_VERSION, GTELL,
 					STATE_LOGGED, STATE_KICKED,
 					ADD_CHAR, REMOVE_CHAR, UPDATE_CHAR, RENAME_CHAR,
-					CHAR_PROMPT, CHAR_SCORE, CHAR_POSITION};
+					CHAR_PROMPT, CHAR_SCORE, CHAR_POSITION, CHAR_STATE};
 
 	QObject *peer;	// server or client
 	CGroup *getGroup() { return (CGroup *)(parent());
@@ -70,7 +70,7 @@ class CGroupCommunicator : public QObject
     void kick(CGroupClient *& conn, QByteArray kickMessage);
     QHash<QByteArray,int> clientsList;
 public:
-    static const int protocolVersion = 107;
+    static const int protocolVersion = 108;
     enum States{ Server, Client, Off};
     CGroupCommunicator(int type, QObject *parent);
     virtual ~CGroupCommunicator();
@@ -84,6 +84,8 @@ public:
     void sendCharUpdate(QDomNode blob);
     void sendCharScoreUpdate(CGroupClient *conn, QDomNode blob);
     void sendCharScoreUpdate(QDomNode blob);
+    void sendCharStateUpdate(CGroupClient *conn, QDomNode blob);
+    void sendCharStateUpdate(QDomNode blob);
     void sendCharPromptUpdate(CGroupClient *conn, QDomNode blob);
     void sendCharPromptUpdate(QDomNode blob);
     void sendCharPositionUpdate(CGroupClient *conn, QDomNode blob);

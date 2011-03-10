@@ -34,6 +34,16 @@ struct Tincoming_lines {
 };
 
 
+class CCharState {
+
+public:
+	void testLine(QByteArray line);
+
+
+
+};
+
+
 class Cdispatcher
 {
     struct Tincoming_lines buffer[4096];
@@ -128,6 +138,7 @@ class Cdispatcher
     bool parseXml(QByteArray tag);
     void dispatchBuffer(ProxySocket &c);
     QByteArray cutColours(QByteArray line);
+    void checkStateChange(QByteArray line);
 public:
     
     int  analyzeMudStream(ProxySocket &c);

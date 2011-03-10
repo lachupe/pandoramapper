@@ -602,6 +602,8 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             QByteArray a_line = cutColours( buffer[i].line );
 
 
+            checkStateChange(a_line);
+
             if (Patterns::matchMoveCancelPatterns( a_line ) ) {
             	event.clear(); // it should actually be clear
             	event.movementBlocker = true;
@@ -834,3 +836,79 @@ char Cdispatcher::parseTerrain(QByteArray prompt)
 
     return terrain;
 }
+
+
+void Cdispatcher::checkStateChange(QByteArray line)
+{
+
+	// DEAD STATE
+	// timer in CGroup turns this even off
+	if (line == "You are dead! Sorry...") {
+		proxy->sendCharStateUpdatedEvent(CGroupChar::DEAD);
+		return;
+	}
+
+	// BASHED STATE
+	static QRegExp bashed("\\**\\* sends you sprawling with a powerful bash.", Qt::CaseSensitive, QRegExp::WildcardUnix);
+	if (bashed.exactMatch(line)) {
+		proxy->sendCharStateUpdatedEvent(CGroupChar::BASHED);
+		return;
+	}
+
+	if (line == "Your head stops stinging.") {
+		proxy->sendCharStateUpdatedEvent(CGroupChar::STANDING);
+	}
+
+	// SLEEPING
+	if (line == "You go to sleep." || line == "You feel very sleepy... zzzzzz" || line == "In your dreams, or what?") {
+		proxy->sendCharStateUpdatedEvent(CGroupChar::SLEEPING);
+		return;
+	}
+
+	if (line == "You wake, and sit up.") {
+		proxy->sendCharStateUpdatedEvent(CGroupChar::RESTING);
+		return;
+	}
+
+	// hmmm
+//	if (line == "You feel less tired.") {
+//		proxy->sendCharStateUpdatedEvent(CGroupChar::RESTING);
+//		return;
+//	}
+
+
+	// RESTING
+	if (line == "You sit down." || line == "You sit down and rest your tired bones.") {
+		proxy->sendCharStateUpdatedEvent(CGroupChar::RESTING);
+		return;
+	}
+
+	if (line == "You stop resting, and stand up.") {
+		proxy->sendCharStateUpdatedEvent(CGroupChar::STANDING);
+		return;
+	}
+
+	if (line == "You stand up.") {
+		proxy->sendCharStateUpdatedEvent(CGroupChar::STANDING);
+		return;
+	}
+
+
+
+	// INCAP
+	if (line == "You're stunned and will probably die soon if no-one helps you." ||
+		line == "You are incapacitated and will slowly die, if not aided."	)
+	{
+		proxy->sendCharStateUpdatedEvent(CGroupChar::INCAP);
+		return;
+	}
+
+	// DEAD
+	if (line == "You are dead! Sorry...") {
+		proxy->sendCharStateUpdatedEvent(CGroupChar::STANDING);
+		return;
+	}
+
+	// TODO: add prompt parser for engaged state
+}
+
