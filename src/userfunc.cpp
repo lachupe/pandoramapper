@@ -383,7 +383,7 @@ int Userland::parse_user_input_line(const char *line)
 
   print_debug(DEBUG_USERFUNC, "in parse_user_input_line");
 
-  printf("THREAD USER INPUT PARSER: %i\r\n", QThread::currentThreadId());
+  printf("THREAD USER INPUT: %i\r\n", QThread::currentThreadId());
 
 
   p = skip_spaces(line);
@@ -1430,6 +1430,8 @@ USERCMD(usercmd_mload)
   char *p;
 
   userfunc_print_debug;
+
+  printf("THREAD MLOAD %i\r\n", QThread::currentThreadId());
 
   send_to_user("--[Pandora: Reloading the database ...\n");
   send_to_user(" * Clearing the database class...\r\n");
