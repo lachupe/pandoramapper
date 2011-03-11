@@ -323,7 +323,7 @@ const struct user_command_type user_commands[] = {
       "    Usage: mregion \r\n\r\n"
       "\r\n"},
 
-    {"mtimer",              usercmd_mtimer,        0,      USERCMD_FLAG_INSTANT,
+    {"mtimer",              usercmd_mtimer,        0,      0,
         "Setup and addon timer ",
         "    Usage: mtimer <start|stop> <timers-name>\r\n\r\n"
         "\r\n"},
@@ -338,7 +338,6 @@ void Userland::add_command(int id, char *arg)
 
     print_debug(DEBUG_USERFUNC, "in addCommand");
 
-
     t.id = id;
     strcpy(t.arg, arg);
 
@@ -351,14 +350,12 @@ void Userland::add_command(int id, char *arg)
 }
 
 
+// parse command is called from the engine runSlot, which check the Map for being blocked
 void Userland::parse_command()
 {
   struct queued_command_type t;
 
   print_debug(DEBUG_USERFUNC, "in parseCommand");
-
-  printf("THREAD PARSE COMMAND: %i\r\n", QThread::currentThreadId());
-
 
   queue_mutex.lock();
   t = commands_queue.front();
@@ -383,9 +380,6 @@ int Userland::parse_user_input_line(const char *line)
 
   print_debug(DEBUG_USERFUNC, "in parse_user_input_line");
 
-  printf("THREAD USER INPUT: %i\r\n", QThread::currentThreadId());
-
-
   p = skip_spaces(line);
 
 
@@ -404,6 +398,7 @@ int Userland::parse_user_input_line(const char *line)
       if (IS_SET(user_commands[i].flags, USERCMD_FLAG_SYNC))
         CHECK_SYNC;
 
+
       result = USER_PARSE_SKIP;
       if (IS_SET(user_commands[i].flags, USERCMD_FLAG_INSTANT)) {
         result = ((*user_commands[i].command_pointer) (i, user_commands[i].subcmd, p, (char *) line));
@@ -411,7 +406,11 @@ int Userland::parse_user_input_line(const char *line)
           toggle_renderer_reaction();
       }
       else {
-        userland_parser->add_command(i, p);
+    	  if (Map.isBlocked()) {
+    		  send_to_user("--[ Map is blocked! Delaying the execution of your command...\r\n\r\n");
+    		  send_prompt();
+    	  }
+		  userland_parser->add_command(i, p);
       }
 
 
@@ -641,7 +640,15 @@ USERCMD(usercmd_maction)
 	  exit = 0;
   }
 
-  if (dir != -1 && conf->getMactionUsesPrespam()) {
+  if (Map.isBlocked()) {
+	  // well, the Map is obviously blocked - something fishy is happening to rooms data RIGHT NOW
+	  // and the user wants SOME OUTPUT *RIGHT NOW*
+	  // the easy way out is to use normal exits and avoiding Map. requests
+	  exit = 1;
+	  // TODO: the other alternative would be to build a synced list of exits after each Engine run
+  }
+
+  if (dir != -1 && conf->getMactionUsesPrespam() && !Map.isBlocked()) {
 	  /* for the case of prespam and sync, try to follow */
 	  QVector<unsigned int> *prespam = engine->getPrespammedDirs();
 	  if (prespam != NULL && dir != -1) {
@@ -649,43 +656,49 @@ USERCMD(usercmd_maction)
 
 		  // get the last room
 	      CRoom *p = Map.getRoom( prespam->at( prespam->size() - 1 ) );
-	      if (p->isDoorSecret(dir) == true) {
-	    	  MACTION_SEND_DOOR(p->getDoor(dir), dir);
-	      } else {
-	    	  MACTION_SEND_DOOR("exit", dir);
-	      }
-
 	      delete prespam;
 
-	      if (local) {
-	        send_prompt();
-	        return USER_PARSE_SKIP;
+	      if (p != NULL) {
+			  if (p->isDoorSecret(dir) == true) {
+				  MACTION_SEND_DOOR(p->getDoor(dir), dir);
+			  } else {
+				  MACTION_SEND_DOOR("exit", dir);
+			  }
+
+
+			  if (local) {
+				send_prompt();
+				return USER_PARSE_SKIP;
+			  }
+			  return USER_PARSE_DONE;
 	      }
-	      return USER_PARSE_DONE;
 	  }
   }
 
   /* get the door names */
   for (i = 0; i < stacker.amount(); i++) {
-    r = stacker.get(i);
+	  if (Map.isBlocked())
+		  break;
+	  r = stacker.get(i);
 
-    if (dir == -1) {
-      int z;
+		if (r != NULL) {
+			if (dir == -1) {
+			  int z;
 
-      for (z = 0; z <= 5; z++)
-        if (r->isDoorSecret(z) == true) {
-        	MACTION_SEND_DOOR(r->getDoor(dir), z);
-        }
+			  for (z = 0; z <= 5; z++)
+				if (r->isDoorSecret(z) == true) {
+					MACTION_SEND_DOOR(r->getDoor(dir), z);
+				}
 
-    } else {
-      if (r->isDoorSecret(dir) == true) {
-    	  MACTION_SEND_DOOR(r->getDoor(dir), dir);
-      } else {
-          exit = 1;         /* set the flag that 'exit' exit should be opened */
-      }
+			} else {
+			  if (r->isDoorSecret(dir) == true) {
+				  MACTION_SEND_DOOR(r->getDoor(dir), dir);
+			  } else {
+				  exit = 1;         /* set the flag that 'exit' exit should be opened */
+			  }
 
-    }
-
+			}
+		}
   }
 
 
@@ -1431,8 +1444,6 @@ USERCMD(usercmd_mload)
 
   userfunc_print_debug;
 
-  printf("THREAD MLOAD %i\r\n", QThread::currentThreadId());
-
   send_to_user("--[Pandora: Reloading the database ...\n");
   send_to_user(" * Clearing the database class...\r\n");
   Map.reinit();  /* this one reinits Ctree structure also */
@@ -1465,12 +1476,7 @@ USERCMD(usercmd_mload)
   }
 
 
-  send_to_user(" * Ready to go!\r\n");
-
-  send_to_user(" * Unlocking analyzer-thread...\r\n");
-
   send_to_user("--[Pandora: Done.\r\n");
-
   conf->setDatabaseModified(false);
 
 
