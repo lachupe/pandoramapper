@@ -158,6 +158,7 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
   conf.setValue("showSelf", getGroupManagerShowSelf() );
   conf.setValue("notifyArm", getGroupManagerNotifyArmour() );
   conf.setValue("notifySanc", getGroupManagerNotifySanc() );
+  conf.setValue("notifyBash", getGroupManagerNotifyBash() );
   conf.setValue("showGroupManager", getGroupManagerShowManager() );
 
   conf.setValue("windowRect", renderer_window->getGroupManagerRect() );
@@ -267,7 +268,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 	setRegionsAutoReplace( conf.value("regionsAutoReplace", false ).toBool() );
 	setRegionsAutoSet( conf.value("regionsAutoSet", false ).toBool() );
 	setMactionUsesPrespam( conf.value("mactionUsesPrespam", true).toBool() );
-	setPrespamTTL( conf.value("prespamTTL", 750).toInt() );
+	setPrespamTTL( conf.value("prespamTTL", 5000).toInt() );
 
 	conf.endGroup();
 
@@ -288,6 +289,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 	setGroupManagerShowSelf( conf.value("showSelf", false ).toBool() );
 	setGroupManagerNotifyArmour( conf.value("notifyArm", true ).toBool() );
 	setGroupManagerNotifySanc( conf.value("notifySanc", true ).toBool() );
+	setGroupManagerNotifyBash( conf.value("notifyBash", true ).toBool() );
 	setGroupManagerShowManager( conf.value("showGroupManager", true ).toBool() );
 	setGroupManagerRect( conf.value("windowRect").toRect() );
 	conf.endGroup();

@@ -126,6 +126,7 @@ class Cconfigurator : public QObject {
     QColor groupManagerColor;
     bool 	groupManagerNotifyArmour;
     bool 	groupManagerNotifySanc;
+    bool	groupManagerNotifyBash;
 
     QByteArray scorePattern;
     QByteArray scorePatternShort;
@@ -171,6 +172,7 @@ public:
     QColor getGroupManagerColor() { return groupManagerColor; }
     bool getGroupManagerNotifySanc() { return groupManagerNotifySanc; }
     bool getGroupManagerNotifyArmour() { return groupManagerNotifyArmour; }
+    bool getGroupManagerNotifyBash() { return groupManagerNotifyBash; }
 
 
     void setGroupManagerState(int val) { groupManagerState = val; setConfigModified(true); }
@@ -184,6 +186,7 @@ public:
     void setGroupManagerColor(QColor c) { groupManagerColor = c; setConfigModified(true); }
     void setGroupManagerNotifySanc(bool b) { groupManagerNotifySanc = b; setConfigModified(true); }
     void setGroupManagerNotifyArmour(bool b) { groupManagerNotifyArmour = b; setConfigModified(true); }
+    void setGroupManagerNotifyBash(bool b) { groupManagerNotifyBash = b; setConfigModified(true); }
 
     /* texture and sectors stuff */
     vector<struct roomSectorsData> sectors;

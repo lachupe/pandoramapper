@@ -513,6 +513,9 @@ void CGroup::parseScoreInformation(QByteArray score)
 void CGroup::parsePromptInformation(QByteArray prompt)
 {
 	QByteArray hp, mana, moves;
+	bool notengaged = false;
+	int hpIndex, moveIndex, manaIndex;
+	int sepIndex;
 
 	if (prompt.indexOf('>') == -1)
 		return; // false prompt
@@ -521,32 +524,81 @@ void CGroup::parsePromptInformation(QByteArray prompt)
 	mana = "Full";
 	moves = "Lots";
 
-	int index = prompt.indexOf("HP:");
-	if (index != -1) {
+	hpIndex = prompt.indexOf("HP:");
+	if (hpIndex != -1) {
 		hp = "";
-		int k = index + 3;
+		int k = hpIndex + 3;
 		while (prompt[k] != ' ' && prompt[k] != '>' )
 			hp += prompt[k++];
+		if (prompt[k] == '>')
+			notengaged = true; // for sure!
 	}
 
-	index = prompt.indexOf("Mana:");
-	if (index != -1) {
+	manaIndex = prompt.indexOf("Mana:");
+	if (manaIndex != -1) {
 		mana = "";
-		int k = index + 5;
+		int k = manaIndex + 5;
 		while (prompt[k] != ' ' && prompt[k] != '>' )
 			mana += prompt[k++];
+		if (prompt[k] == '>')
+			notengaged = true; // for sure!
 	}
 
-	index = prompt.indexOf("Move:");
-	if (index != -1) {
+	moveIndex = prompt.indexOf("Move:");
+	if (moveIndex != -1) {
 		moves = "";
-		int k = index + 5;
+		int k = moveIndex + 5;
 		while (prompt[k] != ' ' && prompt[k] != '>' )
 			moves += prompt[k++];
+		if (prompt[k] == '>')
+			notengaged = true;
 	}
 
 	self->setTextScore(hp, mana, moves);
 	issueLocalCharPromptUpdate();
+
+
+	// now do some work for char State
+	// check those things
+	// a) are we dying?
+	// b) are we NOT dying and char state is INCAP?
+	// c) are we engaged?
+
+	if (hp == "Dying") {										// A
+		setCharState(CGroupChar::INCAP);
+		return;
+	} else if (self->getState() == CGroupChar::INCAP) {			// B
+		// COOL, we were incap and unincapped! ;-)
+		// what to do now? lets select the standing state and if we are fighting the very next check will change it
+		setCharState(CGroupChar::STANDING);
+	}
+
+	// Btw, if we are wounded, hurt or fine -> remove the DEAD flag
+	if (self->getState() == CGroupChar::DEAD && hp != "Awful" && hp != "Bad") {
+		returnToLife();
+		return; // no need to look for engaged state then
+	}
+
+	// and here comes C
+	// and now the ultimate check!
+	sepIndex = prompt.lastIndexOf(':');
+	if (sepIndex == -1 || sepIndex == 1) // index of 1 is for brush terrain
+		notengaged = true;
+
+
+	if (notengaged == false && sepIndex > hpIndex && sepIndex > moveIndex && sepIndex > manaIndex) {
+		printf("Engaged!\r\n");
+		setCharState(CGroupChar::ENGAGED);
+	} else {
+		notengaged = true;
+	}
+
+	if (notengaged && self->getState() == CGroupChar::ENGAGED) {
+		// just stopped fighting!
+		setCharState(CGroupChar::STANDING);
+	}
+
+	printf("Well, error i guess! Ask Aza to check his prompt checker for engaged state!\r\n");
 }
 
 void CGroup::parseStateChangeLine(int message, QByteArray line)
@@ -573,8 +625,26 @@ void CGroup::setCharState(int state)
 		return;
 	}
 	if (self->getState() != state) {
+		// engaged state has the lowest "priority" vs DEAD, INCAP and BASHED
+		if (state == CGroupChar::ENGAGED) {
+			switch (self->getState()) {
+				case CGroupChar::DEAD:
+				case CGroupChar::INCAP:
+				case CGroupChar::BASHED:
+					// ignore it then
+					return;
+			}
+		}
+
 		printf("Setting new state: %i\r\n", state);
+		if (state == CGroupChar::BASHED && conf->getGroupManagerNotifyBash() == true) {
+			sendGTell("I'm bashed!");
+		}
+
 		self->setState(state);
+
+		// for the case of quick turning back from DEAD state, via the hp regen
+		ignoredState = state;
 		issueLocalCharStateUpdate();
 
 		if (state == CGroupChar::DEAD)

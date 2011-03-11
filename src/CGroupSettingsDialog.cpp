@@ -49,6 +49,7 @@ void CGroupSettingsDialog::run()
 	checkBox_showSelf->setChecked( conf->getGroupManagerShowSelf() );
 	checkBox_notifyArm->setChecked( conf->getGroupManagerNotifyArmour() );
 	checkBox_notifySanc->setChecked( conf->getGroupManagerNotifySanc() );
+	checkBox_notifyBash->setChecked( conf->getGroupManagerNotifyBash() );
 }
 
 void CGroupSettingsDialog::accept()
@@ -100,9 +101,14 @@ void CGroupSettingsDialog::accept()
 		conf->setGroupManagerNotifyArmour(notifyArm);
 	}
 
-	bool notifySanc = checkBox_notifyArm->isChecked();
+	bool notifySanc = checkBox_notifySanc->isChecked();
 	if (notifySanc != conf->getGroupManagerNotifySanc() ) {
 		conf->setGroupManagerNotifySanc(notifySanc);
+	}
+
+	bool notifyBash = checkBox_notifyBash->isChecked();
+	if (notifyBash != conf->getGroupManagerNotifyBash() ) {
+		conf->setGroupManagerNotifyBash(notifyBash);
 	}
 
 

@@ -812,16 +812,14 @@ void Cdispatcher::checkStateChange(QByteArray line)
 		proxy->sendCharStateUpdatedEvent(CGroupChar::INCAP);
 		return;
 	}
+	// the only way to leave incap is either to die or to improve from HP:Dying to something else!
 
 	// DEAD
 	if (line == "You are dead! Sorry...") {
 		proxy->sendCharStateUpdatedEvent(CGroupChar::STANDING);
 		return;
 	}
-
-	// TODO: add prompt parser for engaged state
 }
-
 
 void Cdispatcher::updateSpellsState(QByteArray line)
 {
