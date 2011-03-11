@@ -277,6 +277,7 @@ void CRoomManager::addRoom(CRoom *room)
 CRoomManager::CRoomManager()
 {
 	init();
+    blocked = false;
 }
 
 

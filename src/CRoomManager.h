@@ -59,6 +59,7 @@ class CRoomManager : public QObject {
     void deleteRoomUnlocked(CRoom* r, int mode);  /* user interface function */
     void smallDeleteRoomUnlocked(CRoom* r);  /* user interface function */
 
+    bool	blocked;
 public:
     CRoomManager();
     virtual ~CRoomManager();
@@ -121,6 +122,9 @@ public:
     void loadMap(QString filename);
     void saveMap(QString filename);
     void clearAllSecrets();
+
+    void setBlocked(bool b) { blocked = b; }
+    bool isBlocked() { return blocked; }
 };
 
 extern class CRoomManager Map;/* room manager */

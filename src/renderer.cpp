@@ -60,12 +60,7 @@ GLfloat marker_colour[4] =  {1.0, 0.1, 0.1, 0.9};
 RendererWidget::RendererWidget( QWidget *parent )
      : QGLWidget( parent )
 {
-
-
-
   print_debug(DEBUG_RENDERER , "in renderer constructor");
-
-  printf("Setting the angles and positions\r\n");
 
   angleX = conf->getRendererAngleX();
   angleY = conf->getRendererAngleY();
@@ -92,7 +87,7 @@ RendererWidget::RendererWidget( QWidget *parent )
 
 void RendererWidget::initializeGL()
 {
-unsigned int i;
+	unsigned int i;
 
 	setMouseTracking(true);
 
@@ -870,9 +865,16 @@ void RendererWidget::draw(void)
     const float alphaChannelTable[] = { 0.85, 0.4, 0.37, 0.28, 0.25, 0.15, 0.15, 0.13, 0.1, 0.1, 0.1};
 //                                       0    1     2      3    4      5     6    7    8     9    10 
 
-    printf("THREAD PaintGL: %i\r\n", QThread::currentThreadId());
-
     
+    if (Map.isBlocked()) {
+    	// well, not much we can do - ignore the message
+    	printf("Map is blocked. Delaying the redraw\r\n");
+		print_debug(DEBUG_GENERAL, "Map is blocked. Delaying the redraw.");
+		QTimer::singleShot( 500, this, SLOT( paintGL() ) );
+		return;
+    }
+
+
     redraw = false;
     
     // clear the billboards 
@@ -884,8 +886,6 @@ void RendererWidget::draw(void)
 //    square_frustum_checks = 0;
     
     int z = 0;
-    
-    //printf("renderer Thread ID: %i\r\n", (int) QThread::currentThreadId ());
 
     print_debug(DEBUG_RENDERER, "in draw()");
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

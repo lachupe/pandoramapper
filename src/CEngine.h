@@ -94,7 +94,6 @@ public:
     void setRoomname(QByteArray s) { last_name = s; }
     void setDesc(QByteArray s) { last_desc = s; }
     void setExits(QByteArray s) { last_exits = s; }
-    void setPrompt(QByteArray s) { last_prompt = s; }
     void setTerrain(char c) { last_terrain = c; }
 
     bool isMapping() { return mapping; }
@@ -115,6 +114,7 @@ public:
     void resetAddedRoomVar() { addedroom = NULL; }
 public slots:
     void slotRunEngine();
+    void setPrompt(QByteArray s) { last_prompt = s; }
 };
 
 extern class CEngine *engine;

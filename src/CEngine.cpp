@@ -228,16 +228,13 @@ void CEngine::slotRunEngine()
 {
     print_debug(DEBUG_ANALYZER, "In slotRunEngine");
 
-    // just ignore the even it the system is blocking.
-    // supposedly the event will be repeated sometime later =)
-    // for engine and userland redraw this does not matter much
-//    if (Map.tryLockForRead() == false) {
-//    	print_debug(DEBUG_GENERAL, "slotRunEngine tried to block the eventQueue. Delayed.");
-//    	QTimer::singleShot( 50, this, SLOT(slotRunEngine()) );
-//    	return;
-//    } else
-//    	Map.unlock();
-
+    if (Map.isBlocked()) {
+    	// well, not much we can do - ignore the message
+    	printf("The Map is blocked. Delaying the execution of the slotRunEngine.\r\n");
+		print_debug(DEBUG_GENERAL, "The Map is blocked. Delaying the execution of the slotRunEngine.");
+		QTimer::singleShot( 100, this, SLOT(slotRunEngine()) );
+		return;
+    }
 
     if (userland_parser->is_empty()) {
         print_debug(DEBUG_ANALYZER, "Calling the analyzer");

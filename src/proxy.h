@@ -71,7 +71,7 @@ public:
     int mainState;
     int subState;
     char                          buffer[PROXY_BUFFER_SIZE];
-    int                             length;
+    int                           length;
 
     ProxySocket(bool xml);
     ProxySocket() {};
@@ -83,6 +83,23 @@ public:
 
     QByteArray  subchars;
     QByteArray  fragment;
+
+    // returns new position
+    void append(QByteArray line) {
+        memcpy(buffer + length, line, line.length());
+        length += line.length();
+    }
+
+    void append(const char *line) {
+        memcpy(buffer + length, line, strlen(line));
+        length += strlen(line);
+    }
+
+
+
+    void clearBuffer() {
+    	length = 0;
+    }
 
     void close();
     void clear();

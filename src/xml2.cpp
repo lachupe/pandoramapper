@@ -22,8 +22,6 @@
 /*
   $Id: xml2.cpp,v 1.15 2006/08/06 13:50:53 porien Exp $
 */
-#include <cstdlib>
-#include <cstring>
 #include <QApplication>
 #include <QFile>
 #include <QXmlDefaultHandler>
@@ -60,9 +58,12 @@ void CRoomManager::loadMap( QString filename)
 
   // Most sensitive application :-)
   // lock for any writing/reading!
-  
-  print_debug(DEBUG_ROOMS, "endElement : %i", QThread::currentThreadId() );
 
+  // Map is only (almost!) changed in mainwindow thread, which is "sequential"
+  // so, when we come here, we are sequentially blocking the RoomManager (Map)
+  // when progressBar updates it's status, it lets the App Loop to call whatever it wants (depepnding on events)
+  // and we want those events to, well, fail, since there is no such thing as waiting for your own thread :-/
+  Map.setBlocked( true );
   
   unsigned int currentMaximum = 22000;
   QProgressDialog progress("Loading the database...", "Abort Loading", 0, currentMaximum, renderer_window);
@@ -72,8 +73,6 @@ void CRoomManager::loadMap( QString filename)
 
   StructureParser * handler = new StructureParser(&progress, currentMaximum, this);
   reader.setContentHandler( handler );
-    
-  //printf("LoadMap Thread ID: %i\r\n", (int) QThread::currentThreadId ());
     
   print_debug(DEBUG_XML, "reading xml ...");
   fflush(stdout);
@@ -110,7 +109,7 @@ void CRoomManager::loadMap( QString filename)
 	  print_debug(DEBUG_XML, "done.");
   }
 
-//  unlock();
+  Map.setBlocked( false );
 
   delete handler;
   return;
@@ -146,7 +145,8 @@ bool StructureParser::endElement( const QString& , const QString& , const QStrin
   }        
   flag = 0;    
     
-  if (progress->wasCanceled()) 
+
+  if (progress->wasCanceled())
 	  abortLoading = true;
   
   return TRUE;
@@ -295,7 +295,8 @@ void CRoomManager::saveMap(QString filename)
     return;
   }
 
-//  QReadLocker locker(&mapLock);
+
+  Map.setBlocked( true );
   
   QProgressDialog progress("Saving the database...", "Abort Saving", 0, size(), renderer_window);
   progress.setWindowModality(Qt::WindowModal);
@@ -388,5 +389,7 @@ void CRoomManager::saveMap(QString filename)
   fflush(f);
   fclose(f);
     
+  Map.setBlocked( false );
+
   print_debug(DEBUG_XML, "xml_writebase() is done.\r\n");
 }

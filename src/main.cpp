@@ -287,8 +287,6 @@ int main(int argc, char *argv[])
     splash->finish(renderer_window);
     delete splash;
 
-    printf("THREAD MAIN: %i\r\n", QThread::currentThreadId());
-
     proxy->init();
     proxy->start();
     QObject::connect(proxy, SIGNAL(startEngine()), engine, SLOT(slotRunEngine()), Qt::QueuedConnection );

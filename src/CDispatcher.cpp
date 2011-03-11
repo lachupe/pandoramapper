@@ -486,17 +486,13 @@ QByteArray Cdispatcher::cutColours(QByteArray line)
 int Cdispatcher::analyzeMudStream(ProxySocket &c)
 {
     int i;
-    int new_len;
-    char *buf;
     QByteArray scoreLine;
 
     print_debug(DEBUG_DISPATCHER, "analyzeMudStream(): starting");
     print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
 
     dispatchBuffer(c);
-
-    buf = c.buffer;
-    new_len = 0;
+    c.clearBuffer();
 
     // else we simply recreate our buffer and parse lines
     for (i = 0; i< amount; i++) {
@@ -601,7 +597,6 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
         if (buffer[i].type == IS_NORMAL && buffer[i].line.indexOf("\r\n") != -1) {
             QByteArray a_line = cutColours( buffer[i].line );
 
-
             checkStateChange(a_line);
 
             if (Patterns::matchMoveCancelPatterns( a_line ) ) {
@@ -611,12 +606,10 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             }
 
             // check for fleeing/forced movement
-            // a_line == "You flee head over heels." ||
             if (Patterns::matchMoveForcePatterns( a_line ) ) {
-            	// well, for now i ignore the fact that all the rest of the patterns is not fleeing ...
+            	// the next event, i.e. the incoming movement will have the flag
             	event.fleeing = true;
             }
-
 
             // check for scouting
             if (a_line.startsWith("You quietly scout ") == true) {
@@ -641,111 +634,39 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             	proxy->sendScoreLineEvent(a_line);
             }
 
-            // now do all necessary spells checks
-            {
-                unsigned int p;
 
-//                printf("Checking spells on %s.\r\n", a_line);
-                for (p = 0; p < conf->spells.size(); p++) {
-                    if ( (conf->spells[p].up_mes != "" && conf->spells[p].up_mes == a_line) ||
-                         (conf->spells[p].refresh_mes != "" && conf->spells[p].refresh_mes == a_line )) {
-                        print_debug(DEBUG_SPELLS, "SPELL %s Starting/Restaring timer.",  (const char *) conf->spells[p].name);
-                        conf->spells[p].timer.start();   // start counting
-                        conf->spells[p].up = true;
-                        proxy->sendSpellsUpdatedEvent();
-                        break;
-                    }
+            // all necessary spells up/down/refresh lines checks
+        	updateSpellsState(a_line);
 
-                    // if some spell is up - only then we check if its down
-                    if (conf->spells[p].up && conf->spells[p].down_mes != "" && conf->spells[p].down_mes == a_line) {
-                        conf->spells[p].up = false;
-                        conf->spells[p].silently_up = false;
-                        print_debug(DEBUG_SPELLS, "SPELL: %s is DOWN. Uptime: %s.", (const char *) conf->spells[p].name,
-                                                qPrintable( conf->spellUpFor(p) ) );
-                        proxy->sendSpellsUpdatedEvent();
-                        break;
-                    }
-                }
-
-
-
-                if (spells_print_mode && (strlen(a_line) > 3)) {
-                    // we are somewhere between the lines "Affected by:" and prompt
-                    for (p = 0; p < conf->spells.size(); p++) {
-                        //printf("Spell name %s, line %s\r\n", (const char *) conf->spells[p].name, (const char*) a_line );
-                        if (a_line.indexOf(conf->spells[p].name) == 2) {
-                            QString s;
-
-                            if (conf->spells[p].up) {
-                                s = QString("- %1 (up for %2)\r\n")
-                                    .arg( (const char *)conf->spells[p].name )
-                                    .arg( conf->spellUpFor(p) );
-                            } else {
-                                s = QString("- %1 (unknown time)\r\n")
-                                    .arg( (const char *)conf->spells[p].name );
-                                conf->spells[p].silently_up = true;
-                                proxy->sendSpellsUpdatedEvent();
-                            }
-                            memcpy(buf + new_len, qPrintable(s), s.length());
-                            new_len += s.length();
-
-                            break;
-                        }
-                    }
-                    if (p != conf->spells.size())
-                        continue; // dont print this line if we got a match for it
-
-
-                }
-
-            }
+        	QByteArray spellLine = checkAffectedByLine(a_line);
+        	if (spellLine != "") {
+        		c.append(spellLine);
+        		continue; // do not print the old line then
+        	}
 
             // changes the Affected by: output.
             if (conf->spells_pattern == a_line) {
-                unsigned int spell;
-                QByteArray message = "Timers:";
-
                 spells_print_mode = true;   // print the spells data
-                // addon timers first
-                memcpy(buf + new_len, (const char *) message, message.length());
-                new_len += message.length();
-                memcpy(buf + new_len, "\r\n", 2);
-                new_len += 2;
-
-                for (spell = 0; spell < conf->spells.size(); spell++)
-                    if (conf->spells[spell].addon && conf->spells[spell].up) {
-                        // there is a timer ticking
-                        QString s;
-
-                        s = QString("- %1 (up for %2)\r\n")
-                            .arg( (const char *)conf->spells[spell].name )
-                            .arg( conf->spellUpFor(spell) );
-
-                        memcpy(buf + new_len, qPrintable(s), s.length());
-                        new_len += s.length();
-                        break;
-                    }
-
+            	c.append( checkAffectedByLine(a_line) );
             }
-
         }
 
         if (buffer[i].type == IS_PROMPT) {
             print_debug(DEBUG_DISPATCHER, "PROMPT recognized");
-            spells_print_mode = false;      //
-            engine->setPrompt(buffer[i].line);
+            spells_print_mode = false;
+            last_prompt = buffer[i].line;
+            // this is potentialy dangerous!
+            //engine->setPrompt(buffer[i].line);
             proxy->sendPromptLineEvent(buffer[i].line);
         }
 
 
         print_debug(DEBUG_DISPATCHER, "Adding the line to the output buffer");
-        // recreating this line in buffer
-        memcpy(buf + new_len, buffer[i].line, buffer[i].line.length());
-        new_len += buffer[i].line.length();
+        c.append( buffer[i].line );
     }
 
-    print_debug(DEBUG_DISPATCHER, "Done with this buffer. New length: %i", new_len);
-    return new_len;
+    print_debug(DEBUG_DISPATCHER, "Done with this buffer. New length: %i", c.length);
+    return c.length;
 }
 
 
@@ -755,23 +676,16 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
 /* new user input analyzer */
 int Cdispatcher::analyzeUserStream(ProxySocket &c)
 {
-    int i, result;
-    int new_len, len;
-    char *buf;
+    int i;
     CGroup *groupManager;
 
     groupManager = renderer_window->getGroupManager();
 
-
-    buf = c.buffer;
-    new_len = 0;
-
     print_debug(DEBUG_DISPATCHER, "analyzeUserStream() starting");
     print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);
 
-//    printf("---------- user input -----------\r\n");
-
     dispatchBuffer(c);
+    c.clearBuffer();
 
     for (i = 0; i< amount; i++) {
         if (buffer[i].type == IS_NORMAL) {
@@ -788,42 +702,38 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
             buffer[i].line.replace("\r", "");
             buffer[i].line.replace("\n", "");
             memcpy(commandBuffer, buffer[i].line.constData(), buffer[i].line.length());
-            len = buffer[i].line.length();
-            commandBuffer[len] = 0;
+            commandBuffer[ buffer[i].line.length() ] = 0;
 
             print_debug(DEBUG_DISPATCHER, "calling Userland parser");
-            result = userland_parser->parse_user_input_line(commandBuffer);
-            if (result == USER_PARSE_SKIP)
+            if (userland_parser->parse_user_input_line(commandBuffer) == USER_PARSE_SKIP)
                 continue;
 
+            strcat(commandBuffer, "\r\n");
 
-
-            if (buffer[i].line.startsWith("tell Group") == true) {
+            static QByteArray GTellCommand = "tell Group";
+            if (buffer[i].line.startsWith(GTellCommand) == true) {
             	// this is a GROUP-tell!
-            	int len = buffer[i].line.size() - 11; // 10 is length of "tell Group "
+            	int len = buffer[i].line.size() - GTellCommand.length(); // 10 is length of "tell Group "
             	QByteArray data = buffer[i].line.right(len);
             	print_debug(DEBUG_GROUP, "Sending a G-tell from local user: %s", (const char *) data);
             	proxy->sendGroupTellEvent(data);
             	send_to_user("Ok.\r\n\r\n");
-            	send_prompt();
+            	send_to_user(last_prompt);
             	continue;
             }
 
-            strcat(commandBuffer, "\r\n");
+
 
             print_debug(DEBUG_DISPATCHER, "recreating the output buffer");
-            memcpy(buf + new_len, commandBuffer, strlen(commandBuffer));
-            new_len += strlen(commandBuffer);
+            c.append(commandBuffer);
         } else {
             print_debug(DEBUG_DISPATCHER, "user input type : no parsing, just recreating the buffer");
-            // No parsing, just put the line in buffer. recreating this line in buffer
-            memcpy(buf + new_len, buffer[i].line, buffer[i].line.length());
-            new_len += buffer[i].line.length();
+            c.append(buffer[i].line);
         }
     }
 
-    print_debug(DEBUG_DISPATCHER, "Done proceeding user input. Resulting buffer length: %i", new_len);
-    return new_len;
+    print_debug(DEBUG_DISPATCHER, "Done proceeding user input. Resulting buffer length: %i", c.length);
+    return c.length;
 }
 
 char Cdispatcher::parseTerrain(QByteArray prompt)
@@ -911,4 +821,73 @@ void Cdispatcher::checkStateChange(QByteArray line)
 
 	// TODO: add prompt parser for engaged state
 }
+
+
+void Cdispatcher::updateSpellsState(QByteArray line)
+{
+    for (unsigned int p = 0; p < conf->spells.size(); p++) {
+        if ( (conf->spells[p].up_mes != "" && conf->spells[p].up_mes == line) ||
+             (conf->spells[p].refresh_mes != "" && conf->spells[p].refresh_mes == line )) {
+            print_debug(DEBUG_SPELLS, "SPELL %s Starting/Restaring timer.",  (const char *) conf->spells[p].name);
+            conf->spells[p].timer.start();   // start counting
+            conf->spells[p].up = true;
+            proxy->sendSpellsUpdatedEvent();
+            break;
+        }
+
+        // if some spell is up - only then we check if its down
+        if (conf->spells[p].up && conf->spells[p].down_mes != "" && conf->spells[p].down_mes == line) {
+            conf->spells[p].up = false;
+            conf->spells[p].silently_up = false;
+            print_debug(DEBUG_SPELLS, "SPELL: %s is DOWN. Uptime: %s.", (const char *) conf->spells[p].name,
+                                    qPrintable( conf->spellUpFor(p) ) );
+            proxy->sendSpellsUpdatedEvent();
+            break;
+        }
+    }
+
+}
+
+QByteArray Cdispatcher::checkAffectedByLine(QByteArray line)
+{
+    if (spells_print_mode && (line.length() > 3)) {
+		for (unsigned int p = 0; p < conf->spells.size(); p++) {
+			//printf("Spell name %s, line %s\r\n", (const char *) conf->spells[p].name, (const char*) a_line );
+			if (line.indexOf(conf->spells[p].name) == 2) {
+				QString s;
+				if (conf->spells[p].up) {
+					s = QString("- %1 (up for %2)\r\n")
+						.arg( (const char *)conf->spells[p].name )
+						.arg( conf->spellUpFor(p) );
+				} else {
+					s = QString("- %1 (unknown time)\r\n")
+						.arg( (const char *)conf->spells[p].name );
+					conf->spells[p].silently_up = true;
+					proxy->sendSpellsUpdatedEvent();
+				}
+
+				return qPrintable(s);
+			}
+		}
+    }
+    return "";
+}
+
+QByteArray Cdispatcher::checkTimersLine(QByteArray line)
+{
+    QString s = "Timers:\r\n";
+
+    for (unsigned int spell = 0; spell < conf->spells.size(); spell++)
+        if (conf->spells[spell].addon && conf->spells[spell].up) {
+            // there is a timer ticking
+
+            s += QString("- %1 (up for %2)\r\n")
+                .arg( (const char *)conf->spells[spell].name )
+                .arg( conf->spellUpFor(spell) );
+
+        }
+
+    return qPrintable(s);
+}
+
 

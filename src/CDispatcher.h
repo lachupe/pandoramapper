@@ -56,6 +56,8 @@ class Cdispatcher
     bool      scouting;
     Event     event;
 
+    QByteArray last_prompt;
+
     enum dispatcherStates { STATE_NORMAL = 0, 
                                                STATE_ROOM, 
                                                STATE_DESC, 
@@ -134,11 +136,15 @@ class Cdispatcher
 
     char parseTerrain(QByteArray prompt);
 
-
     bool parseXml(QByteArray tag);
     void dispatchBuffer(ProxySocket &c);
     QByteArray cutColours(QByteArray line);
     void checkStateChange(QByteArray line);
+
+    void updateSpellsState(QByteArray line);
+    QByteArray checkAffectedByLine(QByteArray line);
+    QByteArray checkTimersLine(QByteArray line);
+
 public:
     
     int  analyzeMudStream(ProxySocket &c);

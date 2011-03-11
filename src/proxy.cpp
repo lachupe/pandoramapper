@@ -211,7 +211,6 @@ void Proxy::run()
     mud.clear();
     user.clear();
     dispatcher = new Cdispatcher();
-    printf("THREAD PROXY: %i\r\n", QThread::currentThreadId());
     loop();
 }
 
@@ -237,7 +236,10 @@ void Proxy::sendMudEmulationGreeting()
     else
         r = stacker.first();
 
-    r->sendRoom();
+    if (r != NULL)
+    	r->sendRoom();
+    else
+    	user.send_line("Your database has no room with ID 1!");
 
     user.send_line( "-->" );
 }
@@ -312,7 +314,6 @@ void Proxy::sendGroupTellEvent(QByteArray data)
 {
 	print_debug(DEBUG_PROXY, "Sending gtell");
 	emit sendGTell(data);
-	print_debug(DEBUG_PROXY, "Done sending gtell");
 }
 
 void Proxy::sendScoreLineEvent(QByteArray data)

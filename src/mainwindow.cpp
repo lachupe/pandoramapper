@@ -213,7 +213,10 @@ CMainWindow::CMainWindow(QWidget *parent)
     connect(groupManager, SIGNAL(hides()), actionManager, SLOT( groupManagerHides() ),  Qt::QueuedConnection );
     connect(proxy, SIGNAL(sendGTell(QByteArray)), groupManager, SLOT( sendGTell(QByteArray) ),  Qt::QueuedConnection );
     connect(proxy, SIGNAL(sendScoreLine(QByteArray)), groupManager, SLOT( parseScoreInformation(QByteArray) ),  Qt::QueuedConnection );
+
     connect(proxy, SIGNAL(sendPromptLine(QByteArray)), groupManager, SLOT( parsePromptInformation(QByteArray) ),  Qt::QueuedConnection );
+    connect(proxy, SIGNAL(sendPromptLine(QByteArray)), engine, SLOT( setPrompt(QByteArray) ),  Qt::QueuedConnection );
+
     connect(proxy, SIGNAL(sendSpellsUpdate()), groupManager, SLOT( updateSpellsInfo() ),  Qt::QueuedConnection );
 
     connect(proxy, SIGNAL(sendCharStateUpdate(int)), groupManager, SLOT( setCharState(int) ),  Qt::QueuedConnection );

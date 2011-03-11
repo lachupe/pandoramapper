@@ -92,8 +92,20 @@ class PipeManager {
     QQueue<Event> Pipe;
 
 public:
-    void addEvent(Event e)  { pipeMutex.lock(); Pipe.enqueue(e); pipeMutex.unlock();  }
-    void clear() { pipeMutex.lock(); Pipe.clear(); pipeMutex.unlock();  }
+    void addEvent(Event e)
+    {
+    	pipeMutex.lock();
+    	Pipe.enqueue(e);
+    	pipeMutex.unlock();
+    }
+
+    void clear()
+    {
+    	pipeMutex.lock();
+    	Pipe.clear();
+    	pipeMutex.unlock();
+    }
+
     bool isEmpty() { return Pipe.empty(); }    
 
     Event getEvent() 

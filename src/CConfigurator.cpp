@@ -241,8 +241,6 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 	setDisplayRegionsRenderer( conf.value("displayRegions", false).toBool() );
 	setMultisampling( conf.value("multisampling", true).toBool() );
 	setSelectOAnyLayer( conf.value("selectOnAnyLayer", true).toBool() );
-
-	printf("Reading the angles\r\n");
     setRendererAngles(conf.value("angleX", 0).toFloat(), conf.value("angleY", 0).toFloat(), conf.value("angleZ", 0).toFloat());
     setRendererPosition(conf.value("userX", 0).toFloat(), conf.value("userY", 0).toFloat(), conf.value("userZ", 0).toFloat());
     setNoteColor( conf.value("noteColor", "#F28003").toByteArray() );

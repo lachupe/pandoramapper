@@ -54,7 +54,6 @@ public:
   void put(CRoom *r);
   void removeRoom(unsigned int id);    /* swaps */
 
-
   /* DEBUG */
   void printStacks();
 

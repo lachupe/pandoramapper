@@ -48,7 +48,7 @@ void FindDialog::on_lineEdit_textChanged()
 
 void FindDialog::findClicked()
 {
-    QString text = lineEdit->text();
+    QString text = lineEdit->text().simplified();
     Qt::CaseSensitivity cs =
             caseCheckBox->isChecked() ? Qt::CaseSensitive
                                       : Qt::CaseInsensitive;

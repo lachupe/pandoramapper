@@ -67,9 +67,9 @@ void CStacksManager::printStacks()
 
     send_to_user(" Possible positions : \n");
     if (sa->size() == 0)
-	send_to_user(" Current position is unknown!\n");
+    	send_to_user(" Current position is unknown!\n");
     for (i = 0; i < sa->size(); i++) {
-	send_to_user(" %i\n", (*sa)[i]->id);
+    	send_to_user(" %i\n", (*sa)[i]->id);
     }
 }
 
