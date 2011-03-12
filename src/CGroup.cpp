@@ -170,7 +170,7 @@ void CGroup::resetColor()
 
 void CGroup::setCharPosition(unsigned int pos)
 {
-	if (self->getPosition() != pos) {
+	if (self->getPosition() != pos && self->getState() != CGroupChar::DEAD) {
 		self->setPosition(pos);
 		self->setLastMovement( engine->getLastMovement() );
 		issueLocalCharPositionUpdate();
@@ -597,8 +597,6 @@ void CGroup::parsePromptInformation(QByteArray prompt)
 		// just stopped fighting!
 		setCharState(CGroupChar::STANDING);
 	}
-
-	printf("Well, error i guess! Ask Aza to check his prompt checker for engaged state!\r\n");
 }
 
 void CGroup::parseStateChangeLine(int message, QByteArray line)

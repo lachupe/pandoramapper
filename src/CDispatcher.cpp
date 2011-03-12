@@ -647,7 +647,13 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             // changes the Affected by: output.
             if (conf->spells_pattern == a_line) {
                 spells_print_mode = true;   // print the spells data
-            	c.append( checkAffectedByLine(a_line) );
+            }
+
+            static QRegExp statExp("Needed: * Alert: *.", Qt::CaseSensitive, QRegExp::Wildcard);
+            if (statExp.exactMatch(a_line)) {
+            	c.append( a_line );
+            	c.append( checkTimersLine() );
+            	continue;
             }
         }
 
@@ -868,17 +874,18 @@ QByteArray Cdispatcher::checkAffectedByLine(QByteArray line)
 			}
 		}
     }
+
     return "";
 }
 
-QByteArray Cdispatcher::checkTimersLine(QByteArray line)
+QByteArray Cdispatcher::checkTimersLine()
 {
     QString s = "Timers:\r\n";
 
     for (unsigned int spell = 0; spell < conf->spells.size(); spell++)
-        if (conf->spells[spell].addon && conf->spells[spell].up) {
+        if (conf->spells[spell].addon && conf->spells[spell].up)
+        {
             // there is a timer ticking
-
             s += QString("- %1 (up for %2)\r\n")
                 .arg( (const char *)conf->spells[spell].name )
                 .arg( conf->spellUpFor(spell) );

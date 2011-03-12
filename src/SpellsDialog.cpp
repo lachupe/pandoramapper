@@ -21,7 +21,6 @@
 
 #include <QByteArray>
 #include <QMutex>
-#include <vector>
 
 
 #include "SpellsDialog.h"

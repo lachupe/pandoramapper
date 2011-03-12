@@ -143,7 +143,7 @@ class Cdispatcher
 
     void updateSpellsState(QByteArray line);
     QByteArray checkAffectedByLine(QByteArray line);
-    QByteArray checkTimersLine(QByteArray line);
+    QByteArray checkTimersLine();
 
 public:
     
