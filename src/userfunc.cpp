@@ -276,7 +276,7 @@ const struct user_command_type user_commands[] = {
     "    Link two rooms.\r\n"},
   {"mdetach",             usercmd_mdetach,          0,      USERCMD_FLAG_SYNC | USERCMD_FLAG_REDRAW,
     "Detach connections in 2 rooms.",
-    "    Usage: mdetach <dirrection> [oneway|delete]\r\n"
+    "    Usage: mdetach <direction> [oneway|delete]\r\n"
     "    Examples: \r\n"
     "   mdetach west            detach the link in both rooms and mark exits as undefined.\r\n"
     "   mdetach w one           detach link only in this room.\r\n"
@@ -324,8 +324,15 @@ const struct user_command_type user_commands[] = {
       "\r\n"},
 
     {"mtimer",              usercmd_mtimer,        0,      0,
-        "Setup and addon timer ",
-        "    Usage: mtimer <start|stop> <timers-name>\r\n\r\n"
+        "Setup and addon timer, additional simple timers and countdown timers",
+        "    Usage: mtimer addon <start|stop> <timers-name>\r\n\r\n"
+        "    mtimer countdown <name> <timeout_in_seconds> <desc>\r\n\r\n"
+        "    mtimer timer <name> <desc>\r\n"
+        "    mtimer timer remove <name>\r\n\r\n"
+        "    mtimer clear\r\n\r\n"
+        "    Examples: \r\n"
+        "    mtimer countdown 90 blinded *Stolb the Tarkhnarb Orc*\r\n"
+        "    mtimer timer repop Vt zone\r\n"
         "\r\n"},
 
 
@@ -1804,7 +1811,7 @@ USERCMD(usercmd_mregion)
 
             if (!*p) {
                 // PRINT USAGE
-                send_to_user( "Missing arguments. Usage: mregion door add <alias> <door> <dirrection>\r\n");
+                send_to_user( "Missing arguments. Usage: mregion door add <alias> <door> <direction>\r\n");
                 send_prompt();
                 return USER_PARSE_SKIP;
             }
@@ -1812,7 +1819,7 @@ USERCMD(usercmd_mregion)
             p = skip_spaces(p);
             if (!*p) {
                 // PRINT USAGE
-                send_to_user( "Missing arguments. Usage: mregion door add <alias> <door> <dirrection>\r\n");
+                send_to_user( "Missing arguments. Usage: mregion door add <alias> <door> <direction>\r\n");
                 send_prompt();
                 return USER_PARSE_SKIP;
             }
@@ -1879,7 +1886,7 @@ USERCMD(usercmd_mregion)
             return USER_PARSE_SKIP;
         } else if (is_abbrev(arg, "list")) {
             engine->get_users_region()->showRegion();
-	    send_prompt();
+            send_prompt();
             return USER_PARSE_SKIP;
         }
 
@@ -1905,7 +1912,7 @@ USERCMD(usercmd_mregion)
             send_to_user( "Failed. No such region!\r\n");
         }
 
-	send_prompt();
+        send_prompt();
         return USER_PARSE_SKIP;
     }
 
@@ -1914,7 +1921,7 @@ USERCMD(usercmd_mregion)
     if (is_abbrev(arg, "list") ) {
         /* show a list of all regions  */
         Map.sendRegionsList();
-	send_prompt();
+        send_prompt();
         return USER_PARSE_SKIP;
     }
 
@@ -1955,9 +1962,9 @@ USERCMD(usercmd_mregion)
         }
 
 
-	send_prompt();
-        return USER_PARSE_SKIP;
-    }
+		send_prompt();
+			return USER_PARSE_SKIP;
+		}
 
 
 
@@ -2063,63 +2070,125 @@ USERCMD(usercmd_mtimer)
 
     p = one_argument(p, arg, 0);
 
-    if (is_abbrev(arg, "start") ) {
+    if (is_abbrev(arg, "addon") ) {
 
         p = skip_spaces(p);
-        if (!*p) {
-            send_to_user("--[ Error. Missing timer's name. \r\n\r\n");
-            send_prompt();
-            return USER_PARSE_SKIP;
-        }
-        p = one_argument(p, arg, 1);
+		p = one_argument(p, arg, 0);
+	    if (!*p) {
+	            /* print help file or current settings */
+	    	send_to_user("--[ Missing parameters. \r\n\r\n");
+	        send_prompt();
+	        return USER_PARSE_SKIP;
+	    }
 
-        QByteArray timer = arg;
-        for (unsigned int spell = 0; spell < conf->spells.size(); spell++) {
-            if (conf->spells[spell].name == timer && conf->spells[spell].addon == true) {
+		if (is_abbrev(arg, "start") ) {
 
-            	conf->spells[spell].up = true;
-            	conf->spells[spell].timer.start();   // start counting
+			p = skip_spaces(p);
+			if (!*p) {
+				send_to_user("--[ Error. Missing timer's name. \r\n\r\n");
+				send_prompt();
+				return USER_PARSE_SKIP;
+			}
+			p = one_argument(p, arg, 1);
 
-            	send_to_user("--[ Timer %s refreshed.\r\n\r\n", (const char *) conf->spells[spell].name );
-                send_prompt();
-                return USER_PARSE_SKIP;
-            }
-        }
+			QByteArray timer = arg;
+			for (unsigned int spell = 0; spell < conf->spells.size(); spell++) {
+				if (conf->spells[spell].name == timer && conf->spells[spell].addon == true) {
 
-        send_to_user("--[ Timer with this name not found. \r\n\r\n");
+					conf->spells[spell].up = true;
+					conf->spells[spell].timer.start();   // start counting
+
+					send_to_user("--[ Timer %s refreshed.\r\n\r\n", (const char *) conf->spells[spell].name );
+					send_prompt();
+					return USER_PARSE_SKIP;
+				}
+			}
+
+			send_to_user("--[ Timer with this name not found. \r\n\r\n");
+			send_prompt();
+			return USER_PARSE_SKIP;
+		} else if (is_abbrev(arg, "stop") ) {
+
+			p = skip_spaces(p);
+			if (!*p) {
+				send_to_user("--[ Error. Missing timer's name. \r\n\r\n");
+				send_prompt();
+				return USER_PARSE_SKIP;
+			}
+			p = one_argument(p, arg, 1);
+
+			QByteArray timer = arg;
+			for (unsigned int spell = 0; spell < conf->spells.size(); spell++) {
+				//printf("Spell name %s, line %s\r\n", (const char *) conf->spells[p].name, (const char*) a_line );
+				if (conf->spells[spell].name == timer && conf->spells[spell].addon == true) {
+					conf->spells[spell].up = false;
+					conf->spells[spell].silently_up = false;
+					send_to_user("--[ Timer %s stopped. Duration: %s.\r\n\r\n", (const char *) conf->spells[spell].name, qPrintable( conf->spellUpFor(spell) ) );
+					send_prompt();
+					return USER_PARSE_SKIP;
+				}
+			}
+
+			send_prompt();
+			return USER_PARSE_SKIP;
+		} else {
+			send_to_user("--[ Start or Stop command expected as argument! \r\n\r\n");
+			send_prompt();
+			return USER_PARSE_SKIP;
+		}
+    }
+
+    if (is_abbrev(arg, "clear") ) {
+    	conf->timers.clear();
+    	send_to_user("--[ Timers information cleared.\r\n\r\n");
         send_prompt();
         return USER_PARSE_SKIP;
     }
-
-
-    if (is_abbrev(arg, "stop") ) {
-
-        p = skip_spaces(p);
-        if (!*p) {
-            send_to_user("--[ Error. Missing timer's name. \r\n\r\n");
-            send_prompt();
-            return USER_PARSE_SKIP;
-        }
-        p = one_argument(p, arg, 1);
-
-        QByteArray timer = arg;
-        for (unsigned int spell = 0; spell < conf->spells.size(); spell++) {
-        	//printf("Spell name %s, line %s\r\n", (const char *) conf->spells[p].name, (const char*) a_line );
-            if (conf->spells[spell].name == timer && conf->spells[spell].addon == true) {
-                conf->spells[spell].up = false;
-                conf->spells[spell].silently_up = false;
-            	send_to_user("--[ Timer %s stopped. Duration: %s.\r\n\r\n", (const char *) conf->spells[spell].name, qPrintable( conf->spellUpFor(spell) ) );
-                send_prompt();
-                return USER_PARSE_SKIP;
-            }
-        }
-
-        send_prompt();
-        return USER_PARSE_SKIP;
-    }
-
 
     if (is_abbrev(arg, "countdown") ) {
+    	int timeout;
+    	QByteArray name = "", desc = "";
+
+
+        p = skip_spaces(p);
+        p = one_argument(p, arg, 0);
+        if (!*p) {
+            send_to_user("--[ Error. Missing countdowns name. \r\n\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+
+        name = arg;
+
+        p = skip_spaces(p);
+        if (!*p) {
+            send_to_user("--[ Error. Missing countdowns timeout. \r\n\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+
+        p = one_argument(p, arg, 1);
+
+        if (is_integer(arg)) {
+            timeout = atoi(arg) * 1000;
+        } else {
+            send_to_user("--[ Error. Timeout should be an integer value. \r\n\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+
+
+        p = skip_spaces(p);
+        desc = p;
+
+        conf->timers.addCountdown(name, desc, timeout);
+        send_to_user("--[ Countdown %s <%s> is set for duration %i\r\n\r\n", (const char*) name, (const char*) desc, timeout / 1000);
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
+    if (is_abbrev(arg, "timer") ) {
+    	QByteArray name = "", desc = "";
 
         p = skip_spaces(p);
         if (!*p) {
@@ -2127,23 +2196,38 @@ USERCMD(usercmd_mtimer)
             send_prompt();
             return USER_PARSE_SKIP;
         }
-        p = one_argument(p, arg, 1);
 
-        QByteArray timer = arg;
-        for (unsigned int spell = 0; spell < conf->spells.size(); spell++) {
-        	//printf("Spell name %s, line %s\r\n", (const char *) conf->spells[p].name, (const char*) a_line );
-            if (conf->spells[spell].name == timer) {
-            	send_to_user("--[ A spell with name %s already exists.\r\n\r\n", (const char *) conf->spells[spell].name );
+        p = skip_spaces(p);
+        p = one_argument(p, arg, 0);
+
+
+        name = arg;
+
+        if (name == "remove") {
+            p = skip_spaces(p);
+            if (!*p) {
+                send_to_user("--[ Error. Missing timer's name to remove. \r\n\r\n");
                 send_prompt();
                 return USER_PARSE_SKIP;
             }
+
+            p = one_argument(p, arg, 0);
+            if ( conf->timers.removeTimer( arg ) == false) {
+                send_to_user("--[ Failed to remove timer with that name. \r\n\r\n");
+                send_prompt();
+                return USER_PARSE_SKIP;
+            }
+            send_to_user("--[ Timer removed. \r\n\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
         }
 
-        // now get the duration
-        conf->spells[spell].up = false;
-        conf->spells[spell].silently_up = false;
 
+        p = skip_spaces(p);
+        desc = p;
 
+        conf->timers.addTimer(name, desc);
+        send_to_user("--[ Timer %s <%s> added.\r\n\r\n", (const char *) name, (const char *) desc);
         send_prompt();
         return USER_PARSE_SKIP;
     }

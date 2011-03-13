@@ -645,13 +645,13 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
         	}
 
             // changes the Affected by: output.
-            if (conf->spells_pattern == a_line) {
-                spells_print_mode = true;   // print the spells data
-            }
+//            if (conf->spells_pattern == a_line) {
+//            }
 
             static QRegExp statExp("Needed: * Alert: *.", Qt::CaseSensitive, QRegExp::Wildcard);
             if (statExp.exactMatch(a_line)) {
-            	c.append( a_line );
+                spells_print_mode = true;   // print the spells data
+            	c.append( buffer[i].line );
             	c.append( checkTimersLine() );
             	continue;
             }
@@ -875,23 +875,32 @@ QByteArray Cdispatcher::checkAffectedByLine(QByteArray line)
 		}
     }
 
+
     return "";
 }
 
 QByteArray Cdispatcher::checkTimersLine()
 {
-    QString s = "Timers:\r\n";
+    QString s = conf->timers.getStatCommandEntry();
+
+    QString collect = "";
 
     for (unsigned int spell = 0; spell < conf->spells.size(); spell++)
         if (conf->spells[spell].addon && conf->spells[spell].up)
         {
             // there is a timer ticking
-            s += QString("- %1 (up for %2)\r\n")
+            collect += QString("- %1 (up for %2)\r\n")
                 .arg( (const char *)conf->spells[spell].name )
                 .arg( conf->spellUpFor(spell) );
 
         }
 
+    if (collect != "")
+    	s +=  "Addons:\r\n" + collect;
+
+
+    if (s != "")
+    	s+= "Normal spells:\r\n";
     return qPrintable(s);
 }
 

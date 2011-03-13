@@ -28,6 +28,7 @@
 
 #include <vector>
 #include "CRoom.h"
+#include "CTimers.h"
 
 using namespace std;
 
@@ -152,6 +153,7 @@ public:
 
     /* spells */
     std::vector<TSpell>  spells;
+    CTimers				 timers;
     QByteArray      spells_pattern;
     void addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon);
     void addSpell(TSpell s);
