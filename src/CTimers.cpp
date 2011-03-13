@@ -32,8 +32,28 @@ void CTimers::addTimer(QByteArray name, QByteArray desc)
     m_timers.append(l_timer);
 }
 
+
+bool CTimers::removeCountdown(QByteArray name)
+{
+    QMutexLocker locker(&m_lock);
+
+    for (int i = 0; i < m_countdowns.size(); i++)
+    {
+    	TTimer *s = m_countdowns[i];
+    	if (s->name == name) {
+    		m_countdowns.removeAt( i );
+    		delete s;
+    		return true;
+    	}
+    }
+    return false;
+}
+
+
 bool CTimers::removeTimer(QByteArray name)
 {
+    QMutexLocker locker(&m_lock);
+
     for (int i = 0; i < m_timers.size(); i++)
     {
     	TTimer *s = m_timers[i];

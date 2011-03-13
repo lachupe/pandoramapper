@@ -319,9 +319,18 @@ const struct user_command_type user_commands[] = {
     "Use together with mgoto.\r\n"},
 
     {"mregion",              usercmd_mregion,        0,      USERCMD_FLAG_REDRAW,
-      "Region's system subcommands entry point",
-      "    Usage: mregion \r\n\r\n"
-      "\r\n"},
+      "Region's system",
+      "    Usage: \r\n"
+      "    mregion                                              General info\r\n"
+      "    mregion add <name>                                   add new region\r\n"
+      "    mregion door <add> <alias> <door> <direction>        add door alias and direction\r\n"
+      "    mregion door action                                  similar to maction, but for region doors\r\n"
+      "    mregion door remove <alias>                          remove door alias\r\n"
+      "    mregion door list                                    list all doors in this region\r\n"
+      "    mregion set <name>                                   set current users region\r\n"
+      "    mregion list                                         list all regions\r\n"
+      "    mregion replace                                      replace current rooms region with users region\r\n"
+      "    mregion config <autoreplace|render|info>             configuration\r\n\r\n"},
 
     {"mtimer",              usercmd_mtimer,        0,      0,
         "Setup and addon timer, additional simple timers and countdown timers",
@@ -2160,6 +2169,25 @@ USERCMD(usercmd_mtimer)
 
         name = arg;
 
+        if (name == "remove") {
+            p = skip_spaces(p);
+            if (!*p) {
+                send_to_user("--[ Error. Missing countdown timer's name to remove. \r\n\r\n");
+                send_prompt();
+                return USER_PARSE_SKIP;
+            }
+
+            p = one_argument(p, arg, 0);
+            if ( conf->timers.removeCountdown( arg ) == false) {
+                send_to_user("--[ Failed to remove countdown timer with that name. \r\n\r\n");
+                send_prompt();
+                return USER_PARSE_SKIP;
+            }
+            send_to_user("--[ Countdown timer removed. \r\n\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+
         p = skip_spaces(p);
         if (!*p) {
             send_to_user("--[ Error. Missing countdowns timeout. \r\n\r\n");
@@ -2232,6 +2260,7 @@ USERCMD(usercmd_mtimer)
         return USER_PARSE_SKIP;
     }
 
+    send_to_user("--[ timer, countdown or addon?\r\n\r\n");
 
     send_prompt();
     return USER_PARSE_SKIP;

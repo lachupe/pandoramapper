@@ -64,6 +64,7 @@ public:
 	void addCountdown(QByteArray name, QByteArray desc, int time);
 
 	bool removeTimer(QByteArray name);
+	bool removeCountdown(QByteArray name);
 
 	// for stat command representation
 	QByteArray getStatCommandEntry();
