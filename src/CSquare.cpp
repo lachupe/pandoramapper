@@ -134,8 +134,9 @@ void CSquare::add(CRoom *room)
     
     if (( rooms.size() < MAX_SQUARE_ROOMS) && ( (rightx - leftx) < MAX_SQUARE_SIZE) ) 
     {
-        if (rooms.contains(room) == false)
+        if (rooms.contains(room) == false) {
             rooms.push_back(room);
+        }
         return;
     } else {
         
@@ -228,8 +229,9 @@ CPlane::CPlane(CRoom *room)
                             room->getX() + ( MAX_SQUARE_SIZE - 1 ) / 2,
                             room->getY() - ( MAX_SQUARE_SIZE - 1 ) / 2);
 
-    if (squares->rooms.contains(room) == false)
+    if (squares->rooms.contains(room) == false) {
         squares->rooms.push_back(room);
+    }
 }
 
 

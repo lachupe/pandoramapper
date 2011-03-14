@@ -67,8 +67,6 @@ public:
 	void updateCharPrompt(QDomNode blob);
 	void updateCharState(QDomNode blob);
 
-	// remove the DEAD state from the char
-	void returnToLife();
 
 	CGroupCommunicator *getCommunicator() { return network; }
 
@@ -115,6 +113,8 @@ public slots:
 	void updateSpellsInfo();
 
 	void updateGroupManagerWindow();
+	// remove the DEAD state from the char
+	void returnToLife();
 
 signals:
 	void hides();

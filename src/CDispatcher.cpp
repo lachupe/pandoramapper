@@ -561,7 +561,8 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                 }
                 event.prompt = cutColours(event.prompt);
                 // TODO: this prompt setting might be dangerous and non-thread safe!
-                engine->setPrompt(event.prompt);
+//                engine->setPrompt(event.prompt);
+                last_prompt = buffer[i].line;
                 proxy->sendPromptLineEvent(event.prompt);
                 event.terrain = parseTerrain(event.prompt);
                 SEND_EVENT_TO_ENGINE;

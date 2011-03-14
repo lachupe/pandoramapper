@@ -44,7 +44,7 @@ public:
     int         centerx, centery;
     
     /* amount of rooms in this square, -1 for empty */
-    QVector<CRoom *> rooms;
+    QVector<CRoom *> 	rooms;
 
     CSquare(int leftx, int lefty, int rightx, int righty);
     CSquare();

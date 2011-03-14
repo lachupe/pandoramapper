@@ -128,8 +128,6 @@ void RendererWidget::initializeGL()
 
     print_debug(DEBUG_RENDERER, "in init()");
     
-
-    
     basic_gllist = glGenLists(1);
     if (basic_gllist != 0) {
       glNewList(basic_gllist, GL_COMPILE);
@@ -763,9 +761,6 @@ void RendererWidget::glDrawRoom(CRoom *p)
             
         }
     }
-
-        
-    
 }
 
 

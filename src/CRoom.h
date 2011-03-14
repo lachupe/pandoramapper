@@ -37,10 +37,6 @@
 
 #include <QByteArray>
 
-//#define EXIT_UNDEFINED  (MAX_ROOMS+1)
-//#define EXIT_DEATH      (MAX_ROOMS+2)
-
-
 struct room_flag_data {
   QByteArray name;
   QByteArray xml_name;
@@ -48,10 +44,6 @@ struct room_flag_data {
 };
 
 extern const struct room_flag_data room_flags[];
-
-//#define MAX_N   ( MAX_LINES_DESC * 80 )
-//#define MAX_M   ( MAX_LINES_DESC * 80 )
-
 
 class Strings_Comparator {
     private:

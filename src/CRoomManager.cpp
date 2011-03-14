@@ -543,7 +543,6 @@ void  CRoomManager::addToPlane(CRoom *room)
     // is protected by CRoomManager locker
     //	QMutexLocker locker(mapLock);
 
-
     if (planes == NULL) {
         planes = new CPlane(room);
         return;

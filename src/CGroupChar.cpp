@@ -615,6 +615,7 @@ QDomNode CGroupChar::stateToXML()
 	QDomDocument doc("charinfo");
 
 	QDomElement root = doc.createElement("playerData");
+	root.setAttribute("name", QString(name) );
 	root.setAttribute("state", state );
 
 	doc.appendChild(root);
