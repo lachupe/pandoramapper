@@ -57,17 +57,21 @@ void SpellsDialog::run()
     activateWindow();
 }
 
+void SpellsDialog::load_item_data(int index)
+{
+    lineEdit_name->setText(spells[index].name);
+    lineEdit_up_mes->setText(spells[index].up_mes);
+    lineEdit_refresh_mes->setText(spells[index].refresh_mes);
+    lineEdit_down_mes->setText(spells[index].down_mes);
+    checkBox_addon->setChecked( spells[index].addon );
+}
 
 void SpellsDialog::edit_clicked()
 {
     editing_index = listWidget->currentRow();
     enableFrame();
 
-    lineEdit_name->setText(spells[editing_index].name);
-    lineEdit_up_mes->setText(spells[editing_index].up_mes);
-    lineEdit_refresh_mes->setText(spells[editing_index].refresh_mes);
-    lineEdit_down_mes->setText(spells[editing_index].down_mes);
-    checkBox_addon->setChecked( spells[editing_index].addon );
+    load_item_data(editing_index);
 }
 
 void SpellsDialog::redraw()
@@ -175,3 +179,8 @@ void SpellsDialog::disableFrame()
     pushButton_remove->setEnabled(true);
 }
 
+
+void SpellsDialog::on_listWidget_itemSelectionChanged()
+{
+	load_item_data( listWidget->currentRow() );
+}

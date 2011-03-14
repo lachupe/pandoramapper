@@ -27,15 +27,13 @@
 #include "CEvent.h"
 #include "CCommandQueue.h"
 
-#define E_NOEXIT        0
-#define E_NORMAL        1
-#define E_OPENDOOR      2
-#define E_CLOSEDDOOR    3
-#define E_PORTAL        4
 
 
 class CEngine : public QObject {
 Q_OBJECT
+
+
+	enum ExitFlags { E_NOEXIT = 0, E_NORMAL, E_OPENDOOR, E_CLOSEDDOOR, E_PORTAL, E_CLIMBUP, E_CLIMBDOWN };
 
   /* flags */
     bool mapping;                 /* mapping is On/OFF */

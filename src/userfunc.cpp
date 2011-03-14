@@ -1440,10 +1440,9 @@ USERCMD(usercmd_msave)
   } else {
     //p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
 
-    //xml_writebase(arg);
     Map.saveMap( p );
 
-    send_to_user("--[Pandora: Saved to %s...\r\n", arg);
+    send_to_user("--[Pandora: Saved to %s...\r\n", p);
 
     conf->setDatabaseModified(false);
 

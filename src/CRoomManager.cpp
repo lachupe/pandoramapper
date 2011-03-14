@@ -24,6 +24,7 @@
 #include <cstring>
 #include <QDateTime>
 #include <vector>
+#include <QProgressDialog>
 //using namespace std;
 
 #include "defines.h"
@@ -56,10 +57,17 @@ void CRoomManager::clearAllSecrets()
     stacker.put(1);
     stacker.swap();
 
+    Map.setBlocked( true );
+
+    QProgressDialog progress("Removing secret exits...", "Abort", 0, MAX_ROOMS, renderer_window);
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+
 
     //lockForWrite();
     while (stacker.amount() != 0) {
         for (i = 0; i < stacker.amount(); i++) {
+            progress.setValue(i);
             r = stacker.get(i);
             mark[r->id] = true;
             for (z = 0; z <= 5; z++)
@@ -69,8 +77,10 @@ void CRoomManager::clearAllSecrets()
         stacker.swap();
     }
 
+    progress.setValue(0);
     // delete all unreached rooms
     for (i = 0; i < MAX_ROOMS; i++) {
+        progress.setValue(i);
         r = getRoomUnlocked( i );
         if (r == NULL)
             continue;
@@ -98,6 +108,7 @@ void CRoomManager::clearAllSecrets()
 
     }
 
+    Map.setBlocked( false );
     //unlock();
 }
 

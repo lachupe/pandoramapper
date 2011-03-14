@@ -899,8 +899,8 @@ QByteArray Cdispatcher::checkTimersLine()
     	s +=  "Addons:\r\n" + collect;
 
 
-    if (s != "")
-    	s+= "Normal spells:\r\n";
+//    if (s != "")
+//    	s+= "Normal spells:\r\n";
     return qPrintable(s);
 }
 

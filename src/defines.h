@@ -21,7 +21,7 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
-#define SVN_REVISION	183
+#define SVN_REVISION	192
 
 class QString;
 

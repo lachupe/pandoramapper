@@ -33,6 +33,8 @@ Q_OBJECT
     vector<TSpell> spells;
     void enableFrame();
     void disableFrame();
+    void load_item_data(int index);
+
 public:
     SpellsDialog(QWidget *parent = 0);
     void run();
@@ -43,6 +45,8 @@ public slots:
     void add_clicked();
     void remove_clicked();
     virtual void accept();
+private slots:
+    void on_listWidget_itemSelectionChanged();
 };
 
 
