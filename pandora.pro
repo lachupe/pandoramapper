@@ -57,7 +57,6 @@ HEADERS += src/CTimers.h \
     src/RoomEditDialog.h \
     src/SpellsDialog.h \
     src/defines.h \
-    src/exits.h \
     src/finddialog.h \
     src/mainwindow.h \
     src/proxy.h \
@@ -84,7 +83,6 @@ SOURCES += src/CTimers.cpp \
     src/Regions.cpp \
     src/RoomEditDialog.cpp \
     src/SpellsDialog.cpp \
-    src/exits.cpp \
     src/finddialog.cpp \
     src/main.cpp \
     src/mainwindow.cpp \

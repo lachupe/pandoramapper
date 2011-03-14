@@ -599,11 +599,6 @@ void CGroup::parsePromptInformation(QByteArray prompt)
 	}
 }
 
-void CGroup::parseStateChangeLine(int message, QByteArray line)
-{
-
-}
-
 void CGroup::returnToLife()
 {
 	printf("Back to Life!\r\n");

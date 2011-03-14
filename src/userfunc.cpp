@@ -32,7 +32,6 @@
 #include "CEngine.h"
 #include "CTree.h"
 #include "mainwindow.h"
-#include "exits.h"
 
 class Userland *userland_parser;
 
@@ -554,7 +553,6 @@ USERCMD(usercmd_maddroom)
 
   r = new CRoom;
 
-
   r->id = Map.next_free;
   r->setName( engine->getRoomName() );
   r->setDesc( engine->getDesc() );
@@ -563,7 +561,7 @@ USERCMD(usercmd_maddroom)
 
 
   engine->addedroom = r;
-  do_exits(engine->getExits());
+  engine->do_exits(engine->getExits());
 
   r->setX(100);
   r->setY(100);

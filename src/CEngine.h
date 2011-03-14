@@ -27,6 +27,13 @@
 #include "CEvent.h"
 #include "CCommandQueue.h"
 
+#define E_NOEXIT        0
+#define E_NORMAL        1
+#define E_OPENDOOR      2
+#define E_CLOSEDDOOR    3
+#define E_PORTAL        4
+
+
 class CEngine : public QObject {
 Q_OBJECT
 
@@ -95,6 +102,11 @@ public:
     void setDesc(QByteArray s) { last_desc = s; }
     void setExits(QByteArray s) { last_exits = s; }
     void setTerrain(char c) { last_terrain = c; }
+
+    int compare_exits(CRoom *p, int exits[]);
+    void parse_exits(const char *exits_line, int exits[]);
+    void do_exits(const char *exits_line);
+
 
     bool isMapping() { return mapping; }
     void setMapping(bool b) { mapping = b; }

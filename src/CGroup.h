@@ -112,8 +112,6 @@ public slots:
 	void parseScoreInformation(QByteArray score);
 	void parsePromptInformation(QByteArray prompt);
 
-	void parseStateChangeLine(int message, QByteArray line);
-
 	void updateSpellsInfo();
 
 	void updateGroupManagerWindow();

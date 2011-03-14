@@ -302,7 +302,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 
       spell.up = false;
       spell.silently_up = false;
-	  spell.addon = conf.value("addon", 0).toInt();
+	  spell.addon = conf.value("addon", 0).toBool();
 	  spell.name = conf.value("name").toByteArray();
 	  spell.up_mes = conf.value("upMessage").toByteArray();
 	  spell.refresh_mes = conf.value("refreshMessage").toByteArray();
