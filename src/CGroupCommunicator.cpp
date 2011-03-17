@@ -663,7 +663,7 @@ void CGroupCommunicator::sendCharStateUpdate(QDomNode blob)
    	if (type == Client)
    		sendMessage((CGroupClient *)peer, CHAR_STATE, blob);
 	if (type == Server) {
-		QByteArray message = formMessageBlock(CHAR_SCORE, blob);
+		QByteArray message = formMessageBlock(CHAR_STATE, blob);
 		CGroupServer *serv = (CGroupServer *) peer;
 		serv->sendToAll(message);
 	}

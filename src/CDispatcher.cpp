@@ -725,7 +725,8 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
             	print_debug(DEBUG_GROUP, "Sending a G-tell from local user: %s", (const char *) data);
             	proxy->sendGroupTellEvent(data);
             	send_to_user("Ok.\r\n\r\n");
-            	send_to_user(last_prompt);
+//            	send_to_user(last_prompt);
+            	send_prompt();
             	continue;
             }
 
@@ -766,7 +767,7 @@ void Cdispatcher::checkStateChange(QByteArray line)
 	}
 
 	// BASHED STATE
-	static QRegExp bashed("\\**\\* sends you sprawling with a powerful bash.", Qt::CaseSensitive, QRegExp::WildcardUnix);
+	static QRegExp bashed("* sends you sprawling with a powerful bash.", Qt::CaseSensitive, QRegExp::WildcardUnix);
 	if (bashed.exactMatch(line)) {
 		proxy->sendCharStateUpdatedEvent(CGroupChar::BASHED);
 		return;
