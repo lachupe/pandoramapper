@@ -562,7 +562,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                 event.prompt = cutColours(event.prompt);
                 // TODO: this prompt setting might be dangerous and non-thread safe!
 //                engine->setPrompt(event.prompt);
-                last_prompt = buffer[i].line;
+                last_prompt = event.prompt;
                 proxy->sendPromptLineEvent(event.prompt);
                 event.terrain = parseTerrain(event.prompt);
                 SEND_EVENT_TO_ENGINE;
@@ -595,8 +595,19 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
         if (mbrief_state == STATE_DESC && conf->getBriefMode())
             continue;
 
-        if (buffer[i].type == IS_NORMAL && buffer[i].line.indexOf("\r\n") != -1) {
+        //printf("xmlState: %i, buff type %i, line: ...%s...\r\n", xmlState, buffer[i].type, (const char *) buffer[i].line );
+    	//fflush( stdout );
+
+        if (xmlState == STATE_NORMAL && buffer[i].type == IS_NORMAL) {
             QByteArray a_line = cutColours( buffer[i].line );
+            if (a_line == "") {
+            	// skip empty lines.
+            	c.append( buffer[i].line );
+            	continue;
+            }
+
+//            printf("a_line: %s\r\n", (const char *) a_line );
+//        	fflush( stdout );
 
             checkStateChange(a_line);
 
@@ -658,16 +669,6 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             }
         }
 
-        if (buffer[i].type == IS_PROMPT) {
-            print_debug(DEBUG_DISPATCHER, "PROMPT recognized");
-            spells_print_mode = false;
-            last_prompt = buffer[i].line;
-            // this is potentialy dangerous!
-            //engine->setPrompt(buffer[i].line);
-            proxy->sendPromptLineEvent(buffer[i].line);
-        }
-
-
         print_debug(DEBUG_DISPATCHER, "Adding the line to the output buffer");
         c.append( buffer[i].line );
     }
@@ -725,8 +726,8 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
             	print_debug(DEBUG_GROUP, "Sending a G-tell from local user: %s", (const char *) data);
             	proxy->sendGroupTellEvent(data);
             	send_to_user("Ok.\r\n\r\n");
-//            	send_to_user(last_prompt);
-            	send_prompt();
+            	send_to_user(last_prompt);
+//            	send_prompt();
             	continue;
             }
 
@@ -767,8 +768,9 @@ void Cdispatcher::checkStateChange(QByteArray line)
 	}
 
 	// BASHED STATE
-	static QRegExp bashed("* sends you sprawling with a powerful bash.", Qt::CaseSensitive, QRegExp::WildcardUnix);
+	static QRegExp bashed("* sends you sprawling with a powerful bash.", Qt::CaseSensitive, QRegExp::Wildcard);
 	if (bashed.exactMatch(line)) {
+		printf("bash matches!\r\n");
 		proxy->sendCharStateUpdatedEvent(CGroupChar::BASHED);
 		return;
 	}
@@ -837,6 +839,7 @@ void Cdispatcher::updateSpellsState(QByteArray line)
             print_debug(DEBUG_SPELLS, "SPELL %s Starting/Restaring timer.",  (const char *) conf->spells[p].name);
             conf->spells[p].timer.start();   // start counting
             conf->spells[p].up = true;
+            conf->spells[p].silently_up = false;
             proxy->sendSpellsUpdatedEvent();
             break;
         }

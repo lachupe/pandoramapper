@@ -38,7 +38,7 @@ CGroupChar::CGroupChar(CGroup *_parent, QTreeWidget* t) :
 	mana = 999;
 	maxmana = 999;
 	state = STANDING;
-	textHP = "Healthy";
+	textHP = "Wounded";
 	textMana = "Burning";
 	textMoves = "Exhausted";
 	lastMovement = "";
@@ -103,6 +103,10 @@ QString CGroupChar::calculateTimeElapsed(QTime& timer, int delay)
     int min;
     int sec;
 
+    if (delay == -1) {
+    	return " UNDEF ";
+    }
+
     sec = (timer.elapsed() + delay) / 1000;
     min = sec / 60;
     sec = sec % 60;
@@ -158,18 +162,28 @@ void CGroupChar::updateSpells()
 				parent->sendGTell("Sanc spell is up!");
 			sanc = sanc_new;
 			tsanc = conf->spells[p].timer;
-			sanc_elapsed = 0;
+
+			// time is not know, the effect got up while sleeping for example
+			if ( !conf->spells[p].up && conf->spells[p].silently_up )
+				sanc_elapsed = -1;
+			else
+				sanc_elapsed = 0;
 			continue;
     	}
     	if (conf->spells[p].name == "blindness") {
 			blind = conf->spells[p].up || conf->spells[p].silently_up;
 			tblind = conf->spells[p].timer;
+
+			if ( !conf->spells[p].up && conf->spells[p].silently_up )
+				blind_elapsed = -1;
+			else
+				blind_elapsed = 0;
+
 			blind_elapsed = 0;
 			continue;
     	}
     }
 }
-
 
 void CGroupChar::setSpellsFields()
 {
@@ -555,10 +569,19 @@ QDomNode CGroupChar::toXML()
 	root.setAttribute("blessTimer", tbless.elapsed() + bless_elapsed );
 
 	root.setAttribute("sanc", sanc ? "true" : "false" );
-	root.setAttribute("sancTimer", tsanc.elapsed() + sanc_elapsed );
+	if (sanc_elapsed == -1) {
+		root.setAttribute("sancTimer", -1 );
+	} else {
+		root.setAttribute("sancTimer", tsanc.elapsed() + sanc_elapsed );
+	}
 
 	root.setAttribute("blind", blind ? "true" : "false" );
-	root.setAttribute("blindTimer", tblind.elapsed() + blind_elapsed);
+	if ( blind_elapsed == -1 ) {
+		root.setAttribute("blindTimer", -1 );
+	} else {
+		root.setAttribute("blindTimer", tblind.elapsed() + blind_elapsed);
+	}
+
 
 	doc.appendChild(root);
 	return root;
