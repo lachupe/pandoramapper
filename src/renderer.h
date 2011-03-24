@@ -102,7 +102,6 @@ public:
 
     bool doSelect(QPoint pos, unsigned int & id);
     void centerOnRoom(unsigned int id);
-public:
 
     void resetViewSettings() {
     	angleY = 0;

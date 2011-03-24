@@ -543,7 +543,7 @@ void RendererWidget::glDrawRoom(CRoom *p)
             glRectf(-ROOM_SIZE, ROOM_SIZE, +ROOM_SIZE, ROOM_SIZE*2);  // upper 
             glRectf(-ROOM_SIZE, -ROOM_SIZE*2, +ROOM_SIZE, -ROOM_SIZE);   // lower
 
-            glColor4f(colour[0], colour[1], colour[2], colour[3]);
+//            glColor4f(colour[0], colour[1], colour[2], colour[3]);
         } 
 
         // slow version of selection drawing 
@@ -551,7 +551,7 @@ void RendererWidget::glDrawRoom(CRoom *p)
         if (Map.selections.isSelected( p->id ) == true ) {
             glColor4f(0.20, 0.20, 0.80, colour[3]-0.1);
             glRectf(-ROOM_SIZE*2, -ROOM_SIZE*2, ROOM_SIZE*2, ROOM_SIZE*2); // left  
-            glColor4f(colour[0], colour[1], colour[2], colour[3]);
+//            glColor4f(colour[0], colour[1], colour[2], colour[3]);
         }
     } else {
         glCallList(basic_gllist);
@@ -666,11 +666,9 @@ void RendererWidget::glDrawRoom(CRoom *p)
             }
 
 
-            glColor4f(colour[0], colour[1], colour[2], colour[3]);
+//            glColor4f(colour[0], colour[1], colour[2], colour[3]);
 
-        } 
-
-	  else {
+        } else {
             GLfloat kx, ky, kz;
 
             if (k == NORTH) {
@@ -733,34 +731,34 @@ void RendererWidget::glDrawRoom(CRoom *p)
             glEnd();
             
             GLuint death_terrain = conf->getTextureByDesc("DEATH");
-	    if (death_terrain && p->isExitDeath(k)) {
-              glTranslatef(dx2 + kx, dy2 + ky, dz2);
-              
-              glEnable(GL_TEXTURE_2D);
-              glBindTexture(GL_TEXTURE_2D, death_terrain);
-        
-              glBegin(GL_QUADS);
-              
-              glTexCoord2f(0.0, 1.0);
-              glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
-              glTexCoord2f(0.0, 0.0);
-              glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
-              glTexCoord2f(1.0, 0.0);
-              glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
-              glTexCoord2f(1.0, 1.0);
-              glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
-              
-              glEnd();
-              glDisable(GL_TEXTURE_2D);
+            if (death_terrain && p->isExitDeath(k)) {
+				glTranslatef(dx2 + kx, dy2 + ky, dz2);
 
-              glTranslatef(-(dx2 + kx), -(dy2 + ky), -dz2);
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, death_terrain);
+
+				glBegin(GL_QUADS);
+
+				glTexCoord2f(0.0, 1.0);
+				glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
+				glTexCoord2f(0.0, 0.0);
+				glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
+				glTexCoord2f(1.0, 0.0);
+				glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
+				glTexCoord2f(1.0, 1.0);
+				glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
+
+				glEnd();
+				glDisable(GL_TEXTURE_2D);
+
+				glTranslatef(-(dx2 + kx), -(dy2 + ky), -dz2);
               
             }
 
-            glColor4f(colour[0], colour[1], colour[2], colour[3]);
-            
         }
     }
+
+    glColor4f(colour[0], colour[1], colour[2], colour[3]);
 }
 
 

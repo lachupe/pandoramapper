@@ -759,7 +759,6 @@ char Cdispatcher::parseTerrain(QByteArray prompt)
 
 void Cdispatcher::checkStateChange(QByteArray line)
 {
-
 	// DEAD STATE
 	// timer in CGroup turns this even off
 	if (line == "You are dead! Sorry...") {
