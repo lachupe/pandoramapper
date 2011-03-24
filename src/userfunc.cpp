@@ -379,8 +379,9 @@ void Userland::parse_command()
 
   ((*user_commands[t.id].command_pointer) (t.id, user_commands[t.id].subcmd, t.arg, t.arg));
 
-  if (IS_SET(user_commands[t.id].flags, USERCMD_FLAG_REDRAW))
+  if (IS_SET(user_commands[t.id].flags, USERCMD_FLAG_REDRAW)) {
     toggle_renderer_reaction();
+  }
 
   print_debug(DEBUG_USERFUNC, "leaving parseCommand");
 }
@@ -1487,7 +1488,6 @@ USERCMD(usercmd_mload)
     Map.loadMap( p );
 
   }
-
 
   send_to_user("--[Pandora: Done.\r\n");
   conf->setDatabaseModified(false);

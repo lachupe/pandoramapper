@@ -32,7 +32,7 @@ class QFont;
 
 //#define DIST_Z	2	/* the distance between 2 rooms */
 #define BASE_Z  -12	/* the distance to the "camera" */
-#define ROOM_SIZE 0.45f	/* the size of the rooms walls */
+#define ROOM_SIZE 0.47f	/* the size of the rooms walls */
 
 #define MAXHITS 200
 

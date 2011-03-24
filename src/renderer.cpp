@@ -50,7 +50,7 @@
 #pragma warning(disable:4305) // init: truncation from const double to float
 #endif
 
-GLfloat marker_colour[4] =  {1.0, 0.1, 0.1, 0.9};
+GLfloat marker_colour[4] =  {1.0, 0.1, 0.1, 1.0};
 
 
 #define MARKER_SIZE           (ROOM_SIZE/1.85)
@@ -90,11 +90,12 @@ void RendererWidget::initializeGL()
 	unsigned int i;
 
 	setMouseTracking(true);
+	setAutoBufferSwap( false );
 
 	//textFont = new QFont("Times", 10, QFont::Bold);
 
 	glShadeModel(GL_SMOOTH);
-	glClearColor (0.0, 0.0, 0.0, 0.0);	/* This Will Clear The Background Color To Black */
+	glClearColor (0.15, 0.15, 0.15, 0.0);	/* This Will Clear The Background Color To Black */
 	glPointSize (4.0);		/* Add point size, to make it clear */
 	glLineWidth (2.0);		/* Add line width,   ditto */
 
@@ -143,7 +144,7 @@ void RendererWidget::initializeGL()
 
 void RendererWidget::setupViewingModel(  int width, int height ) 
 {
-    gluPerspective(50.0f, (GLfloat) width / (GLfloat) height, 5.0f, conf->getDetailsVisibility()*1.0f);
+    gluPerspective(60.0f, (GLfloat) width / (GLfloat) height, 1.0f, conf->getDetailsVisibility()*1.1f);
     glMatrixMode (GL_MODELVIEW);	
 }
 
@@ -152,7 +153,7 @@ void RendererWidget::resizeGL( int width, int height )
 {
     print_debug(DEBUG_RENDERER, "in resizeGL()");
 
-    glViewport (0, 0, (GLint) width, (GLint) height);	
+	glViewport (0, 0, (GLint) width, (GLint) height);
     glMatrixMode (GL_PROJECTION);	
     glLoadIdentity ();		
   
@@ -181,21 +182,10 @@ void RendererWidget::paintGL()
 {
     print_debug(DEBUG_RENDERER, "in paintGL()");
 
-
-
-
-//    if (Map.tryLockForRead() == false) {
-//    	print_debug(DEBUG_GENERAL, "paintGL tried to block the eventQueue. Delayed.");
-//    	QTimer::singleShot( 100, this, SLOT(paintGL()) );
-//    	return;
-//    } else
-//    	Map.unlock();
-
-
     QTime t;
     t.start();
-    
-    //display(); ?? 
+
+    // exactly this strange combo seems to be able to solve one problem on windows
     draw();
     
     print_debug(DEBUG_RENDERER, "Rendering's done. Time elapsed %d ms\r\n", t.elapsed());
@@ -517,33 +507,33 @@ void RendererWidget::glDrawRoom(CRoom *p)
 
     distance = frustum.distance(dx, dy, dz);
     
-    if (distance >= conf->getDetailsVisibility()) 
+    if (distance >= conf->getDetailsVisibility())
       details = 0;
 
-    if (distance >= conf->getTextureVisibility()) 
+    if (distance >= conf->getTextureVisibility())
       texture = 0;
 
     
     glTranslatef(dx, dy, dz);
     if (p->getTerrain() && texture) {
 
-        glEnable(GL_TEXTURE_2D);
+    	glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, conf->sectors[ p->getTerrain() ].texture);
-        glCallList(conf->sectors[ p->getTerrain() ].gllist);  
+        glCallList(conf->sectors[ p->getTerrain() ].gllist);
         glDisable(GL_TEXTURE_2D);
-        
+
        if (conf->getDisplayRegionsRenderer() &&  engine->get_last_region() == p->getRegion()  ) {
 
 
             // The Regions rectangle around the room
-            glColor4f(0.20, 0.20, 0.20, colour[3]-0.1);
+           glColor4f(0.20, 0.20, 0.20, colour[3]-0.1);
 
             glRectf(-ROOM_SIZE*2, -ROOM_SIZE, -ROOM_SIZE, ROOM_SIZE); // left  
             glRectf(ROOM_SIZE, -ROOM_SIZE, ROOM_SIZE*2, ROOM_SIZE);   // right
             glRectf(-ROOM_SIZE, ROOM_SIZE, +ROOM_SIZE, ROOM_SIZE*2);  // upper 
             glRectf(-ROOM_SIZE, -ROOM_SIZE*2, +ROOM_SIZE, -ROOM_SIZE);   // lower
 
-//            glColor4f(colour[0], colour[1], colour[2], colour[3]);
+            glColor4f(colour[0], colour[1], colour[2], colour[3]);
         } 
 
         // slow version of selection drawing 
@@ -551,7 +541,7 @@ void RendererWidget::glDrawRoom(CRoom *p)
         if (Map.selections.isSelected( p->id ) == true ) {
             glColor4f(0.20, 0.20, 0.80, colour[3]-0.1);
             glRectf(-ROOM_SIZE*2, -ROOM_SIZE*2, ROOM_SIZE*2, ROOM_SIZE*2); // left  
-//            glColor4f(colour[0], colour[1], colour[2], colour[3]);
+            glColor4f(colour[0], colour[1], colour[2], colour[3]);
         }
     } else {
         glCallList(basic_gllist);
@@ -646,27 +636,7 @@ void RendererWidget::glDrawRoom(CRoom *p)
             glEnd();
 
 
-            if (conf->getShowNotesRenderer() == true && p->getNote().isEmpty() != true) {
-
-                QColor color;
-                if(p->getNoteColor() == "")
-                    color = QColor((QString)conf->getNoteColor());
-                else 
-                    color = QColor((QString)p->getNoteColor());
-                                
-                double red = color.red()/255.;
-                double green = color.green()/255.;
-                double blue = color.blue()/255.;
-                double alpha = color.alpha()/255.;
-
-                glColor4f(red, green, blue, alpha);
-
-                renderText(dx, dy, dz + ROOM_SIZE / 2, p->getNote(), textFont);    
-//                billboards.append(new Billboard(dx, dy, dz + ROOM_SIZE / 2, p->getNote()) );
-            }
-
-
-//            glColor4f(colour[0], colour[1], colour[2], colour[3]);
+            glColor4f(colour[0], colour[1], colour[2], colour[3]);
 
         } else {
             GLfloat kx, ky, kz;
@@ -756,6 +726,26 @@ void RendererWidget::glDrawRoom(CRoom *p)
             }
 
         }
+        glColor4f(colour[0], colour[1], colour[2], colour[3]);
+    }
+
+    if (conf->getShowNotesRenderer() == true && p->getNote().isEmpty() != true) {
+
+        QColor color;
+        if(p->getNoteColor() == "")
+            color = QColor((QString)conf->getNoteColor());
+        else
+            color = QColor((QString)p->getNoteColor());
+
+        double red = color.red()/255.;
+        double green = color.green()/255.;
+        double blue = color.blue()/255.;
+        double alpha = color.alpha()/255.;
+
+        glColor4f(red, green, blue, alpha);
+
+        renderText(dx, dy, dz + ROOM_SIZE / 2, p->getNote(), textFont);
+//                billboards.append(new Billboard(dx, dy, dz + ROOM_SIZE / 2, p->getNote()) );
     }
 
     glColor4f(colour[0], colour[1], colour[2], colour[3]);
@@ -802,8 +792,6 @@ void RendererWidget::setupNewBaseCoordinates()
     long long bestDistance, dist;
     int newX, newY, newZ;
     unsigned int i;
-
-    //printf("setupNewbaseCoordinates Thread ID: %i\r\n", (int) QThread::currentThreadId ());
 
     print_debug(DEBUG_RENDERER, "calculating new Base coordinates");
 
@@ -855,7 +843,7 @@ void RendererWidget::centerOnRoom(unsigned int id)
 void RendererWidget::draw(void)
 {
     CPlane *plane;  
-    const float alphaChannelTable[] = { 0.85, 0.4, 0.37, 0.28, 0.25, 0.15, 0.15, 0.13, 0.1, 0.1, 0.1};
+    const float alphaChannelTable[] = { 0.9, 0.35, 0.30, 0.28, 0.25, 0.15, 0.15, 0.13, 0.1, 0.1, 0.1};
 //                                       0    1     2      3    4      5     6    7    8     9    10 
 
     
@@ -863,13 +851,12 @@ void RendererWidget::draw(void)
     	// well, not much we can do - ignore the message
     	printf("Map is blocked. Delaying the redraw\r\n");
 		print_debug(DEBUG_GENERAL, "Map is blocked. Delaying the redraw.");
-		QTimer::singleShot( 500, this, SLOT( paintGL() ) );
+		QTimer::singleShot( 500, this, SLOT( display() ) );
 		return;
     }
 
-
     redraw = false;
-    
+
     // clear the billboards 
     billboards.clear();
 
@@ -888,7 +875,7 @@ void RendererWidget::draw(void)
     glEnable(GL_TEXTURE_2D);
 //    glEnable(GL_DEPTH_TEST);    
     
-    glColor3ub(255, 0, 0);
+//    glColor3ub(255, 0, 0);
 
     glTranslatef(0, 0, userZ);
 
@@ -910,13 +897,11 @@ void RendererWidget::draw(void)
     upperZ -= (1 - visibleLayers % 2) << 1; 
 //    print_debug(DEBUG_RENDERER, "drawing %i rooms", Map.size());
 
+
     glColor4f(0.1, 0.8, 0.8, 0.4);
     colour[0] = 0.1; colour[1] = 0.8; colour[2] = 0.8; colour[3] = 0.4; 
-
     
-    // Way too sensitive application. No changes should be allowed while drawing!
-    // LOCK IT 
-//    Map.lockForRead();
+
     plane = Map.getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
@@ -935,42 +920,29 @@ void RendererWidget::draw(void)
         colour[3] = alphaChannelTable[z];
 
         glColor4f(colour[0], colour[1], colour[2], colour[3]);
-        
+
         current_plane_z = plane->z;
         
         glDrawCSquare(plane->squares, GL_RENDER);
+
         plane = plane->next;
     }
-//    Map.unlock();
 
-    
 //    print_debug(DEBUG_RENDERER, "Drawn %i rooms, after dot elimination %i, %i square frustum checks done", 
 //            rooms_drawn_csquare, rooms_drawn_total, square_frustum_checks);
 //    print_debug(DEBUG_RENDERER, "Drawing markers");
+
+//    printf("Drawn %i rooms, after dot elimination %i\r\n", rooms_drawn_csquare, rooms_drawn_total);
+//    fflush(stdout);
+    //    print_debug(DEBUG_RENDERER, "Drawing markers");
+
 
     glDrawMarkers();
     glDrawGroupMarkers();
     glDrawPrespamLine();
 
-    
+
 //    print_debug(DEBUG_RENDERER, "draw() done");
-
-    
-//    printf("Drawing NOTES!\r\n");
-//    glColor4f( 0.4, 1.0, 0.98, 1.0);
-//
-//    QFont textFont("Times", 10, QFont::Bold);
-//    // Billboards!
-//    for (int i = 0; i < billboards.size(); ++i) {
-//    	printf("Note: %s, x: %f, y: %f, z: %f\r\n", (const char*) billboards[i]->text.toAscii(), 
-//    			billboards[i]->x, billboards[i]->y, billboards[i]->z);
-//    	renderText(billboards[i]->x, billboards[i]->y, billboards[i]->z, billboards[i]->text, textFont); 
-//    }
-//
-//	renderText(10, 10, "Test!", textFont);
-	
-
-    
     this->swapBuffers();
 }
 
