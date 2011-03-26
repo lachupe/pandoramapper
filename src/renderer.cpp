@@ -54,6 +54,7 @@ GLfloat marker_colour[4] =  {1.0, 0.1, 0.1, 1.0};
 
 
 #define MARKER_SIZE           (ROOM_SIZE/1.85)
+#define CONNECTION_THICKNESS_DIVIDOR	  5
 #define PICK_TOL              50 
 
 
@@ -137,8 +138,14 @@ void RendererWidget::initializeGL()
     }
 
     for (i = 0; i < conf->sectors.size(); i++) {
-        conf->loadTexture(&conf->sectors[i]);
+        conf->loadSectorTexture(&conf->sectors[i]);
     }
+
+    // load the exits texture
+    conf->loadNormalTexture("images/exit_normal.png", &conf->exit_normal_texture );
+    conf->loadNormalTexture("images/exit_door.png", &conf->exit_door_texture );
+    conf->loadNormalTexture("images/exit_secret.png", &conf->exit_secret_texture );
+    conf->loadNormalTexture("images/exit_undef.png", &conf->exit_undef_texture );
 }
 
 
@@ -477,278 +484,246 @@ void RendererWidget::glDrawGroupMarkers()
     }
 }
 
-void RendererWidget::glDrawRoom(CRoom *p)
+// TODO: removed:
+// selection markers
+// billboards of any kind
+void RendererWidget::generateDisplayList(CSquare *square)
 {
     GLfloat dx, dx2, dy, dy2, dz, dz2;
     CRoom *r;
     int k;
-    float distance;
-    bool details, texture;    
 
-    QFont textFont("Times", 12, QFont::Bold);
+    square->gllist = glGenLists(1);
 
+    glNewList(square->gllist, GL_COMPILE);
 
-    rooms_drawn_csquare++;
-    
-    dx = p->getX() - curx;
-    dy = p->getY() - cury;
-    dz = (p->getZ() - curz) /* * DIST_Z */;
-    dx2 = 0;
-    dy2 = 0;
-    dz2 = 0;
-    details = 1;
-    texture = 1;
-    
-    if (frustum.isPointInFrustum(dx, dy, dz) != true)
-      return;
-    
-    rooms_drawn_total++;
+	// generate gl list for the square here
+    for (int ind = 0; ind < square->rooms.size(); ind++) {
+        CRoom *p = square->rooms[ind];
 
+        dx = p->getX() - square->centerx;
+        dy = p->getY() - square->centery;
+        dz = 0;
 
-    distance = frustum.distance(dx, dy, dz);
-    
-    if (distance >= conf->getDetailsVisibility())
-      details = 0;
+        glTranslatef(dx, dy, dz);
+        if (p->getTerrain()) {
 
-    if (distance >= conf->getTextureVisibility())
-      texture = 0;
-
-    
-    glTranslatef(dx, dy, dz);
-    if (p->getTerrain() && texture) {
-
-    	glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, conf->sectors[ p->getTerrain() ].texture);
-        glCallList(conf->sectors[ p->getTerrain() ].gllist);
-        glDisable(GL_TEXTURE_2D);
-
-       if (conf->getDisplayRegionsRenderer() &&  engine->get_last_region() == p->getRegion()  ) {
-
-
-            // The Regions rectangle around the room
-           glColor4f(0.20, 0.20, 0.20, colour[3]-0.1);
-
-            glRectf(-ROOM_SIZE*2, -ROOM_SIZE, -ROOM_SIZE, ROOM_SIZE); // left  
-            glRectf(ROOM_SIZE, -ROOM_SIZE, ROOM_SIZE*2, ROOM_SIZE);   // right
-            glRectf(-ROOM_SIZE, ROOM_SIZE, +ROOM_SIZE, ROOM_SIZE*2);  // upper 
-            glRectf(-ROOM_SIZE, -ROOM_SIZE*2, +ROOM_SIZE, -ROOM_SIZE);   // lower
-
-            glColor4f(colour[0], colour[1], colour[2], colour[3]);
-        } 
-
-        // slow version of selection drawing 
-        // should be enough for start
-        if (Map.selections.isSelected( p->id ) == true ) {
-            glColor4f(0.20, 0.20, 0.80, colour[3]-0.1);
-            glRectf(-ROOM_SIZE*2, -ROOM_SIZE*2, ROOM_SIZE*2, ROOM_SIZE*2); // left  
-            glColor4f(colour[0], colour[1], colour[2], colour[3]);
-        }
-    } else {
-        glCallList(basic_gllist);
-    }              
-    
-    glTranslatef(-dx, -dy, -dz);
-
-
-
-    if (details == 0)
-      return;
-    
-    for (k = 0; k <= 5; k++) 
-      if (p->isExitPresent(k) == true) {
-        if (p->isExitNormal(k)) {
-            GLfloat kx, ky, kz;
-            GLfloat sx, sy;
-
-            r = p->exits[k];
-
-            dx2 = r->getX() - curx;
-            dy2 = r->getY() - cury;
-            dz2 = (r->getZ() - curz) /* * DIST_Z */;
-
-            dx2 = (dx + dx2) / 2;
-            dy2 = (dy + dy2) / 2;
-            dz2 = (dz + dz2) / 2;
-
-            if (k == NORTH) {
-                kx = 0;
-                ky = +(ROOM_SIZE + 0.2);
-                kz = 0;
-                sx = 0;
-                sy = +ROOM_SIZE;
-            } else if (k == EAST) {
-                kx = +(ROOM_SIZE + 0.2);
-                ky = 0;
-                kz = 0;
-                sx = +ROOM_SIZE;
-                sy = 0;
-            } else if (k == SOUTH) {
-                kx = 0;
-                ky = -(ROOM_SIZE + 0.2);
-                kz = 0;
-                sx = 0;
-                sy = -ROOM_SIZE;
-            } else if (k == WEST) {
-                kx = -(ROOM_SIZE + 0.2);
-                ky = 0;
-                kz = 0;
-                sx = -ROOM_SIZE;
-                sy = 0;
-            } else if (k == UP) {
-                kx = 0;
-                ky = 0;
-                kz = +(ROOM_SIZE + 0.2);
-                sx = 0;
-                sy = 0;
-            } else /*if (k == DOWN) */{
-                kx = 0;
-                ky = 0;
-                kz = -(ROOM_SIZE + 0.2);
-                sx = 0;
-                sy = 0;
-            } 
-            if (p->getDoor(k) != "") {
-                if (p->isDoorSecret(k) == false) {
-                    glColor4f(0, 1.0, 0.0, colour[3] + 0.2);
-                } else {
-                    // Draw the secret door ...
-                    QByteArray info;
-                    QByteArray alias;                    
-                    info = p->getDoor(k);
-                    if (conf->getShowRegionsInfo() == true) {
-                        alias = engine->get_users_region()->getAliasByDoor( info, k);
-                        if (alias != "") {
-                            info += " [";
-                            info += alias;
-                            info += "]";  
-                        }
-                        renderText((dx + dx2) / 2, (dy + dy2) / 2 , (dz +dz)/2 + ROOM_SIZE / 2 , info, textFont); 
-                    }
-                    glColor4f(1.0, 0.0, 0.0, colour[3] + 0.2);
-                }
-            }
-                
-            glBegin(GL_LINES);
-            glVertex3f(dx + sx, dy + sy, dz);
-            glVertex3f(dx + kx, dy + ky, dz + kz);
-            glVertex3f(dx + kx, dy + ky, dz + kz);
-            glVertex3f(dx2, dy2, dz2);
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, conf->sectors[ p->getTerrain() ].texture );
+            glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 1.0);
+                glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
+                glTexCoord2f(0.0, 0.0);
+                glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
+                glTexCoord2f(1.0, 0.0);
+                glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
+                glTexCoord2f(1.0, 1.0);
+                glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
             glEnd();
-
-
-            glColor4f(colour[0], colour[1], colour[2], colour[3]);
+            glDisable(GL_TEXTURE_2D);
 
         } else {
-            GLfloat kx, ky, kz;
-
-            if (k == NORTH) {
-                dx2 = dx;
-                dy2 = dy + 0.5;
-                dz2 = dz;
-            } else if (k == EAST) {
-                dx2 = dx + 0.5;
-                dy2 = dy;
-                dz2 = dz;
-            } else if (k == SOUTH) {
-                dx2 = dx;
-                dy2 = dy - 0.5;
-                dz2 = dz;
-            } else if (k == WEST) {
-                dx2 = dx - 0.5;
-                dy2 = dy;
-                dz2 = dz;
-            } else if (k == UP) {
-                dx2 = dx;
-                dy2 = dy;
-                dz2 = dz + 0.5;
-            } else if (k == DOWN) {
-                dx2 = dx;
-                dy2 = dy;
-                dz2 = dz - 0.5;
-            }
-
-            kx = 0;
-            ky = 0;
-            kz = 0;
-
-
-            if (k == NORTH) {
-                ky = +(ROOM_SIZE);
-            } else if (k == EAST) {
-                kx = +(ROOM_SIZE);
-            } else if (k == SOUTH) {
-                ky = -(ROOM_SIZE);
-            } else if (k == WEST) {
-                kx = -(ROOM_SIZE);
-            } else if (k == UP) {
-                kz = 0;
-            } else if (k == DOWN) {
-                kz = 0;
-            }
-
-
-            if (p->isExitUndefined(k)) {
-              glColor4f(1.0, 1.0, 0.0, colour[3] + 0.2);
-            } 
-            
-            if (p->isExitDeath(k)) {
-                glColor4f(1.0, 0.0, 0.0, colour[3] + 0.2);
-            } 
-
-            glBegin(GL_LINES);
-            glVertex3f(dx + kx, dy + ky, dz);
-            glVertex3f(dx2 + kx, dy2 + ky, dz2);
-            glEnd();
-            
-            GLuint death_terrain = conf->getTextureByDesc("DEATH");
-            if (death_terrain && p->isExitDeath(k)) {
-				glTranslatef(dx2 + kx, dy2 + ky, dz2);
-
-				glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, death_terrain);
-
-				glBegin(GL_QUADS);
-
-				glTexCoord2f(0.0, 1.0);
-				glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
-				glTexCoord2f(0.0, 0.0);
-				glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
-				glTexCoord2f(1.0, 0.0);
-				glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
-				glTexCoord2f(1.0, 1.0);
-				glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
-
-				glEnd();
-				glDisable(GL_TEXTURE_2D);
-
-				glTranslatef(-(dx2 + kx), -(dy2 + ky), -dz2);
-              
-            }
-
+            glRectf( -ROOM_SIZE, -ROOM_SIZE, ROOM_SIZE, ROOM_SIZE);
         }
-        glColor4f(colour[0], colour[1], colour[2], colour[3]);
+        glTranslatef(-dx, -dy, -dz);
+
+
+
+        for (k = 0; k <= 5; k++)
+          if (p->isExitPresent(k) == true) {
+              GLfloat kx, ky, kz;
+              GLfloat sx, sy, sz;
+              GLuint exit_texture = conf->exit_normal_texture;
+              int thickness = CONNECTION_THICKNESS_DIVIDOR;
+
+              if (k == NORTH) {
+                  kx = 0;
+                  ky = +(ROOM_SIZE + 0.2);
+                  kz = 0;
+                  sx = 0;
+                  sy = +ROOM_SIZE;
+                  sz = 0;
+              } else if (k == EAST) {
+                  kx = +(ROOM_SIZE + 0.2);
+                  ky = 0;
+                  kz = 0;
+                  sx = +ROOM_SIZE;
+                  sy = 0;
+                  sz = 0;
+              } else if (k == SOUTH) {
+                  kx = 0;
+                  ky = -(ROOM_SIZE + 0.2);
+                  kz = 0;
+                  sx = 0;
+                  sy = -ROOM_SIZE;
+                  sz = 0;
+              } else if (k == WEST) {
+                  kx = -(ROOM_SIZE + 0.2);
+                  ky = 0;
+                  kz = 0;
+                  sx = -ROOM_SIZE;
+                  sy = 0;
+                  sz = 0;
+              } else if (k == UP) {
+                  kx = 0;
+                  ky = 0;
+                  kz = +(ROOM_SIZE + 0.2);
+                  sx = ROOM_SIZE / 2;
+                  sy = 0;
+                  sz = 0;
+              } else {
+                  kx = 0;
+                  ky = 0;
+                  kz = -(ROOM_SIZE + 0.2);
+                  sx = 0;
+                  sy = ROOM_SIZE / 2;
+                  sz = 0;
+              }
+
+              if (p->isExitNormal(k)) {
+
+                r = p->exits[k];
+
+                dx2 = r->getX() - square->centerx;
+                dy2 = r->getY() - square->centery;
+                dz2 = r->getZ() - current_plane_z;
+
+                dx2 = (dx + dx2) / 2;
+                dy2 = (dy + dy2) / 2;
+                dz2 = (dz + dz2) / 2;
+
+
+                if (p->getDoor(k) != "") {
+                    if (p->isDoorSecret(k) == false) {
+//                        glColor4f(0, 1.0, 0.0, colour[3] + 0.2);
+                    	exit_texture = conf->exit_door_texture;
+                    } else {
+                    	exit_texture = conf->exit_secret_texture;
+//                        glColor4f(1.0, 0.0, 0.0, colour[3] + 0.2);
+                    }
+                }
+
+
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, exit_texture  );
+
+                glBegin(GL_QUAD_STRIP);
+				glVertex3f(dx + sx - sy / thickness, dy + sy - sx / thickness, dz);
+				glVertex3f(dx + sx + sy / thickness, dy + sy + sx / thickness, dz);
+
+				glVertex3f(dx + kx - sy / thickness, dy + ky - sx / thickness, dz + kz);
+				glVertex3f(dx + kx + sy / thickness, dy + ky + sx / thickness, dz + kz);
+
+				glVertex3f(dx2 - sy / thickness, dy2 - sx / thickness, dz2);
+				glVertex3f(dx2 + sy / thickness, dy2 + sx / thickness, dz2);
+                glEnd();
+
+//                glBegin(GL_LINES);
+                //glVertex3f(dx + sx, dy + sy, dz);
+                //glVertex3f(dx + kx, dy + ky, dz + kz);
+                //glVertex3f(dx + kx, dy + ky, dz + kz);
+                //glVertex3f(dx2, dy2, dz2);
+//                glEnd();
+
+                glDisable(GL_TEXTURE_2D);
+
+            } else {
+                GLfloat kx, ky, kz;
+
+                if (k == NORTH) {
+                    dx2 = dx;
+                    dy2 = dy + 0.5;
+                    dz2 = dz;
+                } else if (k == EAST) {
+                    dx2 = dx + 0.5;
+                    dy2 = dy;
+                    dz2 = dz;
+                } else if (k == SOUTH) {
+                    dx2 = dx;
+                    dy2 = dy - 0.5;
+                    dz2 = dz;
+                } else if (k == WEST) {
+                    dx2 = dx - 0.5;
+                    dy2 = dy;
+                    dz2 = dz;
+                } else if (k == UP) {
+                    dx2 = dx;
+                    dy2 = dy;
+                    dz2 = dz + 0.5;
+                } else if (k == DOWN) {
+                    dx2 = dx;
+                    dy2 = dy;
+                    dz2 = dz - 0.5;
+                }
+
+                kx = 0;
+                ky = 0;
+                kz = 0;
+
+
+                if (k == NORTH) {
+                    ky = +(ROOM_SIZE);
+                } else if (k == EAST) {
+                    kx = +(ROOM_SIZE);
+                } else if (k == SOUTH) {
+                    ky = -(ROOM_SIZE);
+                } else if (k == WEST) {
+                    kx = -(ROOM_SIZE);
+                } else if (k == UP) {
+                    kz = 0;
+                } else if (k == DOWN) {
+                    kz = 0;
+                }
+
+            	exit_texture = conf->exit_undef_texture;
+
+                glBegin(GL_LINES);
+                glEnd();
+
+
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, exit_texture  );
+
+                glBegin(GL_QUAD_STRIP);
+                glVertex3f(dx + kx - sy / thickness, dy + ky - sx / thickness, dz);
+                glVertex3f(dx + kx + sy / thickness, dy + ky + sx / thickness, dz);
+
+                glVertex3f(dx2 + kx - sy / thickness, dy2 + ky - sx / thickness, dz2);
+                glVertex3f(dx2 + kx + sy / thickness, dy2 + ky + sx / thickness, dz2);
+
+                glEnd();
+                glDisable(GL_TEXTURE_2D);
+
+
+                GLuint death_terrain = conf->getTextureByDesc("DEATH");
+                if (death_terrain && p->isExitDeath(k)) {
+    				glTranslatef(dx2 + kx, dy2 + ky, dz2);
+
+    				glEnable(GL_TEXTURE_2D);
+    				glBindTexture(GL_TEXTURE_2D, death_terrain);
+
+    				glBegin(GL_QUADS);
+
+    				glTexCoord2f(0.0, 1.0);
+    				glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
+    				glTexCoord2f(0.0, 0.0);
+    				glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
+    				glTexCoord2f(1.0, 0.0);
+    				glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
+    				glTexCoord2f(1.0, 1.0);
+    				glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
+
+    				glEnd();
+    				glDisable(GL_TEXTURE_2D);
+
+    				glTranslatef(-(dx2 + kx), -(dy2 + ky), -dz2);
+                }
+
+            }
+        }
     }
 
-    if (conf->getShowNotesRenderer() == true && p->getNote().isEmpty() != true) {
-
-        QColor color;
-        if(p->getNoteColor() == "")
-            color = QColor((QString)conf->getNoteColor());
-        else
-            color = QColor((QString)p->getNoteColor());
-
-        double red = color.red()/255.;
-        double green = color.green()/255.;
-        double blue = color.blue()/255.;
-        double alpha = color.alpha()/255.;
-
-        glColor4f(red, green, blue, alpha);
-
-        renderText(dx, dy, dz + ROOM_SIZE / 2, p->getNote(), textFont);
-//                billboards.append(new Billboard(dx, dy, dz + ROOM_SIZE / 2, p->getNote()) );
-    }
-
-    glColor4f(colour[0], colour[1], colour[2], colour[3]);
+    glEndList();
 }
 
 
@@ -776,10 +751,60 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
             for (k = 0; k < p->rooms.size(); k++) 
                 renderPickupRoom(p->rooms[k]);
         } else {
-            for (k = 0; k < p->rooms.size(); k++) 
-                glDrawRoom(p->rooms[k]);
-        }
+        	if (p->gllist == -1)
+        		generateDisplayList(p);
 
+//        	glColor4f(1.0, 1.0, 1.0, 1.0);
+        	// translate to the spot
+        	int squarex = p->centerx - curx;
+        	int squarey = p->centery - cury;
+        	int squarez = current_plane_z - curz;
+
+            glTranslatef(squarex, squarey, squarez);
+            glCallList(p->gllist);
+            glTranslatef( -squarex, -squarey, -squarez);
+
+//            if (conf->getShowNotesRenderer() == true && p->getNote().isEmpty() != true) {
+//
+//                QColor color;
+//                if(p->getNoteColor() == "")
+//                    color = QColor((QString)conf->getNoteColor());
+//                else
+//                    color = QColor((QString)p->getNoteColor());
+//
+//                double red = color.red()/255.;
+//                double green = color.green()/255.;
+//                double blue = color.blue()/255.;
+//                double alpha = color.alpha()/255.;
+//
+//                glColor4f(red, green, blue, alpha);
+//
+//                renderText(dx, dy, dz + ROOM_SIZE / 2, p->getNote(), textFont);
+//        //                billboards.append(new Billboard(dx, dy, dz + ROOM_SIZE / 2, p->getNote()) );
+//            }
+//
+//            if (p->getDoor(k) != "") {
+//                if (p->isDoorSecret(k) == false) {
+//                    glColor4f(0, 1.0, 0.0, colour[3] + 0.2);
+//                } else {
+//                    // Draw the secret door ...
+//                    QByteArray info;
+//                    QByteArray alias;
+//                    info = p->getDoor(k);
+//                    if (conf->getShowRegionsInfo() == true) {
+//                        alias = engine->get_users_region()->getAliasByDoor( info, k);
+//                        if (alias != "") {
+//                            info += " [";
+//                            info += alias;
+//                            info += "]";
+//                        }
+//                        renderText((dx + dx2) / 2, (dy + dy2) / 2 , (dz +dz)/2 + ROOM_SIZE / 2 , info, textFont);
+//                    }
+//                    glColor4f(1.0, 0.0, 0.0, colour[3] + 0.2);
+//                }
+//            }
+
+        }
     }
 }
 

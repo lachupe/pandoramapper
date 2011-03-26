@@ -339,7 +339,7 @@ const struct user_command_type user_commands[] = {
         "    mtimer timer remove <name>\r\n\r\n"
         "    mtimer clear\r\n\r\n"
         "    Examples: \r\n"
-        "    mtimer countdown 90 blinded *Stolb the Tarkhnarb Orc*\r\n"
+        "    mtimer countdown blinded 90 *Stolb the Tarkhnarb Orc*\r\n"
         "    mtimer timer repop Vt zone\r\n"
         "\r\n"},
 

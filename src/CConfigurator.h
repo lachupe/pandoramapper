@@ -195,10 +195,16 @@ public:
     int getSectorByDesc(QByteArray desc);
     int getSectorByPattern(char pattern);
 
-    int loadTexture(struct roomSectorsData *p);
+    int loadSectorTexture(struct roomSectorsData *p);
+    int loadNormalTexture(QByteArray filename, GLuint *texture);
     char getPatternByRoom(CRoom *r);
     GLuint getTextureByDesc(QByteArray desc);
     void addTexture(QByteArray desc, QByteArray filename, char pattern);
+
+    GLuint	exit_normal_texture;
+    GLuint	exit_door_texture;
+    GLuint	exit_secret_texture;
+    GLuint	exit_undef_texture;
 
     /* */
 

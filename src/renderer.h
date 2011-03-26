@@ -65,18 +65,7 @@ class RendererWidget : public QGLWidget
     unsigned int last_drawn_marker;
     unsigned int last_drawn_trail;
     GLuint selectBuf[MAXHITS];
-    void glDrawGroupMarkers();
-    void glDrawPrespamLine();
-    void glDrawMarkers();
-    void drawMarker(int, int, int, int);
-    void glDrawRoom(CRoom *p);
-    void glDrawCSquare(CSquare *p, int renderingMode);
-    void setupViewingModel(int width, int height);
-    void renderPickupObjects();
-    void renderPickupRoom(CRoom *p);
-    void setupNewBaseCoordinates();
-    void draw();
-    void drawCone();
+
     GLfloat angleY;
     GLfloat angleX;
     GLfloat angleZ;
@@ -84,6 +73,21 @@ class RendererWidget : public QGLWidget
     float userY;
     float userZ;
     int userLayerShift;
+
+
+    void glDrawGroupMarkers();
+    void glDrawPrespamLine();
+    void glDrawMarkers();
+    void drawMarker(int, int, int, int);
+    void glDrawCSquare(CSquare *p, int renderingMode);
+    void setupViewingModel(int width, int height);
+    void renderPickupObjects();
+    void renderPickupRoom(CRoom *p);
+    void setupNewBaseCoordinates();
+    void draw();
+    void drawCone();
+    void generateDisplayList(CSquare *p);
+
 public:
     int current_plane_z;
     GLuint basic_gllist;

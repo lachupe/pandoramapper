@@ -56,9 +56,12 @@ Cconfigurator::Cconfigurator()
 
     groupManagerState = CGroupCommunicator::Off;
 
+
     resetCurrentConfig();
     setConfigModified(false);
 }
+
+
 
 void Cconfigurator::resetCurrentConfig()
 {
@@ -648,21 +651,20 @@ QByteArray Cconfigurator::getNoteColor()
     return noteColor;
 }
 
-int Cconfigurator::loadTexture(struct roomSectorsData *p)
+int Cconfigurator::loadNormalTexture(QByteArray filename, GLuint *texture)
 {
     QImage tex1, buf1;
 
-    glGenTextures(1, &p->texture);
-    print_debug(DEBUG_RENDERER, "loading texture %s", (const char *) p->filename);
-    if (p->filename == "")
+    print_debug(DEBUG_RENDERER, "loading texture %s", (const char *) filename);
+    if (filename == "")
         return -1;
-    if (!buf1.load( p->filename )) {
-        print_debug(DEBUG_CONFIG, "Failed to load the %s!", (const char *) p->filename);
+    if (!buf1.load( filename )) {
+        print_debug(DEBUG_CONFIG, "Failed to load the %s!", (const char *) filename);
         return -1;
     }
     tex1 = QGLWidget::convertToGLFormat( buf1 );
-    glGenTextures(1, &p->texture );
-    glBindTexture(GL_TEXTURE_2D, p->texture );
+    glGenTextures(1, texture );
+    glBindTexture(GL_TEXTURE_2D, *texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -670,7 +672,12 @@ int Cconfigurator::loadTexture(struct roomSectorsData *p)
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex1.width(), tex1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex1.bits() );
 
+    return 1;
+}
 
+int Cconfigurator::loadSectorTexture(struct roomSectorsData *p)
+{
+	loadNormalTexture(p->filename, &p->texture);
 
     p->gllist = glGenLists(1);
     if (p->gllist != 0) {

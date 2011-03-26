@@ -76,6 +76,7 @@ CSquare::CSquare(int lx, int ly, int rx, int ry)
     
     centerx = leftx + (rightx - leftx) / 2;
     centery = righty + (lefty - righty) / 2;
+    gllist = -1;
 }
 
 

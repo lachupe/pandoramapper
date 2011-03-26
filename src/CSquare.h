@@ -36,6 +36,8 @@ public:
         Right_Lower = 3
     };
 
+    int gllist;
+
     /* subsquares */
     CSquare     *subsquares[4];
     /* coordinates of this square's left (upper) and right (lower) points */

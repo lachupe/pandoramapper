@@ -661,7 +661,8 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
 //            }
 
             static QRegExp statExp("Needed: * Alert: *.", Qt::CaseSensitive, QRegExp::Wildcard);
-            if (statExp.exactMatch(a_line)) {
+            static QRegExp lvl100statExp("Gold: *. Alert: *.", Qt::CaseSensitive, QRegExp::Wildcard);
+            if (statExp.exactMatch(a_line) || lvl100statExp.exactMatch(a_line)) {
                 spells_print_mode = true;   // print the spells data
             	c.append( buffer[i].line );
             	c.append( checkTimersLine() );
