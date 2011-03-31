@@ -22,8 +22,25 @@
 #define CSQUARE_H
 
 #include <QVector>
+#include <QColor>
 
 class CRoom;
+
+// temporary storage for a billboard text
+class Billboard {
+
+public:
+	Billboard() {}
+	Billboard(double _x, double _y, double _z, QString _text, QColor _col):x(_x),y(_y),z(_z),color(_col),text(_text) {}
+	~Billboard() { text.clear(); }
+
+	double 		x;
+	double 		y;
+	double 		z;
+	QColor   	color;
+	QString 	text;
+};
+
 
 
 class CSquare {
@@ -36,7 +53,18 @@ public:
         Right_Lower = 3
     };
 
-    int gllist;
+//    QList<QScopedPointer< Billboard> > notes;
+//    QList<QScopedPointer< Billboard> > doors;
+
+    void clearNotesList();
+    void clearDoorsList();
+
+
+    int 	gllist;
+    bool 	rebuild_display_list;
+
+    QList<Billboard *> notesBillboards;
+    QList<Billboard *> doorsBillboards;
 
     /* subsquares */
     CSquare     *subsquares[4];
@@ -63,6 +91,7 @@ public:
         
     void        add(CRoom *room);
     void        remove(CRoom *room);
+    void 		rebuildDisplayList() { rebuild_display_list = true; }
 };
 
 class CPlane {

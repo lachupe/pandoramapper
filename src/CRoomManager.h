@@ -40,24 +40,13 @@ class CRoomManager : public QObject {
 	Q_OBJECT
 
 	QList<CRegion *>    regions;
-    QVector<CRoom* > rooms;   		/* rooms */
-    CRoom* ids[MAX_ROOMS];	/* array of pointers */
+    QVector<CRoom* > 	rooms;   		/* rooms */
+    CRoom* 				ids[MAX_ROOMS];	/* array of pointers */
 
-    CPlane        *planes;        /* planes/levels of the map, sorted by the Z coordinate, lower at first */
+    CPlane        		*planes;        /* planes/levels of the map, sorted by the Z coordinate, lower at first */
 
-    inline QByteArray getNameUnlocked(unsigned int id)  {
-    	if (ids[id]) return (*(ids[id])).getName(); return "";
-    }
-
-    inline CRoom*  getRoomUnlocked(unsigned int id)        {
-   	    if (id < MAX_ROOMS)
-            return ids[id];
-        else
-            return NULL;
-    }
-
-    void deleteRoomUnlocked(CRoom* r, int mode);  /* user interface function */
-    void smallDeleteRoomUnlocked(CRoom* r);  /* user interface function */
+//    void deleteRoomUnlocked(CRoom* r, int mode);  /* user interface function */
+//    void smallDeleteRoomUnlocked(CRoom* r);  /* user interface function */
 
     bool	blocked;
 public:
@@ -84,16 +73,18 @@ public:
 
 
     void addRoom(CRoom* room);
-    void addRoomNonsorted(CRoom* room);   /* use only at loading, it's unlocked! */
 
 
 
     inline CRoom* getRoom(unsigned int id)        {
-    	return getRoomUnlocked(id);
+		if (id < MAX_ROOMS)
+			return ids[id];
+		else
+			return NULL;
     }
 
     inline QByteArray getName(unsigned int id)  {
-    	return getNameUnlocked(id); // this GOT to be inlined!
+    	if (ids[id]) return (*(ids[id])).getName(); return "";
     }
 
     int tryMergeRooms(CRoom* room, CRoom* copy, int j);
@@ -108,8 +99,8 @@ public:
 
     QList<CRegion *> getAllRegions();
 
-    void deleteRoom(CRoom* r, int mode) { deleteRoomUnlocked(r, mode); }
-    void smallDeleteRoom(CRoom* r) { smallDeleteRoomUnlocked(r); }
+    void deleteRoom(CRoom* r, int mode);
+    void smallDeleteRoom(CRoom* r);
 
     QList<int> searchNames(QString s, Qt::CaseSensitivity cs);
     QList<int> searchDescs(QString s, Qt::CaseSensitivity cs);

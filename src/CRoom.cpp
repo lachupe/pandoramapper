@@ -71,6 +71,7 @@ CRoom::CRoom()
         exitFlags[i] = 0;
         doors[i].clear();
     }
+    square = NULL;
 }
 
 
@@ -88,8 +89,9 @@ CRoom::~CRoom()
 
 void CRoom::setModified(bool b)
 {
-    if (b)
+    if (b) {
         conf->setDatabaseModified(true);
+    }
 }
 
 int CRoom::descCmp(QByteArray d)
@@ -154,6 +156,7 @@ int CRoom::setDoor(int dir, QByteArray d)
     
     doors[dir] = d;
   
+    rebuildDisplayList();
     setModified(true);
     return 1;
 }
@@ -162,6 +165,7 @@ int CRoom::setDoor(int dir, QByteArray d)
 void CRoom::removeDoor(int dir)
 {
     doors[dir].clear();
+    rebuildDisplayList();
     setModified(true);
 }
 
@@ -211,12 +215,14 @@ void CRoom::setX(int nx)
 {
     x = nx;
     setModified(true);
+    rebuildDisplayList();
 }
 
 void CRoom::setY(int ny)
 {
     y = ny;
     setModified(true);
+    rebuildDisplayList();
 }
 
 
@@ -224,6 +230,11 @@ void CRoom::setZ(int nz)
 {
     Map.removeFromPlane(this);
     z = nz;
+
+
+    //rebuildDisplayList();
+    // addToPlane will reset the square and call setSqaure of this room.
+
     Map.addToPlane(this);
     setModified(true);
 }
@@ -259,7 +270,7 @@ QByteArray CRoom::getNote()
 }
 
 
-void CRoom::setNoteColor(QByteArray color) { noteColor = color; }
+void CRoom::setNoteColor(QByteArray color) { noteColor = color; rebuildDisplayList(); }
 QByteArray CRoom::getNoteColor() { return noteColor; }
 
 void CRoom::setDesc(QByteArray newdesc)
@@ -301,29 +312,46 @@ void CRoom::setTerrain(char terrain)
 {
     sector = conf->getSectorByPattern(terrain);
     setModified(true);
+    rebuildDisplayList();
 }
 
 void CRoom::setSector(char val) 
 {
     sector = val;
+    rebuildDisplayList();
 }
 
 
 void CRoom::setNote(QByteArray newnote)
 {
     note = newnote;
+    rebuildDisplayList();
+}
+
+
+void CRoom::setSquare(CSquare *_square)
+{
+	if (square)
+		rebuildDisplayList();
+
+	square = _square;
+
+	if (square)
+		rebuildDisplayList();
 }
 
 void CRoom::setExit(int dir, CRoom *room)
 {
     exits[dir] = room;
     exitFlags[dir] = EXIT_NONE;
+    rebuildDisplayList();
 }
 
 void CRoom::setExit(int dir, unsigned int value)
 {
     exits[dir]=Map.getRoom(value);
     exitFlags[dir] = EXIT_NONE;
+    rebuildDisplayList();
 }
 
 /*
@@ -346,7 +374,7 @@ void CRoom::setExitUndefined(int dir)
 {
     exits[dir] = NULL;
     exitFlags[dir] = EXIT_UNDEFINED;  
-//    SET_BIT(exitFlags[dir], EXIT_UNDEFINED);
+    rebuildDisplayList();
 }
 
 
@@ -372,16 +400,17 @@ bool CRoom::isExitNormal(int dir)
 
 void CRoom::setExitFlags(int dir, unsigned char flag)
 {
-//    SET_BIT(exitFlags[dir], flag);
     exitFlags[dir] = flag;
     
+    rebuildDisplayList();
     setModified(true);
 }
 
 void CRoom::setExitDeath(int dir) 
 {
     exitFlags[dir] = EXIT_DEATH;
-    exits[dir] = NULL;    
+    exits[dir] = NULL;
+    rebuildDisplayList();
     setModified(true);
 }
 
@@ -446,6 +475,8 @@ void CRoom::setRegion(CRegion *reg)
 {
     if (reg != NULL)
         region = reg;
+
+    rebuildDisplayList();
 }
     
 CRegion *CRoom::getRegion()
@@ -457,6 +488,7 @@ void CRoom::disconnectExit(int dir)
 {
     exitFlags[dir] = EXIT_NONE;
     exits[dir] = NULL;
+    rebuildDisplayList();
 }
 
 void CRoom::removeExit(int dir)
@@ -464,6 +496,7 @@ void CRoom::removeExit(int dir)
     exitFlags[dir] = EXIT_NONE;
     exits[dir] = NULL;
     doors[dir].clear();
+    rebuildDisplayList();
 }
 
 QString CRoom::toolTip()

@@ -51,6 +51,7 @@ void CRoomManager::loadMap( QString filename)
 
   QXmlSimpleReader reader;
 
+
   if (xmlFile.exists() == false) {
       print_debug(DEBUG_XML, "ERROR: The database file %s does NOT exist!\r\n", qPrintable(filename) );
       return;
@@ -101,7 +102,7 @@ void CRoomManager::loadMap( QString filename)
 		  	CRoom *r = rooms[i];
 	        for (int exit = 0; exit <= 5; exit++)
 	            if (r->exits[ exit ] > 0) {
-	                r->exits[exit] = getRoomUnlocked( (unsigned long) r->exits[exit] );
+	                r->exits[exit] = getRoom( (unsigned long) r->exits[exit] );
 	            }
 	  }
 	  progress.setValue(size());
@@ -129,7 +130,7 @@ StructureParser::StructureParser(QProgressDialog *progress, unsigned int& curren
 bool StructureParser::endElement( const QString& , const QString& , const QString& qName)
 {
   if (qName == "room") {
-      parent->addRoomNonsorted(r);	/* tada! */
+      parent->addRoom(r);	/* tada! */
       
       if (r->id > currentMaximum) {
     	  currentMaximum = r->id;

@@ -81,12 +81,12 @@ void CRoomManager::clearAllSecrets()
     // delete all unreached rooms
     for (i = 0; i < MAX_ROOMS; i++) {
         progress.setValue(i);
-        r = getRoomUnlocked( i );
+        r = getRoom( i );
         if (r == NULL)
             continue;
         if (r) {
             if (mark[r->id] == false) {
-                deleteRoomUnlocked(r, 0);
+                deleteRoom(r, 0);
                 continue;
             }
         }
@@ -216,12 +216,12 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
     /* oneway ?! */
     print_debug(DEBUG_ROOMS, "fixing one way in previous room, repointing at merged room");
 
-     p = getRoomUnlocked(oneway_room_id);
+     p = getRoom(oneway_room_id);
      for (i = 0; i <= 5; i++)
          if (p->isExitLeadingTo(i, copy) == true)
              p->setExit(i, r);
 
-    smallDeleteRoomUnlocked(copy);
+    smallDeleteRoom(copy);
 
 
     stacker.put(r);
@@ -234,7 +234,7 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, int j)
     if (p->isExitLeadingTo( reversenum(j), copy) == true)
         p->setExit( reversenum(j), r);
 
-    smallDeleteRoomUnlocked(copy);
+    smallDeleteRoom(copy);
 
     stacker.put(r);
     return 1;
@@ -257,10 +257,8 @@ void CRoomManager::fixFreeRooms()
     exit(1);
 }
 
-/* ------------ addroom --------------*/
-void CRoomManager::addRoomNonsorted(CRoom *room)
+void CRoomManager::addRoom(CRoom *room)
 {
-
 	if (ids[room->id] != NULL) {
         print_debug(DEBUG_ROOMS, "Error while adding new element to database! This id already exists!\n");
     	// Whaaaat?
@@ -272,15 +270,8 @@ void CRoomManager::addRoomNonsorted(CRoom *room)
     ids[room->id] = room;	/* add to the first array */
     NameMap.addName(room->getName(), room->id);	/* update name-searhing engine */
 
-
     fixFreeRooms();
     addToPlane(room);
-}
-
-void CRoomManager::addRoom(CRoom *room)
-{
-//	QWriteLocker locker(&mapLock);
-	addRoomNonsorted(room);
 }
 /* ------------ addroom ENDS ---------- */
 
@@ -410,7 +401,7 @@ void CRoomManager::reinit()
 /* ------------ delete_room --------- */
 /* mode 0 - remove all links in other rooms together with exits and doors */
 /* mode 1 - keeps the doors and exits in other rooms, but mark them as undefined */
-void CRoomManager::deleteRoomUnlocked(CRoom *r, int mode)
+void CRoomManager::deleteRoom(CRoom *r, int mode)
 {
     int k;
     int i;
@@ -431,26 +422,26 @@ void CRoomManager::deleteRoomUnlocked(CRoom *r, int mode)
                 }
 	    	}
 
-    smallDeleteRoomUnlocked(r);
+    smallDeleteRoom(r);
 }
 
 /* --------- _delete_room ENDS --------- */
 
 /* ------------ small_delete_room --------- */
-void CRoomManager::smallDeleteRoomUnlocked(CRoom *r)
+void CRoomManager::smallDeleteRoom(CRoom *r)
 {
 	if (r->id == 1) {
 		print_debug(DEBUG_ROOMS,"ERROR (!!): Attempted to delete the base room!\n");
 		return;
     }
-    removeFromPlane(r);
-    stacker.removeRoom(r->id);
-    selections.unselect(r->id);
-    if (engine->addedroom == r)
+
+	removeFromPlane(r);
+	stacker.removeRoom(r->id);
+	selections.unselect(r->id);
+	if (engine->addedroom == r)
         engine->resetAddedRoomVar();
 
     renderer_window->renderer->deletedRoom = r->id;
-
 
     int i;
     ids[ r->id ] = NULL;
@@ -463,7 +454,6 @@ void CRoomManager::smallDeleteRoomUnlocked(CRoom *r)
         }
 
     delete r;
-
 
     fixFreeRooms();
     toggle_renderer_reaction();

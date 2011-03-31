@@ -22,14 +22,12 @@
 #include "CSquare.h"
 #include "CRoom.h"
 
+#include <cstdio>
 
 #define MAX_SQUARE_SIZE         40
 #define MAX_SQUARE_ROOMS        40
 
 
-/* -------------------------------------------------------------------------*/
-/*  Planes (CPlane) and Square-tree (CSquare) implementation is below       */
-/* -------------------------------------------------------------------------*/
 CSquare::CSquare()
 {
     subsquares[Left_Upper] = NULL;
@@ -43,6 +41,9 @@ CSquare::CSquare()
     righty = -MAX_SQUARE_SIZE/2;
     centerx = 0;
     centery = 0;
+
+//	doors.clear();
+//	notes.clear();
 }
 
 CSquare::~CSquare()
@@ -59,6 +60,9 @@ CSquare::~CSquare()
     if (subsquares[3]) {
         delete subsquares[3];
     }
+
+    clearNotesList();
+    clearDoorsList();
 }
 
 
@@ -77,8 +81,23 @@ CSquare::CSquare(int lx, int ly, int rx, int ry)
     centerx = leftx + (rightx - leftx) / 2;
     centery = righty + (lefty - righty) / 2;
     gllist = -1;
+    rebuild_display_list = true;
+
+//	doors.clear();
+//	notes.clear();
 }
 
+void CSquare::clearNotesList()
+{
+	qDeleteAll(notesBillboards);
+	notesBillboards.clear();
+}
+
+void CSquare::clearDoorsList()
+{
+	qDeleteAll(doorsBillboards);
+	doorsBillboards.clear();
+}
 
 void CSquare::addSubsquareByMode(int mode)
 {
@@ -137,6 +156,7 @@ void CSquare::add(CRoom *room)
     {
         if (rooms.contains(room) == false) {
             rooms.push_back(room);
+            room->setSquare( this );
         }
         return;
     } else {
@@ -162,6 +182,7 @@ void CSquare::remove(CRoom *room)
             /* just for check */
             for ( i=0; i < p->rooms.size(); ++i) {
                 if ( room->id == p->rooms[i]->id ) {
+                    p->rooms[i]->setSquare( NULL );
                     p->rooms.remove(i);
                     return;
                 }
@@ -233,6 +254,8 @@ CPlane::CPlane(CRoom *room)
     if (squares->rooms.contains(room) == false) {
         squares->rooms.push_back(room);
     }
+
+    room->setSquare(squares);
 }
 
 

@@ -1439,9 +1439,9 @@ USERCMD(usercmd_msave)
     send_prompt();
     return USER_PARSE_SKIP;
   } else {
-    //p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
+    p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
 
-    Map.saveMap( p );
+    Map.saveMap( arg );
 
     send_to_user("--[Pandora: Saved to %s...\r\n", p);
 

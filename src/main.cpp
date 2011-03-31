@@ -186,7 +186,6 @@ int main(int argc, char *argv[])
     }
 
 
-
     /* set analyzer engine defaults */
     //engine_init();
     splash->showMessage(QString("Loading the configuration ") + configfile);
@@ -274,8 +273,10 @@ int main(int argc, char *argv[])
     f.setDirectRendering( true );
     f.setRgba( true );
     f.setDepth( true );
+    f.setAlpha( true );
+
     if (conf->getMultisampling())
-    	f.setSampleBuffers( true );
+   	f.setSampleBuffers( true );
     //f.setSamples(4);
 
     QGLFormat::setDefaultFormat( f );

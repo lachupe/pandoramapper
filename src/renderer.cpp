@@ -92,6 +92,8 @@ void RendererWidget::initializeGL()
 
 	setMouseTracking(true);
 	setAutoBufferSwap( false );
+    textFont = new QFont("Times", 12, QFont::Bold );
+
 
 	//textFont = new QFont("Times", 10, QFont::Bold);
 
@@ -192,7 +194,6 @@ void RendererWidget::paintGL()
     QTime t;
     t.start();
 
-    // exactly this strange combo seems to be able to solve one problem on windows
     draw();
     
     print_debug(DEBUG_RENDERER, "Rendering's done. Time elapsed %d ms\r\n", t.elapsed());
@@ -493,7 +494,12 @@ void RendererWidget::generateDisplayList(CSquare *square)
     CRoom *r;
     int k;
 
-    square->gllist = glGenLists(1);
+    square->clearDoorsList();
+    square->clearNotesList();
+
+    if (square->gllist == -1)
+    	square->gllist = glGenLists(1);
+
 
     glNewList(square->gllist, GL_COMPILE);
 
@@ -528,6 +534,15 @@ void RendererWidget::generateDisplayList(CSquare *square)
         glTranslatef(-dx, -dy, -dz);
 
 
+        if (p->getNote().isEmpty() != true) {
+        	QColor color;
+            if(p->getNoteColor() == "")
+                color = QColor((QString)conf->getNoteColor());
+            else
+                color = QColor((QString)p->getNoteColor());
+
+        	square->notesBillboards.append( new Billboard(p->getX(), p->getY(), p->getZ() + ROOM_SIZE / 2, p->getNote(), color) );
+        }
 
         for (k = 0; k <= 5; k++)
           if (p->isExitPresent(k) == true) {
@@ -595,11 +610,48 @@ void RendererWidget::generateDisplayList(CSquare *square)
 
                 if (p->getDoor(k) != "") {
                     if (p->isDoorSecret(k) == false) {
-//                        glColor4f(0, 1.0, 0.0, colour[3] + 0.2);
                     	exit_texture = conf->exit_door_texture;
                     } else {
                     	exit_texture = conf->exit_secret_texture;
-//                        glColor4f(1.0, 0.0, 0.0, colour[3] + 0.2);
+
+						// Draw the secret door ...
+						QByteArray info;
+						QByteArray alias;
+						info = p->getDoor(k);
+						alias = engine->get_users_region()->getAliasByDoor( info, k);
+						if (alias != "") {
+							info += " [";
+							info += alias;
+							info += "]";
+						}
+
+						double deltaX = (r->getX() - p->getX()) / 3.0;
+						double deltaY = (r->getY() - p->getY()) / 3.0;
+						double deltaZ = (r->getZ() - p->getZ()) / 3.0;
+
+						double shiftX = 0;
+						double shiftY = 0;
+						double shiftZ = ROOM_SIZE / 2.0;
+
+						if (deltaX < 0) {
+							shiftY = ROOM_SIZE / 2.0;
+						} else {
+							shiftY = -ROOM_SIZE / 2.0;
+						}
+
+						if (deltaY != 0) {
+							shiftX = -ROOM_SIZE;
+						}
+
+						if (deltaZ < 0) {
+							shiftZ *= -1;
+						}
+
+						double x = p->getX() + deltaX + shiftX;
+						double y = p->getY() + deltaY + shiftY;
+						double z = p->getZ() + deltaZ + shiftZ;
+
+			        	square->doorsBillboards.append( new Billboard( x, y , z, info, QColor(0, 255, 0, 255)) );
                     }
                 }
 
@@ -617,13 +669,6 @@ void RendererWidget::generateDisplayList(CSquare *square)
 				glVertex3f(dx2 - sy / thickness, dy2 - sx / thickness, dz2);
 				glVertex3f(dx2 + sy / thickness, dy2 + sx / thickness, dz2);
                 glEnd();
-
-//                glBegin(GL_LINES);
-                //glVertex3f(dx + sx, dy + sy, dz);
-                //glVertex3f(dx + kx, dy + ky, dz + kz);
-                //glVertex3f(dx + kx, dy + ky, dz + kz);
-                //glVertex3f(dx2, dy2, dz2);
-//                glEnd();
 
                 glDisable(GL_TEXTURE_2D);
 
@@ -724,6 +769,8 @@ void RendererWidget::generateDisplayList(CSquare *square)
     }
 
     glEndList();
+
+    square->rebuild_display_list = false;
 }
 
 
@@ -751,7 +798,7 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
             for (k = 0; k < p->rooms.size(); k++) 
                 renderPickupRoom(p->rooms[k]);
         } else {
-        	if (p->gllist == -1)
+        	if (p->rebuild_display_list)
         		generateDisplayList(p);
 
 //        	glColor4f(1.0, 1.0, 1.0, 1.0);
@@ -764,45 +811,57 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
             glCallList(p->gllist);
             glTranslatef( -squarex, -squarey, -squarez);
 
-//            if (conf->getShowNotesRenderer() == true && p->getNote().isEmpty() != true) {
-//
-//                QColor color;
-//                if(p->getNoteColor() == "")
-//                    color = QColor((QString)conf->getNoteColor());
-//                else
-//                    color = QColor((QString)p->getNoteColor());
-//
-//                double red = color.red()/255.;
-//                double green = color.green()/255.;
-//                double blue = color.blue()/255.;
-//                double alpha = color.alpha()/255.;
-//
-//                glColor4f(red, green, blue, alpha);
-//
-//                renderText(dx, dy, dz + ROOM_SIZE / 2, p->getNote(), textFont);
-//        //                billboards.append(new Billboard(dx, dy, dz + ROOM_SIZE / 2, p->getNote()) );
-//            }
-//
-//            if (p->getDoor(k) != "") {
-//                if (p->isDoorSecret(k) == false) {
-//                    glColor4f(0, 1.0, 0.0, colour[3] + 0.2);
-//                } else {
-//                    // Draw the secret door ...
-//                    QByteArray info;
-//                    QByteArray alias;
-//                    info = p->getDoor(k);
-//                    if (conf->getShowRegionsInfo() == true) {
-//                        alias = engine->get_users_region()->getAliasByDoor( info, k);
-//                        if (alias != "") {
-//                            info += " [";
-//                            info += alias;
-//                            info += "]";
-//                        }
-//                        renderText((dx + dx2) / 2, (dy + dy2) / 2 , (dz +dz)/2 + ROOM_SIZE / 2 , info, textFont);
-//                    }
-//                    glColor4f(1.0, 0.0, 0.0, colour[3] + 0.2);
-//                }
-//            }
+
+            // draw notes, if needed
+            if (conf->getShowNotesRenderer() == true && p->notesBillboards.isEmpty() != true) {
+
+                for (int n = 0; n < p->notesBillboards.size(); n++) {
+                	Billboard *billboard = p->notesBillboards[n];
+
+//                	GLfloat red = billboard->color.red() / 256;
+//                	GLfloat green = billboard->color.green() / 256;
+//                	GLfloat blue = billboard->color.blue() / 256;
+                    GLfloat dx = billboard->x - curx;
+                    GLfloat dy = billboard->y - cury;
+                    GLfloat dz = billboard->z - curz;
+
+//                    glColor4f(red, green, blue, colour[3] + 0.2);
+                    qglColor(QColor( billboard->color.red(), billboard->color.green(), billboard->color.blue(), colour[3] * 255 ) );
+                    renderText(dx, dy, dz, billboard->text, *textFont);
+                }
+
+//				glColor4f(colour[0], colour[1], colour[2], colour[3]);
+            }
+
+            // draw doors, if needed
+            if (conf->getShowRegionsInfo() == true && p->doorsBillboards.isEmpty() != true) {
+
+                qglColor( QColor( 0, 255, 0, colour[3] * 255 ) );
+                for (int n = 0; n < p->doorsBillboards.size(); n++) {
+                	Billboard *billboard = p->doorsBillboards[n];
+
+                    renderText(billboard->x - curx, billboard->y - cury, billboard->z - curz, billboard->text, *textFont);
+                }
+
+            }
+
+            // if needed, draw selected rooms
+            if (!Map.selections.isEmpty()) {
+				glColor4f(0.20, 0.20, 0.80, colour[3]-0.1);
+
+				for (k = 0; k < p->rooms.size(); k++) {
+					if (Map.selections.isSelected( p->rooms[k]->id ) == true ) {
+	                    int dx = p->rooms[k]->getX() - curx;
+	                    int dy = p->rooms[k]->getY() - cury;
+	                    int dz = p->rooms[k]->getZ() - curz;
+	                    glTranslatef(dx, dy, dz);
+						glRectf(-ROOM_SIZE*2, -ROOM_SIZE*2, ROOM_SIZE*2, ROOM_SIZE*2); // left
+	                    glTranslatef(-dx, -dy, -dz);
+					}
+                }
+            }
+
+			glColor4f(colour[0], colour[1], colour[2], colour[3]);
 
         }
     }
@@ -814,7 +873,7 @@ void RendererWidget::setupNewBaseCoordinates()
 {
     CRoom *p = NULL;
     CRoom *newRoom = NULL;
-    long long bestDistance, dist;
+    unsigned long long bestDistance, dist;
     int newX, newY, newZ;
     unsigned int i;
 
@@ -825,7 +884,7 @@ void RendererWidget::setupNewBaseCoordinates()
         return;
 
     // initial unbeatably worst value for euclidean test
-    bestDistance = 30000*30000*30000;
+    bestDistance = (long long) 32000*32000*1000;
     for (i = 0; i < stacker.amount(); i++) {
         p = stacker.get(i);
         newX = curx - p->getX();
@@ -842,6 +901,12 @@ void RendererWidget::setupNewBaseCoordinates()
 		curx = newRoom->getX();
 		cury = newRoom->getY();
 		curz = newRoom->getZ() + userLayerShift;
+
+		printf("Base room: %i\r\n", newRoom->id);
+    	fflush(stdout);
+    } else {
+    	printf("No base room for coordinates setup found!\r\n");
+    	fflush(stdout);
     }
 }
 
@@ -871,10 +936,10 @@ void RendererWidget::draw(void)
     const float alphaChannelTable[] = { 0.9, 0.35, 0.30, 0.28, 0.25, 0.15, 0.15, 0.13, 0.1, 0.1, 0.1};
 //                                       0    1     2      3    4      5     6    7    8     9    10 
 
-    
     if (Map.isBlocked()) {
     	// well, not much we can do - ignore the message
     	printf("Map is blocked. Delaying the redraw\r\n");
+    	fflush(stdout);
 		print_debug(DEBUG_GENERAL, "Map is blocked. Delaying the redraw.");
 		QTimer::singleShot( 500, this, SLOT( display() ) );
 		return;
@@ -882,14 +947,6 @@ void RendererWidget::draw(void)
 
     redraw = false;
 
-    // clear the billboards 
-    billboards.clear();
-
-    
-    rooms_drawn_csquare=0;
-    rooms_drawn_total=0;
-//    square_frustum_checks = 0;
-    
     int z = 0;
 
     print_debug(DEBUG_RENDERER, "in draw()");
@@ -952,15 +1009,6 @@ void RendererWidget::draw(void)
 
         plane = plane->next;
     }
-
-//    print_debug(DEBUG_RENDERER, "Drawn %i rooms, after dot elimination %i, %i square frustum checks done", 
-//            rooms_drawn_csquare, rooms_drawn_total, square_frustum_checks);
-//    print_debug(DEBUG_RENDERER, "Drawing markers");
-
-//    printf("Drawn %i rooms, after dot elimination %i\r\n", rooms_drawn_csquare, rooms_drawn_total);
-//    fflush(stdout);
-    //    print_debug(DEBUG_RENDERER, "Drawing markers");
-
 
     glDrawMarkers();
     glDrawGroupMarkers();

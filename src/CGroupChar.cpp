@@ -24,6 +24,7 @@
 #include "CRoomManager.h"
 #include "CConfigurator.h"
 
+
 CGroupChar::CGroupChar(CGroup *_parent, QTreeWidget* t) :
 	parent(_parent), charTable(t)
 {

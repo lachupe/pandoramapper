@@ -86,7 +86,7 @@ void CStacksManager::removeRoom(unsigned int id)
 void CStacksManager::put(CRoom *r)
 {
     if (mark[r->id] == turn)
-	return;
+    	return;
     sb->push_back(r);
     mark[r->id] = turn;
 }

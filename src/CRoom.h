@@ -34,6 +34,7 @@
 
 #include "defines.h"
 #include "CRegion.h"
+#include "CSquare.h"
 
 #include <QByteArray>
 
@@ -67,15 +68,17 @@ class CRoom {
     QByteArray      note; 			/* note, if needed, additional info etc */
     QByteArray      noteColor;      /* note color in this room */
     QByteArray      desc;			/* descrition */
-    char                  sector;                 /* terrain marker */ 		
+    char            sector;                 /* terrain marker */
                                         /* _no need to free this one_ */
-    CRegion           *region;               /* region of this room */
+    CRegion         *region;               /* region of this room */
     
     
     QByteArray    doors[6];		/* if the door is secret */
     unsigned  char exitFlags[6];
-    
-  
+
+    CSquare			*square;  		/* which square this room belongs to */
+    void rebuildDisplayList() {if (square) square->rebuildDisplayList(); }
+
     int x, y, z;		/* coordinates on our map */
 
 public:
@@ -101,6 +104,9 @@ public:
     void setTerrain(char terrain);
     void setSector(char val);
     void setNote(QByteArray note);
+
+    void setSquare(CSquare *square);
+    CSquare* getSquare() { return square; }
     
     bool isDescSet();
     bool isNameSet();
