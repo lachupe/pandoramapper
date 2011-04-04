@@ -284,9 +284,9 @@ void CActionManager::groupManagerTypeChanged(int type)
 
 void CActionManager::groupOff(bool b)
 {
-    print_debug(DEBUG_INTERFACE, "Changing groupManager tygroupClearSpells()pe to client");
-	if (b)
-		parent->getGroupManager()->setType(CGroupCommunicator::Off);
+    print_debug(DEBUG_INTERFACE, "Changing groupManager type to client");
+    if (b)
+        parent->getGroupManager()->setType(CGroupCommunicator::Off);
     print_debug(DEBUG_INTERFACE, "Done.");
 }
 
@@ -294,8 +294,8 @@ void CActionManager::groupOff(bool b)
 void CActionManager::groupClient(bool b)
 {
     print_debug(DEBUG_INTERFACE, "Changing groupManager type to client");
-	if (b)
-		parent->getGroupManager()->setType(CGroupCommunicator::Client);
+    if (b)
+        parent->getGroupManager()->setType(CGroupCommunicator::Client);
     print_debug(DEBUG_INTERFACE, "Done.");
 }
 
@@ -303,8 +303,8 @@ void CActionManager::groupClient(bool b)
 void CActionManager::groupServer(bool b)
 {
     print_debug(DEBUG_INTERFACE, "Changing groupManager type to server");
-	if (b)
-		parent->getGroupManager()->setType(CGroupCommunicator::Server);
+    if (b)
+        parent->getGroupManager()->setType(CGroupCommunicator::Server);
     print_debug(DEBUG_INTERFACE, "Done.");
 }
 

@@ -660,13 +660,19 @@ void RendererWidget::generateDisplayList(CSquare *square)
                 glBindTexture(GL_TEXTURE_2D, exit_texture  );
 
                 glBegin(GL_QUAD_STRIP);
-				glVertex3f(dx + sx - sy / thickness, dy + sy - sx / thickness, dz);
-				glVertex3f(dx + sx + sy / thickness, dy + sy + sx / thickness, dz);
+                glTexCoord2f(0.0, 1.0);
+                glVertex3f(dx + sx - sy / thickness, dy + sy - sx / thickness, dz);
+                glTexCoord2f(0.0, 0.0);
+                glVertex3f(dx + sx + sy / thickness, dy + sy + sx / thickness, dz);
 
+				glTexCoord2f(0.5, 1.0);
 				glVertex3f(dx + kx - sy / thickness, dy + ky - sx / thickness, dz + kz);
+				glTexCoord2f(0.5, 0.0);
 				glVertex3f(dx + kx + sy / thickness, dy + ky + sx / thickness, dz + kz);
 
+				glTexCoord2f(1.0, 1.0);
 				glVertex3f(dx2 - sy / thickness, dy2 - sx / thickness, dz2);
+				glTexCoord2f(1.0, 0.0);
 				glVertex3f(dx2 + sy / thickness, dy2 + sx / thickness, dz2);
                 glEnd();
 
@@ -722,20 +728,19 @@ void RendererWidget::generateDisplayList(CSquare *square)
 
             	exit_texture = conf->exit_undef_texture;
 
-                glBegin(GL_LINES);
-                glEnd();
-
-
                 glEnable(GL_TEXTURE_2D);
                 glBindTexture(GL_TEXTURE_2D, exit_texture  );
 
                 glBegin(GL_QUAD_STRIP);
+                glTexCoord2f(0.0, 1.0);
                 glVertex3f(dx + kx - sy / thickness, dy + ky - sx / thickness, dz);
+                glTexCoord2f(0.0, 0.0);
                 glVertex3f(dx + kx + sy / thickness, dy + ky + sx / thickness, dz);
 
+                glTexCoord2f(1.0, 1.0);
                 glVertex3f(dx2 + kx - sy / thickness, dy2 + ky - sx / thickness, dz2);
+                glTexCoord2f(1.0, 0.0);
                 glVertex3f(dx2 + kx + sy / thickness, dy2 + ky + sx / thickness, dz2);
-
                 glEnd();
                 glDisable(GL_TEXTURE_2D);
 
