@@ -138,6 +138,10 @@ bool Cdispatcher::parseXml(QByteArray tag)
             if (param != "") {
                 int index = param.indexOf("dir=");
                 index += 4;
+
+                if (param[index] == '\"')
+                	index++;
+
                 switch (param[index]) {
                     case 'n' :    param = "north";
                                         break;
@@ -283,7 +287,6 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
 
 
         case STUFFING :
-//		printf("STUFFING state %i, char : %c, subchars %s \r\n", c.subState, *s, (const char *) c.subchars );
 			switch (c.subState) {
 				case                AMP:
 											switch (*s) {
@@ -312,25 +315,25 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
 												c.subchars.append('t');
 												c.subState = LASTCHAR;
 											}  else STUFFING_CLEANUP;
-											continue;
+												continue;
 				case                 L:
 											if (*s == 't') {
 												c.subchars.append('t');
 												c.subState = LASTCHAR;
 											} else STUFFING_CLEANUP;
-											continue;
+												continue;
 				case                 A:
 											if (*s == 'm') {
 												c.subchars.append('m');
 												c.subState = A_M;
 											} else STUFFING_CLEANUP;
-											continue;
+												continue;
 				case                 A_M:
 											if (*s == 'p') {
 												c.subchars.append('p');
 												c.subState = LASTCHAR;
 											} else STUFFING_CLEANUP;
-											continue;
+												continue;
 				case                 LASTCHAR:
 											if (*s == ';') {
 												if (c.subchars == "&gt")
@@ -343,7 +346,7 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
 												 c.mainState = NORMAL;
 												 c.subchars.clear();
 											} else STUFFING_CLEANUP;
-											continue;
+												continue;
 			}
        case TELNET:
 			switch (c.subState) {
@@ -401,33 +404,27 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
 
 			 break;
         }
-//        printf("Appending %i : %c\r\n", s, *s);
         line.append(*s);
     }
 
     c.fragment.clear();
-//  printf("Amount : %i.\r\n", amount);
     if (line != "") {
         switch (c.mainState) {
                 case NORMAL:
                 case STUFFING:
                     buffer[amount].type = IS_NORMAL;
                     buffer[amount].line = line;
-//                    printf("Normal finishing line: %s\r\n", (const char *) line);
                     break;
                 case XML:
                     buffer[amount].type = IS_NORMAL;
                     buffer[amount].line = line;
-//                    printf("** XML split detected, subchars saved for futher proceeding. Saved line : %s\r\n", (const char *) line);
                     break;
                 case TELNET:
                     if (c.subState == NORMAL) {
                         buffer[amount].type = IS_DATA;
                         buffer[amount].line = line;
-//                        printf("Normal telnet finishing line.\r\n");
                     } else {
                         buffer[amount].line = "";
-//                        printf("Telnet seq SPLIT  detected!\r\n");
                         c.fragment = line;
                     }
                     break;

@@ -1669,8 +1669,8 @@ USERCMD(usercmd_move)
 
   userfunc_print_debug;
 
-  /*firstly - send the command futher to mud, as if it matches */
-  /* used commands - it wont be automatically send futher */
+  /*firstly - send the command further to mud, as if it matches */
+  /* used commands - it wont be automatically send further */
 
   // for normal game - append the command to the commands queue of the engine
 
@@ -1698,8 +1698,6 @@ USERCMD(usercmd_move)
                 break;
   }
 
-  if (dir != -1)
-	  engine->addMovementCommand( dir );
 
   if (proxy->isMudEmulation()) {
 
@@ -1713,14 +1711,12 @@ USERCMD(usercmd_move)
     r = stacker.first();
 
 
-    dir = -1;
-
     switch (subcmd)
     {
           case USER_MOVE_LOOK:
           case USER_MOVE_EXAMINE:
                   r->sendRoom();
-		  send_prompt();
+                  send_prompt();
                   return USER_PARSE_SKIP;
 
                   break;
@@ -1748,6 +1744,10 @@ USERCMD(usercmd_move)
     return USER_PARSE_SKIP;
 
   }
+
+  // if the emulation mode is on - do not add the command to the visualisation list
+  if (dir != -1)
+	  engine->addMovementCommand( dir );
 
   return USER_PARSE_DONE;   /* leave the line as it is */
 }
@@ -1832,9 +1832,15 @@ USERCMD(usercmd_mregion)
 
 
             engine->get_users_region()->addDoor(arg, p);
-            send_to_user( "Ok. Added %s (alias %s) to the region %s\r\n", p, arg, (const char *) engine->get_users_region()->getName() );
 
-	    send_prompt();
+            // try to rebuild at least current square with rooms
+            CRoom *r = stacker.first();
+            if (r != NULL) {
+            	r->rebuildDisplayList();
+            }
+
+            send_to_user( "Ok. Added %s (alias %s) to the region %s\r\n", p, arg, (const char *) engine->get_users_region()->getName() );
+            send_prompt();
             return USER_PARSE_SKIP;
         } else  if (is_abbrev(arg, "action")) {
                 bool local;
@@ -1888,7 +1894,7 @@ USERCMD(usercmd_mregion)
             else
                 send_to_user( "Sorry, failed.\r\n");
 
-	    send_prompt();
+            send_prompt();
             return USER_PARSE_SKIP;
         } else if (is_abbrev(arg, "list")) {
             engine->get_users_region()->showRegion();
@@ -1946,7 +1952,7 @@ USERCMD(usercmd_mregion)
         p = skip_spaces(p);
         if (!*p) {
             send_to_user("Error. Missing regions name. \r\n");
-	    send_prompt();
+            send_prompt();
             return USER_PARSE_SKIP;
         }
         p = one_argument(p, arg, 0);

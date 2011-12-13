@@ -619,7 +619,7 @@ void RendererWidget::generateDisplayList(CSquare *square)
 						QByteArray alias;
 						info = p->getDoor(k);
 						alias = engine->get_users_region()->getAliasByDoor( info, k);
-						if (alias != "") {
+						if (alias != "" && p->getRegion() == engine->get_users_region() ) {
 							info += " [";
 							info += alias;
 							info += "]";
@@ -651,7 +651,7 @@ void RendererWidget::generateDisplayList(CSquare *square)
 						double y = p->getY() + deltaY + shiftY;
 						double z = p->getZ() + deltaZ + shiftZ;
 
-			        	square->doorsBillboards.append( new Billboard( x, y , z, info, QColor(0, 255, 0, 255)) );
+			        	square->doorsBillboards.append( new Billboard( x, y , z, info, QColor(255, 255, 255, 255)) );
                     }
                 }
 
@@ -835,13 +835,13 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
                     renderText(dx, dy, dz, billboard->text, *textFont);
                 }
 
-//				glColor4f(colour[0], colour[1], colour[2], colour[3]);
             }
 
             // draw doors, if needed
             if (conf->getShowRegionsInfo() == true && p->doorsBillboards.isEmpty() != true) {
 
-                qglColor( QColor( 0, 255, 0, colour[3] * 255 ) );
+//                qglColor( QColor( 255, 255, 255, colour[3] * 255 ) );
+				glColor4f(1.0, 1.0, 1.0, colour[3]);
                 for (int n = 0; n < p->doorsBillboards.size(); n++) {
                 	Billboard *billboard = p->doorsBillboards[n];
 
@@ -865,6 +865,27 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
 					}
                 }
             }
+
+            // if needed, draw current region
+            if (conf->getDisplayRegionsRenderer()) {
+				glColor4f(0.50, 0.50, 0.50, colour[3]-0.2);
+
+				// generate gl list for the square here
+			    for (int ind = 0; ind < p->rooms.size(); ind++) {
+			        CRoom *room = p->rooms[ind];
+
+			        if (room->getRegion() && room->getRegion() == engine->get_users_region() ) {
+	                    int dx = room->getX() - curx;
+	                    int dy = room->getY() - cury;
+	                    int dz = room->getZ() - curz;
+	                    glTranslatef(dx, dy, dz);
+						glRectf(-ROOM_SIZE*1.5, -ROOM_SIZE*1.5, ROOM_SIZE*1.5, ROOM_SIZE*1.5); // left
+	                    glTranslatef(-dx, -dy, -dz);
+			        }
+
+			    }
+            }
+
 
 			glColor4f(colour[0], colour[1], colour[2], colour[3]);
 
@@ -907,11 +928,11 @@ void RendererWidget::setupNewBaseCoordinates()
 		cury = newRoom->getY();
 		curz = newRoom->getZ() + userLayerShift;
 
-		printf("Base room: %i\r\n", newRoom->id);
-    	fflush(stdout);
+//		printf("Base room: %i\r\n", newRoom->id);
+//    	fflush(stdout);
     } else {
-    	printf("No base room for coordinates setup found!\r\n");
-    	fflush(stdout);
+//    	printf("No base room for coordinates setup found!\r\n");
+//    	fflush(stdout);
     }
 }
 

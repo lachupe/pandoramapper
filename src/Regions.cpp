@@ -31,7 +31,7 @@
 //
 #include "CRegion.h"
 #include "utils.h"
-
+#include "CRoomManager.h"
 
 CRegion::CRegion()
 {
@@ -61,6 +61,7 @@ QByteArray CRegion::getName()
 void CRegion::addDoor(QByteArray alias, QByteArray name)
 {
     doors.insert(alias.trimmed(), name.simplified());
+    Map.rebuildRegion( this );
 }
 
 QByteArray CRegion::getDoor(QByteArray alias)
@@ -72,7 +73,9 @@ QByteArray CRegion::getDoor(QByteArray alias)
 
 bool CRegion::removeDoor(QByteArray alias)
 {
-    return doors.remove(alias);
+	bool b = doors.remove(alias);
+    Map.rebuildRegion( this );
+	return b;
 }
 
 void CRegion::showRegion()

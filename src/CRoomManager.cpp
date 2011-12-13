@@ -44,6 +44,21 @@ CRoomManager::~CRoomManager()
 {
 }
 
+void CRoomManager::rebuildRegion(CRegion *reg)
+{
+	if (reg == NULL)
+		return;
+
+    QVector<CRoom *> rooms = getRooms();
+    for (unsigned int i = 0; i < size(); i++) {
+        CRoom *r = rooms[i];
+        if (r->getRegion() == reg)
+        	// this only sets a flag, so it should not be a problem to "rebuild" squares list multiple times
+        	r->rebuildDisplayList();
+    }
+
+}
+
 void CRoomManager::clearAllSecrets()
 {
     bool mark[MAX_ROOMS];
@@ -347,6 +362,8 @@ void CRoomManager::addRegion(CRegion *reg)
 	if (reg != NULL)
         regions.push_back(reg);
 }
+
+
 
 
 void CRoomManager::sendRegionsList()

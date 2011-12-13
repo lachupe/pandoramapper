@@ -129,77 +129,77 @@ int Proxy::loop(void)
     fd_set   input, exc;
     int n;
 
-  while (1) {
+    while (1) {
 
-    FD_ZERO(&input);
-    FD_ZERO(&exc);
+		FD_ZERO(&input);
+		FD_ZERO(&exc);
 
-    if (user.isConnected() > 0) {
-        SOCKET sock = user.getSocket();
-        FD_SET(sock, &input);
-        FD_SET(sock, &exc);
+		if (user.isConnected() > 0) {
+			SOCKET sock = user.getSocket();
+			FD_SET(sock, &input);
+			FD_SET(sock, &exc);
 
-        if (!mudEmulation) {
-            SOCKET sock = mud.getSocket();
-            FD_SET(sock, &input);
-            FD_SET(sock, &exc);
-        }
-    }
+			if (!mudEmulation) {
+				SOCKET sock = mud.getSocket();
+				FD_SET(sock, &input);
+				FD_SET(sock, &exc);
+			}
+		}
 
-    FD_SET(proxy_hangsock, &input);
+		FD_SET(proxy_hangsock, &input);
 
-    n = select (FD_SETSIZE , &input, NULL, &exc, NULL);
-    if (n < 0) {
-        /* .... */
-        print_debug(DEBUG_PROXY, "Networking error: Select failed.  Quiting.\r\n");
-        exit(1);
-    }
+		n = select (FD_SETSIZE , &input, NULL, &exc, NULL);
+		if (n < 0) {
+			/* .... */
+			print_debug(DEBUG_PROXY, "Networking error: Select failed.  Quiting.\r\n");
+			exit(1);
+		}
 
-    if (FD_ISSET(proxy_hangsock, &input))
-        if (!user.isConnected())
-            incomingConnection();
+		if (FD_ISSET(proxy_hangsock, &input))
+			if (!user.isConnected())
+				incomingConnection();
 
-    if (user.isConnected()) {
-        if (FD_ISSET(user.getSocket(), &exc) || FD_ISSET(mud.getSocket(), &exc))
-            shutdown();
+		if (user.isConnected()) {
+			if (FD_ISSET(user.getSocket(), &exc) || FD_ISSET(mud.getSocket(), &exc))
+				shutdown();
 
-        if (FD_ISSET(user.getSocket(),&input)) {
-            /* user stream */
-            int size;
+			if (FD_ISSET(user.getSocket(),&input)) {
+				/* user stream */
+				int size;
 
-            print_debug(DEBUG_PROXY, "Proxy: Network activity!\r\n");
+				print_debug(DEBUG_PROXY, "Proxy: Network activity!\r\n");
 
-            size = user.read();
-            if (size > 0) {
-                size = dispatcher->analyzeUserStream(user);
-                if (!mudEmulation) {
-                    mud.write(user.buffer, size);
-                }
-            } else {
-                if (WSAGetLastError() == WSAEWOULDBLOCK)
-                    continue;
-                shutdown();
-             }
-        }
+				size = user.read();
+				if (size > 0) {
+					size = dispatcher->analyzeUserStream(user);
+					if (!mudEmulation) {
+						mud.write(user.buffer, size);
+					}
+				} else {
+					if (WSAGetLastError() == WSAEWOULDBLOCK)
+						continue;
+					shutdown();
+				 }
+			}
 
-        if (mudEmulation)
-            continue;
+			if (mudEmulation)
+				continue;
 
-        if (FD_ISSET(mud.getSocket(),&input)) {
-            int size;
+			if (FD_ISSET(mud.getSocket(),&input)) {
+				int size;
 
-            size = mud.read();
-            if (size>0) {
-                size = dispatcher->analyzeMudStream(mud);
-                user.write( mud.buffer, size );
-            } else {
-                if (WSAGetLastError() == WSAEWOULDBLOCK)
-                    continue;
-                shutdown();
-            }
+				size = mud.read();
+				if (size>0) {
+					size = dispatcher->analyzeMudStream(mud);
+					user.write( mud.buffer, size );
+				} else {
+					if (WSAGetLastError() == WSAEWOULDBLOCK)
+						continue;
+					shutdown();
+				}
 
-        }
-    }
+			}
+		}
 
   }     /* while loop ends */
 
@@ -326,6 +326,18 @@ void Proxy::sendPromptLineEvent(QByteArray data)
 	//printf("Sending prompt to groupManager: %s\r\n", (const char *) data);
 	emit sendPromptLine(data);
 }
+
+void Proxy::setMudEmulation(bool b)
+{
+	mudEmulation = b;
+	if (mud.isConnected()) {
+		mud.close();
+		mud.clear();
+	}
+
+
+}
+
 
 
 // ----------------------------------  ProxySocket ------------------------------------------

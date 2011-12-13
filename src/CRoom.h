@@ -77,7 +77,6 @@ class CRoom {
     unsigned  char exitFlags[6];
 
     CSquare			*square;  		/* which square this room belongs to */
-    void rebuildDisplayList() {if (square) square->rebuildDisplayList(); }
 
     int x, y, z;		/* coordinates on our map */
 
@@ -167,6 +166,8 @@ public:
     QByteArray getDoorAlias(int i);
     
     char dirbynum(int dir);
+
+    void rebuildDisplayList() {if (square) square->rebuildDisplayList(); }
 };
 
 #endif

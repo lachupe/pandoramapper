@@ -94,6 +94,7 @@ public:
     CRegion* getRegionByName(QByteArray name);
     bool addRegion(QByteArray name);
     void addRegion(CRegion *reg);
+    void rebuildRegion(CRegion *reg);
 
     void sendRegionsList();
 

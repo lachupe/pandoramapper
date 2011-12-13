@@ -401,7 +401,7 @@ void CEngine::updateRegions()
         	}
 
         	if (conf->getRegionsAutoSet())
-                users_region = last_region;
+                set_users_region( last_region );
         }
 
         if (conf->getRegionsAutoReplace() && last_region != users_region) {
@@ -705,7 +705,15 @@ void CEngine::clear()
 
 void CEngine::set_users_region(CRegion *reg)
 {
-    users_region = reg;
+	CRegion *prev_reg = users_region;
+
+	if (users_region == reg)
+		return;
+
+	users_region = reg;
+
+	Map.rebuildRegion( prev_reg );
+	Map.rebuildRegion( reg );
 }
 
 void CEngine::set_last_region(CRegion *reg)

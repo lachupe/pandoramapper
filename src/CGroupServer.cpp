@@ -82,7 +82,10 @@ void CGroupServer::sendToAllExceptOne(CGroupClient *conn, QByteArray message)
 
 void CGroupServer::closeAll()
 {
+	print_debug(DEBUG_GROUP, "Deleting all client connections");
 	for (int i = 0; i < connections.size(); i++) {
+		print_debug(DEBUG_GROUP, "Flushing deleting one ... ");
+		connections[i]->flush();
 		connections[i]->deleteLater();
 	}
 }
