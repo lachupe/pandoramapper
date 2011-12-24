@@ -120,7 +120,7 @@ void CStacksManager::reset()
     sb = &stackb;
     sa->clear();
     sb->clear();
-    memset(mark, 0, MAX_ROOMS);
+    memset(mark, 0, MAX_ROOMS * sizeof(mark[0]) );
     turn = 1;
     swap();
 }
@@ -131,7 +131,7 @@ void CStacksManager::swap()
 
     turn++;
     if (turn == 0) {
-        memset(mark, 0, MAX_ROOMS);
+        memset(mark, 0, MAX_ROOMS * sizeof(mark[0]) );
         turn = 1;
     }
     

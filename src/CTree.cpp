@@ -113,7 +113,7 @@ int CTree::divingDelete(TTree * p, char *part, unsigned int id)
 {
     int i;
 
-    if (strlen(part) == 0) {	/* we've found our item */
+    if (part[0] == '\0') {	/* we've found our item */
 	for (i = 0; i < A_SIZE; i++)
             if (p->leads[i] != NULL) {	/* shall not delete this item */
                 removeId(id, p);

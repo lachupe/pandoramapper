@@ -592,7 +592,7 @@ USERCMD(usercmd_maction)
 {
   #define MACTION_SEND_DOOR(door, dir)  \
   if (!local) { \
-    if (strlen(original) != 0) strcat(original, "\n"); \
+  if (original[0] != '\0') strcat(original, "\n"); \
   	  sprintf(original+strlen(original), "%s %s %s", arg, (const char *) door , short_exits[dir]); \
   } \
   send_to_user("%s %s %s\r\n", arg, (const char *) door , short_exits[dir]);
