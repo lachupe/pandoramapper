@@ -26,6 +26,7 @@
 #include <QDateTime>
 #include <QKeyEvent>
 #include <QTimer>
+#include <gl/glu.h>
 
 #include "renderer.h"
 #include "CConfigurator.h"
