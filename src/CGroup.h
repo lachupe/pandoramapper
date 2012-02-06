@@ -51,7 +51,7 @@ public:
 	void setType(int newState);
 	int getType() {return network->getType(); }
 	bool isConnected() { return network->isConnected(); }
-	void reconnect() { resetChars();  network->reconnect(); }
+	void reconnect();
 
 	void addSelf();
 	void hideSelf();
@@ -93,6 +93,10 @@ public:
 
 	void renameChar(QDomNode blob);
 
+	void sendLog(const QString& message) {
+		emit log("GrpManager", message);
+	}
+
 
 public slots:
 	void connectionRefused(QString message);
@@ -118,6 +122,8 @@ public slots:
 
 signals:
 	void hides();
+	void log(const QString& module, const QString& message);
+
 
 private:
 	CGroupCommunicator*		network;

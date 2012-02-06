@@ -92,7 +92,7 @@ class PipeManager {
     QQueue<Event> Pipe;
 
 public:
-    void addEvent(Event e)
+    void addEvent(const Event &e)
     {
     	pipeMutex.lock();
     	Pipe.enqueue(e);
@@ -108,7 +108,7 @@ public:
 
     bool isEmpty() { return Pipe.empty(); }    
 
-    Event getEvent() 
+    Event getEvent()
     {
         Event event;
         pipeMutex.lock(); 

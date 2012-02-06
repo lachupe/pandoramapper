@@ -120,6 +120,8 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
 
   conf.beginWriteArray("Textures");
   for (unsigned int i = 0; i < sectors.size(); ++i) {
+	  if (sectors[i].desc == "NONE")
+		  continue; // do not save the default handle
 	  conf.setArrayIndex(i);
 	  conf.setValue("handle", sectors[i].desc);
 	  conf.setValue("file", sectors[i].filename);
@@ -253,7 +255,11 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
     size = conf.beginReadArray("Textures");
 	for (int i = 0; i < size; ++i) {
 	  conf.setArrayIndex(i);
-      addTexture(conf.value("handle").toByteArray(),  conf.value("file").toByteArray(),  (char) conf.value("pattern").toInt());
+	  QByteArray handle = conf.value("handle").toByteArray();
+	  // ignore "NONE" handle, it's always added by constructors
+	  if (handle == "NONE")
+		  continue;
+      addTexture(handle,  conf.value("file").toByteArray(),  (char) conf.value("pattern").toInt());
 	}
 	conf.endArray();
 	conf.endGroup();
@@ -385,7 +391,7 @@ void Cconfigurator::addSpell(QByteArray spellname, QByteArray up, QByteArray dow
     setConfigModified(true);
 }
 
-void Cconfigurator::addSpell(TSpell spell)
+void Cconfigurator::addSpell(const TSpell &spell)
 {
     spells.push_back(spell);
     setConfigModified(true);

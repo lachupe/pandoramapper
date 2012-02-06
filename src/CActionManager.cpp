@@ -212,8 +212,8 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     loadConfigAct->setStatusTip(tr("Save current configuration to a different file"));
     connect(loadConfigAct, SIGNAL(triggered()), this, SLOT(loadConfig()));
 
-    showLogAct = new QAction(tr("&Show Log"), this);
-    showLogAct->setStatusTip(tr("Show the application's Log file"));
+    showLogAct = new QAction(tr("&Show Debug Log"), this);
+    showLogAct->setStatusTip(tr("Show the applications debugging log"));
     connect(showLogAct, SIGNAL(triggered()), this, SLOT(showLog() ));
 
 

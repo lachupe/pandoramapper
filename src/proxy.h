@@ -25,16 +25,14 @@
 #include <QThread>
 
 #if defined Q_OS_LINUX || defined Q_OS_MACX || defined Q_OS_FREEBSD
-    #define SOCKET int
+#define SOCKET int
 #elif defined Q_OS_WIN32
-    #include <winsock.h>
+#include <winsock.h>
 #endif
 
 #define SOCKET int
 
-
 #define PROXY_BUFFER_SIZE 8192
-
 
 #define IAC 255
 #define DONT 254
@@ -58,124 +56,135 @@
 #define TN_EOF 236
 #define LAST_TN_CMD 236
 
-
 class Cdispatcher;
-
+class Proxy;
 
 class ProxySocket {
-    /* connection sockets */
-    SOCKET sock;
-    QMutex mutex;
+	/* connection sockets */
+	SOCKET sock;
+	QMutex mutex;
+	Proxy  *parent;
 
 public:
-    int mainState;
-    int subState;
-    char                          buffer[PROXY_BUFFER_SIZE];
-    int                           length;
+	int mainState;
+	int subState;
+	char buffer[PROXY_BUFFER_SIZE];
+	int length;
 
-    ProxySocket(bool xml);
-    ProxySocket() {};
+	ProxySocket(Proxy * parent, bool xml = false);
 
-    /* xml flags */
-    bool xmlMode;  int n;
+	/* xml flags */
+	bool xmlMode;
+	int n;
 
-    bool xmlTogglable;
+	bool xmlTogglable;
 
-    QByteArray  subchars;
-    QByteArray  fragment;
+	QByteArray subchars;
+	QByteArray fragment;
 
-    // returns new position
-    void append(QByteArray line) {
-        memcpy(buffer + length, line, line.length());
-        length += line.length();
-    }
+	// returns new position
+	void append(QByteArray line) {
+		memcpy(buffer + length, line, line.length());
+		length += line.length();
+	}
 
-    void append(const char *line) {
-        memcpy(buffer + length, line, strlen(line));
-        length += strlen(line);
-    }
+	void append(const char *line) {
+		memcpy(buffer + length, line, strlen(line));
+		length += strlen(line);
+	}
 
+	void clearBuffer() {
+		length = 0;
+	}
 
+	void close();
+	void clear();
+	void send_line(const char *line);SOCKET getSocket();
+	bool isXmlMode();
+	void setXmlMode(bool b);
+	bool isXmlTogglable();
+	void setXmlTogglable(bool b);
 
-    void clearBuffer() {
-    	length = 0;
-    }
+	bool isConnected();
+	void setConnection(SOCKET sock);
+	bool openConnection(QByteArray name, int port);
 
-    void close();
-    void clear();
-    void send_line(const char *line);
-    SOCKET getSocket();
-    bool isXmlMode();
-    void setXmlMode( bool b );
-    bool isXmlTogglable();
-    void setXmlTogglable( bool b );
+	void nonblock();
 
-    bool isConnected();
-    void setConnection(SOCKET sock);
-    bool openConnection(QByteArray name, int port);
-
-    void nonblock();
-
-
-    int read();     // read stuff in internal buffer
-    int read(char *buf, int len);
-    void write(char *buf, int len);
+	int read(); // read stuff in internal buffer
+	int read(char *buf, int len);
+	void write(char *buf, int len);
 
 };
 
-
-
 /* PROXY THREAD DEFINES */
-class Proxy : public QThread {
-        Q_OBJECT
+class Proxy: public QThread {
+Q_OBJECT
 
-        ProxySocket             mud;
-        ProxySocket             user;
-        SOCKET                  proxy_hangsock;
-        Cdispatcher             *dispatcher;
+	ProxySocket *mud;
+	ProxySocket *user;
+	SOCKET proxy_hangsock;
 
+	Cdispatcher *dispatcher;
 
-        int      loop();
-        bool    mudEmulation;
+	int loop();
+	bool mudEmulation;
 
-        bool connectToMud();
-        void incomingConnection();
-        void sendMudEmulationGreeting();
+	bool connectToMud();
+	void incomingConnection();
+	void sendMudEmulationGreeting();
 
 public:
 
-        void run();
-        int init();
-        void send_line_to_user(const char *line);
-        void send_line_to_mud(const char *line);
-        bool isMudEmulation() { return mudEmulation; }
-        void setMudEmulation(bool b);
-        void shutdown();
+	Proxy();
+	~Proxy();
 
-        void startEngineCall() { emit startEngine(); }
-        void startRendererCall() { emit startRenderer(); }
+	void run();
+	int  init();
+	void send_line_to_user(const char *line);
+	void send_line_to_mud(const char *line);
+	bool isMudEmulation() {
+		return mudEmulation;
+	}
+	void setMudEmulation(bool b);
+	void shutdown();
 
-        void sendGroupTellEvent(QByteArray data);
-        void sendScoreLineEvent(QByteArray data);
-        void sendPromptLineEvent(QByteArray data);
-        void sendSpellsUpdatedEvent() { emit sendSpellsUpdate(); }
-        void sendCharStateUpdatedEvent(int state) { emit sendCharStateUpdate(state); }
+	void startEngineCall() {
+		emit startEngine();
+	}
+	void startRendererCall() {
+		emit startRenderer();
+	}
+
+	void sendGroupTellEvent(QByteArray data);
+	void sendScoreLineEvent(QByteArray data);
+	void sendPromptLineEvent(QByteArray data);
+	void sendSpellsUpdatedEvent() {
+		emit sendSpellsUpdate();
+	}
+	void sendCharStateUpdatedEvent(int state) {
+		emit sendCharStateUpdate(state);
+	}
+
+	void sendLog(const QString& message) {
+		emit log("Network", message);
+	}
+
 signals:
-    void connectionEstablished();
-    void connectionLost();
-    void startEngine();
-    void startRenderer();
+	void connectionEstablished();
+	void connectionLost();
+	void startEngine();
+	void startRenderer();
 	void sendGTell(QByteArray);
 	void sendScoreLine(QByteArray);
 	void sendPromptLine(QByteArray);
 	void sendSpellsUpdate();
 	void sendCharStateUpdate(int);
-
+	void log(const QString& module, const QString& message);
 };
 
 /* PROX THREAD ENDS */
 
 extern class Proxy *proxy;
-
 
 #endif

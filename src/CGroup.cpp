@@ -111,6 +111,13 @@ CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
 	print_debug(DEBUG_GROUP, "Leaving the GroupManager constructor");
 }
 
+void CGroup::reconnect()
+{
+	resetChars();
+	network->reconnect();
+}
+
+
 void CGroup::hideSelf()
 {
 	self->setHidden( true );
@@ -200,6 +207,8 @@ bool CGroup::addChar(QDomNode node)
 	if ( isNamePresent(newChar->getName()) == true || newChar->getName() == "") {
 		print_debug(DEBUG_GROUP, "Adding new char FAILED. the name %s already existed.",
 				(const char *) newChar->getName());
+		sendLog( QString("Failed to add new char, the name %1 is already present").arg( (const char*) newChar->getName() ) );
+
 		delete newChar;
 		return false;
 	} else {
@@ -325,37 +334,44 @@ void CGroup::updateCharPrompt(QDomNode blob)
 
 void CGroup::connectionRefused(QString message)
 {
+	sendLog( QString("Connection refused: %1").arg( message ) );
 	print_debug(DEBUG_GROUP, "Connection refused: %s", (const char *) message.toAscii());
-	if (network->getType() == CGroupCommunicator::Client)
-		QMessageBox::information(this, "groupManager", QString("Connection refused: %1.").arg(message));
+//	if (network->getType() == CGroupCommunicator::Client)
+//		QMessageBox::information(this, "groupManager", QString("Connection refused: %1.").arg(message));
 }
 
 void CGroup::connectionFailed(QString message)
 {
+	sendLog( QString("Failed to connect: %1").arg( message ) );
 	print_debug(DEBUG_GROUP, "Failed to connect: %s", (const char *) message.toAscii());
-	if (network->getType() == CGroupCommunicator::Client)
-		QMessageBox::information(this, "groupManager", QString("Failed to connect: %1.").arg(message));
+//	if (network->getType() == CGroupCommunicator::Client)
+//		QMessageBox::information(this, "groupManager", QString("Failed to connect: %1.").arg(message));
 }
 
 void CGroup::connectionClosed(QString message)
 {
 	print_debug(DEBUG_GROUP, "Connection closed: %s", (const char *) message.toAscii());
+	sendLog( QString("Connection closed: %1").arg( message ) );
 
-	if (network->getType() == CGroupCommunicator::Client)
-		QMessageBox::information(this, "groupManager", QString("Connection closed: %1.").arg(message));
+//	if (network->getType() == CGroupCommunicator::Client)
+//		QMessageBox::information(this, "groupManager", QString("Connection closed: %1.").arg(message));
 }
 
 void CGroup::connectionError(QString message)
 {
 	print_debug(DEBUG_GROUP, "Connection error: %s", (const char *) message.toAscii());
-	if (network->getType() == CGroupCommunicator::Client)
-		QMessageBox::information(this, "groupManager", QString("Connection error: %1.").arg(message));
+	sendLog( QString("Connection error: %1").arg( message ) );
+
+//	if (network->getType() == CGroupCommunicator::Client)
+//		QMessageBox::information(this, "groupManager", QString("Connection error: %1.").arg(message));
 }
 
 void CGroup::serverStartupFailed(QString message)
 {
 	print_debug(DEBUG_GROUP, "Failed to start the Group server: %s", (const char *) message.toAscii());
-    QMessageBox::information(this, "groupManager", QString("Failed to start the groupManager server: %1.").arg(message));
+	sendLog( QString("Failed to start the group server: %1").arg( message ) );
+
+//    QMessageBox::information(this, "groupManager", QString("Failed to start the groupManager server: %1.").arg(message));
 }
 
 void CGroup::gotKicked(QDomNode message)
@@ -377,14 +393,16 @@ void CGroup::gotKicked(QDomNode message)
 	// somehow this always leads to crash! :-(
 	//QMessageBox::critical(this, "groupManager", QString("You got kicked! Reason: %1.").arg(text.text()));
 
-	print_debug(DEBUG_GROUP, "You got kicked! Reason: %s",
+	print_debug(DEBUG_GROUP, "Kicked from group manager! Reason: %s",
 			(const char *) text.text().toAscii());
 
-	send_to_user("--[ You got kicked! Reason: %s",
+	send_to_user("--[ You were kicked from group manager! Reason: %s",
 			(const char *) text.text().toAscii());
-
 	send_to_user("\r\n");
 	send_prompt();
+
+	sendLog( QString("You were kicked from the group manager! Reason: %1").arg( text.text() ) );
+
 }
 
 void CGroup::gTellArrived(QDomNode node)
@@ -462,6 +480,8 @@ void CGroup::renameChar(QDomNode blob)
 			(const char *) oldname.toAscii(),
 			(const char *) newname.toAscii() );
 
+	sendLog( QString("%1 changed his name to %2").arg(oldname).arg(newname));
+
 	CGroupChar *ch;
 	ch = getCharByName(oldname.toAscii());
 	if (ch == NULL)
@@ -469,6 +489,7 @@ void CGroup::renameChar(QDomNode blob)
 
 	ch->setName(newname.toAscii());
 	ch->updateLabels();
+
 }
 
 void CGroup::updateSpellsInfo()
@@ -586,7 +607,7 @@ void CGroup::parsePromptInformation(QByteArray prompt)
 		notengaged = true;
 
 
-	if (notengaged == false && sepIndex > hpIndex && sepIndex > moveIndex && sepIndex > manaIndex) {
+	if (notengaged == false && sepIndex > hpIndex && hpIndex != -1 && sepIndex > moveIndex && sepIndex > manaIndex) {
 		printf("Engaged!\r\n");
 		setCharState(CGroupChar::ENGAGED);
 	} else {

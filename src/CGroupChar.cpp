@@ -530,7 +530,7 @@ QByteArray CGroupChar::getNameFromXML(QDomNode node)
 
     if (node.nodeName() != "playerData") {
     	print_debug(DEBUG_GROUP, "Called updateFromXML with wrong node. The name does not fit.");
-    	return false;
+    	return "Error"; // no idea what to return
     }
 
    	QDomElement e = node.toElement();

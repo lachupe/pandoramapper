@@ -683,9 +683,6 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
 int Cdispatcher::analyzeUserStream(ProxySocket &c)
 {
     int i;
-    CGroup *groupManager;
-
-    groupManager = renderer_window->getGroupManager();
 
     print_debug(DEBUG_DISPATCHER, "analyzeUserStream() starting");
     print_debug(DEBUG_DISPATCHER, "Buffer size %i", c.length);

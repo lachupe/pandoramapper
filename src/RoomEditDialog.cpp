@@ -296,7 +296,6 @@ void RoomEditDialog::accept()
     QString name, desc, note;
     int x, y, z;
     int id;
-    char terrain;
     unsigned int i;
 
     print_debug(DEBUG_INTERFACE, "Accepted!\r\n");
@@ -333,7 +332,7 @@ void RoomEditDialog::accept()
         
     desc = textEdit_desc->toPlainText();
     desc.replace("\n", "|");
-    terrain = comboBox_terrain->currentIndex();
+    //char terrain = comboBox_terrain->currentIndex();
     for (i=0; i< conf->sectors.size(); i++)
         if (comboBox_terrain->currentText() == conf->sectors[i].desc) {
             r->setSector(i);

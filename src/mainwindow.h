@@ -22,6 +22,8 @@
 #define MAINWINDOW_H 
 
 #include <QMainWindow>
+#include <QDockWidget>
+#include <QTextBrowser>
 
 #include "renderer.h"
 #include "CActionManager.h"
@@ -47,6 +49,17 @@ void toggle_renderer_reaction();
 void notify_analyzer();
 
 
+class DockWidget : public QDockWidget
+{
+  Q_OBJECT
+public:
+  DockWidget ( const QString & title, QWidget * parent = 0, Qt::WFlags flags = 0 );
+
+  virtual QSize minimumSizeHint() const;
+  virtual QSize sizeHint() const;
+
+};
+
 class CMainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -66,6 +79,11 @@ class CMainWindow : public QMainWindow
     QMenu       *logMenu;
     QMenu       *helpMenu;
     QMenu		*groupMenu;
+
+    // port of a log dockable from mmapper
+    QTextBrowser   *logWindow;
+    DockWidget *m_dockDialogLog;
+    DockWidget *m_dockDialogGroup;
 
  
     QPoint mousePosInRenderer( QPoint pos );
@@ -129,6 +147,9 @@ public slots:
   void setMapMoveMode();
   void setDeleteMode();
   void setSelectMode();
+  void addDockLogEntry(const QString& module, const QString& message);
+
+
 
 protected slots:
     void closeEvent(QCloseEvent *event);

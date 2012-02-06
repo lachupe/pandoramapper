@@ -198,7 +198,6 @@ bool StructureParser::startElement( const QString& , const QString& ,
   if (qName == "exit") {
     unsigned int dir;
     unsigned int to;
-    int i;
         
     /* special */
     if (attributes.length() < 3) {

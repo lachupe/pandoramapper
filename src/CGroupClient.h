@@ -48,7 +48,8 @@ public:
 	virtual ~CGroupClient();
 
 	void setSocket(int socketDescriptor);
-	
+
+	bool isLogged() { if (protocolState == Logged) return true; }
 	int getConnectionState() {return connectionState; }
 	void setConnectionState(int val);
 	void setProtocolState(int val);

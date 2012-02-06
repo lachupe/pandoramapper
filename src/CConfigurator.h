@@ -156,7 +156,7 @@ public:
     CTimers				 timers;
     QByteArray      spells_pattern;
     void addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon);
-    void addSpell(TSpell s);
+    void addSpell(const TSpell &s);
     QString spellUpFor(unsigned int p);
     void resetSpells();
 

@@ -39,6 +39,24 @@
 class CMainWindow *renderer_window;
 
 
+DockWidget::DockWidget ( const QString & title, QWidget * parent, Qt::WFlags flags )
+    :QDockWidget(title, parent, flags)
+{}
+
+QSize DockWidget::minimumSizeHint() const
+{
+  return QSize(200, 0);
+};
+
+QSize DockWidget::sizeHint() const
+{
+  return QSize(500, 130);
+};
+
+
+
+
+
 void toggle_renderer_reaction()
 {
     if (renderer_window->renderer->redraw == false) {
@@ -86,6 +104,18 @@ CMainWindow::CMainWindow(QWidget *parent)
 
     /* Enable mouse tracking to be able to show tooltips. */
     setMouseTracking(true);
+
+
+    m_dockDialogLog = new DockWidget(tr("Log View"), this);
+    m_dockDialogLog->setObjectName("DockWidgetLog");
+    m_dockDialogLog->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+    m_dockDialogLog->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    addDockWidget(Qt::BottomDockWidgetArea, m_dockDialogLog);
+
+    logWindow = new QTextBrowser(m_dockDialogLog);
+    logWindow->setObjectName("LogWindow");
+    m_dockDialogLog->setWidget(logWindow);
+
 
     //setToolMode(SelectMode);
     setToolMode(conf->getStartupMode()?MoveMode:SelectMode);
@@ -163,6 +193,8 @@ CMainWindow::CMainWindow(QWidget *parent)
 
     logMenu = menuBar()->addMenu(tr("&Log") );
     logMenu->addAction(actionManager->showLogAct );
+    logMenu->addAction(m_dockDialogLog->toggleViewAction());
+
 
     groupMenu = menuBar()->addMenu(tr("&Group") );
     groupMenu->addAction(actionManager->groupOffAct);
@@ -227,6 +259,19 @@ CMainWindow::CMainWindow(QWidget *parent)
 
     connect(renderer, SIGNAL(updateCharPosition(unsigned int)), groupManager, SLOT( setCharPosition(unsigned int) ),  Qt::QueuedConnection );
 
+    // bind all the posters to the dockable log
+    connect(groupManager, SIGNAL(log( const QString&, const QString& )), this, SLOT(addDockLogEntry( const QString&, const QString& )));
+    connect(proxy, SIGNAL(log( const QString&, const QString& )), this, SLOT(addDockLogEntry( const QString&, const QString& )));
+
+
+    addDockLogEntry("General", "Started");
+}
+
+
+void CMainWindow::addDockLogEntry(const QString& module, const QString& message)
+{
+  logWindow->append("[" + module + "] " + message);
+  logWindow->update();
 }
 
 

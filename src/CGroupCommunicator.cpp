@@ -101,7 +101,7 @@ void CGroupCommunicator::connectionEstablished(CGroupClient *connection)
 void CGroupCommunicator::connectionClosed(CGroupClient *connection)
 {
 	if (type == Client) {
-		//getGroup()->connectionError("Remote host closed the connection");
+		getGroup()->connectionError("Remote host closed the connection");
 		changeType(Off);
 	} else if (type == Server) {
 		int sock = connection->socketDescriptor();
@@ -111,7 +111,7 @@ void CGroupCommunicator::connectionClosed(CGroupClient *connection)
 			sendRemoveUserNotification(connection, name);
 			clientsList.remove(name);
 			getGroup()->removeChar(name);
-			getGroup()->connectionClosed(QString("Client %1 quited.").arg(QString(name)) );
+			getGroup()->connectionClosed(QString("Client %1 quited").arg(QString(name)) );
 		}
 		CGroupServer *server = (CGroupServer *) peer;
 		server->connectionClosed(connection);
@@ -126,15 +126,14 @@ void CGroupCommunicator::errorInConnection(CGroupClient *connection)
 
 	switch(connection->error()) {
 		case QAbstractSocket::ConnectionRefusedError:
-			str = QString("Tried to connect to %1 on port %2")
+			str = QString("Connection to %1:%2 refused")
 					.arg(connection->peerName())
 					.arg(conf->getGroupManagerRemotePort()) ;
 			getGroup()->connectionRefused( str.toAscii() );
 			changeType(Off);
 			break;
 		case QAbstractSocket::RemoteHostClosedError:
-			if (type == Server)
-				connectionClosed(connection);
+			connectionClosed(connection);
 			break;
 		case QAbstractSocket::HostNotFoundError:
 			str = QString("Host %1 not found ").arg(connection->peerName());
@@ -157,8 +156,10 @@ void CGroupCommunicator::errorInConnection(CGroupClient *connection)
 			getGroup()->connectionError("Network Error");
 			break;
 		case QAbstractSocket::AddressInUseError:
+			getGroup()->connectionRefused("Address in use");
+			break;
 		case QAbstractSocket::SocketAddressNotAvailableError:
-			getGroup()->connectionRefused("Network Error");
+			getGroup()->connectionRefused("Socket address not available");
 			break;
 		case QAbstractSocket::UnsupportedSocketOperationError:
 		case QAbstractSocket::ProxyAuthenticationRequiredError:
@@ -587,7 +588,13 @@ void CGroupCommunicator::sendRemoveUserNotification(CGroupClient *conn, QByteArr
    		return;
 
 	if (type == Server) {
-		QByteArray message = formMessageBlock(REMOVE_CHAR, getGroup()->getCharByName(name)->toXML());
+		CGroupChar *ch = getGroup()->getCharByName(name);
+		if (ch == NULL) {
+			getGroup()->sendLog("Error on server side! Failed to remove the user!");
+			return;
+		}
+
+		QByteArray message = formMessageBlock(REMOVE_CHAR, ch->toXML() );
 		CGroupServer *serv = (CGroupServer *) peer;
 		serv->sendToAllExceptOne(conn, message);
 	}
@@ -778,17 +785,24 @@ void CGroupCommunicator::reconnect()
 	    peer->deleteLater();
 	    //delete peer;
 	}
-	print_debug(DEBUG_GROUP, "reconnect Done");
 
 	getGroup()->resetChars();
 	clientsList.clear();
 	getGroup()->close();
 
 	if (type == Client) {
+		getGroup()->sendLog(
+				QString("Trying to reconnect to group manager server %1:%2")
+					.arg( (const char*) conf->getGroupManagerHost() )
+					.arg( conf->getGroupManagerRemotePort() )
+					);
 	    peer = new CGroupClient(conf->getGroupManagerHost(), conf->getGroupManagerRemotePort(), this);
 	} else if (type == Server) {
+		getGroup()->sendLog( QString("Re-Starting group manager server listening on port %1").arg(conf->getGroupManagerLocalPort())  );
 	    peer = new CGroupServer(conf->getGroupManagerLocalPort(), this);
 	}
+
+	print_debug(DEBUG_GROUP, "reconnect Done");
 }
 
 void CGroupCommunicator::changeType(int newState) {
@@ -813,15 +827,23 @@ void CGroupCommunicator::changeType(int newState) {
 	print_debug(DEBUG_GROUP, "Changing the Type of the GroupManager: new Type %i.", newState);
 	switch (newState) {
 		case Server:
+			getGroup()->sendLog( QString("Starting group manager server listening on port %1").arg(conf->getGroupManagerLocalPort())  );
 			peer = new CGroupServer(conf->getGroupManagerLocalPort(), this);
 			break;
 		case Client:
+			getGroup()->sendLog(
+					QString("Trying to connect to group manager server %1:%2")
+						.arg( (const char*) conf->getGroupManagerHost() )
+						.arg( conf->getGroupManagerRemotePort() )
+						);
 			peer = new CGroupClient(conf->getGroupManagerHost(), conf->getGroupManagerRemotePort(), this);
 			break;
 		default:
 			break;
 	}
 	emit typeChanged(type);
-	if (type == Off)
+	if (type == Off) {
+		getGroup()->sendLog( "The group manager is off." );
 		getGroup()->close();
+	}
 }
