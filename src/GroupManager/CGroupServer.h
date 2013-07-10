@@ -17,38 +17,40 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef DEFINES_H
-#define DEFINES_H
+
+#ifndef CGROUPSERVER_H_
+#define CGROUPSERVER_H_
+
+#include <QList>
+#include <QTcpServer>
+
+#include "GroupManager/CGroupClient.h"
+
+class CGroupCommunicator;
+
+class CGroupServer: public QTcpServer
+{
+	Q_OBJECT
+	
+	QList<CGroupClient *> connections;
+public:
+	CGroupServer(int localPort, QObject *parent);
+	virtual ~CGroupServer();
+	void addClient(CGroupClient *client);
+	void sendToAll(QByteArray);
+	void sendToAllExceptOne(CGroupClient *conn, QByteArray);
+	void closeAll();
+	
+protected:
+    void incomingConnection(int socketDescriptor);
+    
+public slots:
+	void connectionClosed(CGroupClient *connection);
+
+signals:
+	void failedToStart();
 
 
-#define SVN_REVISION	208
+};
 
-class QString;
-
-#define MAX_ROOMS       35000		/* maximal amount of rooms */
-
-
-#define MAX_STR_LEN     400
-#define MAX_LINES_DESC  20
-
-#define NORTH           0
-#define EAST            1
-#define SOUTH           2
-#define WEST            3
-#define UP              4
-#define DOWN            5
-
-/* coordinate's cap */
-#define MAX_X           32000
-#define MIN_X           -32000
-
-
-/* global flags */
-extern QString *logFileName;
-
-void toggle_renderer_reaction();
-void notify_analyzer();
-
-
-#endif
-
+#endif /*CGROUPSERVER_H_*/

@@ -1,13 +1,19 @@
 TEMPLATE = app
+
 OBJECTS_DIR = obj
+
 MOC_DIR = moc
+
 UI_DIR = ui
+
+
+
 CONFIG += qt \
     opengl \
     warn_on \
     thread
 
-#CONFIG += qt_integration_plugin
+
 CONFIG += debug_and_release
     
 QT += xml \
@@ -15,89 +21,123 @@ QT += xml \
     gui \
     network \
     core
-FORMS += src/configedit.ui \
-    src/finddialog.ui \
-    src/groupmanagersettings.ui \
-    src/logdialog.ui \
-    src/movementdialog.ui \
-    src/roomedit.ui \
-    src/spellsdialog.ui \
-    src/groupmanagersettings.ui \
-    src/configedit.ui \
-    src/finddialog.ui \
-    src/logdialog.ui \
-    src/movementdialog.ui \
-    src/roomedit.ui \
-    src/spellsdialog.ui
-HEADERS += src/CTimers.h \
-	src/patterns.h \
-    src/CCommandQueue.h \
-    src/CActionManager.h \
-    src/CConfigurator.h \
-    src/CDispatcher.h \
-    src/CEngine.h \
-    src/CEvent.h \
-    src/CFrustum.h \
-    src/CGroup.h \
-    src/CGroupChar.h \
-    src/CGroupClient.h \
-    src/CGroupCommunicator.h \
-    src/CGroupServer.h \
-    src/CGroupSettingsDialog.h \
-    src/CLogDialog.h \
-    src/CMovementDialog.h \
-    src/CRegion.h \
-    src/CRoom.h \
-    src/CRoomManager.h \
-    src/CSelectionManager.h \
-    src/CSquare.h \
-    src/CStacksManager.h \
-    src/CTree.h \
-    src/ConfigWidget.h \
-    src/RoomEditDialog.h \
-    src/SpellsDialog.h \
-    src/defines.h \
-    src/finddialog.h \
-    src/mainwindow.h \
-    src/proxy.h \
-    src/renderer.h \
-    src/userfunc.h \
-    src/utils.h \
-    src/xml2.h
-SOURCES += src/CTimers.cpp \
-	src/patterns.cpp \
-    src/CActionManager.cpp \
-    src/CConfigurator.cpp \
-    src/CDispatcher.cpp \
-    src/CEngine.cpp \
-    src/CFrustum.cpp \
-    src/CLogDialog.cpp \
-    src/CMovementDialog.cpp \
-    src/CRoom.cpp \
-    src/CRoomManager.cpp \
-    src/CSelectionManager.cpp \
-    src/CSquare.cpp \
-    src/CStacksManager.cpp \
-    src/CTree.cpp \
-    src/ConfigWidget.cpp \
-    src/Regions.cpp \
-    src/RoomEditDialog.cpp \
-    src/SpellsDialog.cpp \
-    src/finddialog.cpp \
-    src/main.cpp \
-    src/mainwindow.cpp \
-    src/proxy.cpp \
-    src/renderer.cpp \
-    src/userfunc.cpp \
-    src/utils.cpp \
-    src/xml2.cpp \
-    src/CGroupSettingsDialog.cpp \
-    src/CGroupChar.cpp \
-    src/CGroupCommunicator.cpp \
-    src/CGroupClient.cpp \
-    src/CGroupServer.cpp \
-    src/CGroup.cpp
-TARGET = pandora
+
+DEFINES += NOMINMAX
+
+INCLUDEPATH = src src/Utils
+	
+FORMS += src/Ui/configedit.ui \
+    src/Ui/finddialog.ui \
+    src/Ui/groupmanagersettings.ui \
+    src/Ui/logdialog.ui \
+    src/Ui/movementdialog.ui \
+    src/Ui/roomedit.ui \
+    src/Ui/spellsdialog.ui
+
+	
+################################################ 	Main		######################################################
+HEADERS += src/defines.h 
+SOURCES += src/main.cpp 
+
+	
+################################################ 	Engine		######################################################
+HEADERS += src/Engine/CEngine.h \
+    src/Engine/CCommandQueue.h \
+    src/Engine/CEvent.h \
+    src/Engine/CStacksManager.h 
+
+SOURCES += src/Engine/CEngine.cpp \
+    src/Engine/CStacksManager.cpp 
+	
+	
+################################################ 	GroupManager		######################################################
+HEADERS += src/GroupManager/CGroup.h \
+    src/GroupManager/CGroupChar.h \
+    src/GroupManager/CGroupClient.h \
+    src/GroupManager/CGroupCommunicator.h \
+    src/GroupManager/CGroupServer.h
+
+SOURCES += src/GroupManager/CGroup.cpp \
+    src/GroupManager/CGroupChar.cpp \
+    src/GroupManager/CGroupClient.cpp \
+    src/GroupManager/CGroupCommunicator.cpp \
+    src/GroupManager/CGroupServer.cpp
+
+	
+################################################ 	Gui		######################################################
+HEADERS += src/Gui/CActionManager.h \
+    src/Gui/CLogDialog.h \
+    src/Gui/CMovementDialog.h \
+    src/Gui/ConfigWidget.h \
+    src/Gui/CSelectionManager.h \
+    src/Gui/finddialog.h \
+    src/Gui/mainwindow.h \
+    src/Gui/RoomEditDialog.h \
+    src/Gui/SpellsDialog.h \
+    src/Gui/CGroupSettingsDialog.h
+
+SOURCES += src/Gui/CActionManager.cpp \
+    src/Gui/CLogDialog.cpp \
+    src/Gui/CMovementDialog.cpp \
+    src/Gui/ConfigWidget.cpp \
+    src/Gui/CSelectionManager.cpp \
+    src/Gui/finddialog.cpp \
+    src/Gui/mainwindow.cpp \
+    src/Gui/RoomEditDialog.cpp \
+    src/Gui/SpellsDialog.cpp \
+    src/Gui/CGroupSettingsDialog.cpp
+
+	
+################################################ 	Map		######################################################
+HEADERS += src/Map/CRoom.h \
+    src/Map/CRoomManager.h \
+    src/Map/CTree.h \
+    src/Map/CRegion.h 
+
+
+SOURCES += src/Map/CRoom.cpp \
+    src/Map/CRoomManager.cpp \
+    src/Map/CTree.cpp \
+    src/Map/CRegion.cpp 
+
+	
+################################################ 	Proxy		######################################################
+HEADERS += src/Proxy/CDispatcher.h \
+	src/Proxy/patterns.h \
+    src/Proxy/proxy.h \
+    src/Proxy/userfunc.h 
+	
+
+SOURCES += src/Proxy/CDispatcher.cpp \
+	src/Proxy/patterns.cpp \
+    src/Proxy/proxy.cpp \
+    src/Proxy/userfunc.cpp 
+
+	
+################################################ 	Renderer	######################################################
+HEADERS += src/Renderer/CFrustum.h \
+    src/Renderer/CSquare.h \
+    src/Renderer/renderer.h 
+
+
+SOURCES += src/Renderer/CFrustum.cpp \
+    src/Renderer/CSquare.cpp \
+    src/Renderer/renderer.cpp 
+
+	
+################################################ 	Utils		######################################################
+HEADERS += src/Utils/CTimers.h \
+    src/Utils/CConfigurator.h \
+    src/Utils/utils.h \
+    src/Utils/xml2.h
+
+SOURCES += src/Utils/CTimers.cpp \
+    src/Utils/CConfigurator.cpp \
+    src/Utils/utils.cpp \
+    src/Utils/xml2.cpp
+	
+	
+TARGET = pandoramapper
 
 unix:!macx{
 	DESTDIR = release/ 

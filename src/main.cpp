@@ -30,20 +30,23 @@
 #include <QDesktopWidget>
 
 #include "defines.h"
-#include "CRoom.h"
+
 #include "CConfigurator.h"
-
-
-#include "CRoomManager.h"
 #include "xml2.h"
-
-#include "CDispatcher.h"
-#include "mainwindow.h"
-#include "CStacksManager.h"
-#include "proxy.h"
 #include "utils.h"
-#include "CEngine.h"
-#include "userfunc.h"
+
+#include "Map/CRoom.h"
+#include "Map/CRoomManager.h"
+
+#include "Proxy/userfunc.h"
+#include "Proxy/CDispatcher.h"
+#include "Proxy/proxy.h"
+
+#include "Gui/mainwindow.h"
+
+#include "Engine/CStacksManager.h"
+#include "Engine/CEngine.h"
+
 
 
 #ifdef Q_OS_MACX

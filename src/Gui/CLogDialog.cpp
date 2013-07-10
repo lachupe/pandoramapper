@@ -17,38 +17,48 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef DEFINES_H
-#define DEFINES_H
 
 
-#define SVN_REVISION	208
+#include <QMessageBox>
 
-class QString;
+#include "utils.h"
+#include "defines.h"
+#include "CConfigurator.h"
 
-#define MAX_ROOMS       35000		/* maximal amount of rooms */
+#include "Map/CRoomManager.h"
 
+#include "Engine/CStacksManager.h"
 
-#define MAX_STR_LEN     400
-#define MAX_LINES_DESC  20
+#include "Gui/CMovementDialog.h"
+#include "Gui/CLogDialog.h"
 
-#define NORTH           0
-#define EAST            1
-#define SOUTH           2
-#define WEST            3
-#define UP              4
-#define DOWN            5
+CLogDialog::CLogDialog(QWidget *parent) : QDialog(parent)
+{
+    setupUi(this);                        
+    setWindowTitle(tr("Pandora's Log File"));
+}
 
-/* coordinate's cap */
-#define MAX_X           32000
-#define MIN_X           -32000
+void CLogDialog::run()
+{
+    QUrl url;
 
+    url.fromLocalFile( *logFileName );
 
-/* global flags */
-extern QString *logFileName;
+    QFile file(*logFileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
 
-void toggle_renderer_reaction();
-void notify_analyzer();
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        textBrowser->append(line);
+    }
 
+    textBrowser->setReadOnly(true);
+}
 
-#endif
+void CLogDialog::accept()
+{
 
+    done(Accepted);
+}

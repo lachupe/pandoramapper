@@ -17,38 +17,54 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef DEFINES_H
-#define DEFINES_H
 
 
-#define SVN_REVISION	208
 
-class QString;
+#ifndef STACKSMANAGER_H
+#define STACKSMANAGER_H
 
-#define MAX_ROOMS       35000		/* maximal amount of rooms */
+#include <vector>
+#include "Map/CRoom.h"
+#include "Map/CRoomManager.h"
 
+class CStacksManager {
+private:
 
-#define MAX_STR_LEN     400
-#define MAX_LINES_DESC  20
+  std::vector<CRoom *> stacka;
+  std::vector<CRoom *> stackb;
 
-#define NORTH           0
-#define EAST            1
-#define SOUTH           2
-#define WEST            3
-#define UP              4
-#define DOWN            5
+  std::vector<CRoom *> *sa;
+  std::vector<CRoom *> *sb;
 
-/* coordinate's cap */
-#define MAX_X           32000
-#define MIN_X           -32000
+  unsigned int  mark[MAX_ROOMS];
+  unsigned int  turn;
+public:
+  unsigned int amount() { return sa->size(); }
+  unsigned int next()    { return sb->size(); }
 
+  CRoom * first();
+  CRoom * nextFirst();
 
-/* global flags */
-extern QString *logFileName;
+  void swap();
+  CStacksManager();
+  void reset();
 
-void toggle_renderer_reaction();
-void notify_analyzer();
+  CRoom * get(unsigned int i);
+
+  CRoom * getNext(unsigned int i);
+
+  void put(unsigned int id);
+  void put(CRoom *r);
+  void removeRoom(unsigned int id);    /* swaps */
+
+  /* DEBUG */
+  void printStacks();
+
+  void getCurrent(char *);
+
+};
+
+extern class CStacksManager stacker;
 
 
 #endif
-
