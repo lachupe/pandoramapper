@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     int     override_local_port = 0;
     char    override_remote_host[MAX_STR_LEN] = "";
     int     override_remote_port = 0;
-    char    configfile[MAX_STR_LEN] = "configs/mume.ini";
+    char    configfile[MAX_STR_LEN] = "mume.ini";
     int     default_local_port = 3000;
     int     default_remote_port = 4242;
     int     mud_emulation = 0;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     strcpy(resPath, appPath);
     strcat(resPath, "/Contents/Resources/");
 
-    char    default_base_file[MAX_STR_LEN] = "databases/base.xml";
+    char    default_base_file[MAX_STR_LEN] = "mume.xml";
     char    default_remote_host[MAX_STR_LEN] = "";
     strcpy(configfile, "configs/default.conf");
 
