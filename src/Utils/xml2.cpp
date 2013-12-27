@@ -149,16 +149,16 @@ bool StructureParser::endElement( const QString& , const QString& , const QStrin
   if (progress->wasCanceled())
 	  abortLoading = true;
   
-  return TRUE;
+  return true;
 }
 
 bool StructureParser::characters( const QString& ch)
 {
 	if (abortLoading)
-		return TRUE;
+		return true;
 	
     if (ch == NULL || ch == "")
-    	return TRUE;
+    	return true;
     
     if (flag == XML_ROOMNAME) {
     	r->setName(ch.toLocal8Bit());
@@ -167,7 +167,7 @@ bool StructureParser::characters( const QString& ch)
     } else if (flag == XML_NOTE) {
     	r->setNote(ch.toLocal8Bit());
     }
-    return TRUE;
+    return true;
 } 
 
 
@@ -176,7 +176,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
                                     const QXmlAttributes& attributes)
 {
 	if (abortLoading)
-		return TRUE;
+		return true;
 	
     if (readingRegion == true) {
         if (qName == "alias") {
@@ -190,7 +190,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
             
             if (door != "" && alias != "")
                 region->addDoor(alias, door);
-            return TRUE;
+            return true;
         } 
    }
         
@@ -224,10 +224,10 @@ bool StructureParser::startElement( const QString& , const QString& ,
     
   } else if (qName == "roomname") {
     flag = XML_ROOMNAME;
-    return TRUE;
+    return true;
   } else if (qName == "desc") {
     flag = XML_DESC;
-    return TRUE;
+    return true;
   } else if (qName == "note") {
       if(attributes.count() > 0) {
           r->setNoteColor(attributes.value("color").toLocal8Bit());
@@ -238,7 +238,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
           r->setNoteColor("");
       }
       flag = XML_NOTE;
-    return TRUE;
+    return true;
   } else if (qName == "room") {
       r = new CRoom;
 
@@ -274,7 +274,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
 	  }
   }
   
-  return TRUE;
+  return true;
 }
 
 /* plain text file alike writing */

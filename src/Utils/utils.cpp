@@ -66,19 +66,19 @@ const char *exits[] = {
 
 
 const boolean_struct input_booleans[] = {
-  {"on", TRUE},
-  {"off", FALSE},
-  {"1", TRUE},
-  {"0", FALSE},
-  {"yes", TRUE},
-  {"no", FALSE},
-  {"+", TRUE},
-  {"-", FALSE},
-  {"true", TRUE},
-  {"false", FALSE},
+  {"on", true},
+  {"off", false},
+  {"1", true},
+  {"0", false},
+  {"yes", true},
+  {"no", false},
+  {"+", true},
+  {"-", false},
+  {"true", true},
+  {"false", false},
 
 
-  {NULL, FALSE}
+  {NULL, false}
 };
 
 QTime debug_timer;
