@@ -45,12 +45,8 @@ class Cconfigurator *conf;
 Cconfigurator::Cconfigurator()
 {
     /* here we set the default configuration */
-
-    print_debug(DEBUG_CONFIG, "in configurator constructor");
-
     setRegionsAutoReplace( false );
     setRegionsAutoSet( false );
-
 
     /* data */
     databaseModified = false;
@@ -231,6 +227,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 	setWindowRect( conf.value("windowRect").toRect() );
 	setAlwaysOnTop( conf.value("alwaysOnTop", true ).toBool() );
 	setStartupMode( conf.value("startupMode", 1).toInt() );
+    setLogFileEnabled( conf.value("isLogFileEnabled", false).toBool() );
 	conf.endGroup();
 
 	conf.beginGroup("Networking");
@@ -342,7 +339,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 	for (int i = 0; i < size; ++i) {
 	  conf.setArrayIndex(i);
 
-	  QString s = conf.value("name").toString();
+      QString s = conf.value("name").toString();
 
 	  unsigned int z = 0;
       while (debug_data[z].name != NULL) {
@@ -622,6 +619,13 @@ void Cconfigurator::setAlwaysOnTop(bool b)
     alwaysOnTop = b;
     setConfigModified(true);
 }
+
+void Cconfigurator::setLogFileEnabled(bool b)
+{
+    isLogFileEnabled = b;
+    setConfigModified(true);
+}
+
 
 void Cconfigurator::setNameQuote(int i)
 {

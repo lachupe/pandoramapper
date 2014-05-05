@@ -20,7 +20,8 @@ QT += xml \
     opengl \
     gui \
     network \
-    core
+    core \
+    widgets
 
 DEFINES += NOMINMAX
 

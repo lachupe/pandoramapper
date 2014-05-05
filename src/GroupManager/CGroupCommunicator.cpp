@@ -162,6 +162,7 @@ void CGroupCommunicator::errorInConnection(CGroupClient *connection)
 		case QAbstractSocket::SocketAddressNotAvailableError:
 			getGroup()->connectionRefused("Socket address not available");
 			break;
+        case QAbstractSocket::OperationError:
 		case QAbstractSocket::UnsupportedSocketOperationError:
 		case QAbstractSocket::ProxyAuthenticationRequiredError:
 		case QAbstractSocket::UnknownSocketError:

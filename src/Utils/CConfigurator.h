@@ -60,6 +60,7 @@ class Cconfigurator : public QObject {
     bool        configModified;       /* if the config was modified */
     QByteArray  configFile;
     QByteArray  configPath;
+    bool        isLogFileEnabled;
 
     /* patterns/regexps */
     QByteArray exitsPattern;
@@ -175,6 +176,10 @@ public:
     bool getGroupManagerNotifySanc() { return groupManagerNotifySanc; }
     bool getGroupManagerNotifyArmour() { return groupManagerNotifyArmour; }
     bool getGroupManagerNotifyBash() { return groupManagerNotifyBash; }
+
+    bool getLogFileEnabled() { return isLogFileEnabled; }
+    void setLogFileEnabled(bool b);
+
 
 
     void setGroupManagerState(int val) { groupManagerState = val; setConfigModified(true); }

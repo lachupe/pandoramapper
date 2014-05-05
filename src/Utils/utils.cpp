@@ -100,6 +100,8 @@ int write_debug(unsigned int flag, const char *format, va_list args)
     int size;
     int i;
 
+    if (conf != NULL && !conf->getLogFileEnabled())
+        return -1; // log file is disabled
 
     if (logfile == NULL) {
     	debug_timer.start();

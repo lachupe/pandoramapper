@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 
 #else
     resPath = "";
-    char    default_base_file[MAX_STR_LEN] = "database/mume.xml";
+    char    default_base_file[MAX_STR_LEN] = "mume.xml";
     char    default_remote_host[MAX_STR_LEN] = "129.241.210.221";
 #endif
     QApplication::setColorSpec( QApplication::CustomColor );
@@ -192,7 +192,6 @@ int main(int argc, char *argv[])
     /* set analyzer engine defaults */
     //engine_init();
     splash->showMessage(QString("Loading the configuration ") + configfile);
-    print_debug(DEBUG_SYSTEM, "Using config file : %s.", configfile);
     conf = new Cconfigurator();
     conf->loadConfig(resPath, configfile);
     print_debug(DEBUG_SYSTEM, "starting up...");

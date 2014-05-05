@@ -80,23 +80,41 @@ void CTimers::addCountdown(QByteArray name, QByteArray desc, int time)
 
     // append the shot-down event pending
 
-	QTimer::singleShot( time, this, SLOT( finishCountdownTimer() ) );
+    QTimer::singleShot( time, this, SLOT( finishCountdownTimer() ) );
 
     m_countdowns.append(l_timer);
 }
 
 void CTimers::finishCountdownTimer()
 {
+
     QMutexLocker locker(&m_lock);
 
+    int deleted = 0;
+    int delta = 1;
     for (int i = 0; i < m_countdowns.size(); i++) {
     	TTimer *s = m_countdowns[i];
-    	if ( s->duration <= s->timer.elapsed() ) {
-    		send_to_user("--[ Countdown timer %s < %s > finished.\r\n\r\n", (const char *) s->name, (const char *) s->desc);
-    		send_prompt();
+
+        //send_to_user("--[ testing countdown timer:  %s < %s > dur: %i elapsed: %i finished.\r\n\r\n", (const char *) s->name, (const char *) s->desc, s->duration, s->timer.elapsed());
+        int diff = s->duration - s->timer.elapsed();
+
+        if ( diff <= 0 ) {
+            send_to_user("--[ Countdown timer %s < %s > finished.\r\n\r\n", (const char *) s->name, (const char *) s->desc);
+            send_prompt();
     		m_countdowns.removeAt( i );
     		delete s;
-    	}
+            deleted++;
+        } else if (diff < delta) {
+            delta = diff;
+        }
+
+    }
+
+    // as of Qt 5.2.1 (at previous) singleShot timers are not precise enough
+    // and might, easilly, fire earlier!
+    if (deleted == 0) {
+        // in this case, refire the event in at least 1ms
+        QTimer::singleShot( delta, this, SLOT( finishCountdownTimer() ) );
     }
 }
 
