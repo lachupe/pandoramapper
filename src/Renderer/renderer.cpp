@@ -965,8 +965,9 @@ void RendererWidget::centerOnRoom(unsigned int id)
 void RendererWidget::draw(void)
 {
     CPlane *plane;  
-    const float alphaChannelTable[] = { 0.9, 0.35, 0.30, 0.28, 0.25, 0.15, 0.15, 0.13, 0.1, 0.1, 0.1};
-//                                       0    1     2      3    4      5     6    7    8     9    10 
+    //const float alphaChannelTable[] = { 0.95, 0.35, 0.30, 0.28, 0.25, 0.15, 0.15, 0.13, 0.1, 0.1, 0.1};
+    const float alphaChannelTable[] = { 0.95, 0.25, 0.20, 0.15, 0.10, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+//                                       0    1     2      3    4      5     6    7    8     9    10
 
     if (Map.isBlocked()) {
     	// well, not much we can do - ignore the message

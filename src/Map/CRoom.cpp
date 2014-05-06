@@ -236,7 +236,7 @@ void CRoom::setZ(int nz)
     z = nz;
 
 
-    //rebuildDisplayList();
+    rebuildDisplayList();
     // addToPlane will reset the square and call setSqaure of this room.
 
     Map.addToPlane(this);

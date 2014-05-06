@@ -119,7 +119,7 @@ void CEngine::tryDir()
 
     CCommand cmd = commandQueue.peek();
     if (cmd.timer.elapsed() > conf->getPrespamTTL() ) {
-    	print_debug(DEBUG_ANALYZER, "The command queue has head entry with lifetime over 5 seconds. Resetting");
+        print_debug(DEBUG_ANALYZER, "The command queue has head entry with lifetime over limit. Resetting");
     	commandQueue.clear();
     	toggle_renderer_reaction();
     } else if (cmd.dir == dir && !event.fleeing ) {

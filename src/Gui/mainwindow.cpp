@@ -490,10 +490,8 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
          case Qt::Key_F10:
             //hide_roominfo();
             break;
-         case Qt::Key_Space:
-            if (!k->isAutoRepeat()) {
+         case Qt::Key_Alt:
                 setToolMode(MoveMode);
-            }
             break;
     }
     update_status_bar();
@@ -503,13 +501,10 @@ void CMainWindow::keyPressEvent( QKeyEvent *k )
 
 void CMainWindow::keyReleaseEvent( QKeyEvent *k )
 {
-
     print_debug(DEBUG_INTERFACE, "Processing events in keyReleaseEvent\r\n");
     switch ( k->key() ) {
-        case Qt::Key_Space:
-            if (!k->isAutoRepeat()) {
-                setToolMode(SelectMode);
-            }
+        case Qt::Key_Alt:
+            setToolMode(SelectMode);
             break;
     }
 }
