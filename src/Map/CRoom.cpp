@@ -29,6 +29,9 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+
+#include "map.pb.h"
+
 #include <QByteArray>
 #include <QString>
 
@@ -48,46 +51,24 @@ Strings_Comparator comparator;
 
 
 const struct room_flag_data room_flags[] = {
-  {"undefined", "UNDEFINED", CRoom::EXIT_UNDEFINED},
-  {"death", "DEATH", CRoom::EXIT_DEATH},
+  {"undefined", "UNDEFINED",  ET_UNDEFINED},
+  {"death", "DEATH", ET_DEATH},
     
-  {"", "", CRoom::EXIT_NONE}
+  {"", "", ET_NONE}
 };
 
 
-CRoom::CRoom()
+CRoom::CRoom(CRoomManager *parent) :
+    parent(parent)
 {
-    int i;
-    
-    id = 0;
-    name = NULL;
-    note = NULL;
-    desc = NULL;
-    x = 0;
-    y = 0;
-    z = 0;
-    sector = 0;
-    region = NULL;
-    flags = 0;
-  
-    for (i = 0; i <= 5; i++) {
-        exits[i] = NULL;
-        exitFlags[i] = 0;
-        doors[i].clear();
-    }
     square = NULL;
+    setRegion("default");
 }
 
 
 CRoom::~CRoom()
 {
-    int i;
-    
-    NameMap.deleteItem(name, id);
-    
-    for (i = 0; i <= 5; i++) {
-        doors[i].clear();
-    }
+    parent->getNameMap()->deleteItem( getName(), getId());
 }
 
 
@@ -100,16 +81,16 @@ void CRoom::setModified(bool b)
 
 int CRoom::descCmp(QByteArray d)
 { 
-    if (desc.isEmpty() != true)
-        return comparator.strcmp_desc(d, desc);
+    if (room.desc().empty() != true)
+        return comparator.strcmp_desc(d, getDesc());
     else
         return 0;
 }
 
 int CRoom::roomnameCmp(QByteArray n)
 { 
-    if (name.isEmpty() != true)
-        return comparator.strcmp_roomname(n, name);
+    if (room.name().empty() != true)
+        return comparator.strcmp_roomname(n, getName());
     else
         return 0;
 }
@@ -117,7 +98,7 @@ int CRoom::roomnameCmp(QByteArray n)
 
 
 /* --------------- check if exit in room is connected --------------- */
-bool CRoom::isConnected(int dir)
+bool CRoom::isConnected(ExitDirection dir)
 {
     if (isExitUndefined(dir)  || isExitDeath(dir) )
         return false;
@@ -129,83 +110,113 @@ bool CRoom::isConnected(int dir)
 
 
 /* is there anything at all in this direction ? */
-bool CRoom::isExitPresent(int dir)
+bool CRoom::isExitPresent(ExitDirection dir)
 {
-    if (exits[dir] != NULL)
+    const mapdata::Exit &exit = room.exits(dir);
+
+    if (exit.type() == ET_NORMAL)
         return true;
-    if (isExitUndefined(dir)  || isExitDeath(dir) )
+    if (exit.type() == ET_UNDEFINED || exit.type() == ET_DEATH)
         return true;
-    return false;    
+
+    return false;
 }
 
-bool CRoom::isExitLeadingTo(int dir, CRoom *room)
+bool CRoom::isExitLeadingTo(ExitDirection dir, CRoom *room)
 {
-    if (exits[dir] == NULL)
+    if (isConnected(dir) == false)
         return false;
-    if (exits[dir]->id == room->id)
+    if (getExitLeadsTo(dir) == room->getId())
         return true;
     return false;
 }
 
 
+
+CRoom* CRoom::getExitRoom(ExitDirection dir) {
+    if (isConnected(dir) == false)
+        return NULL;
+
+    return parent->getRoom(room.exits().Get(dir).leads_to_id());
+}
+
+RoomId CRoom::getExitLeadsTo(ExitDirection dir) {
+    if (isConnected(dir) == false)
+        return NULL;
+
+    return room.exits().Get(dir).leads_to_id();
+}
+
+
+
 /* ------------------------ add_door() ------------------------*/
-int CRoom::setDoor(int dir, QByteArray d)
+int CRoom::setDoor(ExitDirection dir, QByteArray d)
 {
     if (d == "")
-	return 0;
+        return 0;
 
-    if (exits[dir] == NULL) {
-        exitFlags[dir] = EXIT_UNDEFINED;
+    mapdata::Exit *exit = room.mutable_exits(dir);
+
+
+    if (exit->type() == ET_NONE) {
+        exit->set_type(mapdata::Exit::ET_UNDEFINED);
     }
+
+    exit->set_door(d);
     
-    doors[dir] = d;
-  
     rebuildDisplayList();
     setModified(true);
     return 1;
 }
 
 /* ------------------------ remove_door() ------------------------*/
-void CRoom::removeDoor(int dir)
+void CRoom::removeDoor(ExitDirection dir)
 {
-    doors[dir].clear();
+    mapdata::Exit *exit = room.mutable_exits(dir);
+
+    exit->clear_door();
     rebuildDisplayList();
     setModified(true);
 }
 
-QByteArray CRoom::getDoor(int dir)
+QByteArray CRoom::getDoor(ExitDirection dir)
 {
-    return doors[dir];
+    const mapdata::Exit& exit = room.exits(dir);
+
+    if (exit.door().empty() && exit.exit_flags().door() == true)
+        return "exit";
+    else
+        return exit.door().c_str();
 }
 
-bool CRoom::isDoorSet(int dir)
+bool CRoom::isDoorSet(ExitDirection dir)
 {
-    if (doors[dir].isEmpty())
+    if (room.exits(dir).door().empty())
         return false;
     else 
         return true;
         
 }
 
-char CRoom::dirbynum(int dir)
+char CRoom::dirbynum(ExitDirection dir)
 {
   switch (dir) {
-	case  NORTH : 
+    case  ED_NORTH :
                 return 'n';
 		break;
-	case  SOUTH :
+    case  ED_SOUTH :
                 return 's';
 		break;
-	case  EAST :
+    case  ED_EAST :
                 return 'e';
 		break;
-	case  WEST :
+    case  ED_WEST :
                 return 'w';
 		break;
-	case  UP :
+    case  ED_UP :
                 return 'u';
 		break;
-	case  DOWN :
+    case  ED_DOWN :
                 return 'd';
 		break;
   }
@@ -215,16 +226,32 @@ char CRoom::dirbynum(int dir)
 }
 
 
+int CRoom::getX()
+{
+    return room.pos().x();
+}
+
+int CRoom::getY()
+{
+    return room.pos().y();
+}
+
+int CRoom::getZ()
+{
+    return room.pos().z();
+}
+
+
 void CRoom::setX(int nx)
 {
-    x = nx;
+    room.mutable_pos()->set_x(nx);
     setModified(true);
     rebuildDisplayList();
 }
 
 void CRoom::setY(int ny)
 {
-    y = ny;
+    room.mutable_pos()->set_y(ny);
     setModified(true);
     rebuildDisplayList();
 }
@@ -232,54 +259,60 @@ void CRoom::setY(int ny)
 
 void CRoom::setZ(int nz)
 {
-    Map.removeFromPlane(this);
-    z = nz;
+    parent->removeFromPlane(this);
+    room.mutable_pos()->set_z(nz);
 
 
     rebuildDisplayList();
     // addToPlane will reset the square and call setSqaure of this room.
 
-    Map.addToPlane(this);
+    parent->addToPlane(this);
     setModified(true);
 }
 
 
 void CRoom::simpleSetZ(int nz)
 {
-    z = nz;
+    room.mutable_pos()->set_z(nz);
     setModified(true);
 }
 
 QByteArray CRoom::getName()
 {
-    return name;
+    return room.name().c_str();
 }
 
 
 QByteArray CRoom::getDesc()
 {
-    return desc;
+    return room.desc().c_str();
 }
 
 
-char CRoom::getTerrain()
+mapdata::Room::RoomTerrainType CRoom::getTerrain()
 {
-    return sector;
+    return room.terrain();
 }
 
 
 QByteArray CRoom::getNote()
 {
-    return note;
+    return room.note().c_str();
 }
 
 
-void CRoom::setNoteColor(QByteArray color) { noteColor = color; rebuildDisplayList(); }
-QByteArray CRoom::getNoteColor() { return noteColor; }
+void CRoom::setNoteColor(QByteArray color) {
+    room.set_note_color(color);
+    rebuildDisplayList();
+}
+
+QByteArray CRoom::getNoteColor() {
+    return room.note_color().c_str();
+}
 
 void CRoom::setDesc(QByteArray newdesc)
 {
-    desc = newdesc;
+    room.set_desc(newdesc);
     setModified(true);    
 }
       
@@ -291,44 +324,40 @@ QByteArray CRoom::getSecretsInfo()
     
     res.clear();
     
-    for (i = 0; i <= 5; i++) 
-        if (isDoorSecret( i ) == true) {
-            res.append(dirbynum( i ));
-            res = res + ": " + doors[i];
-            alias = engine->get_users_region()->getAliasByDoor(doors[i], i);
+    for (i = 0; i <= 5; i++) {
+        ExitDirection iDir = static_cast<ExitDirection>(i);
+        if (isDoorSecret( iDir ) == true) {
+            res.append(dirbynum( iDir ));
+            res = res + ": " + room.exits(i).door().c_str();
+            alias = engine->get_users_region()->getAliasByDoor(room.exits(iDir).door().c_str(), iDir);
             if (alias.isEmpty() == false) 
                 res += "[" + alias + "]";
         }
+    }
 
     return res;
 }
 
 void CRoom::setName(QByteArray newname)
 {
-    NameMap.deleteItem(name, id);
-    name = newname;
-    NameMap.addName(newname, id);
+    parent->getNameMap()->deleteItem(room.name().c_str(), room.id());
+    room.set_name(newname);
+    parent->getNameMap()->addName(newname, room.id());
     setModified(true);
 }
 
 
 void CRoom::setTerrain(char terrain)
 {
-    sector = conf->getSectorByPattern(terrain);
+    room.set_terrain( static_cast<mapdata::Room::RoomTerrainType>(conf->getSectorByPattern(terrain)) );
     setModified(true);
-    rebuildDisplayList();
-}
-
-void CRoom::setSector(char val) 
-{
-    sector = val;
     rebuildDisplayList();
 }
 
 
 void CRoom::setNote(QByteArray newnote)
 {
-    note = newnote;
+    room.set_note(newnote);
     rebuildDisplayList();
 }
 
@@ -344,76 +373,57 @@ void CRoom::setSquare(CSquare *_square)
 		rebuildDisplayList();
 }
 
-void CRoom::setExit(int dir, CRoom *room)
+void CRoom::setExit(ExitDirection dir, CRoom *r)
 {
-    exits[dir] = room;
-    exitFlags[dir] = EXIT_NONE;
+    room.mutable_exits(dir)->set_leads_to_id(r->getId());
+    room.mutable_exits(dir)->set_type( mapdata::Exit::ET_NORMAL );
+
+    // old code used EXIT_NONE ... this is going to deliver some problems!
+    //exitFlags[dir] = EXIT_NONE;
     rebuildDisplayList();
 }
 
-void CRoom::setExit(int dir, unsigned int value)
+void CRoom::setExit(ExitDirection dir, RoomId value)
 {
-    exits[dir]=Map.getRoom(value);
-    exitFlags[dir] = EXIT_NONE;
+    room.mutable_exits(dir)->set_leads_to_id(value);
+    room.mutable_exits(dir)->set_type( mapdata::Exit::ET_NORMAL );
+
+    // old code used EXIT_NONE ... this is going to deliver some problems!
+    //exitFlags[dir] = EXIT_NONE;
     rebuildDisplayList();
 }
 
-/*
-CRoom *CRoom::getExit(int dir)
-{
-    return exits[dir];
-}
-*/
 
-bool CRoom::isExitUndefined(int dir)
+bool CRoom::isExitUndefined(ExitDirection dir)
 {
-    if (exitFlags[dir] == EXIT_UNDEFINED)
-        return true;
-    else
-        return false;
-
+    return room.exits(dir).type() == mapdata::Exit::ET_UNDEFINED;
 }
 
-void CRoom::setExitUndefined(int dir)
+void CRoom::setExitUndefined(ExitDirection dir)
 {
-    exits[dir] = NULL;
-    exitFlags[dir] = EXIT_UNDEFINED;  
+    room.mutable_exits(dir)->set_leads_to_id(0);
+    room.mutable_exits(dir)->set_type( mapdata::Exit::ET_UNDEFINED );
     rebuildDisplayList();
 }
 
 
 
-bool CRoom::isExitDeath(int dir)
+bool CRoom::isExitDeath(ExitDirection dir)
 {
-    if (exitFlags[dir] == EXIT_DEATH)
-        return true;
-    else
-        return false;
-
+    return room.exits(dir).type() == mapdata::Exit::ET_DEATH;
 }
 
-bool CRoom::isExitNormal(int dir)
+bool CRoom::isExitNormal(ExitDirection dir)
 {
-    if (isExitUndefined(dir)  || isExitDeath(dir) )
-        return false;
-    else
-        return true;
-
+    return room.exits(dir).type() == mapdata::Exit::ET_NORMAL;
 }
 
 
-void CRoom::setExitFlags(int dir, unsigned char flag)
-{
-    exitFlags[dir] = flag;
-    
-    rebuildDisplayList();
-    setModified(true);
-}
 
-void CRoom::setExitDeath(int dir) 
+void CRoom::setExitDeath(ExitDirection dir)
 {
-    exitFlags[dir] = EXIT_DEATH;
-    exits[dir] = NULL;
+    room.mutable_exits(dir)->set_type(mapdata::Exit::ET_DEATH);
+    room.mutable_exits(dir)->set_leads_to_id(0);
     rebuildDisplayList();
     setModified(true);
 }
@@ -422,18 +432,17 @@ void CRoom::setExitDeath(int dir)
 
 bool CRoom::anyUndefinedExits()
 {
-    int i;
-    
-    for (i = 0; i <= 5; i++) 
-        if (exitFlags[i] == EXIT_UNDEFINED) 
+    for (unsigned int i = 0; i <= 5; i++) {
+        ExitDirection iDir = static_cast<ExitDirection>(i);
+        if (room.exits(iDir).type() == mapdata::Exit::ET_UNDEFINED)
             return true;
-
+    }
     return false;
 }
 
-bool CRoom::isEqualNameAndDesc(CRoom *room)
+bool CRoom::isEqualNameAndDesc(CRoom *r)
 {
-    if ((desc == room->getDesc()) && (name == room->getName()))
+    if ((r->getDesc() == room.desc().c_str()) && (r->getName() == room.name().c_str()))
         return true;
     return false;
 }
@@ -441,22 +450,22 @@ bool CRoom::isEqualNameAndDesc(CRoom *room)
 
 bool CRoom::isDescSet()
 {
-    if (desc.isEmpty() == true)
+    if (room.desc().empty())
         return false;
     return true;
 }
 
 bool CRoom::isNameSet()
 {
-    if (name.isEmpty() == true)
+    if (room.name().empty())
         return false;
     return true;
 }
 
 
-bool CRoom::isDoorSecret(int dir)
+bool CRoom::isDoorSecret(ExitDirection dir)
 {
-    if (doors[dir].isEmpty() != true && doors[dir] != "exit")
+    if (room.exits(dir).door_flags().hidden())
         return true;
     else 
         return false;
@@ -464,7 +473,7 @@ bool CRoom::isDoorSecret(int dir)
 
 QByteArray CRoom::getRegionName()
 {
-    return region->getName();
+    return room.area_name().c_str();
 }
 
 void CRoom::setRegion(QByteArray name)
@@ -480,6 +489,8 @@ void CRoom::setRegion(CRegion *reg)
     if (reg != NULL)
         region = reg;
 
+    room.set_area_name(reg->getName());
+
     rebuildDisplayList();
 }
     
@@ -488,18 +499,22 @@ CRegion *CRoom::getRegion()
     return region;
 }
 
-void CRoom::disconnectExit(int dir)
+void CRoom::disconnectExit(ExitDirection dir)
 {
-    exitFlags[dir] = EXIT_NONE;
-    exits[dir] = NULL;
+    room.mutable_exits(dir)->set_type(mapdata::Exit::ET_NONE);
+    room.mutable_exits(dir)->set_leads_to_id(0);
+
     rebuildDisplayList();
 }
 
-void CRoom::removeExit(int dir)
+void CRoom::removeExit(ExitDirection dir)
 {
-    exitFlags[dir] = EXIT_NONE;
-    exits[dir] = NULL;
-    doors[dir].clear();
+    room.mutable_exits(dir)->set_type(mapdata::Exit::ET_NONE);
+    room.mutable_exits(dir)->set_leads_to_id(0);
+    room.mutable_exits(dir)->clear_door();
+    room.mutable_exits(dir)->clear_door_flags();
+    room.mutable_exits(dir)->clear_exit_flags();
+
     rebuildDisplayList();
 }
 
@@ -507,16 +522,17 @@ QString CRoom::toolTip()
 {
     QString s;
     s += "#";
-    s += QString::number(id);
+    s += QString::number(getId());
     s += "\n";
-    s += name;
+    s += getName();
 
     for (int i = 0; i <= 5; i++) {
-        if (isDoorSecret(i)) {
+        ExitDirection iDir = static_cast<ExitDirection>(i);
+        if (isDoorSecret(iDir)) {
             s += "\n";
-            s += (dirbynum(i));
+            s += (dirbynum(iDir));
             s += ": ";
-            s += doors[i];
+            s += room.exits(iDir).door().c_str();
         }
     }
 
@@ -529,32 +545,36 @@ void CRoom::sendRoom()
     unsigned int i, pos;
     char line[MAX_STR_LEN];
     
-    send_to_user(" Id: %i, Flags: %s, Region: %s, Coord: %i,%i,%i\r\n", id,
+    send_to_user(" Id: %i, Flags: %s, Region: %s, Coord: %i,%i,%i\r\n", getId(),
 	    (const char *) conf->sectors[sector].desc, 
 	    (const char *) region->getName(),
-	    x, y, z);
-    send_to_user(" [32m%s[0m\n", (const char *) name);
+        getX(), getY(), getZ());
+    send_to_user(" [32m%s[0m\n", (const char *) getName() );
 
     line[0] = 0;
     pos = 0;
+
     if (!(proxy->isMudEmulation() && conf->getBriefMode() ) ) {
-      for (i = 0; i <= strlen(desc); i++)
-		if (desc[i] == '|') {
-		    line[pos] = 0;
-		    send_to_user("%s\r\n", line);
-		    line[0] = 0;
-		    pos = 0;
-		} else {
-		    line[pos++] = desc[i];
-		}
+        QByteArray desc = getDesc();
+
+        for (i = 0; i <= strlen(desc); i++)
+            if (desc[i] == '|') {
+                line[pos] = 0;
+                send_to_user("%s\r\n", line);
+                line[0] = 0;
+                pos = 0;
+            } else {
+                line[pos++] = desc[i];
+            }
     }
-    send_to_user(" note: %s\n", (const char *) note);
+    send_to_user(" note: %s\n", (const char *) getNote());
 
     
     sprintf(line, "Doors:");
     for (i = 0; i <= 5; i++) {
-      if (doors[i].isEmpty() != true) {
-        sprintf(line + strlen(line), " %c: %s", dirbynum(i), (const char *) doors[i]);
+        ExitDirection iDir = static_cast<ExitDirection>(i);
+      if (isDoorSecret(iDir)) {
+        sprintf(line + strlen(line), " %c: %s", dirbynum(iDir), (const char *) getDoor(iDir));
       }
     
     }
@@ -564,17 +584,19 @@ void CRoom::sendRoom()
     if (conf->getBriefMode() && proxy->isMudEmulation()) {
       sprintf(line, "Exits: ");
       for (i = 0; i <= 5; i++)
-          if (isExitPresent(i) == true) {
-              if ( isExitUndefined(i) ) {
+          ExitDirection iDir = static_cast<ExitDirection>(i);
+          if (isExitPresent(iDir) == true) {
+              if ( isExitUndefined(iDir) ) {
                   sprintf(line + strlen(line), " #%s#", exitnames[i]);
                   continue;
               }
-              if ( isExitDeath(i) ) {
+              if ( isExitDeath(iDir) ) {
                   sprintf(line + strlen(line), " !%s!", exitnames[i]);
                   continue;
               }
-              if (doors[i].isEmpty() != true) {
-                  if (doors[i] == "exit")  {
+
+              if (isDoorSet(iDir)) {
+                  if (isDoorSecret(iDir) == false)  {
                       sprintf(line + strlen(line), " (%s)", exitnames[i]);
                   } else {
                       sprintf(line + strlen(line), " +%s+", exitnames[i]);
@@ -592,17 +614,19 @@ void CRoom::sendRoom()
       sprintf(line, " exits:");
   
       for (i = 0; i <= 5; i++)
-          if (isExitPresent(i) == true) {
-              if (isExitUndefined(i) ) {
+          ExitDirection iDir = static_cast<ExitDirection>(i);
+          if (isExitPresent(iDir) == true) {
+              if (isExitUndefined(iDir) ) {
                   sprintf(line + strlen(line), " #%s#", exitnames[i]);
                   continue;
               }
-              if (isExitDeath(i)) {
+              if (isExitDeath(iDir)) {
                   sprintf(line + strlen(line), " !%s!", exitnames[i]);
                   continue;
               }
-              if (doors[i].isEmpty() == false) {
-                  if (strcmp("exit", doors[i]) == 0) {
+
+              if (isDoorSet(iDir)) {
+                  if (isDoorSecret(iDir) == false)  {
                       sprintf(line + strlen(line), " (%s)", exitnames[i]);
                   } else {
                       sprintf(line + strlen(line), " +%s+", exitnames[i]);
@@ -610,6 +634,7 @@ void CRoom::sendRoom()
               } else {
                   sprintf(line + strlen(line), " %s", exitnames[i]);
               }
+
               sprintf(line + strlen(line), " -[to %i]-", exits[i]->id );
           }
       

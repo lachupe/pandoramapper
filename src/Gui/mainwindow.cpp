@@ -136,9 +136,11 @@ CMainWindow::CMainWindow(QWidget *parent)
     fileMenu->addSeparator();
     fileMenu->addAction(actionManager->openAct);
     fileMenu->addAction(actionManager->reloadAct);
+    fileMenu->addAction(actionManager->importAct);
     fileMenu->addSeparator();
     fileMenu->addAction(actionManager->saveAct);
     fileMenu->addAction(actionManager->saveAsAct);
+    fileMenu->addAction(actionManager->exportAct);
     fileMenu->addSeparator();
     fileMenu->addAction(actionManager->quitAct);
 

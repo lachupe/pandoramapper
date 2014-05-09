@@ -42,6 +42,8 @@ public:
     QAction       *saveAsAct;
     QAction       *quitAct;
     QAction       *publishAct;
+    QAction       *importAct;
+    QAction       *exportAct;
 
     QAction       *mappingAct;
     QAction       *automergeAct;
@@ -103,6 +105,8 @@ public slots:
     void reload();
     void save();
     void saveAs();
+    void importMap();
+    void exportMap();
 
     void showLog();
     

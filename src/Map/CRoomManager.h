@@ -38,6 +38,8 @@
 
 class CPlane;
 class CSquare;
+class CTree;
+struct TTree;
 
 class CRoomManager : public QObject {
 	Q_OBJECT
@@ -47,6 +49,9 @@ class CRoomManager : public QObject {
     CRoom* 				ids[MAX_ROOMS];	/* array of pointers */
 
     CPlane        		*planes;        /* planes/levels of the map, sorted by the Z coordinate, lower at first */
+
+    CTree               *roomNamesTree;
+
 
 //    void deleteRoomUnlocked(CRoom* r, int mode);  /* user interface function */
 //    void smallDeleteRoomUnlocked(CRoom* r);  /* user interface function */
@@ -74,12 +79,13 @@ public:
     void          removeFromPlane(CRoom* room);
     void          expandPlane(CPlane *plane, CRoom* room);
 
+    CTree*        getNameMap() { return roomNamesTree; }
+
+
+    CRoom* createRoom(QByteArray &name, QByteArray &desc, int x, int y, int z);
 
     void addRoom(CRoom* room);
-
-
-
-    inline CRoom* getRoom(unsigned int id)        {
+    inline CRoom* getRoom(RoomId id)        {
 		if (id < MAX_ROOMS)
 			return ids[id];
 		else
@@ -106,6 +112,8 @@ public:
     void deleteRoom(CRoom* r, int mode);
     void smallDeleteRoom(CRoom* r);
 
+    TTree* findByName(QByteArray last_name);
+
     QList<int> searchNames(QString s, Qt::CaseSensitivity cs);
     QList<int> searchDescs(QString s, Qt::CaseSensitivity cs);
     QList<int> searchNotes(QString s, Qt::CaseSensitivity cs);
@@ -116,7 +124,15 @@ public:
 
     void loadMap(QString filename);
     void saveMap(QString filename);
+
+
+
+
+    void loadXmlMap(QString filename);
+    void saveXmlMap(QString filename);
     void clearAllSecrets();
+
+    void loadMMapperMap(QString filename);
 
     void setBlocked(bool b) { blocked = b; }
     bool isBlocked() { return blocked; }

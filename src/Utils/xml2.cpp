@@ -43,7 +43,7 @@
 #define XML_DESC        (1 << 1)
 #define XML_NOTE        (1 << 2)
 
-void CRoomManager::loadMap( QString filename)
+void CRoomManager::loadXmlMap( QString filename)
 {
   QFile xmlFile( filename);
   QXmlInputSource source( &xmlFile );
@@ -278,7 +278,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
 }
 
 /* plain text file alike writing */
-void CRoomManager::saveMap(QString filename)
+void CRoomManager::saveXmlMap(QString filename)
 {
   FILE *f;
   CRoom *p;

@@ -39,6 +39,8 @@
 #include "Map/CRegion.h"
 #include "Renderer/CSquare.h"
 
+#include "map.pb.h"
+
 
 struct room_flag_data {
   QByteArray name;
@@ -63,38 +65,46 @@ class Strings_Comparator {
 
 extern Strings_Comparator comparator;
 
+class CRoomManager;
 
 class CRoom {
-    unsigned int    flags;          
-    QByteArray      name; 			/* POINTER to the room name */ 
-    QByteArray      note; 			/* note, if needed, additional info etc */
-    QByteArray      noteColor;      /* note color in this room */
-    QByteArray      desc;			/* descrition */
-    char            sector;                 /* terrain marker */
-                                        /* _no need to free this one_ */
-    CRegion         *region;               /* region of this room */
+    // inner serializable (protocol buffers) object
+    mapdata::Room room;
+
+    // old member and fields
+//    enum ExitFlags { EXIT_NONE = 0, EXIT_UNDEFINED, EXIT_DEATH};
+
+//    unsigned int    flags;
+//    QByteArray      name; 			//
+//    QByteArray      note; 			// note, if needed, additional info etc
+//    QByteArray      noteColor;      // note color in this room
+//    QByteArray      desc;			// descrition
+//    char            sector;                 /* terrain marker */
+//    CRegion         *region;               /* region of this room */
     
-    
-    QByteArray    doors[6];		/* if the door is secret */
-    unsigned  char exitFlags[6];
+//    QByteArray    doors[6];		/* if the door is secret */
+//    unsigned  char exitFlags[6];
+//    unsigned int    id; 		        /* identifier, public for speed up - its very often used  */
+//    int x, y, z;		/* coordinates on our map */
+
 
     CSquare			*square;  		/* which square this room belongs to */
+    CRegion         *region;
 
-    int x, y, z;		/* coordinates on our map */
-
+    CRoomManager    *parent;
 public:
-    enum ExitFlags { EXIT_NONE = 0, EXIT_UNDEFINED, EXIT_DEATH};
-  
-    unsigned int    id; 		        /* identifier, public for speed up - its very often used  */
-    CRoom           *exits[6];              /* very often used in places where performance matters */
-  
-  
-    CRoom();
+    CRoom(CRoomManager *parent);
     ~CRoom();
     
+    RoomId getId() { return room.id(); }
+
+    CRoom* getExitRoom(ExitDirection dir);
+
+    RoomId getExitLeadsTo(ExitDirection dir);
+
     QByteArray getName();
     QByteArray getDesc();
-    char getTerrain();
+    mapdata::Room::RoomTerrainType getTerrain();
     QByteArray getNote();
     
     QByteArray getNoteColor();
@@ -103,7 +113,6 @@ public:
     void setDesc(QByteArray newdesc);
     void setName(QByteArray newname);
     void setTerrain(char terrain);
-    void setSector(char val);
     void setNote(QByteArray note);
 
     void setSquare(CSquare *square);
@@ -116,35 +125,34 @@ public:
     QString toolTip();
     
     void setModified(bool b);
-    bool isConnected(int dir);
+    bool isConnected(ExitDirection dir);
     void sendRoom();
     
     // door stuff
-    int setDoor(int dir, QByteArray door);
-    void removeDoor(int dir);
-    QByteArray getDoor(int dir);
-    bool isDoorSet(int dir);
-    bool isDoorSecret(int dir);
+    int setDoor(ExitDirection dir, QByteArray door);
+    void removeDoor(ExitDirection dir);
+    QByteArray getDoor(ExitDirection dir);
+    bool isDoorSet(ExitDirection dir);
+    bool isDoorSecret(ExitDirection dir);
     
-    void disconnectExit(int dir);       /* just detaches the connection */
-    void removeExit(int dir);           /* also removes the door */
-    void setExit(int dir, CRoom *room);
-    void setExit(int dir, unsigned int id);
+    void disconnectExit(ExitDirection dir);       /* just detaches the connection */
+    void removeExit(ExitDirection dir);           /* also removes the door */
+    void setExit(ExitDirection dir, CRoom *room);
+    void setExit(ExitDirection dir, RoomId id);
 //    CRoom *getExit(int dir);
-    bool isExitLeadingTo(int dir, CRoom *room);
+    bool isExitLeadingTo(ExitDirection dir, CRoom *room);
     
-    bool isExitDeath(int dir);
-    void setExitDeath(int dir);
+    bool isExitDeath(ExitDirection dir);
+    void setExitDeath(ExitDirection dir);
 
-    bool isExitNormal(int dir);
-    bool isExitPresent(int dir);       /* if there is anything at all in this direction, deathtrap, undefined exit or normal one */
-    bool isExitUndefined(int dir);
-    void setExitUndefined(int dir);
+    bool isExitNormal(ExitDirection dir);
+    bool isExitPresent(ExitDirection dir);       /* if there is anything at all in this direction, deathtrap, undefined exit or normal one */
+    bool isExitUndefined(ExitDirection dir);
+    void setExitUndefined(ExitDirection dir);
     
     
     bool anyUndefinedExits();
     
-    void setExitFlags(int dir, unsigned char flag);
     
     // coordinates     
     void setX(int x);
@@ -152,9 +160,9 @@ public:
     void setZ(int x);
     void simpleSetZ(int val); // does not perform any Plane operations (see rendering) on  CPlane in Map.h
     
-    inline int getX() { return x; }
-    inline int getY() { return y; }
-    inline int getZ() { return z; }
+    int getX();
+    int getY();
+    int getZ();
     
     int descCmp(QByteArray desc);
     int roomnameCmp(QByteArray name);
@@ -167,7 +175,7 @@ public:
     QByteArray getSecretsInfo();
     QByteArray getDoorAlias(int i);
     
-    char dirbynum(int dir);
+    char dirbynum(ExitDirection dir);
 
     void rebuildDisplayList() {if (square) square->rebuildDisplayList(); }
 };

@@ -25,7 +25,7 @@ QT += xml \
 
 DEFINES += NOMINMAX
 
-INCLUDEPATH = src src/Utils
+INCLUDEPATH = src src/Utils protobuf/include
 	
 FORMS += src/Ui/configedit.ui \
     src/Ui/finddialog.ui \
@@ -37,8 +37,12 @@ FORMS += src/Ui/configedit.ui \
 
 	
 ################################################ 	Main		######################################################
-HEADERS += src/defines.h 
-SOURCES += src/main.cpp 
+HEADERS += src/defines.h \ 
+    src/Map/map.pb.h \
+    src/mmapper/mmapper_importer.h
+SOURCES += src/main.cpp \ 
+    src/Map/map.pb.cc \
+    src/mmapper/mmapper_importer.cpp
 
 	
 ################################################ 	Engine		######################################################
@@ -93,13 +97,12 @@ SOURCES += src/Gui/CActionManager.cpp \
 HEADERS += src/Map/CRoom.h \
     src/Map/CRoomManager.h \
     src/Map/CTree.h \
-    src/Map/CRegion.h 
-
+    src/Map/CRegion.h
 
 SOURCES += src/Map/CRoom.cpp \
     src/Map/CRoomManager.cpp \
     src/Map/CTree.cpp \
-    src/Map/CRegion.cpp 
+    src/Map/CRegion.cpp
 
 	
 ################################################ 	Proxy		######################################################
@@ -152,3 +155,16 @@ unix:LIBS += -lm -lglut -lGLU
 #    -pipe \
 #    $$CFLAGS_VAR
 #QMAKE_CXXFLAGS_DEBUG += $$CFLAGS_VAR
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/protobuf/libs/ -llibprotobuf
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/protobuf/libs/ -llibprotobufd
+else:unix: LIBS += -L$$PWD/protobuf/libs/ -llibprotobuf
+
+INCLUDEPATH += $$PWD/protobuf/libs
+DEPENDPATH += $$PWD/protobuf/libs
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/protobuf/libs/liblibprotobuf.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/protobuf/libs/liblibprotobufd.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/protobuf/libs/libprotobuf.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/protobuf/libs/libprotobufd.lib
+else:unix: PRE_TARGETDEPS += $$PWD/protobuf/libs/liblibprotobuf.a

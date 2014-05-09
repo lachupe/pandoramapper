@@ -160,13 +160,13 @@ const struct user_command_type user_commands[] = {
   {"msave",         usercmd_msave,         0,           0,
     "Save/Save as current database.",
    "    Usage: msave [filename]\r\n"
-   "    Examples: msave / msave warpmap.xml\r\n\r\n"
+   "    Examples: msave / msave warpmap.pmf\r\n\r\n"
    "    This command saves the database stored in memory in an xml file. Without arguments\r\n"
    "it saves to the default file.\r\n"},
   {"mload",         usercmd_mload,         0,           USERCMD_FLAG_REDRAW,
     "Load file/Reload the database from disk.",
    "    Usage: mload [filename]\r\n"
-   "    Examples: mload / mload mume.xml\r\n\r\n"
+   "    Examples: mload / mload mume.pmf\r\n\r\n"
    "    Without arguments this command reloads the currently opened database.\r\n"
    "As argument you can specify some other database-file to load.\r\n"},
   {"mreset",         usercmd_mreset,         0,           USERCMD_FLAG_REDRAW,
@@ -552,27 +552,12 @@ USERCMD(usercmd_maddroom)
   send_to_user("--[ (Forced) adding new room!\n");
   print_debug(DEBUG_ANALYZER, "adding new room!");
 
-
-
-  Map.fixFreeRooms();	/* making this call just for more safety - might remove */
-
-  r = new CRoom;
-
-  r->id = Map.next_free;
-  r->setName( engine->getRoomName() );
-  r->setDesc( engine->getDesc() );
+  r = Map.createRoom(engine->getRoomName(), engine->getDesc(), 100, 100, 100);
   r->setTerrain( engine->getTerrain() );
   r->setRegion( engine->get_users_region() );
 
-
   engine->addedroom = r;
   engine->do_exits(engine->getExits());
-
-  r->setX(100);
-  r->setY(100);
-  r->setZ(100);
-
-  Map.addRoom(r);
 
   stacker.put(r);
   stacker.swap();
@@ -1510,6 +1495,8 @@ USERCMD(usercmd_mreset)
   engine->clear();
 
   stacker.reset();
+
+
 
   send_to_user("--[Pandora: Resetted!\n");
 

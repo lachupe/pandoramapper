@@ -96,7 +96,7 @@ QMap<QByteArray, QByteArray> CRegion::getAllDoors()
     return doors;
 }
 
-QByteArray CRegion::getAliasByDoor(QByteArray door, int dir)
+QByteArray CRegion::getAliasByDoor(QByteArray door, ExitDirection dir)
 {
     QByteArray fulldoor;
     

@@ -18,18 +18,19 @@
 #include "utils.h"
 
 #include "Map/CRoom.h"
+#include "Map/CRoomManager.h"
 
 class CCommand
 {
 public:
 	QTime timer;
 	int type;
-	int dir;
+    ExitDirection dir;
 
 	enum TYPES { NONE = 0, MOVEMENT = 1, SCOUTING };
 
     CCommand() {}
-	CCommand(int _type, int _dir) : type(_type), dir(_dir) { timer.start(); }
+    CCommand(int _type, ExitDirection _dir) : type(_type), dir(_dir) { timer.start(); }
 
 	CCommand(const CCommand &other)
     {
@@ -51,7 +52,7 @@ public:
     void clear()    {
     	timer.restart();
     	type = NONE;
-    	dir = -1;
+        dir = ED_UNKNOWN;
     }
 };
 
@@ -63,7 +64,7 @@ class CCommandQueue {
 
 public:
 
-    void addCommand(int type, int dir)
+    void addCommand(int type, ExitDirection dir)
     {
     	CCommand command;
     	pipeMutex.lock();
@@ -120,13 +121,14 @@ public:
 
         pipeMutex.lock();
 
-    	list->append(r->id);
+        list->append(r->getId());
     	for (int i = 0; i < pipe.size(); i++) {
     		CCommand cmd = pipe.at(i);
     		if (cmd.type == CCommand::MOVEMENT) {
 				if (r->isConnected(cmd.dir) ) {
-					list->append(r->exits[cmd.dir]->id);
-					r = r->exits[cmd.dir];
+                    int id = r->getExitLeadsTo(cmd.dir);
+                    list->append(id);
+                    r = Map.getRoom(id);
 				}
 				else if (r->isExitUndefined( cmd.dir ) )
 					break;

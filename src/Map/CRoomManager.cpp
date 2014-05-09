@@ -41,9 +41,71 @@
 
 class CRoomManager Map;
 
+/*------------- Constructor of the room manager ---------------*/
+CRoomManager::CRoomManager()
+{
+    init();
+    blocked = false;
+}
+
+
 CRoomManager::~CRoomManager()
 {
+    delete region;
+    delete roomNamesTree;
 }
+
+
+void CRoomManager::init()
+{
+//	QWriteLocker locker(&mapLock);
+
+    print_debug(DEBUG_ROOMS,"Roommanager INIT.\r\n");
+
+    next_free = 1;
+
+    print_debug(DEBUG_ROOMS, "In roomer.init()");
+
+    /* adding first (empty) root elements to the lists */
+    rooms.clear();
+    regions.clear();
+
+
+
+    CRegion *region = new CRegion;
+    region->setName("default");
+
+    regions.push_back(region);
+
+    roomNamesTree = new CTree();
+
+    ids[0] = NULL;
+    planes = NULL;
+}
+
+TTree* CRoomManager::findByName(QByteArray last_name) {
+    return roomNamesTree->findByName(last_name);
+}
+
+
+void CRoomManager::createRoom(QByteArray &name, QByteArray &desc, int x, int y, int z)
+{
+    Map.fixFreeRooms();	// making this call just for more safety - might remove
+
+    CRoom *addedroom = new CRoom(this);
+
+    addedroom->setId( Map.next_free );
+    addedroom->setName(event.name);
+    addedroom->setDesc(event.desc);
+
+    addedroom->setX(x);
+    addedroom->setY(y);
+    addedroom->simpleSetZ(z);
+
+    addRoom(addedroom);
+}
+
+
 
 void CRoomManager::rebuildRegion(CRegion *reg)
 {
@@ -284,46 +346,15 @@ void CRoomManager::addRoom(CRoom *room)
 
     rooms.push_back(room);
     ids[room->id] = room;	/* add to the first array */
-    NameMap.addName(room->getName(), room->id);	/* update name-searhing engine */
+    roomNamesTree.addName(room->getName(), room->id);	/* update name-searhing engine */
 
     fixFreeRooms();
     addToPlane(room);
 }
 /* ------------ addroom ENDS ---------- */
 
-/*------------- Constructor of the room manager ---------------*/
-CRoomManager::CRoomManager()
-{
-	init();
-    blocked = false;
-}
 
 
-void CRoomManager::init()
-{
-//	QWriteLocker locker(&mapLock);
-
-    print_debug(DEBUG_ROOMS,"Roommanager INIT.\r\n");
-
-    next_free = 1;
-
-    print_debug(DEBUG_ROOMS, "In roomer.init()");
-
-    /* adding first (empty) root elements to the lists */
-    rooms.clear();
-    regions.clear();
-
-
-
-    CRegion *region = new CRegion;
-    region->setName("default");
-
-    regions.push_back(region);
-
-
-    ids[0] = NULL;
-    planes = NULL;
-}
 
 /*------------- Constructor of the room manager ENDS  ---------------*/
 
@@ -411,7 +442,7 @@ void CRoomManager::reinit()
 
     memset(ids, 0, MAX_ROOMS * sizeof (CRoom *) );
     rooms.clear();
-    NameMap.reinit();
+    roomNamesTree.reinit();
 }
 
 /* -------------- reinit ENDS --------- */
@@ -644,4 +675,16 @@ QList<int> CRoomManager::searchExits(QString s, Qt::CaseSensitivity cs)
     }
 
     return results;
+}
+
+
+
+void CRoomManager::loadMap(QString filename)
+{
+
+}
+
+void CRoomManager::saveMap(QString filename)
+{
+
 }

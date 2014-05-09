@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     strcpy(resPath, appPath);
     strcat(resPath, "/Contents/Resources/");
 
-    char    default_base_file[MAX_STR_LEN] = "mume.xml";
+    char    default_base_file[MAX_STR_LEN] = "mume.pmf";
     char    default_remote_host[MAX_STR_LEN] = "";
     strcpy(configfile, "configs/default.conf");
 
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 
 #else
     resPath = "";
-    char    default_base_file[MAX_STR_LEN] = "mume.xml";
+    char    default_base_file[MAX_STR_LEN] = "mume.pmf";
     char    default_remote_host[MAX_STR_LEN] = "129.241.210.221";
 #endif
     QApplication::setColorSpec( QApplication::CustomColor );

@@ -69,7 +69,7 @@ Q_OBJECT
 
     bool testRoom(CRoom *room);
 
-    void mapCurrentRoom(CRoom *room, int dir);
+    void mapCurrentRoom(CRoom *room, ExitDirection dir);
 
 public:
     CEngine();
@@ -79,8 +79,8 @@ public:
 
     void addEvent(Event e) { eventPipe.addEvent(e); }
 
-    void addMovementCommand(int dir) { commandQueue.addCommand(CCommand::MOVEMENT, dir); }
-    QVector<unsigned int> *getPrespammedDirs();
+    void addMovementCommand(ExitDirection dir) { commandQueue.addCommand(CCommand::MOVEMENT, dir); }
+    QVector<RoomId> *getPrespammedDirs();
 
 
 
@@ -112,7 +112,7 @@ public:
 
     void setMgoto(bool b) { mgoto = b; }
     bool isMgoto() { return mgoto; }
-    bool empty() { return eventPipe.isEmpty(); };                      /* are pipes empty? */
+    bool empty() { return eventPipe.isEmpty(); }                      /* are pipes empty? */
     void clear();                      /* clears events pipes */
 
     void set_users_region(CRegion *reg);

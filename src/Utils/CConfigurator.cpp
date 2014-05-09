@@ -223,7 +223,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 	QSettings conf(path + filename, QSettings::IniFormat);
 
 	conf.beginGroup("General");
-	setBaseFile( conf.value("mapFile", "database/mume.xml").toByteArray() );
+    setBaseFile( conf.value("mapFile", "database/mume.pmf").toByteArray() );
 	setWindowRect( conf.value("windowRect").toRect() );
 	setAlwaysOnTop( conf.value("alwaysOnTop", true ).toBool() );
 	setStartupMode( conf.value("startupMode", 1).toInt() );
@@ -467,7 +467,7 @@ void Cconfigurator::addTexture(QByteArray desc, QByteArray filename, char patter
     sectors.push_back(s);
 }
 
-int Cconfigurator::getSectorByPattern(char pattern)
+RoomTerrainType Cconfigurator::getSectorByPattern(char pattern)
 {
     unsigned int i;
     for (i = 0; i < sectors.size(); ++i) {

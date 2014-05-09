@@ -1,0 +1,195 @@
+package mapdata;
+
+// Map file layout
+// MapHeader x 1
+// Regions x MapHeader.areas_amount
+// Rooms x MapHeader.rooms_amount
+
+
+message MapHeader {
+	optional int32 	rooms_amount = 1 [default = 0];
+	optional int32  areas_amount = 2 [default = 0];
+}
+
+
+message Area {
+	message Alias {
+		required string name = 1;
+		required string door = 2;
+	}
+
+	required string 		name = 1;
+	repeated Alias			alias = 2;
+
+	optional float			scale = 3 [default = 1.0];
+}
+
+message Exit {
+	enum ExitType { 
+		ET_NORMAL = 0;
+		ET_LOOP = 1;
+		ET_ONEWAY = 2;
+		ET_UNDEFINED = 3;
+		ET_DEATH = 4;
+		ET_NONE = 5;
+	}
+
+	enum ExitDirection { 
+		ED_NORTH = 0;
+		ED_SOUTH = 1;
+		ED_EAST = 2;
+		ED_WEST = 3; 
+		ED_UP = 4;
+		ED_DOWN = 5; 
+		ED_UNKNOWN = 6;
+	}
+
+	required ExitDirection	dir = 1 [default = ED_UNKNOWN]; 
+	optional int32  		leads_to_id = 2;
+	optional ExitType 		type = 3 [default = ET_NONE];
+	optional string 		door = 4;
+
+	message ExitFlags {
+		optional bool 		exit = 1 [default = false];
+		optional bool		door = 2 [default = false];
+		optional bool		road = 3 [default = false];
+		optional bool		climb = 4 [default = false];
+		optional bool		random = 5 [default = false];
+		optional bool		special = 6 [default = false];
+		optional bool		no_match = 7 [default = false];
+	}
+	optional ExitFlags		exit_flags = 5;
+	
+	message DoorFlags {
+		optional bool		hidden = 1 [default = false];
+		optional bool		needkey = 2 [default = false];
+		optional bool		noblock = 3 [default = false];
+		optional bool		nobreak = 4 [default = false];
+		optional bool		nopick = 5 [default = false];
+		optional bool		delayed = 6 [default = false];
+	}
+	optional DoorFlags      door_flags = 6;
+
+}
+
+message Room {
+	enum RoomTerrainType    { 
+		RTT_UNDEFINED = 0;
+		RTT_INDOORS = 1;
+		RTT_CITY = 2;
+		RTT_FIELD = 3; 
+		RTT_FOREST = 4; 
+		RTT_HILLS = 5; 
+		RTT_MOUNTAINS = 6;
+		RTT_SHALLOW = 7; 
+		RTT_WATER = 8; 
+		RTT_RAPIDS = 9; 
+		RTT_UNDERWATER = 10; 
+		RTT_ROAD = 11; 
+		RTT_BRUSH = 12;
+		RTT_TUNNEL = 13; 
+		RTT_CAVERN = 14; 
+		RTT_DEATHTRAP = 15; 
+		RTT_RANDOM = 16;
+	}
+		
+	// room flags
+	enum RoomPortableType   { 
+		RPT_UNDEFINED = 0; 
+		RPT_PORTABLE = 1; 
+		RPT_NOTPORTABLE = 2; 
+	}
+	enum RoomLightType      { 
+		RLT_UNDEFINED = 0; 
+		RLT_DARK = 1; 
+		RLT_LIT = 2;
+	}
+	enum RoomAlignType      { 
+		RAT_UNDEFINED = 0; 
+		RAT_GOOD = 1; 
+		RAT_NEUTRAL = 2; 
+		RAT_EVIL = 3;
+	}
+	enum RoomRidableType    { 
+		RRT_UNDEFINED = 0; 
+		RRT_RIDABLE = 1; 
+		RRT_NOTRIDABLE = 2;
+	}
+	
+		
+	message MobFlags {
+		optional bool rent = 1 [default = false];
+		optional bool shop = 2 [default = false];
+		optional bool weaponshop = 3 [default = false];
+		optional bool armourshop = 4 [default = false];
+		optional bool foodshop = 5 [default = false];
+		optional bool petshop = 6 [default = false];
+		optional bool guild = 7 [default = false];
+		optional bool scoutguild = 8 [default = false];
+		optional bool mageguild = 9 [default = false];
+		optional bool clericguild = 10 [default = false];
+		optional bool warriorguild = 11 [default = false];
+		optional bool rangerguild = 12 [default = false];
+		optional bool smob = 13 [default = false];
+		optional bool quest = 14 [default = false];
+		optional bool any = 15 [default = false];
+	}
+	message LoadFlags {
+		optional bool treasure = 1[default = false];
+		optional bool armour = 2 [default = false];
+		optional bool weapon = 3 [default = false];
+		optional bool water = 4 [default = false];
+		optional bool food = 5 [default = false];
+		optional bool herb = 6 [default = false];
+		optional bool key = 7 [default = false];
+		optional bool mule = 8 [default = false];
+		optional bool horse = 9 [default = false];
+		optional bool packhorse = 10 [default = false];
+		optional bool trainedhorse = 11 [default = false];
+		optional bool rohirrim = 12 [default = false];
+		optional bool warg = 13 [default = false];
+		optional bool boat = 14 [default = false];
+		optional bool attention = 15 [default = false];
+		optional bool tower = 16 [default = false];
+	}
+		
+	message Coordinate {
+		required float x = 1;
+		required float y = 2;
+		required float z = 3;
+
+		// scale of the room on the map, applies to the area scale
+		optional float scale = 4 [default = 1.0];
+	}
+		
+	// most important
+	required int32  		id = 1; 
+	required string 		name = 2;
+	required string 		desc = 3;
+	
+	// coordinates
+	required Coordinate 	pos = 4;
+	
+	// area
+	optional string			area_name = 6 [default="default"];
+
+	optional string dynamicDesc = 7;
+	optional RoomTerrainType terrain = 8 [default = RTT_UNDEFINED];
+	
+	// exits
+	repeated Exit exits = 9;
+
+	// additional and not so important info
+	optional string note = 15;  
+	optional string note_color = 16;
+	optional string info = 17;
+
+	// flags
+	optional RoomPortableType flag_portable = 18 [default = RPT_UNDEFINED];
+	optional RoomLightType 	  flag_light = 19 [default = RLT_UNDEFINED];
+	optional RoomRidableType  flag_rideable = 20 [default = RRT_UNDEFINED];
+	optional RoomAlignType    flag_align = 21 [default = RAT_UNDEFINED];
+
+	optional MobFlags		mob_flags = 22;
+	optional LoadFlags		load_flags = 23;
+}

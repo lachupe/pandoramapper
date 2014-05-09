@@ -62,6 +62,18 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     openAct->setStatusTip(tr("Open an existing map"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
+
+    importAct = new QAction(tr("Import"), this);
+    //importAct->setShortcut(tr("Ctrl+L"));
+    importAct->setStatusTip(tr("Import existing map XML or MM2 map"));
+    connect(importAct, SIGNAL(triggered()), this, SLOT(importMap()));
+
+    exportAct = new QAction(tr("Export"), this);
+    //importAct->setShortcut(tr("Ctrl+L"));
+    exportAct->setStatusTip(tr("Export to XML format"));
+    connect(exportAct, SIGNAL(triggered()), this, SLOT(exportMap() ));
+
+
     reloadAct = new QAction(tr("&Reload..."), this);
     reloadAct->setShortcut(tr("Ctrl+R"));
     reloadAct->setStatusTip(tr("Reload current map"));
@@ -594,51 +606,7 @@ void CActionManager::merge_room()
     userland_parser->parse_user_input_line("mmerge");
 }
 
-void CActionManager::open()
-{
-  QString s = QFileDialog::getOpenFileName(
-                    parent,
-                    "Choose a database",
-                    "database/",
-                    "XML files (*.xml)");
-  char data[MAX_STR_LEN];
 
-  print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));
-  strcpy(data, qPrintable(s));
-
-  if (!s.isEmpty()) {
-    usercmd_mload(0, 0,  data, data);
-  }
-}
-
-void CActionManager::reload()
-{
-    userland_parser->parse_user_input_line("mload");
-}
-
-void CActionManager::save()
-{
-    userland_parser->parse_user_input_line("msave");
-    QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
-}
-
-void CActionManager::saveAs()
-{
-  char data[MAX_STR_LEN];
-
-  QString s = QFileDialog::getSaveFileName(
-                    parent,
-                    "Choose a filename to save under",
-                    "database/",
-                    "XML database files (*.xml)");
-
-  strcpy(data, qPrintable(s));
-
-  if (!s.isEmpty()) {
-    usercmd_msave(0, 0,  data, data);
-    QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
-  }
-}
 
 
 void CActionManager::mapping_mode()
@@ -729,7 +697,7 @@ void CActionManager::saveAsConfig()
                     parent,
                     "Choose a filename to save under",
                     "configs/",
-                    "XML config files (*.xml)");
+                    "INI config files (*.ini)");
     if (s.isEmpty())
         return;
     conf->saveConfigAs("", s.toLocal8Bit());
@@ -742,7 +710,7 @@ void CActionManager::loadConfig()
                     parent,
                     "Choose another configuration file to load",
                     "configs/",
-                    "XML config files (*.xml)");
+                    "INI config files (*.ini)");
   if (s.isEmpty())
         return;
 
@@ -803,4 +771,96 @@ void CActionManager::find()
     }
     parent->findDialog->show();
     parent->findDialog->activateWindow();
+}
+
+
+void CActionManager::reload()
+{
+    userland_parser->parse_user_input_line("mload");
+}
+
+void CActionManager::save()
+{
+    userland_parser->parse_user_input_line("msave");
+    QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
+}
+
+void CActionManager::saveAs()
+{
+  char data[MAX_STR_LEN];
+
+  QString s = QFileDialog::getSaveFileName(
+                    parent,
+                    "Choose a filename to save under",
+                    "database/",
+                    "Pandora map files (*.pmf)");
+
+  strcpy(data, qPrintable(s));
+
+  if (!s.isEmpty()) {
+    usercmd_msave(0, 0,  data, data);
+    QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
+  }
+}
+
+
+void CActionManager::open()
+{
+  QString s = QFileDialog::getOpenFileName(
+                    parent,
+                    "Choose a database",
+                    "database/",
+                    "Pandora map files (*.pmf)");
+  char data[MAX_STR_LEN];
+
+  print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));
+  strcpy(data, qPrintable(s));
+
+  if (!s.isEmpty()) {
+    usercmd_mload(0, 0,  data, data);
+  }
+}
+
+
+void CActionManager::importMap()
+{
+    QString s = QFileDialog::getOpenFileName(
+                        parent,
+                        "Choose a database",
+                        "database/",
+                        "Pandora map files (*.pmf);;Old XML format (*.xml);;MMapper2 map files (*.mm2)");
+    char data[MAX_STR_LEN];
+
+    print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));
+
+
+    if (s.endsWith(".xml")) {
+        Map.loadXmlMap(s);
+        return;
+    } else if(s.endsWith(".mm2")) {
+        Map.loadMMapperMap(s);
+        return;
+    }
+
+    QMessageBox::information(parent, "Error", "Unknown file extention", QMessageBox::Ok);
+}
+
+void CActionManager::exportMap()
+{
+    char data[MAX_STR_LEN];
+
+    QString s = QFileDialog::getSaveFileName(
+                      parent,
+                      "Choose a filename to export",
+                      "database/",
+                      "Old pandora XML maps (*.xml)");
+
+    strcpy(data, qPrintable(s));
+
+    if (!s.isEmpty()) {
+      Map.saveXmlMap(s);
+      //usercmd_msave(0, 0,  data, data);
+      QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
+    }
+
 }

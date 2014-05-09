@@ -250,43 +250,43 @@ int is_abbrev(const char *arg1, const char *arg2)
 
 }
 
-int numbydir(char dir)
+ExitDirection numbydir(char dir)
 {
     if (LOWER(dir) == 'n')
-	return NORTH;
+    return ED_NORTH;
     if (LOWER(dir) == 's')
-	return SOUTH;
+    return ED_SOUTH;
     if (LOWER(dir) == 'e')
-	return EAST;
+    return ED_EAST;
     if (LOWER(dir) == 'w')
-	return WEST;
+    return ED_WEST;
     if (LOWER(dir) == 'u')
-	return UP;
+    return ED_UP;
     if (LOWER(dir) == 'd')
-	return DOWN;
+    return ED_DOWN;
 
-    return -1;
+    return ED_UNKNOWN;
 }
 
-char dirbynum(int dir)
+char dirbynum(ExitDirection dir)
 {
   switch (dir) {
-	case  NORTH :
+    case  ED_NORTH :
                 return 'n';
 		break;
-	case  SOUTH :
+    case  ED_SOUTH :
                 return 's';
 		break;
-	case  EAST :
+    case  ED_EAST :
                 return 'e';
 		break;
-	case  WEST :
+    case  ED_WEST :
                 return 'w';
 		break;
-	case  UP :
+    case  ED_UP :
                 return 'u';
 		break;
-	case  DOWN :
+    case  ED_DOWN :
                 return 'd';
 		break;
   }
@@ -295,21 +295,22 @@ char dirbynum(int dir)
   return -1;
 }
 
-int reversenum(int num)
+ExitDirection reversenum(ExitDirection num)
 {
-    if (num == NORTH)
-	return SOUTH;
-    if (num == SOUTH)
-	return NORTH;
-    if (num == EAST)
-	return WEST;
-    if (num == WEST)
-	return EAST;
-    if (num == UP)
-	return DOWN;
-    if (num == DOWN)
-	return UP;
-    return -1;
+    if (num == ED_NORTH)
+        return ED_SOUTH;
+    if (num == ED_SOUTH)
+        return ED_NORTH;
+    if (num == ED_EAST)
+        return ED_WEST;
+    if (num == ED_WEST)
+        return ED_EAST;
+    if (num == ED_UP)
+        return ED_DOWN;
+    if (num == ED_DOWN)
+        return ED_UP;
+
+    return ED_UNKNOWN;
 }
 
 void send_to_user(const char *messg, ...)

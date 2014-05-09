@@ -25,22 +25,32 @@
 
 class QString;
 
-#define MAX_ROOMS       35000		/* maximal amount of rooms */
+#define MAX_ROOMS       45000		/* maximal amount of rooms */
 
 
 #define MAX_STR_LEN     400
 #define MAX_LINES_DESC  20
 
-#define NORTH           0
-#define EAST            1
-#define SOUTH           2
-#define WEST            3
-#define UP              4
-#define DOWN            5
-
 /* coordinate's cap */
 #define MAX_X           32000
 #define MIN_X           -32000
+
+typedef unsigned int RoomId;
+
+enum ExitType { ET_NORMAL = 0, ET_UNDEFINED = 3, ET_DEATH = 4, ET_NONE = 5 };
+
+enum ExitDirection { ED_NORTH=0, ED_SOUTH, ED_EAST, ED_WEST, ED_UP,
+               ED_DOWN, ED_UNKNOWN, ED_NONE };
+
+
+enum RoomTerrainType    { RTT_UNDEFINED = 0, RTT_INDOORS, RTT_CITY, RTT_FIELD, RTT_FOREST, RTT_HILLS , RTT_MOUNTAINS,
+                          RTT_SHALLOW, RTT_WATER, RTT_RAPIDS, RTT_UNDERWATER, RTT_ROAD, RTT_BRUSH,
+                          RTT_TUNNEL, RTT_CAVERN, RTT_DEATHTRAP, RTT_RANDOM};
+
+enum RoomPortableType   { RPT_UNDEFINED = 0, RPT_PORTABLE, RPT_NOTPORTABLE };
+enum RoomLightType      { RLT_UNDEFINED = 0, RLT_DARK, RLT_LIT };
+enum RoomAlignType      { RAT_UNDEFINED = 0, RAT_GOOD, RAT_NEUTRAL, RAT_EVIL };
+enum RoomRidableType    { RRT_UNDEFINED = 0, RRT_RIDABLE, RRT_NOTRIDABLE };
 
 
 /* global flags */

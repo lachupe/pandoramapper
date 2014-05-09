@@ -22,6 +22,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "defines.h"
+
 class QByteArray;
 
 
@@ -90,9 +92,9 @@ char *skip_spaces(const char *str);
 char *next_space(char *str);
 char *one_argument(char *argument, char *first_arg, int mode);
 int is_abbrev(const char *arg1, const char *arg2);
-int reversenum(int num);
-char dirbynum(int dir);
-int numbydir(char dir);
+ExitDirection reversenum(ExitDirection num);
+char dirbynum(ExitDirection dir);
+ExitDirection numbydir(char dir);
 void send_prompt();
 void send_to_user(const char *messg, ...);
 void send_to_mud(const char *messg, ...);
