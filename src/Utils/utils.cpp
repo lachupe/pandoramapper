@@ -149,15 +149,15 @@ void print_debug(unsigned int flag, const char *messg, ...)
 }
 
 
-int parse_dir(char *dir)
+ExitDirection parse_dir(char *dir)
 {
   int i;
 
   for (i = 0; i<= 5; i++)
     if (is_abbrev(dir, exits[i]) )
-      return i;
+      return static_cast<ExitDirection>(i);
 
-  return -1;
+  return ED_UNKNOWN;
 }
 
 

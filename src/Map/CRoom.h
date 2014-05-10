@@ -97,14 +97,18 @@ public:
     ~CRoom();
     
     RoomId getId() { return room.id(); }
+    void setId(RoomId id) { room.set_id(id); }
 
     CRoom* getExitRoom(ExitDirection dir);
 
     RoomId getExitLeadsTo(ExitDirection dir);
 
+    void CRoom::setSector(RoomTerrainType val);
+
+
     QByteArray getName();
     QByteArray getDesc();
-    mapdata::Room::RoomTerrainType getTerrain();
+    RoomTerrainType getTerrain();
     QByteArray getNote();
     
     QByteArray getNoteColor();

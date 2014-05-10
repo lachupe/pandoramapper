@@ -1,0 +1,1 @@
+"../../../protobuf/bin/protoc" --cpp_out=./../ map.proto

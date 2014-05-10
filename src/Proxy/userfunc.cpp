@@ -81,7 +81,7 @@ class Userland *userland_parser;
 
 #define PARSE_DIR_ARGUMENT(dir, arg) \
     dir = parse_dir(arg);               \
-    if (dir == -1) {                            \
+    if (dir == ED_UNKNOWN) {                            \
       send_to_user("--[ %s is not a dirrection.\r\n", arg);     \
       send_prompt(); \
       return USER_PARSE_SKIP;             \
@@ -188,12 +188,12 @@ const struct user_command_type user_commands[] = {
    "    Examples: minfo / minfo 120\r\n\r\n"
    "    This command displays everything know about current room. Roomname, id, flags,\r\n"
    "room description, exits, connections and last update date.\r\n"},
-  {"north",         usercmd_move,         NORTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"east",          usercmd_move,         EAST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"south",         usercmd_move,         SOUTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"west",          usercmd_move,         WEST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"up",            usercmd_move,         UP,             USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"down",          usercmd_move,         DOWN,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"north",         usercmd_move,         ED_NORTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"east",          usercmd_move,         ED_EAST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"south",         usercmd_move,         ED_SOUTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"west",          usercmd_move,         ED_WEST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"up",            usercmd_move,         ED_UP,             USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
+  {"down",          usercmd_move,         ED_DOWN,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
   {"look",          usercmd_move,         USER_MOVE_LOOK, USERCMD_FLAG_INSTANT,   NULL, NULL},
   {"examine",       usercmd_move,         USER_MOVE_EXAMINE, USERCMD_FLAG_INSTANT,   NULL, NULL},
   {"mmerge",        usercmd_mmerge,       0,    USERCMD_FLAG_SYNC | USERCMD_FLAG_REDRAW,
@@ -590,7 +590,7 @@ USERCMD(usercmd_maction)
   char *p;
   char arg[MAX_STR_LEN];
   CRoom *r;
-  int dir;
+  ExitDirection dir;
   int local;
   unsigned int i;
   char exit;
@@ -621,9 +621,9 @@ USERCMD(usercmd_maction)
 
 //  PARSE_DIR_ARGUMENT(dir, arg);
   dir = parse_dir(arg);
-  if (dir == -1) {
+  if (dir == ED_UNKNOWN) {
     if (is_abbrev(arg, "all")) {
-      dir = -1;
+      dir = ED_UNKNOWN;
     } else {
       send_to_user("--[ %s is not a direction.\r\n", arg);
       send_prompt();
@@ -689,10 +689,12 @@ USERCMD(usercmd_maction)
 			if (dir == -1) {
 			  int z;
 
-			  for (z = 0; z <= 5; z++)
-				if (r->isDoorSecret(z) == true) {
-					MACTION_SEND_DOOR(r->getDoor(dir), z);
-				}
+              for (z = 0; z <= 5; z++) {
+                  ExitDirection zdir = static_cast<ExitDirection>(z);
+                  if (r->isDoorSecret(zdir) == true) {
+                      MACTION_SEND_DOOR(r->getDoor(dir), zdir);
+                  }
+              }
 
 			} else {
 			  if (r->isDoorSecret(dir) == true) {
@@ -726,7 +728,7 @@ USERCMD(usercmd_mdelete)
     char arg[MAX_STR_LEN];
     CRoom *r;
     int remove;
-    QList<int> ids;
+    QList<RoomId> ids;
 
 
     userfunc_print_debug;
@@ -747,7 +749,7 @@ USERCMD(usercmd_mdelete)
     } else {
         CHECK_SYNC;
         r = stacker.first();
-        ids.append(r->id);
+        ids.append(r->getId());
     }
 
 
@@ -755,7 +757,7 @@ USERCMD(usercmd_mdelete)
         r = Map.getRoom( ids.at(i) );
         if ( r == NULL )
             continue;
-        if (r->id == 1) {
+        if (r->getId() == 1) {
             send_to_user("--[ Sorry, you can not delete the base (id == 1) room!\r\n");
             send_prompt();
             return USER_PARSE_SKIP;
@@ -829,7 +831,7 @@ USERCMD(usercmd_mtreestats)
   skip_spaces(line);
 
 
-  NameMap.printTreeStats();
+  Map.getRoomNamesTree()->printTreeStats();
 
   send_prompt();
   return USER_PARSE_SKIP;
@@ -855,9 +857,9 @@ USERCMD(usercmd_mgoto)
 {
     char *p;
     char arg[MAX_STR_LEN];
-    unsigned int id;
+    RoomId id;
     CRoom *r;
-    int dir;
+    ExitDirection dir;
 
     userfunc_print_debug;
 
@@ -894,7 +896,7 @@ USERCMD(usercmd_mgoto)
                 return USER_PARSE_SKIP;
             }
 
-            stacker.put(r->exits[dir]->id);
+            stacker.put(r->getExitLeadsTo(dir));
         }
     }
 
@@ -916,7 +918,7 @@ USERCMD(usercmd_mdetach)
   char arg[MAX_STR_LEN];
   CRoom *r, *s;
   int del = 0, oneway = 0;
-  int dir;
+  ExitDirection dir;
   unsigned int i;
 
   userfunc_print_debug;
@@ -941,7 +943,7 @@ USERCMD(usercmd_mdetach)
 
   r = stacker.first();
   if (r->isExitPresent(dir) == true) {
-    s = r->exits[dir];
+    s = r->getExitRoom(dir);
     if (del) {
         r->removeExit(dir);
     } else {
@@ -954,14 +956,16 @@ USERCMD(usercmd_mdetach)
   }
 
   if (!oneway && s != NULL) {
-    for (i = 0; i<= 5; i++)
-      if (s->isExitLeadingTo(i, r) == true) {
-        if (del) {
-            s->removeExit(i);
-        } else {
-            s->setExitUndefined(i);
-        }
+    for (int ind = 0; ind<= 5; ind++) {
+        ExitDirection i = static_cast<ExitDirection>(ind);
+        if (s->isExitLeadingTo(i, r) == true) {
+            if (del) {
+                s->removeExit(i);
+            } else {
+                s->setExitUndefined(i);
+            }
       }
+    }
   }
 
   send_prompt();
@@ -971,7 +975,9 @@ USERCMD(usercmd_mdetach)
 /* "    Usage: mlink <dirrection> <id> [backdir] [force|oneway]\r\n"  */
 USERCMD(usercmd_mlink)
 {
-  int force = 0, oneway = 0, backdir = -1, id, dir;
+  int force = 0, oneway = 0;
+  ExitDirection backdir = ED_UNKNOWN, dir;
+  RoomId id;
   char *p;
   char arg[MAX_STR_LEN];
   CRoom *r, *second;
@@ -1012,7 +1018,7 @@ USERCMD(usercmd_mlink)
 
     for (i = 0; i <= 5; i++)
       if (is_abbrev(arg, exits[i]) )
-        backdir = i;
+        backdir = static_cast<ExitDirection>(i);
 
     if (is_abbrev(arg, "force"))
       force = 1;
@@ -1082,7 +1088,9 @@ USERCMD(usercmd_mmark)
   i = 0;
   while (room_flags[i].name != "") {
     if (is_abbrev(arg, room_flags[i].name) ) {
-      r->setExitFlags(dir, room_flags[i].flag);
+
+    // FIXME
+    //r->setExitFlags(dir, room_flags[i].flag);
       send_to_user("--[Pandora: Marked %s as %s\r\n", exits[dir],  (const char *) room_flags[i].xml_name);
 
       send_prompt();
@@ -1101,7 +1109,7 @@ USERCMD(usercmd_mdoor)
   char arg[MAX_STR_LEN];
   char arg2[MAX_STR_LEN];
   CRoom *r;
-  int i;
+  ExitDirection i;
 
   userfunc_print_debug;
 
@@ -1510,7 +1518,7 @@ USERCMD(usercmd_mmerge)
   char arg[MAX_STR_LEN];
   int force = 0;
   CRoom *t = NULL;
-  int j = -1;
+  ExitDirection j = ED_UNKNOWN;
   unsigned int i;
   unsigned int id;
 
@@ -1523,12 +1531,13 @@ USERCMD(usercmd_mmerge)
   }
 
   /* find the only defined exit in new room - the one we came from */
-  for (i = 0; i <= 5; i++)
-    if (engine->addedroom->isExitNormal(i) == true) {
-      j = i;
-      break;
-    }
-
+  for (i = 0; i <= 5; i++) {
+      ExitDirection dir = static_cast<ExitDirection>(i);
+      if (engine->addedroom->isExitNormal(dir) == true) {
+          j = dir;
+          break;
+      }
+  }
 
   p = skip_spaces(line);
   if (!*p) {
@@ -1656,7 +1665,7 @@ USERCMD(usercmd_minfo)
 USERCMD(usercmd_move)
 {
   CRoom *r;
-  int dir;
+  ExitDirection dir;
 
   userfunc_print_debug;
 
@@ -1665,27 +1674,28 @@ USERCMD(usercmd_move)
 
   // for normal game - append the command to the commands queue of the engine
 
-  dir = -1;
+  dir = ED_UNKNOWN;
 
-  switch (subcmd)
+
+  switch ( static_cast<ExitDirection>(subcmd) )
   {
-        case  NORTH:
-                dir = NORTH;
+        case  ED_NORTH:
+                dir = ED_NORTH;
                 break;
-        case  EAST:
-                dir = EAST;
+        case  ED_EAST:
+                dir = ED_EAST;
                 break;
-        case  SOUTH:
-                dir = SOUTH;
+        case  ED_SOUTH:
+                dir = ED_SOUTH;
                 break;
-        case  WEST:
-                dir = WEST;
+        case  ED_WEST:
+                dir = ED_WEST;
                 break;
-        case  UP:
-                dir = UP;
+        case  ED_UP:
+                dir = ED_UP;
                 break;
-        case  DOWN:
-                dir = DOWN;
+        case  ED_DOWN:
+                dir = ED_DOWN;
                 break;
   }
 
@@ -1713,12 +1723,12 @@ USERCMD(usercmd_move)
                   break;
     }
 
-    if (dir == -1)
+    if (dir == ED_UNKNOWN)
       return USER_PARSE_NONE;
     if ( r->isConnected(dir)  == false ) {
       send_to_user("Alas, you cannot go this way.\r\n\r\n");
     } else {
-      stacker.put(r->exits[dir]->id);
+      stacker.put(r->getExitLeadsTo(dir));
       stacker.swap();
 
 

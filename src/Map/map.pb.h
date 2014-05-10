@@ -910,7 +910,7 @@ class Exit : public ::google::protobuf::Message {
   inline ::mapdata::Exit_ExitDirection dir() const;
   inline void set_dir(::mapdata::Exit_ExitDirection value);
 
-  // optional int32 leads_to_id = 2;
+  // optional int32 leads_to_id = 2 [default = 0];
   inline bool has_leads_to_id() const;
   inline void clear_leads_to_id();
   static const int kLeadsToIdFieldNumber = 2;
@@ -2622,7 +2622,7 @@ inline void Exit::set_dir(::mapdata::Exit_ExitDirection value) {
   dir_ = value;
 }
 
-// optional int32 leads_to_id = 2;
+// optional int32 leads_to_id = 2 [default = 0];
 inline bool Exit::has_leads_to_id() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }

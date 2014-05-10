@@ -6,7 +6,8 @@ MOC_DIR = moc
 
 UI_DIR = ui
 
-
+RESOURCES = resources/pandora.qrc
+RC_FILE = resources/pandora.rc
 
 CONFIG += qt \
     opengl \
@@ -33,16 +34,20 @@ FORMS += src/Ui/configedit.ui \
     src/Ui/logdialog.ui \
     src/Ui/movementdialog.ui \
     src/Ui/roomedit.ui \
-    src/Ui/spellsdialog.ui
+    src/Ui/spellsdialog.ui \
+    src/Ui/roomeditattrdlg.ui \
+    src/Gui/roomeditattrdlg.ui
 
 	
 ################################################ 	Main		######################################################
 HEADERS += src/defines.h \ 
     src/Map/map.pb.h \
-    src/mmapper/mmapper_importer.h
+    src/mmapper/mmapper_importer.h \
+    src/Gui/roomeditattrdlg.h
 SOURCES += src/main.cpp \ 
     src/Map/map.pb.cc \
-    src/mmapper/mmapper_importer.cpp
+    src/mmapper/mmapper_importer.cpp \
+    src/Gui/roomeditattrdlg.cpp
 
 	
 ################################################ 	Engine		######################################################
@@ -88,7 +93,6 @@ SOURCES += src/Gui/CActionManager.cpp \
     src/Gui/CSelectionManager.cpp \
     src/Gui/finddialog.cpp \
     src/Gui/mainwindow.cpp \
-    src/Gui/RoomEditDialog.cpp \
     src/Gui/SpellsDialog.cpp \
     src/Gui/CGroupSettingsDialog.cpp
 
@@ -149,7 +153,7 @@ unix:!macx{
 
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 win32:LIBS += -lwsock32
-unix:LIBS += -lm -lglut -lGLU
+unix:LIBS += -lm
 
 #QMAKE_CXXFLAGS_RELEASE += -O2 \
 #    -pipe \

@@ -63,12 +63,36 @@ CRoom::CRoom(CRoomManager *parent) :
 {
     square = NULL;
     setRegion("default");
+
+    // populate room.exits with "none" exits
+
+    // the infamoust cycle
+    for (int i = 0; i <= 5; i++) {
+        mapdata::Exit::ExitDirection dir = static_cast<mapdata::Exit::ExitDirection>(i);
+        mapdata::Exit* exit = room.add_exits();
+        exit->set_dir(dir);
+    }
 }
 
 
 CRoom::~CRoom()
 {
-    parent->getNameMap()->deleteItem( getName(), getId());
+    parent->getRoomNamesTree()->deleteItem( getName(), getId());
+}
+
+
+void CRoom::setSector(RoomTerrainType val)
+{
+    room.set_terrain( static_cast<mapdata::Room::RoomTerrainType>(val) );
+    rebuildDisplayList();
+}
+
+
+void CRoom::setTerrain(char terrain)
+{
+    RoomTerrainType sector = conf->getSectorByPattern(terrain);
+    setModified(true);
+    rebuildDisplayList();
 }
 
 
@@ -289,9 +313,9 @@ QByteArray CRoom::getDesc()
 }
 
 
-mapdata::Room::RoomTerrainType CRoom::getTerrain()
+RoomTerrainType CRoom::getTerrain()
 {
-    return room.terrain();
+    return static_cast<RoomTerrainType>( room.terrain() );
 }
 
 
@@ -340,18 +364,10 @@ QByteArray CRoom::getSecretsInfo()
 
 void CRoom::setName(QByteArray newname)
 {
-    parent->getNameMap()->deleteItem(room.name().c_str(), room.id());
+    parent->getRoomNamesTree()->deleteItem(room.name().c_str(), room.id());
     room.set_name(newname);
-    parent->getNameMap()->addName(newname, room.id());
+    parent->getRoomNamesTree()->addName(newname, room.id());
     setModified(true);
-}
-
-
-void CRoom::setTerrain(char terrain)
-{
-    room.set_terrain( static_cast<mapdata::Room::RoomTerrainType>(conf->getSectorByPattern(terrain)) );
-    setModified(true);
-    rebuildDisplayList();
 }
 
 
@@ -546,7 +562,7 @@ void CRoom::sendRoom()
     char line[MAX_STR_LEN];
     
     send_to_user(" Id: %i, Flags: %s, Region: %s, Coord: %i,%i,%i\r\n", getId(),
-	    (const char *) conf->sectors[sector].desc, 
+                     (const char *) conf->sectors[ (int) getTerrain() ].desc,
 	    (const char *) region->getName(),
         getX(), getY(), getZ());
     send_to_user(" [32m%s[0m\n", (const char *) getName() );
@@ -583,7 +599,7 @@ void CRoom::sendRoom()
     
     if (conf->getBriefMode() && proxy->isMudEmulation()) {
       sprintf(line, "Exits: ");
-      for (i = 0; i <= 5; i++)
+      for (i = 0; i <= 5; i++) {
           ExitDirection iDir = static_cast<ExitDirection>(i);
           if (isExitPresent(iDir) == true) {
               if ( isExitUndefined(iDir) ) {
@@ -605,7 +621,7 @@ void CRoom::sendRoom()
                   sprintf(line + strlen(line), " %s", exitnames[i]);
               }
           }
-    
+      }
       
       
     } else {
@@ -613,7 +629,7 @@ void CRoom::sendRoom()
       line[0] = 0;
       sprintf(line, " exits:");
   
-      for (i = 0; i <= 5; i++)
+      for (i = 0; i <= 5; i++) {
           ExitDirection iDir = static_cast<ExitDirection>(i);
           if (isExitPresent(iDir) == true) {
               if (isExitUndefined(iDir) ) {
@@ -635,10 +651,10 @@ void CRoom::sendRoom()
                   sprintf(line + strlen(line), " %s", exitnames[i]);
               }
 
-              sprintf(line + strlen(line), " -[to %i]-", exits[i]->id );
+              sprintf(line + strlen(line), " -[to %i]-", getExitLeadsTo(iDir) );
           }
-      
-      
+       }
+
     }
 
     send_to_user("%s\r\n", line);

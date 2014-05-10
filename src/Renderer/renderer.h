@@ -65,6 +65,12 @@ class RendererWidget : public QGLWidget
     float userZ;
     int userLayerShift;
 
+    GLuint	exit_normal_texture;
+    GLuint	exit_door_texture;
+    GLuint	exit_secret_texture;
+    GLuint	exit_undef_texture;
+
+
 
     void glDrawGroupMarkers();
     void glDrawPrespamLine();

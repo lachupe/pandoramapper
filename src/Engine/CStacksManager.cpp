@@ -61,7 +61,7 @@ void CStacksManager::getCurrent(char *str)
     return;
   }
   
-  sprintf(str, "%i", ((*sa)[0])->id );
+  sprintf(str, "%i", ((*sa)[0])->getId() );
 }
 
 
@@ -73,30 +73,30 @@ void CStacksManager::printStacks()
     if (sa->size() == 0)
     	send_to_user(" Current position is unknown!\n");
     for (i = 0; i < sa->size(); i++) {
-    	send_to_user(" %i\n", (*sa)[i]->id);
+        send_to_user(" %i\n", (*sa)[i]->getId());
     }
 }
 
-void CStacksManager::removeRoom(unsigned int id)
+void CStacksManager::removeRoom(RoomId id)
 {
   unsigned int i;
 
   for (i = 0; i < sa->size(); i++) 
-    if (stacker.get(i)->id != id) 
+    if (stacker.get(i)->getId() != id)
       stacker.put( stacker.get(i) );
   stacker.swap();
 }
 
 void CStacksManager::put(CRoom *r)
 {
-    if (mark[r->id] == turn)
+    if (mark[r->getId()] == turn)
     	return;
     sb->push_back(r);
-    mark[r->id] = turn;
+    mark[r->getId()] = turn;
 }
 
 
-void CStacksManager::put(unsigned int id)
+void CStacksManager::put(RoomId id)
 {
     put(Map.getRoom(id));
 }

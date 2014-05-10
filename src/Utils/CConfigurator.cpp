@@ -67,13 +67,135 @@ void Cconfigurator::resetCurrentConfig()
     moveCancelPatterns.clear();
     moveForcePatterns.clear();
 
-    struct roomSectorsData first;
+    struct roomSectorsData sec;
 
-    first.pattern = 0;
-    first.desc = "NONE";
-    first.texture = 1;
-    first.gllist = 1;
-    sectors.push_back(first);
+    /*
+     * RTT_INDOORS,
+
+     * RTT_CITY,
+     * RTT_FIELD,
+     * RTT_FOREST,
+     * RTT_HILLS ,
+     * RTT_MOUNTAINS,
+     * RTT_SHALLOW,
+     * RTT_WATER,
+     * RTT_RAPIDS,
+     * RTT_UNDERWATER,
+     * RTT_ROAD,
+     * RTT_BRUSH,
+     * RTT_TUNNEL,
+     * RTT_CAVERN,
+     * RTT_DEATHTRAP,
+     * RTT_RANDOM};
+    */
+
+
+    // RTT_UNDEFINED = 0,
+    sec.pattern = 0;
+    sec.desc = "NONE";
+    sec.texture = 1;
+    sec.gllist = 1;
+    sectors.push_back(sec);
+
+    sec.texture = 0;
+    sec.gllist = 0;
+
+
+    // RTT_INDOORS
+    sec.pattern = 91;
+    sec.desc = "INDOORS";
+    sec.filename = ":/textures/indoors.png";
+    sectors.push_back(sec);
+
+    // RTT_CITY
+    sec.pattern = 35;
+    sec.desc = "CITY";
+    sec.filename = ":/textures/city.png";
+    sectors.push_back(sec);
+
+    // RTT_FIELD
+    sec.pattern = 46;
+    sec.desc = "FIELD";
+    sec.filename = ":/textures/field.png";
+    sectors.push_back(sec);
+
+    // RTT_FOREST
+    sec.pattern = 102;
+    sec.desc = "FOREST";
+    sec.filename = ":/textures/forest.png";
+    sectors.push_back(sec);
+
+    // RTT_HILLS
+    sec.pattern = 40;
+    sec.desc = "HILLS";
+    sec.filename = ":/textures/hills.png";
+    sectors.push_back(sec);
+
+    // RTT_MOUNTAINS
+    sec.pattern = 60;
+    sec.desc = "MOUNTAINS";
+    sec.filename = ":/textures/mountain.png";
+    sectors.push_back(sec);
+
+    // RTT_SHALLOW
+    sec.pattern = 37;
+    sec.desc = "SHALLOWWATER";
+    sec.filename = ":/textures/shwater.png";
+    sectors.push_back(sec);
+
+    // RTT_WATER
+    sec.pattern = 126;
+    sec.desc = "WATER";
+    sec.filename = ":/textures/river.png";
+    sectors.push_back(sec);
+
+    // RTT_RAPIDS
+    sec.pattern = 87;
+    sec.desc = "RAPIDS";
+    sec.filename = ":/textures/rapids.png";
+    sectors.push_back(sec);
+
+    // RTT_UNDERWATER
+    sec.pattern = 85;
+    sec.desc = "UNDERWATER";
+    sec.filename = ":/textures/rapids.png";
+    sectors.push_back(sec);
+
+    // RTT_ROAD
+    sec.pattern = 43;
+    sec.desc = "ROAD";
+    sec.filename = ":/textures/road.png";
+    sectors.push_back(sec);
+
+    // RTT_BRUSH
+    sec.pattern = 58;
+    sec.desc = "BRUSH";
+    sec.filename = ":/textures/brush.png";
+    sectors.push_back(sec);
+
+    // RTT_TUNNEL
+    sec.pattern = 61;
+    sec.desc = "TUNNEL";
+    sec.filename = ":/textures/tunnel.png";
+    sectors.push_back(sec);
+
+    // RTT_CAVERN
+    sec.pattern = 79;
+    sec.desc = "CAVERN";
+    sec.filename = ":/textures/cavern.png";
+    sectors.push_back(sec);
+
+    // RTT_DEATH
+    sec.pattern = 63;
+    sec.desc = "DEATH";
+    sec.filename = ":/textures/death.png";
+    sectors.push_back(sec);
+
+    // RTT_RANDOM
+    sec.pattern = 63;
+    sec.desc = "RANDOM";
+    sec.filename = ":/textures/random.png";
+    sectors.push_back(sec);
 }
 
 
@@ -431,22 +553,23 @@ void Cconfigurator::resetSpells()
 
 /* ----------------- REGULAR EXPRESSIONS SECTION ---------------- */
 /* ------------------- DATA ------------------- */
-char Cconfigurator::getPatternByRoom(CRoom *r)
+char Cconfigurator::getTerrainPatternByRoom(CRoom *r)
 {
     return sectors.at(r->getTerrain()).pattern;
 }
 
-int Cconfigurator::getSectorByDesc(QByteArray desc)
+RoomTerrainType Cconfigurator::getSectorByDesc(QByteArray desc)
 {
     unsigned int i;
     for (i = 0; i < sectors.size(); ++i) {
         if (sectors[i].desc == desc)
-            return i;
+            return static_cast<RoomTerrainType>(i);
     }
-    return 0;
+    return RTT_UNDEFINED;
 }
 
-GLuint Cconfigurator::getTextureByDesc(QByteArray desc)
+
+GLuint Cconfigurator::getTerrainTextureByDesc(QByteArray desc)
 {
     int i;
     i = getSectorByDesc(desc);
@@ -472,9 +595,9 @@ RoomTerrainType Cconfigurator::getSectorByPattern(char pattern)
     unsigned int i;
     for (i = 0; i < sectors.size(); ++i) {
         if (sectors[i].pattern == pattern)
-            return i;
+            return static_cast<RoomTerrainType>(i);
     }
-    return 0;
+    return RTT_UNDEFINED;
 }
 
 

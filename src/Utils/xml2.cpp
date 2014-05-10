@@ -80,33 +80,9 @@ void CRoomManager::loadXmlMap( QString filename)
 //  lockForWrite();
   reader.parse( source );
 
-  
- 
   if (progress.wasCanceled()) {
 	  print_debug(DEBUG_XML, "Loading was canceled");
 	  reinit();
-  } else {
-	  progress.setLabelText("Preparing the loaded database");
-	  progress.setMaximum(size());
-	  progress.setValue(0);
-
-	  for (unsigned int i = 0; i < size(); i++) {
-		  	progress.setValue(i);
-	
-		  	if (progress.wasCanceled()) {
-		  		reinit();
-		  		break;
-		  	}
-	
-		  	CRoom *r = rooms[i];
-	        for (int exit = 0; exit <= 5; exit++)
-	            if (r->exits[ exit ] > 0) {
-	                r->exits[exit] = getRoom( (unsigned long) r->exits[exit] );
-	            }
-	  }
-	  progress.setValue(size());
-	  
-	  print_debug(DEBUG_XML, "done.");
   }
 
   Map.setBlocked( false );
@@ -131,8 +107,8 @@ bool StructureParser::endElement( const QString& , const QString& , const QStrin
   if (qName == "room") {
       parent->addRoom(r);	/* tada! */
       
-      if (r->id > currentMaximum) {
-    	  currentMaximum = r->id;
+      if (r->getId() > currentMaximum) {
+          currentMaximum = r->getId();
     	  progress->setMaximum(currentMaximum);
       }
 	  unsigned int size = parent->size();
@@ -195,7 +171,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
    }
         
   if (qName == "exit") {
-    unsigned int dir;
+    ExitDirection dir;
     unsigned int to;
         
     /* special */
@@ -209,14 +185,14 @@ bool StructureParser::startElement( const QString& , const QString& ,
       
     s = attributes.value("to");
     if (s == "DEATH") {
-	r->setExitDeath( dir );
+        r->setExitDeath( dir );
     } else if (s == "UNDEFINED") {
-	r->setExitUndefined( dir);
+        r->setExitUndefined( dir);
     } else {
     	i = 0;
     	bool NoError = false;
     	to = s.toInt(&NoError);
-    	r->exits[dir] = (CRoom *) to;        
+        r->setExit(dir, to);
     }
 
     s = attributes.value("door");
@@ -240,10 +216,10 @@ bool StructureParser::startElement( const QString& , const QString& ,
       flag = XML_NOTE;
     return true;
   } else if (qName == "room") {
-      r = new CRoom;
 
       s = attributes.value("id");
-      r->id = s.toInt();
+
+      r = parent->createRoom( s.toInt() );
       
       s = attributes.value("x");
       r->setX( s.toInt() );
@@ -255,7 +231,9 @@ bool StructureParser::startElement( const QString& , const QString& ,
       r->simpleSetZ( s.toInt() );
 
       s = attributes.value("terrain");
+
       r->setSector( conf->getSectorByDesc(s.toLocal8Bit()) );
+
       
       s = attributes.value("region");
       r->setRegion(s.toLocal8Bit());
@@ -282,7 +260,6 @@ void CRoomManager::saveXmlMap(QString filename)
 {
   FILE *f;
   CRoom *p;
-  int i;
   char tmp[4028];
   unsigned int z;
     
@@ -327,11 +304,7 @@ void CRoomManager::saveXmlMap(QString filename)
             fprintf(f, "    </region>\n");
         }
         fprintf(f, "  </regions>\n");
-  
-  
-  
-  
-  }
+   }
   
   
     for (z = 0; z < size(); z++) {
@@ -345,7 +318,7 @@ void CRoomManager::saveXmlMap(QString filename)
     
         fprintf(f,  "  <room id=\"%i\" x=\"%i\" y=\"%i\" z=\"%i\" "
                 "terrain=\"%s\" region=\"%s\">\n",
-                p->id, p->getX(), p->getY(), p->getZ(), 
+                p->getId(), p->getX(), p->getY(), p->getZ(),
                 (const char *) conf->sectors[ p->getTerrain() ].desc, 
                 (const char *) p->getRegionName());
             
@@ -360,11 +333,12 @@ void CRoomManager::saveXmlMap(QString filename)
     
     
             
-        for (i = 0; i <= 5; i++) {
+        for (int ind = 0; ind <= 5; ind++) {
+            ExitDirection i = static_cast<ExitDirection>(ind);
             if (p->isExitPresent(i) == true) {
     
                 if (p->isExitNormal(i) == true) {
-                    sprintf(tmp, "%d", p->exits[i]->id);
+                    sprintf(tmp, "%d", p->getExitLeadsTo(i));
                 } else {
                     if (p->isExitUndefined(i) == true)
                         sprintf(tmp, "%s", "UNDEFINED");

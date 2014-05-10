@@ -53,9 +53,9 @@ public:
 
   CRoom * getNext(unsigned int i);
 
-  void put(unsigned int id);
+  void put(RoomId id);
   void put(CRoom *r);
-  void removeRoom(unsigned int id);    /* swaps */
+  void removeRoom(RoomId id);    /* swaps */
 
   /* DEBUG */
   void printStacks();

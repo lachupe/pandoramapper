@@ -145,15 +145,18 @@ void RendererWidget::initializeGL()
       glEndList();
     }
 
+    print_debug(DEBUG_RENDERER, "loading %i secto textures", conf->sectors.size());
+
+
     for (i = 0; i < conf->sectors.size(); i++) {
         conf->loadSectorTexture(&conf->sectors[i]);
     }
 
     // load the exits texture
-    conf->loadNormalTexture("images/exit_normal.png", &conf->exit_normal_texture );
-    conf->loadNormalTexture("images/exit_door.png", &conf->exit_door_texture );
-    conf->loadNormalTexture("images/exit_secret.png", &conf->exit_secret_texture );
-    conf->loadNormalTexture("images/exit_undef.png", &conf->exit_undef_texture );
+    conf->loadNormalTexture("images/exit_normal.png", &exit_normal_texture );
+    conf->loadNormalTexture("images/exit_door.png", &exit_door_texture );
+    conf->loadNormalTexture("images/exit_secret.png", &exit_secret_texture );
+    conf->loadNormalTexture("images/exit_undef.png", &exit_undef_texture );
 }
 
 
@@ -334,9 +337,9 @@ void RendererWidget::glDrawMarkers()
         
     }
     
-    if (last_drawn_marker != stacker.first()->id) {
+    if (last_drawn_marker != stacker.first()->getId()) {
         last_drawn_trail = last_drawn_marker;
-        last_drawn_marker = stacker.first()->id;
+        last_drawn_marker = stacker.first()->getId();
         renderer_window->getGroupManager()->setCharPosition(last_drawn_marker);
         //emit updateCharPosition(last_drawn_marker);
     }
@@ -498,7 +501,7 @@ void RendererWidget::generateDisplayList(CSquare *square)
 {
     GLfloat dx, dx2, dy, dy2, dz, dz2;
     CRoom *r;
-    int k;
+    ExitDirection k;
 
     square->clearDoorsList();
     square->clearNotesList();
@@ -550,49 +553,50 @@ void RendererWidget::generateDisplayList(CSquare *square)
         	square->notesBillboards.append( new Billboard(p->getX(), p->getY(), p->getZ() + ROOM_SIZE / 2, p->getNote(), color) );
         }
 
-        for (k = 0; k <= 5; k++)
+        for (int kind = 0; kind <= 5; kind++) {
+            ExitDirection k = static_cast<ExitDirection>(kind);
           if (p->isExitPresent(k) == true) {
               GLfloat kx, ky, kz;
               GLfloat sx, sy, sz;
-              GLuint exit_texture = conf->exit_normal_texture;
+              GLuint exit_texture = exit_normal_texture;
               int thickness = CONNECTION_THICKNESS_DIVIDOR;
 
-              if (k == NORTH) {
+              if (k == ED_NORTH) {
                   kx = 0;
                   ky = +(ROOM_SIZE + 0.2);
                   kz = 0;
                   sx = 0;
                   sy = +ROOM_SIZE;
                   sz = 0;
-              } else if (k == EAST) {
+              } else if (k == ED_EAST) {
                   kx = +(ROOM_SIZE + 0.2);
                   ky = 0;
                   kz = 0;
                   sx = +ROOM_SIZE;
                   sy = 0;
                   sz = 0;
-              } else if (k == SOUTH) {
+              } else if (k == ED_SOUTH) {
                   kx = 0;
                   ky = -(ROOM_SIZE + 0.2);
                   kz = 0;
                   sx = 0;
                   sy = -ROOM_SIZE;
                   sz = 0;
-              } else if (k == WEST) {
+              } else if (k == ED_WEST) {
                   kx = -(ROOM_SIZE + 0.2);
                   ky = 0;
                   kz = 0;
                   sx = -ROOM_SIZE;
                   sy = 0;
                   sz = 0;
-              } else if (k == UP) {
+              } else if (k == ED_UP) {
                   kx = 0;
                   ky = 0;
                   kz = +(ROOM_SIZE + 0.2);
                   sx = ROOM_SIZE / 2;
                   sy = 0;
                   sz = 0;
-              } else {
+              } else if (k == ED_DOWN) {
                   kx = 0;
                   ky = 0;
                   kz = -(ROOM_SIZE + 0.2);
@@ -603,7 +607,7 @@ void RendererWidget::generateDisplayList(CSquare *square)
 
               if (p->isExitNormal(k)) {
 
-                r = p->exits[k];
+                r = p->getExitRoom(k);
 
                 dx2 = r->getX() - square->centerx;
                 dy2 = r->getY() - square->centery;
@@ -616,9 +620,9 @@ void RendererWidget::generateDisplayList(CSquare *square)
 
                 if (p->getDoor(k) != "") {
                     if (p->isDoorSecret(k) == false) {
-                    	exit_texture = conf->exit_door_texture;
+                        exit_texture = exit_door_texture;
                     } else {
-                    	exit_texture = conf->exit_secret_texture;
+                        exit_texture = exit_secret_texture;
 
 						// Draw the secret door ...
 						QByteArray info;
@@ -687,27 +691,27 @@ void RendererWidget::generateDisplayList(CSquare *square)
             } else {
                 GLfloat kx, ky, kz;
 
-                if (k == NORTH) {
+                if (k == ED_NORTH) {
                     dx2 = dx;
                     dy2 = dy + 0.5;
                     dz2 = dz;
-                } else if (k == EAST) {
+                } else if (k == ED_EAST) {
                     dx2 = dx + 0.5;
                     dy2 = dy;
                     dz2 = dz;
-                } else if (k == SOUTH) {
+                } else if (k == ED_SOUTH) {
                     dx2 = dx;
                     dy2 = dy - 0.5;
                     dz2 = dz;
-                } else if (k == WEST) {
+                } else if (k == ED_WEST) {
                     dx2 = dx - 0.5;
                     dy2 = dy;
                     dz2 = dz;
-                } else if (k == UP) {
+                } else if (k == ED_UP) {
                     dx2 = dx;
                     dy2 = dy;
                     dz2 = dz + 0.5;
-                } else if (k == DOWN) {
+                } else if (k == ED_DOWN) {
                     dx2 = dx;
                     dy2 = dy;
                     dz2 = dz - 0.5;
@@ -718,21 +722,21 @@ void RendererWidget::generateDisplayList(CSquare *square)
                 kz = 0;
 
 
-                if (k == NORTH) {
+                if (k == ED_NORTH) {
                     ky = +(ROOM_SIZE);
-                } else if (k == EAST) {
+                } else if (k == ED_EAST) {
                     kx = +(ROOM_SIZE);
-                } else if (k == SOUTH) {
+                } else if (k == ED_SOUTH) {
                     ky = -(ROOM_SIZE);
-                } else if (k == WEST) {
+                } else if (k == ED_WEST) {
                     kx = -(ROOM_SIZE);
-                } else if (k == UP) {
+                } else if (k == ED_UP) {
                     kz = 0;
-                } else if (k == DOWN) {
+                } else if (k == ED_DOWN) {
                     kz = 0;
                 }
 
-            	exit_texture = conf->exit_undef_texture;
+                exit_texture = exit_undef_texture;
 
                 glEnable(GL_TEXTURE_2D);
                 glBindTexture(GL_TEXTURE_2D, exit_texture  );
@@ -751,7 +755,7 @@ void RendererWidget::generateDisplayList(CSquare *square)
                 glDisable(GL_TEXTURE_2D);
 
 
-                GLuint death_terrain = conf->getTextureByDesc("DEATH");
+                GLuint death_terrain = conf->getTerrainTextureByDesc("DEATH");
                 if (death_terrain && p->isExitDeath(k)) {
     				glTranslatef(dx2 + kx, dy2 + ky, dz2);
 
@@ -777,8 +781,8 @@ void RendererWidget::generateDisplayList(CSquare *square)
 
             }
         }
+        }
     }
-
     glEndList();
 
     square->rebuild_display_list = false;
@@ -861,7 +865,7 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
 				glColor4f(0.20, 0.20, 0.80, colour[3]-0.1);
 
 				for (k = 0; k < p->rooms.size(); k++) {
-					if (Map.selections.isSelected( p->rooms[k]->id ) == true ) {
+                    if (Map.selections.isSelected( p->rooms[k]->getId() ) == true ) {
 	                    int dx = p->rooms[k]->getX() - curx;
 	                    int dy = p->rooms[k]->getY() - cury;
 	                    int dz = p->rooms[k]->getZ() - curz;
@@ -977,6 +981,9 @@ void RendererWidget::draw(void)
 		QTimer::singleShot( 500, this, SLOT( display() ) );
 		return;
     }
+
+
+    makeCurrent();
 
     redraw = false;
 
@@ -1129,7 +1136,7 @@ void RendererWidget::renderPickupRoom(CRoom *p)
     //printf("Rendering the pickup room %i\r\n", p->id);
 
     glTranslatef(dx, dy, dz);
-    glLoadName( p->id + 1 );
+    glLoadName( p->getId() + 1 );
     glCallList(basic_gllist);
     glTranslatef(-dx, -dy, -dz);
 }

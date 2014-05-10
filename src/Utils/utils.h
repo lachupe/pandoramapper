@@ -99,7 +99,7 @@ void send_prompt();
 void send_to_user(const char *messg, ...);
 void send_to_mud(const char *messg, ...);
 int get_input_boolean(char *input);
-int parse_dir(char *dir);
+ExitDirection parse_dir(char *dir);
 void basic_mud_log(const char *format, ...);
 int MIN(int a, int b);
 

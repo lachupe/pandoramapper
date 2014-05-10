@@ -66,8 +66,8 @@ public:
     QVector<CRoom* > getRooms() { return rooms; }
     CPlane* getPlanes() { return planes; }
 
-    unsigned int next_free; 	/* next free id */
-    unsigned int oneway_room_id;
+    RoomId next_free; 	/* next free id */
+    RoomId oneway_room_id;
 
     unsigned int size()  { return rooms.size(); }
 
@@ -79,10 +79,11 @@ public:
     void          removeFromPlane(CRoom* room);
     void          expandPlane(CPlane *plane, CRoom* room);
 
-    CTree*        getNameMap() { return roomNamesTree; }
+    CTree*        getRoomNamesTree() { return roomNamesTree; }
 
 
-    CRoom* createRoom(QByteArray &name, QByteArray &desc, int x, int y, int z);
+    CRoom* createRoom(QByteArray name, QByteArray desc, int x, int y, int z);
+    CRoom* createRoom(RoomId id, int x = 0, int y = 0, int z = 0);
 
     void addRoom(CRoom* room);
     inline CRoom* getRoom(RoomId id)        {
@@ -96,7 +97,7 @@ public:
     	if (ids[id]) return (*(ids[id])).getName(); return "";
     }
 
-    int tryMergeRooms(CRoom* room, CRoom* copy, int j);
+    int tryMergeRooms(CRoom* room, CRoom* copy, ExitDirection j);
     bool isDuplicate(CRoom* addedroom);
 
     void fixFreeRooms();

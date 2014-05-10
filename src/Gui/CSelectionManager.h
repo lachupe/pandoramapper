@@ -24,32 +24,33 @@
 #include <QObject>
 #include <QSet>
 #include <QPoint>
+#include "defines.h"
 
 class CSelectionManager : public QObject {
 Q_OBJECT
-    QSet<int> selection;
+    QSet<RoomId> selection;
     
 public:
     CSelectionManager();
     ~CSelectionManager();
     void resetSelection();
 
-    inline bool isSelected(unsigned int id) { return selection.contains(id); }
+    inline bool isSelected(RoomId id) { return selection.contains(id); }
 
-    void select(unsigned int id);
-    void unselect(unsigned int id);
+    void select(RoomId id);
+    void unselect(RoomId id);
 
-    unsigned int getFirst() { return selection.values().at(0); }
-    unsigned int get(int index) { return selection.values().at(index); }
+    RoomId getFirst() { return selection.values().at(0); }
+    RoomId get(int index) { return selection.values().at(index); }
 
     int size() {return selection.size(); }
-    void exclusiveSelection(unsigned int id); 
+    void exclusiveSelection(RoomId id);
 
-    QList<int>  getList() { return selection.toList(); }
+    QList<RoomId>  getList() { return selection.toList(); }
     bool isEmpty() { return selection.empty(); }
 
 signals:
-  void roomSelected(unsigned int id);
+  void roomSelected(RoomId id);
 };
 
 class CMouseState : public QObject {

@@ -369,7 +369,6 @@ void CActionManager::groupSettings()
 void CActionManager::bindRooms()
 {
     CRoom *one, *two;
-    int dir;
 
     if (Map.selections.size() != 2) {
         QMessageBox::critical(parent, "Failure", QString("You have to select two rooms to bind them."));
@@ -381,18 +380,20 @@ void CActionManager::bindRooms()
     two = Map.getRoom( Map.selections.get(1) );
 
     // roll over all dirs
-    for (dir = 0; dir <= 5; dir++)
+    for (int d = 0; d <= 5; d++) {
+        ExitDirection dir = static_cast<ExitDirection>(d);
+
         // and check if there are connections like undefined exits north-south etc
         if (one->isExitUndefined( dir) == true && two->isExitUndefined( reversenum( dir ) ) ) {
             // now test is the connection is geometrically right
             bool fits = false;
 
-            if ( (dir == NORTH && one->getY() < two->getY()) ||
-                 (dir == EAST && one->getX() < two->getX())  ||
-                 (dir == WEST && one->getX() > two->getX())  ||
-                 (dir == SOUTH && one->getY() > two->getY()) ||
-                 (dir == UP && one->getZ() < two->getZ())    ||
-                 (dir == DOWN && one->getZ() > two->getZ()) )
+            if ( (dir == ED_NORTH && one->getY() < two->getY()) ||
+                 (dir == ED_EAST && one->getX() < two->getX())  ||
+                 (dir == ED_WEST && one->getX() > two->getX())  ||
+                 (dir == ED_SOUTH && one->getY() > two->getY()) ||
+                 (dir == ED_UP && one->getZ() < two->getZ())    ||
+                 (dir == ED_DOWN && one->getZ() > two->getZ()) )
             {
                 fits = true;
             }
@@ -405,7 +406,7 @@ void CActionManager::bindRooms()
             }
 
         }
-
+    }
 
     QMessageBox::critical(parent, "Failure", QString("No fitting exits found. Rooms are badly positioned or exits are not marked as Undefined."));
 
@@ -414,7 +415,7 @@ void CActionManager::bindRooms()
 
 void CActionManager::edit_current_room()
 {
-    unsigned int id;
+    RoomId id;
 
     if (Map.selections.isEmpty() == false) {
         id = Map.selections.getFirst();
@@ -423,7 +424,7 @@ void CActionManager::edit_current_room()
             QMessageBox::critical(parent, "Room Info Edit", QString("You are not in sync!"));
             return;
         }
-        id = stacker.first()->id;
+        id = stacker.first()->getId();
     }
 
     parent->editRoomDialog( id );
@@ -641,7 +642,7 @@ void CActionManager::refreshRoom()
         r = Map.getRoom( Map.selections.getFirst() );
     }
 
-    command = QString("mgoto %1").arg(r->id);
+    command = QString("mgoto %1").arg(r->getId());
     userland_parser->parse_user_input_line( (const char *) command.toLocal8Bit() );
     userland_parser->parse_user_input_line("mrefresh");
 }
@@ -828,7 +829,7 @@ void CActionManager::importMap()
                         parent,
                         "Choose a database",
                         "database/",
-                        "Pandora map files (*.pmf);;Old XML format (*.xml);;MMapper2 map files (*.mm2)");
+                        "Old XML format (*.xml);;MMapper2 map files (*.mm2)");
     char data[MAX_STR_LEN];
 
     print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));

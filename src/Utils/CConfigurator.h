@@ -197,19 +197,15 @@ public:
 
     /* texture and sectors stuff */
     vector<struct roomSectorsData> sectors;
-    int getSectorByDesc(QByteArray desc);
-    int getSectorByPattern(char pattern);
+    RoomTerrainType getSectorByDesc(QByteArray desc);
+    RoomTerrainType getSectorByPattern(char pattern);
 
     int loadSectorTexture(struct roomSectorsData *p);
     int loadNormalTexture(QByteArray filename, GLuint *texture);
-    char getPatternByRoom(CRoom *r);
-    GLuint getTextureByDesc(QByteArray desc);
+    char getTerrainPatternByRoom(CRoom *r);
+    GLuint getTerrainTextureByDesc(QByteArray desc);
     void addTexture(QByteArray desc, QByteArray filename, char pattern);
 
-    GLuint	exit_normal_texture;
-    GLuint	exit_door_texture;
-    GLuint	exit_secret_texture;
-    GLuint	exit_undef_texture;
 
     /* */
 

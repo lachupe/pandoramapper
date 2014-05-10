@@ -48,7 +48,7 @@ void CMovementDialog::run()
 
 void CMovementDialog::accept()
 {
-    QList<int> ids;
+    QList<RoomId> ids;
     CRoom *r;
 
 
@@ -71,7 +71,7 @@ void CMovementDialog::accept()
                 done(Accepted);
                 return;
             } 
-            ids.append(stacker.first()->id);
+            ids.append(stacker.first()->getId());
         }
 
         for (int i = 0; i < ids.size(); ++i) {

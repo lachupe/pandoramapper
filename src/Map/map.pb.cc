@@ -363,78 +363,78 @@ void protobuf_AddDesc_map_2eproto() {
     "ms_amount\030\001 \001(\005:\0010\022\027\n\014areas_amount\030\002 \001(\005"
     ":\0010\"o\n\004Area\022\014\n\004name\030\001 \002(\t\022\"\n\005alias\030\002 \003(\013"
     "2\023.mapdata.Area.Alias\022\020\n\005scale\030\003 \001(\002:\0011\032"
-    "#\n\005Alias\022\014\n\004name\030\001 \002(\t\022\014\n\004door\030\002 \002(\t\"\202\006\n"
+    "#\n\005Alias\022\014\n\004name\030\001 \002(\t\022\014\n\004door\030\002 \002(\t\"\205\006\n"
     "\004Exit\0224\n\003dir\030\001 \002(\0162\033.mapdata.Exit.ExitDi"
-    "rection:\nED_UNKNOWN\022\023\n\013leads_to_id\030\002 \001(\005"
-    "\022-\n\004type\030\003 \001(\0162\026.mapdata.Exit.ExitType:\007"
-    "ET_NONE\022\014\n\004door\030\004 \001(\t\022+\n\nexit_flags\030\005 \001("
-    "\0132\027.mapdata.Exit.ExitFlags\022+\n\ndoor_flags"
-    "\030\006 \001(\0132\027.mapdata.Exit.DoorFlags\032\250\001\n\tExit"
-    "Flags\022\023\n\004exit\030\001 \001(\010:\005false\022\023\n\004door\030\002 \001(\010"
-    ":\005false\022\023\n\004road\030\003 \001(\010:\005false\022\024\n\005climb\030\004 "
-    "\001(\010:\005false\022\025\n\006random\030\005 \001(\010:\005false\022\026\n\007spe"
-    "cial\030\006 \001(\010:\005false\022\027\n\010no_match\030\007 \001(\010:\005fal"
-    "se\032\231\001\n\tDoorFlags\022\025\n\006hidden\030\001 \001(\010:\005false\022"
-    "\026\n\007needkey\030\002 \001(\010:\005false\022\026\n\007noblock\030\003 \001(\010"
-    ":\005false\022\026\n\007nobreak\030\004 \001(\010:\005false\022\025\n\006nopic"
-    "k\030\005 \001(\010:\005false\022\026\n\007delayed\030\006 \001(\010:\005false\"b"
-    "\n\010ExitType\022\r\n\tET_NORMAL\020\000\022\013\n\007ET_LOOP\020\001\022\r"
-    "\n\tET_ONEWAY\020\002\022\020\n\014ET_UNDEFINED\020\003\022\014\n\010ET_DE"
-    "ATH\020\004\022\013\n\007ET_NONE\020\005\"m\n\rExitDirection\022\014\n\010E"
-    "D_NORTH\020\000\022\014\n\010ED_SOUTH\020\001\022\013\n\007ED_EAST\020\002\022\013\n\007"
-    "ED_WEST\020\003\022\t\n\005ED_UP\020\004\022\013\n\007ED_DOWN\020\005\022\016\n\nED_"
-    "UNKNOWN\020\006\"\206\020\n\004Room\022\n\n\002id\030\001 \002(\005\022\014\n\004name\030\002"
-    " \002(\t\022\014\n\004desc\030\003 \002(\t\022%\n\003pos\030\004 \002(\0132\030.mapdat"
-    "a.Room.Coordinate\022\032\n\tarea_name\030\006 \001(\t:\007de"
-    "fault\022\023\n\013dynamicDesc\030\007 \001(\t\022=\n\007terrain\030\010 "
-    "\001(\0162\035.mapdata.Room.RoomTerrainType:\rRTT_"
-    "UNDEFINED\022\034\n\005exits\030\t \003(\0132\r.mapdata.Exit\022"
-    "\014\n\004note\030\017 \001(\t\022\022\n\nnote_color\030\020 \001(\t\022\014\n\004inf"
-    "o\030\021 \001(\t\022D\n\rflag_portable\030\022 \001(\0162\036.mapdata"
-    ".Room.RoomPortableType:\rRPT_UNDEFINED\022>\n"
-    "\nflag_light\030\023 \001(\0162\033.mapdata.Room.RoomLig"
-    "htType:\rRLT_UNDEFINED\022C\n\rflag_rideable\030\024"
-    " \001(\0162\035.mapdata.Room.RoomRidableType:\rRRT"
-    "_UNDEFINED\022>\n\nflag_align\030\025 \001(\0162\033.mapdata"
-    ".Room.RoomAlignType:\rRAT_UNDEFINED\022)\n\tmo"
-    "b_flags\030\026 \001(\0132\026.mapdata.Room.MobFlags\022+\n"
-    "\nload_flags\030\027 \001(\0132\027.mapdata.Room.LoadFla"
-    "gs\032\372\002\n\010MobFlags\022\023\n\004rent\030\001 \001(\010:\005false\022\023\n\004"
-    "shop\030\002 \001(\010:\005false\022\031\n\nweaponshop\030\003 \001(\010:\005f"
-    "alse\022\031\n\narmourshop\030\004 \001(\010:\005false\022\027\n\010foods"
-    "hop\030\005 \001(\010:\005false\022\026\n\007petshop\030\006 \001(\010:\005false"
-    "\022\024\n\005guild\030\007 \001(\010:\005false\022\031\n\nscoutguild\030\010 \001"
-    "(\010:\005false\022\030\n\tmageguild\030\t \001(\010:\005false\022\032\n\013c"
-    "lericguild\030\n \001(\010:\005false\022\033\n\014warriorguild\030"
-    "\013 \001(\010:\005false\022\032\n\013rangerguild\030\014 \001(\010:\005false"
-    "\022\023\n\004smob\030\r \001(\010:\005false\022\024\n\005quest\030\016 \001(\010:\005fa"
-    "lse\022\022\n\003any\030\017 \001(\010:\005false\032\373\002\n\tLoadFlags\022\027\n"
-    "\010treasure\030\001 \001(\010:\005false\022\025\n\006armour\030\002 \001(\010:\005"
-    "false\022\025\n\006weapon\030\003 \001(\010:\005false\022\024\n\005water\030\004 "
-    "\001(\010:\005false\022\023\n\004food\030\005 \001(\010:\005false\022\023\n\004herb\030"
-    "\006 \001(\010:\005false\022\022\n\003key\030\007 \001(\010:\005false\022\023\n\004mule"
-    "\030\010 \001(\010:\005false\022\024\n\005horse\030\t \001(\010:\005false\022\030\n\tp"
-    "ackhorse\030\n \001(\010:\005false\022\033\n\014trainedhorse\030\013 "
-    "\001(\010:\005false\022\027\n\010rohirrim\030\014 \001(\010:\005false\022\023\n\004w"
-    "arg\030\r \001(\010:\005false\022\023\n\004boat\030\016 \001(\010:\005false\022\030\n"
-    "\tattention\030\017 \001(\010:\005false\022\024\n\005tower\030\020 \001(\010:\005"
-    "false\032\?\n\nCoordinate\022\t\n\001x\030\001 \002(\002\022\t\n\001y\030\002 \002("
-    "\002\022\t\n\001z\030\003 \002(\002\022\020\n\005scale\030\004 \001(\002:\0011\"\250\002\n\017RoomT"
-    "errainType\022\021\n\rRTT_UNDEFINED\020\000\022\017\n\013RTT_IND"
-    "OORS\020\001\022\014\n\010RTT_CITY\020\002\022\r\n\tRTT_FIELD\020\003\022\016\n\nR"
-    "TT_FOREST\020\004\022\r\n\tRTT_HILLS\020\005\022\021\n\rRTT_MOUNTA"
-    "INS\020\006\022\017\n\013RTT_SHALLOW\020\007\022\r\n\tRTT_WATER\020\010\022\016\n"
-    "\nRTT_RAPIDS\020\t\022\022\n\016RTT_UNDERWATER\020\n\022\014\n\010RTT"
-    "_ROAD\020\013\022\r\n\tRTT_BRUSH\020\014\022\016\n\nRTT_TUNNEL\020\r\022\016"
-    "\n\nRTT_CAVERN\020\016\022\021\n\rRTT_DEATHTRAP\020\017\022\016\n\nRTT"
-    "_RANDOM\020\020\"L\n\020RoomPortableType\022\021\n\rRPT_UND"
-    "EFINED\020\000\022\020\n\014RPT_PORTABLE\020\001\022\023\n\017RPT_NOTPOR"
-    "TABLE\020\002\"=\n\rRoomLightType\022\021\n\rRLT_UNDEFINE"
-    "D\020\000\022\014\n\010RLT_DARK\020\001\022\013\n\007RLT_LIT\020\002\"O\n\rRoomAl"
-    "ignType\022\021\n\rRAT_UNDEFINED\020\000\022\014\n\010RAT_GOOD\020\001"
-    "\022\017\n\013RAT_NEUTRAL\020\002\022\014\n\010RAT_EVIL\020\003\"I\n\017RoomR"
-    "idableType\022\021\n\rRRT_UNDEFINED\020\000\022\017\n\013RRT_RID"
-    "ABLE\020\001\022\022\n\016RRT_NOTRIDABLE\020\002", 3026);
+    "rection:\nED_UNKNOWN\022\026\n\013leads_to_id\030\002 \001(\005"
+    ":\0010\022-\n\004type\030\003 \001(\0162\026.mapdata.Exit.ExitTyp"
+    "e:\007ET_NONE\022\014\n\004door\030\004 \001(\t\022+\n\nexit_flags\030\005"
+    " \001(\0132\027.mapdata.Exit.ExitFlags\022+\n\ndoor_fl"
+    "ags\030\006 \001(\0132\027.mapdata.Exit.DoorFlags\032\250\001\n\tE"
+    "xitFlags\022\023\n\004exit\030\001 \001(\010:\005false\022\023\n\004door\030\002 "
+    "\001(\010:\005false\022\023\n\004road\030\003 \001(\010:\005false\022\024\n\005climb"
+    "\030\004 \001(\010:\005false\022\025\n\006random\030\005 \001(\010:\005false\022\026\n\007"
+    "special\030\006 \001(\010:\005false\022\027\n\010no_match\030\007 \001(\010:\005"
+    "false\032\231\001\n\tDoorFlags\022\025\n\006hidden\030\001 \001(\010:\005fal"
+    "se\022\026\n\007needkey\030\002 \001(\010:\005false\022\026\n\007noblock\030\003 "
+    "\001(\010:\005false\022\026\n\007nobreak\030\004 \001(\010:\005false\022\025\n\006no"
+    "pick\030\005 \001(\010:\005false\022\026\n\007delayed\030\006 \001(\010:\005fals"
+    "e\"b\n\010ExitType\022\r\n\tET_NORMAL\020\000\022\013\n\007ET_LOOP\020"
+    "\001\022\r\n\tET_ONEWAY\020\002\022\020\n\014ET_UNDEFINED\020\003\022\014\n\010ET"
+    "_DEATH\020\004\022\013\n\007ET_NONE\020\005\"m\n\rExitDirection\022\014"
+    "\n\010ED_NORTH\020\000\022\014\n\010ED_SOUTH\020\001\022\013\n\007ED_EAST\020\002\022"
+    "\013\n\007ED_WEST\020\003\022\t\n\005ED_UP\020\004\022\013\n\007ED_DOWN\020\005\022\016\n\n"
+    "ED_UNKNOWN\020\006\"\206\020\n\004Room\022\n\n\002id\030\001 \002(\005\022\014\n\004nam"
+    "e\030\002 \002(\t\022\014\n\004desc\030\003 \002(\t\022%\n\003pos\030\004 \002(\0132\030.map"
+    "data.Room.Coordinate\022\032\n\tarea_name\030\006 \001(\t:"
+    "\007default\022\023\n\013dynamicDesc\030\007 \001(\t\022=\n\007terrain"
+    "\030\010 \001(\0162\035.mapdata.Room.RoomTerrainType:\rR"
+    "TT_UNDEFINED\022\034\n\005exits\030\t \003(\0132\r.mapdata.Ex"
+    "it\022\014\n\004note\030\017 \001(\t\022\022\n\nnote_color\030\020 \001(\t\022\014\n\004"
+    "info\030\021 \001(\t\022D\n\rflag_portable\030\022 \001(\0162\036.mapd"
+    "ata.Room.RoomPortableType:\rRPT_UNDEFINED"
+    "\022>\n\nflag_light\030\023 \001(\0162\033.mapdata.Room.Room"
+    "LightType:\rRLT_UNDEFINED\022C\n\rflag_rideabl"
+    "e\030\024 \001(\0162\035.mapdata.Room.RoomRidableType:\r"
+    "RRT_UNDEFINED\022>\n\nflag_align\030\025 \001(\0162\033.mapd"
+    "ata.Room.RoomAlignType:\rRAT_UNDEFINED\022)\n"
+    "\tmob_flags\030\026 \001(\0132\026.mapdata.Room.MobFlags"
+    "\022+\n\nload_flags\030\027 \001(\0132\027.mapdata.Room.Load"
+    "Flags\032\372\002\n\010MobFlags\022\023\n\004rent\030\001 \001(\010:\005false\022"
+    "\023\n\004shop\030\002 \001(\010:\005false\022\031\n\nweaponshop\030\003 \001(\010"
+    ":\005false\022\031\n\narmourshop\030\004 \001(\010:\005false\022\027\n\010fo"
+    "odshop\030\005 \001(\010:\005false\022\026\n\007petshop\030\006 \001(\010:\005fa"
+    "lse\022\024\n\005guild\030\007 \001(\010:\005false\022\031\n\nscoutguild\030"
+    "\010 \001(\010:\005false\022\030\n\tmageguild\030\t \001(\010:\005false\022\032"
+    "\n\013clericguild\030\n \001(\010:\005false\022\033\n\014warriorgui"
+    "ld\030\013 \001(\010:\005false\022\032\n\013rangerguild\030\014 \001(\010:\005fa"
+    "lse\022\023\n\004smob\030\r \001(\010:\005false\022\024\n\005quest\030\016 \001(\010:"
+    "\005false\022\022\n\003any\030\017 \001(\010:\005false\032\373\002\n\tLoadFlags"
+    "\022\027\n\010treasure\030\001 \001(\010:\005false\022\025\n\006armour\030\002 \001("
+    "\010:\005false\022\025\n\006weapon\030\003 \001(\010:\005false\022\024\n\005water"
+    "\030\004 \001(\010:\005false\022\023\n\004food\030\005 \001(\010:\005false\022\023\n\004he"
+    "rb\030\006 \001(\010:\005false\022\022\n\003key\030\007 \001(\010:\005false\022\023\n\004m"
+    "ule\030\010 \001(\010:\005false\022\024\n\005horse\030\t \001(\010:\005false\022\030"
+    "\n\tpackhorse\030\n \001(\010:\005false\022\033\n\014trainedhorse"
+    "\030\013 \001(\010:\005false\022\027\n\010rohirrim\030\014 \001(\010:\005false\022\023"
+    "\n\004warg\030\r \001(\010:\005false\022\023\n\004boat\030\016 \001(\010:\005false"
+    "\022\030\n\tattention\030\017 \001(\010:\005false\022\024\n\005tower\030\020 \001("
+    "\010:\005false\032\?\n\nCoordinate\022\t\n\001x\030\001 \002(\002\022\t\n\001y\030\002"
+    " \002(\002\022\t\n\001z\030\003 \002(\002\022\020\n\005scale\030\004 \001(\002:\0011\"\250\002\n\017Ro"
+    "omTerrainType\022\021\n\rRTT_UNDEFINED\020\000\022\017\n\013RTT_"
+    "INDOORS\020\001\022\014\n\010RTT_CITY\020\002\022\r\n\tRTT_FIELD\020\003\022\016"
+    "\n\nRTT_FOREST\020\004\022\r\n\tRTT_HILLS\020\005\022\021\n\rRTT_MOU"
+    "NTAINS\020\006\022\017\n\013RTT_SHALLOW\020\007\022\r\n\tRTT_WATER\020\010"
+    "\022\016\n\nRTT_RAPIDS\020\t\022\022\n\016RTT_UNDERWATER\020\n\022\014\n\010"
+    "RTT_ROAD\020\013\022\r\n\tRTT_BRUSH\020\014\022\016\n\nRTT_TUNNEL\020"
+    "\r\022\016\n\nRTT_CAVERN\020\016\022\021\n\rRTT_DEATHTRAP\020\017\022\016\n\n"
+    "RTT_RANDOM\020\020\"L\n\020RoomPortableType\022\021\n\rRPT_"
+    "UNDEFINED\020\000\022\020\n\014RPT_PORTABLE\020\001\022\023\n\017RPT_NOT"
+    "PORTABLE\020\002\"=\n\rRoomLightType\022\021\n\rRLT_UNDEF"
+    "INED\020\000\022\014\n\010RLT_DARK\020\001\022\013\n\007RLT_LIT\020\002\"O\n\rRoo"
+    "mAlignType\022\021\n\rRAT_UNDEFINED\020\000\022\014\n\010RAT_GOO"
+    "D\020\001\022\017\n\013RAT_NEUTRAL\020\002\022\014\n\010RAT_EVIL\020\003\"I\n\017Ro"
+    "omRidableType\022\021\n\rRRT_UNDEFINED\020\000\022\017\n\013RRT_"
+    "RIDABLE\020\001\022\022\n\016RRT_NOTRIDABLE\020\002", 3029);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "map.proto", &protobuf_RegisterTypes);
   MapHeader::default_instance_ = new MapHeader();
@@ -2317,7 +2317,7 @@ bool Exit::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 leads_to_id = 2;
+      // optional int32 leads_to_id = 2 [default = 0];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -2423,7 +2423,7 @@ void Exit::SerializeWithCachedSizes(
       1, this->dir(), output);
   }
 
-  // optional int32 leads_to_id = 2;
+  // optional int32 leads_to_id = 2 [default = 0];
   if (has_leads_to_id()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->leads_to_id(), output);
   }
@@ -2469,7 +2469,7 @@ void Exit::SerializeWithCachedSizes(
       1, this->dir(), target);
   }
 
-  // optional int32 leads_to_id = 2;
+  // optional int32 leads_to_id = 2 [default = 0];
   if (has_leads_to_id()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->leads_to_id(), target);
   }
@@ -2521,7 +2521,7 @@ int Exit::ByteSize() const {
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->dir());
     }
 
-    // optional int32 leads_to_id = 2;
+    // optional int32 leads_to_id = 2 [default = 0];
     if (has_leads_to_id()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(

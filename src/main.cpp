@@ -231,11 +231,6 @@ int main(int argc, char *argv[])
     engine = new CEngine();
     proxy = new Proxy();
 
-    //splash->showMessage("Loading the database, please wait...");
-    //print_debug(DEBUG_SYSTEM, "Loading the database ... ");
-    //xml_readbase( conf->get_base_file() );
-    //print_debug(DEBUG_SYSTEM, "Successfuly loaded %i rooms!", Map.size());
-
     /* special init for the mud emulation */
     if (mud_emulation) {
       print_debug(DEBUG_SYSTEM, "Starting in MUD emulation mode...");
