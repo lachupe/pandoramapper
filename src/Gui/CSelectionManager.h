@@ -25,6 +25,7 @@
 #include <QSet>
 #include <QPoint>
 #include "defines.h"
+#include "Map/CRoom.h"
 
 class CSelectionManager : public QObject {
 Q_OBJECT

@@ -95,6 +95,7 @@ void Cconfigurator::resetCurrentConfig()
     sec.desc = "NONE";
     sec.texture = 1;
     sec.gllist = 1;
+    sec.filename = ":/textures/terrain0.png";
     sectors.push_back(sec);
 
     sec.texture = 0;
@@ -104,97 +105,97 @@ void Cconfigurator::resetCurrentConfig()
     // RTT_INDOORS
     sec.pattern = 91;
     sec.desc = "INDOORS";
-    sec.filename = ":/textures/indoors.png";
+    sec.filename = ":/textures/terrain1.png";
     sectors.push_back(sec);
 
     // RTT_CITY
     sec.pattern = 35;
     sec.desc = "CITY";
-    sec.filename = ":/textures/city.png";
+    sec.filename = ":/textures/terrain2.png";
     sectors.push_back(sec);
 
     // RTT_FIELD
     sec.pattern = 46;
     sec.desc = "FIELD";
-    sec.filename = ":/textures/field.png";
+    sec.filename = ":/textures/terrain3.png";
     sectors.push_back(sec);
 
     // RTT_FOREST
     sec.pattern = 102;
     sec.desc = "FOREST";
-    sec.filename = ":/textures/forest.png";
+    sec.filename = ":/textures/terrain4.png";
     sectors.push_back(sec);
 
     // RTT_HILLS
     sec.pattern = 40;
     sec.desc = "HILLS";
-    sec.filename = ":/textures/hills.png";
+    sec.filename = ":/textures/terrain5.png";
     sectors.push_back(sec);
 
     // RTT_MOUNTAINS
     sec.pattern = 60;
     sec.desc = "MOUNTAINS";
-    sec.filename = ":/textures/mountain.png";
+    sec.filename = ":/textures/terrain6.png";
     sectors.push_back(sec);
 
     // RTT_SHALLOW
     sec.pattern = 37;
     sec.desc = "SHALLOWWATER";
-    sec.filename = ":/textures/shwater.png";
+    sec.filename = ":/textures/terrain7.png";
     sectors.push_back(sec);
 
     // RTT_WATER
     sec.pattern = 126;
     sec.desc = "WATER";
-    sec.filename = ":/textures/river.png";
+    sec.filename = ":/textures/terrain8.png";
     sectors.push_back(sec);
 
     // RTT_RAPIDS
     sec.pattern = 87;
     sec.desc = "RAPIDS";
-    sec.filename = ":/textures/rapids.png";
+    sec.filename = ":/textures/terrain9.png";
     sectors.push_back(sec);
 
     // RTT_UNDERWATER
     sec.pattern = 85;
     sec.desc = "UNDERWATER";
-    sec.filename = ":/textures/rapids.png";
+    sec.filename = ":/textures/terrain10.png";
     sectors.push_back(sec);
 
     // RTT_ROAD
     sec.pattern = 43;
     sec.desc = "ROAD";
-    sec.filename = ":/textures/road.png";
+    sec.filename = ":/textures/terrain11.png";
     sectors.push_back(sec);
 
     // RTT_BRUSH
     sec.pattern = 58;
     sec.desc = "BRUSH";
-    sec.filename = ":/textures/brush.png";
+    sec.filename = ":/textures/terrain12.png";
     sectors.push_back(sec);
 
     // RTT_TUNNEL
     sec.pattern = 61;
     sec.desc = "TUNNEL";
-    sec.filename = ":/textures/tunnel.png";
+    sec.filename = ":/textures/terrain13.png";
     sectors.push_back(sec);
 
     // RTT_CAVERN
     sec.pattern = 79;
     sec.desc = "CAVERN";
-    sec.filename = ":/textures/cavern.png";
+    sec.filename = ":/textures/terrain14.png";
     sectors.push_back(sec);
 
     // RTT_DEATH
     sec.pattern = 63;
     sec.desc = "DEATH";
-    sec.filename = ":/textures/death.png";
+    sec.filename = ":/textures/terrain15.png";
     sectors.push_back(sec);
 
     // RTT_RANDOM
     sec.pattern = 63;
     sec.desc = "RANDOM";
-    sec.filename = ":/textures/random.png";
+    sec.filename = ":/textures/terrain16.png";
     sectors.push_back(sec);
 }
 
@@ -237,17 +238,6 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
   conf.setValue("noteColor", getNoteColor() );
   conf.setValue("drawPrespam", getDrawPrespam());
 
-  conf.beginWriteArray("Textures");
-  for (unsigned int i = 0; i < sectors.size(); ++i) {
-	  if (sectors[i].desc == "NONE")
-		  continue; // do not save the default handle
-	  conf.setArrayIndex(i);
-	  conf.setValue("handle", sectors[i].desc);
-	  conf.setValue("file", sectors[i].filename);
-	  conf.setValue("pattern", sectors[i].pattern);
-
-  }
-  conf.endArray();
   conf.endGroup();
 
   conf.beginGroup("Engine");
@@ -372,16 +362,6 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
     setNoteColor( conf.value("noteColor", "#F28003").toByteArray() );
     setDrawPrespam(  conf.value("drawPrespam", true).toBool() );
 
-    size = conf.beginReadArray("Textures");
-	for (int i = 0; i < size; ++i) {
-	  conf.setArrayIndex(i);
-	  QByteArray handle = conf.value("handle").toByteArray();
-	  // ignore "NONE" handle, it's always added by constructors
-	  if (handle == "NONE")
-		  continue;
-      addTexture(handle,  conf.value("file").toByteArray(),  (char) conf.value("pattern").toInt());
-	}
-	conf.endArray();
 	conf.endGroup();
 
 	conf.beginGroup("Engine");

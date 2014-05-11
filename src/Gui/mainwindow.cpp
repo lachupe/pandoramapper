@@ -29,7 +29,7 @@
 
 #include "Gui/mainwindow.h"
 #include "Gui/CActionManager.h"
-#include "Gui/RoomEditDialog.h"
+#include "Gui/roomeditattrdlg.h"
 #include "Gui/ConfigWidget.h"
 #include "Gui/SpellsDialog.h"
 #include "Gui/CMovementDialog.h"

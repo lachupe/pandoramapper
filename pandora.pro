@@ -33,11 +33,8 @@ FORMS += src/Ui/configedit.ui \
     src/Ui/groupmanagersettings.ui \
     src/Ui/logdialog.ui \
     src/Ui/movementdialog.ui \
-    src/Ui/roomedit.ui \
     src/Ui/spellsdialog.ui \
-    src/Ui/roomeditattrdlg.ui \
-    src/Gui/roomeditattrdlg.ui
-
+    src/Ui/roomeditattrdlg.ui
 	
 ################################################ 	Main		######################################################
 HEADERS += src/defines.h \ 

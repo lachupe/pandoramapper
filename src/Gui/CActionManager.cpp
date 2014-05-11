@@ -33,7 +33,7 @@
 #include "Gui/CMovementDialog.h"
 #include "Gui/CLogDialog.h"
 #include "Gui/finddialog.h"
-#include "Gui/RoomEditDialog.h"
+#include "Gui/roomeditattrdlg.h"
 
 #include "GroupManager/CGroupCommunicator.h"
 

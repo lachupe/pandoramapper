@@ -23,6 +23,7 @@
 #define UTILS_H
 
 #include "defines.h"
+#include "Map/CRoom.h"
 
 class QByteArray;
 

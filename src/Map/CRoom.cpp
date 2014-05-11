@@ -103,7 +103,7 @@ void CRoom::setModified(bool b)
     }
 }
 
-int CRoom::descCmp(QByteArray d)
+int CRoom::descCmp(QByteArray d) const
 { 
     if (room.desc().empty() != true)
         return comparator.strcmp_desc(d, getDesc());
@@ -111,7 +111,7 @@ int CRoom::descCmp(QByteArray d)
         return 0;
 }
 
-int CRoom::roomnameCmp(QByteArray n)
+int CRoom::roomnameCmp(QByteArray n) const
 { 
     if (room.name().empty() != true)
         return comparator.strcmp_roomname(n, getName());
@@ -122,7 +122,7 @@ int CRoom::roomnameCmp(QByteArray n)
 
 
 /* --------------- check if exit in room is connected --------------- */
-bool CRoom::isConnected(ExitDirection dir)
+bool CRoom::isConnected(ExitDirection dir) const
 {
     if (isExitUndefined(dir)  || isExitDeath(dir) )
         return false;
@@ -134,7 +134,7 @@ bool CRoom::isConnected(ExitDirection dir)
 
 
 /* is there anything at all in this direction ? */
-bool CRoom::isExitPresent(ExitDirection dir)
+bool CRoom::isExitPresent(ExitDirection dir) const
 {
     const mapdata::Exit &exit = room.exits(dir);
 
@@ -157,14 +157,14 @@ bool CRoom::isExitLeadingTo(ExitDirection dir, CRoom *room)
 
 
 
-CRoom* CRoom::getExitRoom(ExitDirection dir) {
+CRoom* CRoom::getExitRoom(ExitDirection dir) const {
     if (isConnected(dir) == false)
         return NULL;
 
     return parent->getRoom(room.exits().Get(dir).leads_to_id());
 }
 
-RoomId CRoom::getExitLeadsTo(ExitDirection dir) {
+RoomId CRoom::getExitLeadsTo(ExitDirection dir) const {
     if (isConnected(dir) == false)
         return NULL;
 
@@ -203,7 +203,7 @@ void CRoom::removeDoor(ExitDirection dir)
     setModified(true);
 }
 
-QByteArray CRoom::getDoor(ExitDirection dir)
+QByteArray CRoom::getDoor(ExitDirection dir) const
 {
     const mapdata::Exit& exit = room.exits(dir);
 
@@ -213,7 +213,7 @@ QByteArray CRoom::getDoor(ExitDirection dir)
         return exit.door().c_str();
 }
 
-bool CRoom::isDoorSet(ExitDirection dir)
+bool CRoom::isDoorSet(ExitDirection dir) const
 {
     if (room.exits(dir).door().empty())
         return false;
@@ -222,7 +222,7 @@ bool CRoom::isDoorSet(ExitDirection dir)
         
 }
 
-char CRoom::dirbynum(ExitDirection dir)
+char CRoom::dirbynum(ExitDirection dir) const
 {
   switch (dir) {
     case  ED_NORTH :
@@ -250,17 +250,17 @@ char CRoom::dirbynum(ExitDirection dir)
 }
 
 
-int CRoom::getX()
+int CRoom::getX() const
 {
     return room.pos().x();
 }
 
-int CRoom::getY()
+int CRoom::getY() const
 {
     return room.pos().y();
 }
 
-int CRoom::getZ()
+int CRoom::getZ() const
 {
     return room.pos().z();
 }
@@ -301,25 +301,35 @@ void CRoom::simpleSetZ(int nz)
     setModified(true);
 }
 
-QByteArray CRoom::getName()
+QByteArray CRoom::getName() const
 {
     return room.name().c_str();
 }
 
+RoomAlignType getAlignType() const
+{
 
-QByteArray CRoom::getDesc()
+}
+
+
+QByteArray CRoom::getDesc() const
 {
     return room.desc().c_str();
 }
 
+QByteArray CRoom::getDynamicDesc() const
+{
+    return room.dynamicdesc().c_str();
+}
 
-RoomTerrainType CRoom::getTerrain()
+
+RoomTerrainType CRoom::getTerrain() const
 {
     return static_cast<RoomTerrainType>( room.terrain() );
 }
 
 
-QByteArray CRoom::getNote()
+QByteArray CRoom::getNote() const
 {
     return room.note().c_str();
 }
@@ -330,7 +340,8 @@ void CRoom::setNoteColor(QByteArray color) {
     rebuildDisplayList();
 }
 
-QByteArray CRoom::getNoteColor() {
+QByteArray CRoom::getNoteColor() const
+{
     return room.note_color().c_str();
 }
 
@@ -340,7 +351,7 @@ void CRoom::setDesc(QByteArray newdesc)
     setModified(true);    
 }
       
-QByteArray CRoom::getSecretsInfo()
+QByteArray CRoom::getSecretsInfo() const
 {
     int i;
     QByteArray res;
@@ -410,7 +421,7 @@ void CRoom::setExit(ExitDirection dir, RoomId value)
 }
 
 
-bool CRoom::isExitUndefined(ExitDirection dir)
+bool CRoom::isExitUndefined(ExitDirection dir) const
 {
     return room.exits(dir).type() == mapdata::Exit::ET_UNDEFINED;
 }
@@ -424,14 +435,297 @@ void CRoom::setExitUndefined(ExitDirection dir)
 
 
 
-bool CRoom::isExitDeath(ExitDirection dir)
+bool CRoom::isExitDeath(ExitDirection dir) const
 {
     return room.exits(dir).type() == mapdata::Exit::ET_DEATH;
 }
 
-bool CRoom::isExitNormal(ExitDirection dir)
+bool CRoom::isExitNormal(ExitDirection dir) const
 {
     return room.exits(dir).type() == mapdata::Exit::ET_NORMAL;
+}
+
+
+bool CRoom::isMobFlagSet(RoomMobFlag flag) const
+{
+    switch(flag) {
+        case RMF_RENT:
+            return room.mob_flags().rent();
+        case RMF_SHOP:
+            return room.mob_flags().shop();
+        case RMF_WEAPONSHOP:
+            return room.mob_flags().weaponshop();
+        case RMF_ARMOURSHOP:
+            return room.mob_flags().armourshop();
+        case RMF_FOODSHOP:
+            return room.mob_flags().foodshop();
+        case RMF_PETSHOP:
+            return room.mob_flags().petshop();
+        case RMF_GUILD:
+            return room.mob_flags().guild();
+        case RMF_SCOUTGUILD:
+            return room.mob_flags().scoutguild();
+        case RMF_MAGEGUILD:
+            return room.mob_flags().mageguild();
+        case RMF_CLERICGUILD:
+            return room.mob_flags().clericguild();
+        case RMF_WARRIORGUILD:
+            return room.mob_flags().warriorguild();
+        case RMF_RANGERGUILD:
+            return room.mob_flags().rangerguild();
+        case RMF_SMOB:
+            return room.mob_flags().smob();
+        case RMF_QUEST:
+            return room.mob_flags().quest();
+        case RMF_ANY:
+            return room.mob_flags().any();
+    }
+}
+
+
+
+void CRoom::setMobFlag(RoomMobFlag flag, bool value)
+{
+    switch(flag) {
+        case RMF_RENT:
+            room.mutable_mob_flags()->set_rent(value);
+            break;
+        case RMF_SHOP:
+            room.mutable_mob_flags()->set_shop(value);
+            break;
+        case RMF_WEAPONSHOP:
+            room.mutable_mob_flags()->set_weaponshop(value);
+            break;
+        case RMF_ARMOURSHOP:
+            room.mutable_mob_flags()->set_armourshop(value);
+            break;
+        case RMF_FOODSHOP:
+            room.mutable_mob_flags()->set_foodshop(value);
+            break;
+        case RMF_PETSHOP:
+            room.mutable_mob_flags()->set_petshop(value);
+            break;
+        case RMF_GUILD:
+            room.mutable_mob_flags()->set_guild(value);
+            break;
+        case RMF_SCOUTGUILD:
+            room.mutable_mob_flags()->set_scoutguild(value);
+            break;
+        case RMF_MAGEGUILD:
+            room.mutable_mob_flags()->set_mageguild(value);
+            break;
+        case RMF_CLERICGUILD:
+            room.mutable_mob_flags()->set_clericguild(value);
+            break;
+        case RMF_WARRIORGUILD:
+            room.mutable_mob_flags()->set_warriorguild(value);
+            break;
+        case RMF_RANGERGUILD:
+            room.mutable_mob_flags()->set_rangerguild(value);
+            break;
+        case RMF_SMOB:
+            room.mutable_mob_flags()->set_smob(value);
+            break;
+        case RMF_QUEST:
+            room.mutable_mob_flags()->set_quest(value);
+            break;
+        case RMF_ANY:
+            room.mutable_mob_flags()->set_any(value);
+            break;
+    }
+}
+
+
+bool CRoom::isLoadFlagSet(RoomLoadFlag flag) const
+{
+    switch(flag) {
+    case RLF_TREASURE:
+        return room.load_flags().treasure();
+        break;
+    case RLF_ARMOUR:
+        return room.load_flags().armour();
+        break;
+    case RLF_WEAPON:
+        return room.load_flags().weapon();
+        break;
+    case RLF_WATER:
+        return room.load_flags().water();
+        break;
+    case RLF_FOOD:
+        return room.load_flags().food();
+        break;
+    case RLF_HERB:
+        return room.load_flags().herb();
+        break;
+    case RLF_KEY:
+        return room.load_flags().key();
+        break;
+    case RLF_MULE:
+        return room.load_flags().mule();
+        break;
+    case RLF_HORSE:
+        return room.load_flags().horse();
+        break;
+    case RLF_PACKHORSE:
+        return room.load_flags().packhorse();
+        break;
+    case RLF_TRAINEDHORSE:
+        return room.load_flags().trainedhorse();
+        break;
+    case RLF_ROHIRRIM:
+        return room.load_flags().rohirrim();
+        break;
+    case RLF_WARG:
+        return room.load_flags().warg();
+        break;
+    case RLF_BOAT:
+        return room.load_flags().boat();
+        break;
+    case RLF_ATTENTION:
+        return room.load_flags().attention();
+        break;
+    case RLF_TOWER:
+        return room.load_flags().tower();
+        break;
+    }
+}
+
+void CRoom::setLoadFlag(RoomLoadFlag flag, bool value)
+{
+    switch(flag) {
+    case RLF_TREASURE:
+        room.mutable_load_flags()->set_treasure(value);
+        break;
+    case RLF_ARMOUR:
+        room.mutable_load_flags()->set_armour(value);
+        break;
+    case RLF_WEAPON:
+        room.mutable_load_flags()->set_weapon(value);
+        break;
+    case RLF_WATER:
+        room.mutable_load_flags()->set_water(value);
+        break;
+    case RLF_FOOD:
+        room.mutable_load_flags()->set_food(value);
+        break;
+    case RLF_HERB:
+        room.mutable_load_flags()->set_herb(value);
+        break;
+    case RLF_KEY:
+        room.mutable_load_flags()->set_key(value);
+        break;
+    case RLF_MULE:
+        room.mutable_load_flags()->set_mule(value);
+        break;
+    case RLF_HORSE:
+        room.mutable_load_flags()->set_horse(value);
+        break;
+    case RLF_PACKHORSE:
+        room.mutable_load_flags()->set_packhorse(value);
+        break;
+    case RLF_TRAINEDHORSE:
+        room.mutable_load_flags()->set_trainedhorse(value);
+        break;
+    case RLF_ROHIRRIM:
+        room.mutable_load_flags()->set_rohirrim(value);
+        break;
+    case RLF_WARG:
+        room.mutable_load_flags()->set_warg(value);
+        break;
+    case RLF_BOAT:
+        room.mutable_load_flags()->set_boat(value);
+        break;
+    case RLF_ATTENTION:
+        room.mutable_load_flags()->set_attention(value);
+        break;
+    case RLF_TOWER:
+        room.mutable_load_flags()->set_tower(value);
+        break;
+    }
+}
+
+
+
+bool CRoom::isExitFlagSet(ExitDirection dir, ExitFlag flag) const
+{
+    switch(flag) {
+        case EF_EXIT:
+            return room.exits(dir).exit_flags().exit();
+        case EF_DOOR:
+            return room.exits(dir).exit_flags().door();
+        case EF_ROAD:
+            return room.exits(dir).exit_flags().road();
+        case EF_CLIMB:
+            return room.exits(dir).exit_flags().climb();
+        case EF_SPECIAL:
+            return room.exits(dir).exit_flags().special();
+        case EF_NO_MATCH:
+            return room.exits(dir).exit_flags().no_match();
+    };
+
+    return false;
+}
+
+bool CRoom::isDoorFlagSet(ExitDirection dir, DoorFlag flag) const
+{
+    switch(flag) {
+        case DF_HIDDEN:
+            return room.exits(dir).door_flags().hidden();
+        case DF_NEEDKEY:
+            return room.exits(dir).door_flags().needkey();
+        case DF_NOBLOCK:
+            return room.exits(dir).door_flags().noblock();
+        case DF_NOBREAK:
+            return room.exits(dir).door_flags().nobreak();
+        case DF_NOPICK:
+            return room.exits(dir).door_flags().nopick();
+        case DF_DELAYED:
+            return room.exits(dir).door_flags().delayed();
+    };
+
+    return false;
+}
+
+void CRoom::setExitFlag(ExitDirection dir, ExitFlag flag, bool value)
+{
+    switch(flag) {
+        case EF_EXIT:
+            room.mutable_exits(dir)->mutable_exit_flags()->set_exit(value);
+            break;
+        case EF_DOOR:
+            room.mutable_exits(dir)->mutable_exit_flags()->set_door(value);
+            break;
+        case EF_ROAD:
+            room.mutable_exits(dir)->mutable_exit_flags()->set_road(value);
+            break;
+        case EF_CLIMB:
+            room.mutable_exits(dir)->mutable_exit_flags()->set_climb(value);
+            break;
+        case EF_SPECIAL:
+            room.mutable_exits(dir)->mutable_exit_flags()->set_special(value);
+            break;
+        case EF_NO_MATCH:
+            room.mutable_exits(dir)->mutable_exit_flags()->set_no_match(value);
+            break;
+    };
+}
+
+void CRoom::setDoorFlag(ExitDirection dir, DoorFlag flag, bool value)
+{
+    switch(flag) {
+        case DF_HIDDEN:
+            room.mutable_exits(dir)->mutable_door_flags()->set_hidden(value);
+        case DF_NEEDKEY:
+            room.mutable_exits(dir)->mutable_door_flags()->set_needkey(value);
+        case DF_NOBLOCK:
+            room.mutable_exits(dir)->mutable_door_flags()->set_noblock(value);
+        case DF_NOBREAK:
+            room.mutable_exits(dir)->mutable_door_flags()->set_nobreak(value);
+        case DF_NOPICK:
+            room.mutable_exits(dir)->mutable_door_flags()->set_nopick(value);
+        case DF_DELAYED:
+            room.mutable_exits(dir)->mutable_door_flags()->set_delayed(value);
+    };
 }
 
 
@@ -446,7 +740,7 @@ void CRoom::setExitDeath(ExitDirection dir)
 
 
 
-bool CRoom::anyUndefinedExits()
+bool CRoom::anyUndefinedExits() const
 {
     for (unsigned int i = 0; i <= 5; i++) {
         ExitDirection iDir = static_cast<ExitDirection>(i);
@@ -479,7 +773,7 @@ bool CRoom::isNameSet()
 }
 
 
-bool CRoom::isDoorSecret(ExitDirection dir)
+bool CRoom::isDoorSecret(ExitDirection dir) const
 {
     if (room.exits(dir).door_flags().hidden())
         return true;
@@ -487,7 +781,7 @@ bool CRoom::isDoorSecret(ExitDirection dir)
         return false;
 }
 
-QByteArray CRoom::getRegionName()
+QByteArray CRoom::getRegionName() const
 {
     return room.area_name().c_str();
 }
@@ -510,7 +804,7 @@ void CRoom::setRegion(CRegion *reg)
     rebuildDisplayList();
 }
     
-CRegion *CRoom::getRegion()
+CRegion *CRoom::getRegion() const
 {
     return region;
 }
@@ -534,7 +828,7 @@ void CRoom::removeExit(ExitDirection dir)
     rebuildDisplayList();
 }
 
-QString CRoom::toolTip()
+QString CRoom::toolTip() const
 {
     QString s;
     s += "#";
@@ -556,7 +850,7 @@ QString CRoom::toolTip()
 }
 
 /* ------------------------------ prints the given room --------------------*/
-void CRoom::sendRoom()
+void CRoom::sendRoom() const
 {
     unsigned int i, pos;
     char line[MAX_STR_LEN];

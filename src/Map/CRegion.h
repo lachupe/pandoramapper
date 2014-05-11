@@ -23,6 +23,7 @@
 
 #include <QMap>
 #include <QByteArray>
+#include "Map/CRoom.h"
 
 class CRegion {
     QByteArray name;

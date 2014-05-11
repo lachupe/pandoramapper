@@ -93,7 +93,7 @@ public:
 			return NULL;
     }
 
-    inline QByteArray getName(unsigned int id)  {
+    inline QByteArray getName(RoomId id)  {
     	if (ids[id]) return (*(ids[id])).getName(); return "";
     }
 

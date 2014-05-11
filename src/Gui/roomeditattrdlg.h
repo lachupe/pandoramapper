@@ -29,12 +29,12 @@
 
 #include <QDialog>
 #include "ui_roomeditattrdlg.h"
+#include "defines.h"
 
 class QShortcut;
-class MapData;
-class MapCanvas;
-class RoomSelection;
-class Room;
+
+class CRoom;
+class CRoomManager;
 
 class RoomEditAttrDlg : public QDialog, private Ui::RoomEditAttrDlg
 {
@@ -44,7 +44,7 @@ signals:
 	void mapChanged();
 
 public slots:
-    void setRoomSelection(const RoomSelection*, MapData*, MapCanvas*);   
+    void setRoomSelection(const QList<RoomId> *selection, CRoomManager *manager);
 
 	//selection page    
     void roomListCurrentIndexChanged(int);
@@ -101,9 +101,9 @@ private:
 	void connectAll();
 	void disconnectAll();
 
-	const Room* getSelectedRoom();	
-	uint getSelectedExit();
-	void updateDialog(const Room *r);
+    const CRoom *getSelectedRoom();
+    ExitDirection getSelectedExit();
+    void updateDialog(const CRoom *r);
 	
 	QListWidgetItem* loadListItems[20];
 	QListWidgetItem* mobListItems[20];
@@ -111,10 +111,9 @@ private:
 	QListWidgetItem* exitListItems[20];
 	QListWidgetItem* doorListItems[20];
 
-	const RoomSelection* 	m_roomSelection;
-	MapData* 		m_mapData;
-	MapCanvas* 		m_mapCanvas;
-  QShortcut *m_hiddenShortcut;
+    const QList<RoomId> 	*m_roomSelection;
+    CRoomManager            *m_manager;
+    QShortcut               *m_hiddenShortcut;
 };
 
 
