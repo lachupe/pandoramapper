@@ -798,8 +798,13 @@ void CActionManager::saveAs()
   strcpy(data, qPrintable(s));
 
   if (!s.isEmpty()) {
-    usercmd_msave(0, 0,  data, data);
-    QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
+      try {
+          Map.saveMap(s);
+      } catch(const std::runtime_error& er) {
+
+      }
+
+      QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
   }
 }
 
@@ -817,7 +822,16 @@ void CActionManager::open()
   strcpy(data, qPrintable(s));
 
   if (!s.isEmpty()) {
-    usercmd_mload(0, 0,  data, data);
+      try {
+          Map.loadMap( s );
+      } catch(const std::runtime_error &er) {
+          QMessageBox::information(parent, "Failed to load the map", "", QMessageBox::Ok);
+          send_to_user(" * Failed to load the map. Error: %s\r\n",
+                        er.what()  );
+          QMessageBox::critical(parent, "Pandora",
+                            QString("Failed to load the map\r\nError:%1").arg(QString(er.what())));
+      }
+
   }
 }
 

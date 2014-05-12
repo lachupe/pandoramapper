@@ -6,8 +6,7 @@ MOC_DIR = moc
 
 UI_DIR = ui
 
-RESOURCES = resources/pandora.qrc \
-    src/resources/mmapper2.qrc
+RESOURCES = resources/pandora.qrc
 RC_FILE = resources/pandora.rc
 
 CONFIG += qt \

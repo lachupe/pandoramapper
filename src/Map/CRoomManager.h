@@ -123,8 +123,8 @@ public:
 
     CRoom* findDuplicateRoom(CRoom *orig);
 
-    void loadMap(QString filename);
-    void saveMap(QString filename);
+    bool loadMap(QString filename);
+    bool saveMap(QString filename);
 
 
 

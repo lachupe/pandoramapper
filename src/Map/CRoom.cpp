@@ -81,6 +81,22 @@ CRoom::~CRoom()
 }
 
 
+bool CRoom::writeToStream(std::ostream *outstream) const
+{
+    try {
+        return room.SerializeToOstream(outstream);
+    } catch(std::exception &e) {
+        printf("Error: %s\r\n", e.what());
+    }
+}
+
+bool CRoom::readFromStream(std::fstream &instream)
+{
+//    return room.ParseFromIstream(instream);
+    return true;
+}
+
+
 void CRoom::setSector(RoomTerrainType val)
 {
     room.set_terrain( static_cast<mapdata::Room::RoomTerrainType>(val) );
@@ -720,16 +736,18 @@ bool CRoom::isExitFlagSet(ExitDirection dir, ExitFlag flag) const
 bool CRoom::isDoorFlagSet(ExitDirection dir, DoorFlag flag) const
 {
     switch(flag) {
-        case DF_NEEDKEY:
-            return room.exits(dir).door_flags().needkey();
-        case DF_NOBLOCK:
-            return room.exits(dir).door_flags().noblock();
-        case DF_NOBREAK:
-            return room.exits(dir).door_flags().nobreak();
-        case DF_NOPICK:
-            return room.exits(dir).door_flags().nopick();
-        case DF_DELAYED:
-            return room.exits(dir).door_flags().delayed();
+    case DF_HIDDEN:
+        return isDoorSecret(dir);
+    case DF_NEEDKEY:
+        return room.exits(dir).door_flags().needkey();
+    case DF_NOBLOCK:
+        return room.exits(dir).door_flags().noblock();
+    case DF_NOBREAK:
+        return room.exits(dir).door_flags().nobreak();
+    case DF_NOPICK:
+        return room.exits(dir).door_flags().nopick();
+    case DF_DELAYED:
+        return room.exits(dir).door_flags().delayed();
     };
 
     return false;
@@ -755,6 +773,7 @@ void CRoom::setExitFlag(ExitDirection dir, ExitFlag flag, bool value)
                 // remove door, if any
                 removeDoor(dir);
             }
+            break;
         case EF_ROAD:
             room.mutable_exits(dir)->mutable_exit_flags()->set_road(value);
             break;
@@ -773,16 +792,24 @@ void CRoom::setExitFlag(ExitDirection dir, ExitFlag flag, bool value)
 void CRoom::setDoorFlag(ExitDirection dir, DoorFlag flag, bool value)
 {
     switch(flag) {
-        case DF_NEEDKEY:
-            room.mutable_exits(dir)->mutable_door_flags()->set_needkey(value);
-        case DF_NOBLOCK:
-            room.mutable_exits(dir)->mutable_door_flags()->set_noblock(value);
-        case DF_NOBREAK:
-            room.mutable_exits(dir)->mutable_door_flags()->set_nobreak(value);
-        case DF_NOPICK:
-            room.mutable_exits(dir)->mutable_door_flags()->set_nopick(value);
-        case DF_DELAYED:
-            room.mutable_exits(dir)->mutable_door_flags()->set_delayed(value);
+    case DF_HIDDEN:
+        // read-only flag
+        break;
+    case DF_NEEDKEY:
+        room.mutable_exits(dir)->mutable_door_flags()->set_needkey(value);
+        break;
+    case DF_NOBLOCK:
+        room.mutable_exits(dir)->mutable_door_flags()->set_noblock(value);
+        break;
+    case DF_NOBREAK:
+        room.mutable_exits(dir)->mutable_door_flags()->set_nobreak(value);
+        break;
+    case DF_NOPICK:
+        room.mutable_exits(dir)->mutable_door_flags()->set_nopick(value);
+        break;
+    case DF_DELAYED:
+        room.mutable_exits(dir)->mutable_door_flags()->set_delayed(value);
+        break;
     };
 }
 

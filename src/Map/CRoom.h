@@ -71,23 +71,6 @@ class CRoom {
     // inner serializable (protocol buffers) object
     mapdata::Room room;
 
-    // old member and fields
-//    enum ExitFlags { EXIT_NONE = 0, EXIT_UNDEFINED, EXIT_DEATH};
-
-//    unsigned int    flags;
-//    QByteArray      name; 			//
-//    QByteArray      note; 			// note, if needed, additional info etc
-//    QByteArray      noteColor;      // note color in this room
-//    QByteArray      desc;			// descrition
-//    char            sector;                 /* terrain marker */
-//    CRegion         *region;               /* region of this room */
-    
-//    QByteArray    doors[6];		/* if the door is secret */
-//    unsigned  char exitFlags[6];
-//    unsigned int    id; 		        /* identifier, public for speed up - its very often used  */
-//    int x, y, z;		/* coordinates on our map */
-
-
     CSquare			*square;  		/* which square this room belongs to */
     CRegion         *region;
 
@@ -96,6 +79,10 @@ public:
     CRoom(CRoomManager *parent);
     ~CRoom();
     
+
+    bool writeToStream(std::ostream *outstream) const;
+    bool readFromStream(std::fstream &instream);
+
     RoomId getId() const { return room.id(); }
     void setId(RoomId id) { room.set_id(id); }
 

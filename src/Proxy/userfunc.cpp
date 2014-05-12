@@ -1475,7 +1475,12 @@ USERCMD(usercmd_mload)
                   (const char *) conf->getBaseFile()  );
 
     //xml_readbase( conf->get_base_file() );
-    Map.loadMap( conf->getBaseFile() );
+    try {
+        Map.loadMap( conf->getBaseFile() );
+    } catch(const std::runtime_error &er) {
+        send_to_user(" * Failed to load the map. Error: %s\r\n",
+                      er.what()  );
+    }
 
   } else {
     //p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */

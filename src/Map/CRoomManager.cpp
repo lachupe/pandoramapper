@@ -24,6 +24,8 @@
 #include <cstring>
 #include <QDateTime>
 #include <vector>
+#include <iostream>
+#include <fstream>
 #include <QProgressDialog>
 //using namespace std;
 
@@ -705,12 +707,45 @@ QList<int> CRoomManager::searchExits(QString s, Qt::CaseSensitivity cs)
 
 
 
-void CRoomManager::loadMap(QString filename)
+bool CRoomManager::loadMap(QString filename)
 {
+    std::fstream input(filename.toLocal8Bit(), ios::in | ios::binary);
+    if (!input)
+        throw new std::runtime_error("Failed to open map file");
 
+    mapdata::MapHeader header;
+    if (!header.ParseFromIstream(&input))
+        throw std::runtime_error("Failed to read the header");
+
+    return true;
 }
 
-void CRoomManager::saveMap(QString filename)
+bool CRoomManager::saveMap(QString filename)
 {
+    setBlocked( true );
 
+    std::fstream output(filename.toLocal8Bit(), ios::out | ios::trunc | ios::binary);
+
+    mapdata::MapHeader header;
+
+    header.set_areas_amount(regions.size());
+    header.set_rooms_amount(size());
+
+    if (!header.SerializeToOstream(&output)) {
+        setBlocked(false);
+        throw std::runtime_error("Failed to serialize header");
+        return -1;
+    }
+
+    for (auto it = rooms.begin(); it != rooms.end(); it++) {
+        CRoom *r = *it;
+        if (!r->writeToStream(&output)) {
+            setBlocked(false);
+            throw std::runtime_error("Failed to serialize room");
+        }
+
+    }
+
+    setBlocked(false);
+    return true;
 }
