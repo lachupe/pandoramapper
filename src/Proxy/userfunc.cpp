@@ -1036,7 +1036,7 @@ USERCMD(usercmd_mlink)
     return USER_PARSE_SKIP;
   }
 
-  r->setExit(dir, id);
+  r->setExitLeadsTo(dir, id);
   send_to_user("--[ Linked exit %s with %s [%i].\r\n", exits[dir], (const char *) second->getName(), id);
 
   /* if oneway option was given - we are done here */
@@ -1052,7 +1052,7 @@ USERCMD(usercmd_mlink)
     }
 
 
-    second->setExit(backdir, r);
+    second->setExitLeadsTo(backdir, r);
     send_to_user("--[ Linked exit %s in second room with this room.\r\n", exits[backdir]);
   }
 

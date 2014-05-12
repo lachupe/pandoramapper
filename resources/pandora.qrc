@@ -45,23 +45,6 @@
         <file>icons/groupcfg.png</file>
         <file>icons/groupmanager.png</file>
         <file>icons/reload.png</file>
-        <file>pixmaps/splash20.png</file>
-        <file>pixmaps/terrain0.png</file>
-        <file>pixmaps/terrain1.png</file>
-        <file>pixmaps/terrain2.png</file>
-        <file>pixmaps/terrain3.png</file>
-        <file>pixmaps/terrain4.png</file>
-        <file>pixmaps/terrain5.png</file>
-        <file>pixmaps/terrain6.png</file>
-        <file>pixmaps/terrain7.png</file>
-        <file>pixmaps/terrain8.png</file>
-        <file>pixmaps/terrain9.png</file>
-        <file>pixmaps/terrain10.png</file>
-        <file>pixmaps/terrain11.png</file>
-        <file>pixmaps/terrain12.png</file>
-        <file>pixmaps/terrain13.png</file>
-        <file>pixmaps/terrain14.png</file>
-        <file>pixmaps/terrain15.png</file>
         <file>pixmaps/road0.png</file>
         <file>pixmaps/road1.png</file>
         <file>pixmaps/road2.png</file>
@@ -126,26 +109,27 @@
         <file>pixmaps/trail13.png</file>
         <file>pixmaps/trail14.png</file>
         <file>pixmaps/trail15.png</file>
-        <file>textures/brush.png</file>
-        <file>textures/cavern.png</file>
-        <file>textures/city.png</file>
-        <file>textures/death.png</file>
         <file>textures/exit_door.png</file>
         <file>textures/exit_normal.png</file>
         <file>textures/exit_secret.png</file>
         <file>textures/exit_undef.png</file>
-        <file>textures/field.png</file>
-        <file>textures/forest.png</file>
-        <file>textures/hills.png</file>
-        <file>textures/indoors.png</file>
         <file>textures/logo.png</file>
-        <file>textures/mountain.png</file>
-        <file>textures/rapids.png</file>
-        <file>textures/river.png</file>
-        <file>textures/road.png</file>
-        <file>textures/shwater.png</file>
-        <file>textures/tunnel.png</file>
-        <file>textures/unwater.png</file>
-        <file>textures/random.png</file>
+        <file>textures/terrain0.png</file>
+        <file>textures/terrain1.png</file>
+        <file>textures/terrain2.png</file>
+        <file>textures/terrain3.png</file>
+        <file>textures/terrain4.png</file>
+        <file>textures/terrain5.png</file>
+        <file>textures/terrain6.png</file>
+        <file>textures/terrain7.png</file>
+        <file>textures/terrain8.png</file>
+        <file>textures/terrain9.png</file>
+        <file>textures/terrain10.png</file>
+        <file>textures/terrain11.png</file>
+        <file>textures/terrain12.png</file>
+        <file>textures/terrain13.png</file>
+        <file>textures/terrain14.png</file>
+        <file>textures/terrain15.png</file>
+        <file>textures/terrain16.png</file>
     </qresource>
 </RCC>

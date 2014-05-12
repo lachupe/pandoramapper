@@ -24,11 +24,13 @@ message Area {
 	optional float			scale = 3 [default = 1.0];
 }
 
+
+
 message Exit {
+
+	// 2 and 3 (loop and oneway) are removed due to redundancy
 	enum ExitType { 
 		ET_NORMAL = 0;
-		ET_LOOP = 1;
-		ET_ONEWAY = 2;
 		ET_UNDEFINED = 3;
 		ET_DEATH = 4;
 		ET_NONE = 5;
@@ -50,23 +52,20 @@ message Exit {
 	optional string 		door = 4;
 
 	message ExitFlags {
-		optional bool 		exit = 1 [default = false];
-		optional bool		door = 2 [default = false];
-		optional bool		road = 3 [default = false];
-		optional bool		climb = 4 [default = false];
-		optional bool		random = 5 [default = false];
-		optional bool		special = 6 [default = false];
-		optional bool		no_match = 7 [default = false];
+		optional bool		road = 1 [default = false];
+		optional bool		climb = 2 [default = false];
+		optional bool		random = 3 [default = false];
+		optional bool		special = 4 [default = false];
+		optional bool		no_match = 5 [default = false];
 	}
 	optional ExitFlags		exit_flags = 5;
 	
 	message DoorFlags {
-		optional bool		hidden = 1 [default = false];
-		optional bool		needkey = 2 [default = false];
-		optional bool		noblock = 3 [default = false];
-		optional bool		nobreak = 4 [default = false];
-		optional bool		nopick = 5 [default = false];
-		optional bool		delayed = 6 [default = false];
+		optional bool		needkey = 1 [default = false];
+		optional bool		noblock = 2 [default = false];
+		optional bool		nobreak = 3 [default = false];
+		optional bool		nopick = 4 [default = false];
+		optional bool		delayed = 5 [default = false];
 	}
 	optional DoorFlags      door_flags = 6;
 

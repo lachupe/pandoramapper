@@ -124,9 +124,10 @@ int CRoom::roomnameCmp(QByteArray n) const
 /* --------------- check if exit in room is connected --------------- */
 bool CRoom::isConnected(ExitDirection dir) const
 {
-    if (isExitUndefined(dir)  || isExitDeath(dir) )
+    if (isExitUndefined(dir)  || isExitDeath(dir)  )
         return false;
-    if (exits[dir] != NULL)
+
+    if (isExitPresent(dir))
         return true;
 
     return false;
@@ -181,12 +182,13 @@ int CRoom::setDoor(ExitDirection dir, QByteArray d)
 
     mapdata::Exit *exit = room.mutable_exits(dir);
 
-
+    // create exit if there is none yet
     if (exit->type() == ET_NONE) {
-        exit->set_type(mapdata::Exit::ET_UNDEFINED);
+        setExitUndefined(dir);
     }
 
     exit->set_door(d);
+
     
     rebuildDisplayList();
     setModified(true);
@@ -205,12 +207,7 @@ void CRoom::removeDoor(ExitDirection dir)
 
 QByteArray CRoom::getDoor(ExitDirection dir) const
 {
-    const mapdata::Exit& exit = room.exits(dir);
-
-    if (exit.door().empty() && exit.exit_flags().door() == true)
-        return "exit";
-    else
-        return exit.door().c_str();
+    return room.exits(dir).door().c_str();
 }
 
 bool CRoom::isDoorSet(ExitDirection dir) const
@@ -219,7 +216,6 @@ bool CRoom::isDoorSet(ExitDirection dir) const
         return false;
     else 
         return true;
-        
 }
 
 char CRoom::dirbynum(ExitDirection dir) const
@@ -306,9 +302,64 @@ QByteArray CRoom::getName() const
     return room.name().c_str();
 }
 
-RoomAlignType getAlignType() const
-{
 
+
+void CRoom::setAlignType(RoomAlignType val)
+{
+    if (val == getAlignType())
+        return;
+    room.set_flag_align(static_cast<mapdata::Room::RoomAlignType>(val));
+    rebuildDisplayList();
+    setModified(true);
+}
+
+void CRoom::setPortableType(RoomPortableType val)
+{
+    if (val == getPortableType())
+        return;
+    room.set_flag_portable(static_cast<mapdata::Room::RoomPortableType>(val));
+    rebuildDisplayList();
+    setModified(true);
+}
+
+void CRoom::setLightType(RoomLightType val)
+{
+    if (val == getLightType())
+        return;
+    room.set_flag_light(static_cast<mapdata::Room::RoomLightType>(val));
+    rebuildDisplayList();
+    setModified(true);
+}
+
+void CRoom::setRidableType(RoomRidableType val)
+{
+    if (val == getRidableType())
+        return;
+    room.set_flag_rideable(static_cast<mapdata::Room::RoomRidableType>(val));
+    rebuildDisplayList();
+    setModified(true);
+}
+
+
+RoomLightType CRoom::getLightType() const
+{
+    return static_cast<RoomLightType>( room.flag_light() );
+}
+
+
+RoomRidableType CRoom::getRidableType() const
+{
+    return static_cast<RoomRidableType>( room.flag_rideable() );
+}
+
+RoomPortableType CRoom::getPortableType() const
+{
+    return static_cast<RoomPortableType>( room.flag_portable() );
+}
+
+RoomAlignType CRoom::getAlignType() const
+{
+    return static_cast<RoomAlignType>( room.flag_align() );
 }
 
 
@@ -400,7 +451,7 @@ void CRoom::setSquare(CSquare *_square)
 		rebuildDisplayList();
 }
 
-void CRoom::setExit(ExitDirection dir, CRoom *r)
+void CRoom::setExitLeadsTo(ExitDirection dir, CRoom *r)
 {
     room.mutable_exits(dir)->set_leads_to_id(r->getId());
     room.mutable_exits(dir)->set_type( mapdata::Exit::ET_NORMAL );
@@ -410,7 +461,7 @@ void CRoom::setExit(ExitDirection dir, CRoom *r)
     rebuildDisplayList();
 }
 
-void CRoom::setExit(ExitDirection dir, RoomId value)
+void CRoom::setExitLeadsTo(ExitDirection dir, RoomId value)
 {
     room.mutable_exits(dir)->set_leads_to_id(value);
     room.mutable_exits(dir)->set_type( mapdata::Exit::ET_NORMAL );
@@ -649,10 +700,10 @@ void CRoom::setLoadFlag(RoomLoadFlag flag, bool value)
 bool CRoom::isExitFlagSet(ExitDirection dir, ExitFlag flag) const
 {
     switch(flag) {
-        case EF_EXIT:
-            return room.exits(dir).exit_flags().exit();
+        case EF_EXIT: // special case
+            return isExitPresent(dir);
         case EF_DOOR:
-            return room.exits(dir).exit_flags().door();
+            return isDoorSet(dir);
         case EF_ROAD:
             return room.exits(dir).exit_flags().road();
         case EF_CLIMB:
@@ -669,8 +720,6 @@ bool CRoom::isExitFlagSet(ExitDirection dir, ExitFlag flag) const
 bool CRoom::isDoorFlagSet(ExitDirection dir, DoorFlag flag) const
 {
     switch(flag) {
-        case DF_HIDDEN:
-            return room.exits(dir).door_flags().hidden();
         case DF_NEEDKEY:
             return room.exits(dir).door_flags().needkey();
         case DF_NOBLOCK:
@@ -689,12 +738,23 @@ bool CRoom::isDoorFlagSet(ExitDirection dir, DoorFlag flag) const
 void CRoom::setExitFlag(ExitDirection dir, ExitFlag flag, bool value)
 {
     switch(flag) {
-        case EF_EXIT:
-            room.mutable_exits(dir)->mutable_exit_flags()->set_exit(value);
+        case EF_EXIT: // special case
+            if (value && isExitPresent(dir) == false) {
+                // add exit
+                setExitUndefined(dir);
+            } else if (!value && isExitPresent(dir)) {
+                // remove exit
+                removeExit(dir);
+            }
             break;
         case EF_DOOR:
-            room.mutable_exits(dir)->mutable_exit_flags()->set_door(value);
-            break;
+            if (value) {
+                // add default door
+                setDoor(dir, "exit");
+            } else {
+                // remove door, if any
+                removeDoor(dir);
+            }
         case EF_ROAD:
             room.mutable_exits(dir)->mutable_exit_flags()->set_road(value);
             break;
@@ -713,8 +773,6 @@ void CRoom::setExitFlag(ExitDirection dir, ExitFlag flag, bool value)
 void CRoom::setDoorFlag(ExitDirection dir, DoorFlag flag, bool value)
 {
     switch(flag) {
-        case DF_HIDDEN:
-            room.mutable_exits(dir)->mutable_door_flags()->set_hidden(value);
         case DF_NEEDKEY:
             room.mutable_exits(dir)->mutable_door_flags()->set_needkey(value);
         case DF_NOBLOCK:
@@ -775,10 +833,10 @@ bool CRoom::isNameSet()
 
 bool CRoom::isDoorSecret(ExitDirection dir) const
 {
-    if (room.exits(dir).door_flags().hidden())
-        return true;
-    else 
+    if (room.exits(dir).door() == std::string("exit"))
         return false;
+    else 
+        return true;
 }
 
 QByteArray CRoom::getRegionName() const
@@ -859,7 +917,7 @@ void CRoom::sendRoom() const
                      (const char *) conf->sectors[ (int) getTerrain() ].desc,
 	    (const char *) region->getName(),
         getX(), getY(), getZ());
-    send_to_user(" [32m%s[0m\n", (const char *) getName() );
+    send_to_user(" [32m%s[0m\r\n", (const char *) getName() );
 
     line[0] = 0;
     pos = 0;
@@ -877,7 +935,7 @@ void CRoom::sendRoom() const
                 line[pos++] = desc[i];
             }
     }
-    send_to_user(" note: %s\n", (const char *) getNote());
+    send_to_user(" note: %s\r\n", (const char *) getNote());
 
     
     sprintf(line, "Doors:");

@@ -399,9 +399,9 @@ void CActionManager::bindRooms()
             }
 
             if (fits == true) {
-                one->setExit(dir, two);
+                one->setExitLeadsTo(dir, two);
                 if (conf->getDuallinker() == true)
-                    two->setExit( reversenum( dir ), one);
+                    two->setExitLeadsTo( reversenum( dir ), one);
                 return;
             }
 
@@ -417,17 +417,16 @@ void CActionManager::edit_current_room()
 {
     RoomId id;
 
-    if (Map.selections.isEmpty() == false) {
+    if (Map.selections.isEmpty()) {
         id = Map.selections.getFirst();
-    } else {
         if (stacker.amount() != 1) {
             QMessageBox::critical(parent, "Room Info Edit", QString("You are not in sync!"));
             return;
         }
-        id = stacker.first()->getId();
+        Map.selections.select( stacker.first()->getId() );
     }
 
-    parent->editRoomDialog( id );
+    parent->editRoomDialog();
 }
 
 

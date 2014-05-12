@@ -142,8 +142,8 @@ public:
     
     void disconnectExit(ExitDirection dir);       /* just detaches the connection */
     void removeExit(ExitDirection dir);           /* also removes the door */
-    void setExit(ExitDirection dir, CRoom *room);
-    void setExit(ExitDirection dir, RoomId id);
+    void setExitLeadsTo(ExitDirection dir, CRoom *room);
+    void setExitLeadsTo(ExitDirection dir, RoomId id);
 //    CRoom *getExit(int dir);
     bool isExitLeadingTo(ExitDirection dir, CRoom *room);
     
@@ -186,6 +186,14 @@ public:
     void setLoadFlag(RoomLoadFlag flag, bool value);
 
     RoomAlignType getAlignType() const;
+    RoomPortableType getPortableType() const;
+    RoomLightType getLightType() const;
+    RoomRidableType getRidableType() const;
+
+    void setAlignType(RoomAlignType val);
+    void setPortableType(RoomPortableType val);
+    void setLightType(RoomLightType val);
+    void setRidableType(RoomRidableType val);
 
 
     QByteArray getRegionName() const;

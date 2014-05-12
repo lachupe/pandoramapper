@@ -23,14 +23,23 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="selectionTab">
       <attribute name="title">
        <string>Selection</string>
       </attribute>
       <layout class="QGridLayout">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>9</number>
+       </property>
+       <property name="topMargin">
+        <number>9</number>
+       </property>
+       <property name="rightMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
         <number>9</number>
        </property>
        <property name="spacing">
@@ -92,7 +101,16 @@
        <string>Attributes</string>
       </attribute>
       <layout class="QGridLayout">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>9</number>
+       </property>
+       <property name="topMargin">
+        <number>9</number>
+       </property>
+       <property name="rightMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
         <number>9</number>
        </property>
        <property name="spacing">
@@ -128,7 +146,16 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <property name="topMargin">
+           <number>9</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <property name="bottomMargin">
            <number>9</number>
           </property>
           <property name="spacing">
@@ -194,7 +221,16 @@
           <property name="spacing">
            <number>3</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
            <number>3</number>
           </property>
           <item>
@@ -245,7 +281,16 @@
           <property name="spacing">
            <number>3</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
            <number>3</number>
           </property>
           <item>
@@ -296,7 +341,16 @@
           <property name="spacing">
            <number>3</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
            <number>3</number>
           </property>
           <item>
@@ -400,7 +454,16 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <property name="topMargin">
+           <number>9</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <property name="bottomMargin">
            <number>9</number>
           </property>
           <property name="spacing">
@@ -418,7 +481,7 @@
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap resource="../resources/mmapper2.qrc">:/pixmaps/terrain5.png</pixmap>
+             <pixmap>:/pixmaps/terrain5.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>false</bool>
@@ -440,7 +503,16 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <property name="topMargin">
+           <number>9</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <property name="bottomMargin">
            <number>9</number>
           </property>
           <property name="spacing">
@@ -608,7 +680,16 @@
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QGridLayout">
-             <property name="margin">
+             <property name="leftMargin">
+              <number>9</number>
+             </property>
+             <property name="topMargin">
+              <number>9</number>
+             </property>
+             <property name="rightMargin">
+              <number>9</number>
+             </property>
+             <property name="bottomMargin">
               <number>9</number>
              </property>
              <property name="spacing">
@@ -665,7 +746,16 @@
        <string>Terrain</string>
       </attribute>
       <layout class="QGridLayout">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>9</number>
+       </property>
+       <property name="topMargin">
+        <number>9</number>
+       </property>
+       <property name="rightMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
         <number>9</number>
        </property>
        <property name="spacing">
@@ -680,7 +770,16 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <property name="topMargin">
+           <number>9</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <property name="bottomMargin">
            <number>9</number>
           </property>
           <property name="spacing">
@@ -692,8 +791,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain8.png</normaloff>:/pixmaps/terrain8.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain8.png</normaloff>:/textures/terrain8.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -715,8 +814,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain9.png</normaloff>:/pixmaps/terrain9.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain9.png</normaloff>:/textures/terrain9.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -738,8 +837,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/road7.png</normaloff>:/pixmaps/road7.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain11.png</normaloff>:/textures/terrain11.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -761,8 +860,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain10.png</normaloff>:/pixmaps/terrain10.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain10.png</normaloff>:/textures/terrain10.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -805,8 +904,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain14.png</normaloff>:/pixmaps/terrain14.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain14.png</normaloff>:/textures/terrain14.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -828,8 +927,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain7.png</normaloff>:/pixmaps/terrain7.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain7.png</normaloff>:/textures/terrain7.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -851,8 +950,8 @@
              <string>Random</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain15.png</normaloff>:/pixmaps/terrain15.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain15.png</normaloff>:/textures/terrain15.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -874,8 +973,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain12.png</normaloff>:/pixmaps/terrain12.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain12.png</normaloff>:/textures/terrain12.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -897,8 +996,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain2.png</normaloff>:/pixmaps/terrain2.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain2.png</normaloff>:/textures/terrain2.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -920,8 +1019,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain13.png</normaloff>:/pixmaps/terrain13.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain13.png</normaloff>:/textures/terrain13.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -943,8 +1042,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain3.png</normaloff>:/pixmaps/terrain3.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain3.png</normaloff>:/textures/terrain3.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -966,8 +1065,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain6.png</normaloff>:/pixmaps/terrain6.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain6.png</normaloff>:/textures/terrain6.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -989,8 +1088,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain5.png</normaloff>:/pixmaps/terrain5.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain5.png</normaloff>:/textures/terrain5.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -1012,8 +1111,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain4.png</normaloff>:/pixmaps/terrain4.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain4.png</normaloff>:/textures/terrain4.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -1126,8 +1225,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain0.png</normaloff>:/pixmaps/terrain0.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain0.png</normaloff>:/textures/terrain0.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -1149,8 +1248,8 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../resources/mmapper2.qrc">
-              <normaloff>:/pixmaps/terrain1.png</normaloff>:/pixmaps/terrain1.png</iconset>
+             <iconset resource="../../resources/pandora.qrc">
+              <normaloff>:/textures/terrain1.png</normaloff>:/textures/terrain1.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -1179,7 +1278,16 @@
        <property name="spacing">
         <number>6</number>
        </property>
-       <property name="margin">
+       <property name="leftMargin">
+        <number>9</number>
+       </property>
+       <property name="topMargin">
+        <number>9</number>
+       </property>
+       <property name="rightMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
         <number>9</number>
        </property>
        <item>
@@ -1233,8 +1341,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../resources/mmapper2.qrc"/>
-  <include location="../resources/mmapper2.qrc"/>
+  <include location="../../resources/pandora.qrc"/>
  </resources>
  <connections/>
 </ui>

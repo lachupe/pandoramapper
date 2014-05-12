@@ -47,8 +47,6 @@ class Room_Coordinate;
 
 enum Exit_ExitType {
   Exit_ExitType_ET_NORMAL = 0,
-  Exit_ExitType_ET_LOOP = 1,
-  Exit_ExitType_ET_ONEWAY = 2,
   Exit_ExitType_ET_UNDEFINED = 3,
   Exit_ExitType_ET_DEATH = 4,
   Exit_ExitType_ET_NONE = 5
@@ -569,61 +567,43 @@ class Exit_ExitFlags : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional bool exit = 1 [default = false];
-  inline bool has_exit() const;
-  inline void clear_exit();
-  static const int kExitFieldNumber = 1;
-  inline bool exit() const;
-  inline void set_exit(bool value);
-
-  // optional bool door = 2 [default = false];
-  inline bool has_door() const;
-  inline void clear_door();
-  static const int kDoorFieldNumber = 2;
-  inline bool door() const;
-  inline void set_door(bool value);
-
-  // optional bool road = 3 [default = false];
+  // optional bool road = 1 [default = false];
   inline bool has_road() const;
   inline void clear_road();
-  static const int kRoadFieldNumber = 3;
+  static const int kRoadFieldNumber = 1;
   inline bool road() const;
   inline void set_road(bool value);
 
-  // optional bool climb = 4 [default = false];
+  // optional bool climb = 2 [default = false];
   inline bool has_climb() const;
   inline void clear_climb();
-  static const int kClimbFieldNumber = 4;
+  static const int kClimbFieldNumber = 2;
   inline bool climb() const;
   inline void set_climb(bool value);
 
-  // optional bool random = 5 [default = false];
+  // optional bool random = 3 [default = false];
   inline bool has_random() const;
   inline void clear_random();
-  static const int kRandomFieldNumber = 5;
+  static const int kRandomFieldNumber = 3;
   inline bool random() const;
   inline void set_random(bool value);
 
-  // optional bool special = 6 [default = false];
+  // optional bool special = 4 [default = false];
   inline bool has_special() const;
   inline void clear_special();
-  static const int kSpecialFieldNumber = 6;
+  static const int kSpecialFieldNumber = 4;
   inline bool special() const;
   inline void set_special(bool value);
 
-  // optional bool no_match = 7 [default = false];
+  // optional bool no_match = 5 [default = false];
   inline bool has_no_match() const;
   inline void clear_no_match();
-  static const int kNoMatchFieldNumber = 7;
+  static const int kNoMatchFieldNumber = 5;
   inline bool no_match() const;
   inline void set_no_match(bool value);
 
   // @@protoc_insertion_point(class_scope:mapdata.Exit.ExitFlags)
  private:
-  inline void set_has_exit();
-  inline void clear_has_exit();
-  inline void set_has_door();
-  inline void clear_has_door();
   inline void set_has_road();
   inline void clear_has_road();
   inline void set_has_climb();
@@ -637,8 +617,6 @@ class Exit_ExitFlags : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  bool exit_;
-  bool door_;
   bool road_;
   bool climb_;
   bool random_;
@@ -646,7 +624,7 @@ class Exit_ExitFlags : public ::google::protobuf::Message {
   bool no_match_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_map_2eproto();
   friend void protobuf_AssignDesc_map_2eproto();
@@ -711,52 +689,43 @@ class Exit_DoorFlags : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional bool hidden = 1 [default = false];
-  inline bool has_hidden() const;
-  inline void clear_hidden();
-  static const int kHiddenFieldNumber = 1;
-  inline bool hidden() const;
-  inline void set_hidden(bool value);
-
-  // optional bool needkey = 2 [default = false];
+  // optional bool needkey = 1 [default = false];
   inline bool has_needkey() const;
   inline void clear_needkey();
-  static const int kNeedkeyFieldNumber = 2;
+  static const int kNeedkeyFieldNumber = 1;
   inline bool needkey() const;
   inline void set_needkey(bool value);
 
-  // optional bool noblock = 3 [default = false];
+  // optional bool noblock = 2 [default = false];
   inline bool has_noblock() const;
   inline void clear_noblock();
-  static const int kNoblockFieldNumber = 3;
+  static const int kNoblockFieldNumber = 2;
   inline bool noblock() const;
   inline void set_noblock(bool value);
 
-  // optional bool nobreak = 4 [default = false];
+  // optional bool nobreak = 3 [default = false];
   inline bool has_nobreak() const;
   inline void clear_nobreak();
-  static const int kNobreakFieldNumber = 4;
+  static const int kNobreakFieldNumber = 3;
   inline bool nobreak() const;
   inline void set_nobreak(bool value);
 
-  // optional bool nopick = 5 [default = false];
+  // optional bool nopick = 4 [default = false];
   inline bool has_nopick() const;
   inline void clear_nopick();
-  static const int kNopickFieldNumber = 5;
+  static const int kNopickFieldNumber = 4;
   inline bool nopick() const;
   inline void set_nopick(bool value);
 
-  // optional bool delayed = 6 [default = false];
+  // optional bool delayed = 5 [default = false];
   inline bool has_delayed() const;
   inline void clear_delayed();
-  static const int kDelayedFieldNumber = 6;
+  static const int kDelayedFieldNumber = 5;
   inline bool delayed() const;
   inline void set_delayed(bool value);
 
   // @@protoc_insertion_point(class_scope:mapdata.Exit.DoorFlags)
  private:
-  inline void set_has_hidden();
-  inline void clear_has_hidden();
   inline void set_has_needkey();
   inline void clear_has_needkey();
   inline void set_has_noblock();
@@ -770,7 +739,6 @@ class Exit_DoorFlags : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  bool hidden_;
   bool needkey_;
   bool noblock_;
   bool nobreak_;
@@ -778,7 +746,7 @@ class Exit_DoorFlags : public ::google::protobuf::Message {
   bool delayed_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_map_2eproto();
   friend void protobuf_AssignDesc_map_2eproto();
@@ -846,8 +814,6 @@ class Exit : public ::google::protobuf::Message {
 
   typedef Exit_ExitType ExitType;
   static const ExitType ET_NORMAL = Exit_ExitType_ET_NORMAL;
-  static const ExitType ET_LOOP = Exit_ExitType_ET_LOOP;
-  static const ExitType ET_ONEWAY = Exit_ExitType_ET_ONEWAY;
   static const ExitType ET_UNDEFINED = Exit_ExitType_ET_UNDEFINED;
   static const ExitType ET_DEATH = Exit_ExitType_ET_DEATH;
   static const ExitType ET_NONE = Exit_ExitType_ET_NONE;
@@ -2305,59 +2271,15 @@ inline void Area::set_scale(float value) {
 
 // Exit_ExitFlags
 
-// optional bool exit = 1 [default = false];
-inline bool Exit_ExitFlags::has_exit() const {
+// optional bool road = 1 [default = false];
+inline bool Exit_ExitFlags::has_road() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void Exit_ExitFlags::set_has_exit() {
+inline void Exit_ExitFlags::set_has_road() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void Exit_ExitFlags::clear_has_exit() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void Exit_ExitFlags::clear_exit() {
-  exit_ = false;
-  clear_has_exit();
-}
-inline bool Exit_ExitFlags::exit() const {
-  return exit_;
-}
-inline void Exit_ExitFlags::set_exit(bool value) {
-  set_has_exit();
-  exit_ = value;
-}
-
-// optional bool door = 2 [default = false];
-inline bool Exit_ExitFlags::has_door() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void Exit_ExitFlags::set_has_door() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void Exit_ExitFlags::clear_has_door() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void Exit_ExitFlags::clear_door() {
-  door_ = false;
-  clear_has_door();
-}
-inline bool Exit_ExitFlags::door() const {
-  return door_;
-}
-inline void Exit_ExitFlags::set_door(bool value) {
-  set_has_door();
-  door_ = value;
-}
-
-// optional bool road = 3 [default = false];
-inline bool Exit_ExitFlags::has_road() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void Exit_ExitFlags::set_has_road() {
-  _has_bits_[0] |= 0x00000004u;
-}
 inline void Exit_ExitFlags::clear_has_road() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void Exit_ExitFlags::clear_road() {
   road_ = false;
@@ -2371,15 +2293,15 @@ inline void Exit_ExitFlags::set_road(bool value) {
   road_ = value;
 }
 
-// optional bool climb = 4 [default = false];
+// optional bool climb = 2 [default = false];
 inline bool Exit_ExitFlags::has_climb() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void Exit_ExitFlags::set_has_climb() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void Exit_ExitFlags::clear_has_climb() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void Exit_ExitFlags::clear_climb() {
   climb_ = false;
@@ -2393,15 +2315,15 @@ inline void Exit_ExitFlags::set_climb(bool value) {
   climb_ = value;
 }
 
-// optional bool random = 5 [default = false];
+// optional bool random = 3 [default = false];
 inline bool Exit_ExitFlags::has_random() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void Exit_ExitFlags::set_has_random() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void Exit_ExitFlags::clear_has_random() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void Exit_ExitFlags::clear_random() {
   random_ = false;
@@ -2415,15 +2337,15 @@ inline void Exit_ExitFlags::set_random(bool value) {
   random_ = value;
 }
 
-// optional bool special = 6 [default = false];
+// optional bool special = 4 [default = false];
 inline bool Exit_ExitFlags::has_special() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void Exit_ExitFlags::set_has_special() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void Exit_ExitFlags::clear_has_special() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void Exit_ExitFlags::clear_special() {
   special_ = false;
@@ -2437,15 +2359,15 @@ inline void Exit_ExitFlags::set_special(bool value) {
   special_ = value;
 }
 
-// optional bool no_match = 7 [default = false];
+// optional bool no_match = 5 [default = false];
 inline bool Exit_ExitFlags::has_no_match() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void Exit_ExitFlags::set_has_no_match() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void Exit_ExitFlags::clear_has_no_match() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void Exit_ExitFlags::clear_no_match() {
   no_match_ = false;
@@ -2463,37 +2385,15 @@ inline void Exit_ExitFlags::set_no_match(bool value) {
 
 // Exit_DoorFlags
 
-// optional bool hidden = 1 [default = false];
-inline bool Exit_DoorFlags::has_hidden() const {
+// optional bool needkey = 1 [default = false];
+inline bool Exit_DoorFlags::has_needkey() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void Exit_DoorFlags::set_has_hidden() {
+inline void Exit_DoorFlags::set_has_needkey() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void Exit_DoorFlags::clear_has_hidden() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void Exit_DoorFlags::clear_hidden() {
-  hidden_ = false;
-  clear_has_hidden();
-}
-inline bool Exit_DoorFlags::hidden() const {
-  return hidden_;
-}
-inline void Exit_DoorFlags::set_hidden(bool value) {
-  set_has_hidden();
-  hidden_ = value;
-}
-
-// optional bool needkey = 2 [default = false];
-inline bool Exit_DoorFlags::has_needkey() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void Exit_DoorFlags::set_has_needkey() {
-  _has_bits_[0] |= 0x00000002u;
-}
 inline void Exit_DoorFlags::clear_has_needkey() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void Exit_DoorFlags::clear_needkey() {
   needkey_ = false;
@@ -2507,15 +2407,15 @@ inline void Exit_DoorFlags::set_needkey(bool value) {
   needkey_ = value;
 }
 
-// optional bool noblock = 3 [default = false];
+// optional bool noblock = 2 [default = false];
 inline bool Exit_DoorFlags::has_noblock() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void Exit_DoorFlags::set_has_noblock() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void Exit_DoorFlags::clear_has_noblock() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void Exit_DoorFlags::clear_noblock() {
   noblock_ = false;
@@ -2529,15 +2429,15 @@ inline void Exit_DoorFlags::set_noblock(bool value) {
   noblock_ = value;
 }
 
-// optional bool nobreak = 4 [default = false];
+// optional bool nobreak = 3 [default = false];
 inline bool Exit_DoorFlags::has_nobreak() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void Exit_DoorFlags::set_has_nobreak() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void Exit_DoorFlags::clear_has_nobreak() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void Exit_DoorFlags::clear_nobreak() {
   nobreak_ = false;
@@ -2551,15 +2451,15 @@ inline void Exit_DoorFlags::set_nobreak(bool value) {
   nobreak_ = value;
 }
 
-// optional bool nopick = 5 [default = false];
+// optional bool nopick = 4 [default = false];
 inline bool Exit_DoorFlags::has_nopick() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void Exit_DoorFlags::set_has_nopick() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void Exit_DoorFlags::clear_has_nopick() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void Exit_DoorFlags::clear_nopick() {
   nopick_ = false;
@@ -2573,15 +2473,15 @@ inline void Exit_DoorFlags::set_nopick(bool value) {
   nopick_ = value;
 }
 
-// optional bool delayed = 6 [default = false];
+// optional bool delayed = 5 [default = false];
 inline bool Exit_DoorFlags::has_delayed() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void Exit_DoorFlags::set_has_delayed() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void Exit_DoorFlags::clear_has_delayed() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void Exit_DoorFlags::clear_delayed() {
   delayed_ = false;

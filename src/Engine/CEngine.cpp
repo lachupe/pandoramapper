@@ -474,9 +474,9 @@ void CEngine::mapCurrentRoom(CRoom *room, ExitDirection dir)
 
     addedroom->setRegion( users_region );
 
-    room->setExit(dir, addedroom);
+    room->setExitLeadsTo(dir, addedroom);
     if (conf->getDuallinker() == true)
-        addedroom->setExit(reversenum(dir), room);
+        addedroom->setExitLeadsTo(reversenum(dir), room);
     else
         Map.oneway_room_id = room->getId();
 
@@ -643,8 +643,8 @@ void CEngine::angryLinker(CRoom *r)
           print_debug(DEBUG_ROOMS, "ID: %i to %i exit %s.", r->getId(), candidates[i]->getId(), exits[i] );
 
           /* ok, do the linking */
-          candidates[ i ]->setExit( reversenum(iDir), r);
-          r->setExit(iDir, candidates[ i ]);
+          candidates[ i ]->setExitLeadsTo( reversenum(iDir), r);
+          r->setExitLeadsTo(iDir, candidates[ i ]);
           print_debug(DEBUG_ROOMS, "Linked.", r->getId(), candidates[i]->getId(), exits[i] );
 
           send_to_user("--[ (AngryLinker) Linked exit %s with %s [%i].\r\n",

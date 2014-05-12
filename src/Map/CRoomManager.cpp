@@ -319,7 +319,7 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, ExitDirection j)
      for (unsigned int i = 0; i <= 5; i++) {
          ExitDirection iDir = static_cast<ExitDirection>(i);
          if (p->isExitLeadingTo(iDir, copy) == true)
-             p->setExit(iDir, r);
+             p->setExitLeadsTo(iDir, r);
      }
 
     smallDeleteRoom(copy);
@@ -330,11 +330,11 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, ExitDirection j)
   }
 
   if ( r->isExitUndefined(j) ) {
-    r->setExit(j, copy->getExitLeadsTo(j) );
+    r->setExitLeadsTo(j, copy->getExitLeadsTo(j) );
 
     p = copy->getExitRoom(j);
     if (p->isExitLeadingTo( reversenum(j), copy) == true)
-        p->setExit( reversenum(j), r);
+        p->setExitLeadsTo( reversenum(j), r);
 
     smallDeleteRoom(copy);
 

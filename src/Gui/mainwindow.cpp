@@ -324,18 +324,13 @@ void CMainWindow::hide_status()
   }
 }
 
-void CMainWindow::editRoomDialog(unsigned int id)
+void CMainWindow::editRoomDialog()
 {
-    if (!edit_dialog) {
-        edit_dialog = new RoomEditDialog(this);
-    }
+    RoomEditAttrDlg m_roomEditDialog;
 
-    edit_dialog->clear_data();
-    edit_dialog->load_room_data(id);
 
-    edit_dialog->show();
-    edit_dialog->raise();
-    edit_dialog->activateWindow();
+    m_roomEditDialog.setRoomSelection( Map.selections.getList(), &Map);
+    m_roomEditDialog.exec();
 }
 
 

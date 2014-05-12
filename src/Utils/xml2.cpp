@@ -192,7 +192,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
     	i = 0;
     	bool NoError = false;
     	to = s.toInt(&NoError);
-        r->setExit(dir, to);
+        r->setExitLeadsTo(dir, to);
     }
 
     s = attributes.value("door");

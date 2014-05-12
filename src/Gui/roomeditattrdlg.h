@@ -40,11 +40,22 @@ class RoomEditAttrDlg : public QDialog, private Ui::RoomEditAttrDlg
 {
     Q_OBJECT
 
+    // helper functions
+    void setAlign(RoomAlignType flag);
+    void setPortable(RoomPortableType flag);
+    void setRidable(RoomRidableType flag);
+    void setLight(RoomLightType flag);
+    void setMobFlag(RoomMobFlag flag, bool val);
+    void setLoadFlag(RoomLoadFlag flag, bool val);
+    void setDoorFlag(ExitDirection dir, DoorFlag flag, bool val);
+    void setExitFlag(ExitDirection dir, ExitFlag flag, bool val);
+
+
 signals:
 	void mapChanged();
 
 public slots:
-    void setRoomSelection(const QList<RoomId> *selection, CRoomManager *manager);
+    void setRoomSelection(QList<RoomId> selection, CRoomManager *manager);
 
 	//selection page    
     void roomListCurrentIndexChanged(int);
@@ -101,7 +112,7 @@ private:
 	void connectAll();
 	void disconnectAll();
 
-    const CRoom *getSelectedRoom();
+    CRoom *getSelectedRoom();
     ExitDirection getSelectedExit();
     void updateDialog(const CRoom *r);
 	
@@ -111,7 +122,7 @@ private:
 	QListWidgetItem* exitListItems[20];
 	QListWidgetItem* doorListItems[20];
 
-    const QList<RoomId> 	*m_roomSelection;
+    QList<RoomId>           m_roomSelection;
     CRoomManager            *m_manager;
     QShortcut               *m_hiddenShortcut;
 };

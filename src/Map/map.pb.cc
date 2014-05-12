@@ -137,9 +137,7 @@ void protobuf_AssignDesc_map_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Exit));
   Exit_ExitFlags_descriptor_ = Exit_descriptor_->nested_type(0);
-  static const int Exit_ExitFlags_offsets_[7] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Exit_ExitFlags, exit_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Exit_ExitFlags, door_),
+  static const int Exit_ExitFlags_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Exit_ExitFlags, road_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Exit_ExitFlags, climb_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Exit_ExitFlags, random_),
@@ -158,8 +156,7 @@ void protobuf_AssignDesc_map_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Exit_ExitFlags));
   Exit_DoorFlags_descriptor_ = Exit_descriptor_->nested_type(1);
-  static const int Exit_DoorFlags_offsets_[6] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Exit_DoorFlags, hidden_),
+  static const int Exit_DoorFlags_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Exit_DoorFlags, needkey_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Exit_DoorFlags, noblock_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Exit_DoorFlags, nobreak_),
@@ -363,78 +360,76 @@ void protobuf_AddDesc_map_2eproto() {
     "ms_amount\030\001 \001(\005:\0010\022\027\n\014areas_amount\030\002 \001(\005"
     ":\0010\"o\n\004Area\022\014\n\004name\030\001 \002(\t\022\"\n\005alias\030\002 \003(\013"
     "2\023.mapdata.Area.Alias\022\020\n\005scale\030\003 \001(\002:\0011\032"
-    "#\n\005Alias\022\014\n\004name\030\001 \002(\t\022\014\n\004door\030\002 \002(\t\"\205\006\n"
+    "#\n\005Alias\022\014\n\004name\030\001 \002(\t\022\014\n\004door\030\002 \002(\t\"\247\005\n"
     "\004Exit\0224\n\003dir\030\001 \002(\0162\033.mapdata.Exit.ExitDi"
     "rection:\nED_UNKNOWN\022\026\n\013leads_to_id\030\002 \001(\005"
     ":\0010\022-\n\004type\030\003 \001(\0162\026.mapdata.Exit.ExitTyp"
     "e:\007ET_NONE\022\014\n\004door\030\004 \001(\t\022+\n\nexit_flags\030\005"
     " \001(\0132\027.mapdata.Exit.ExitFlags\022+\n\ndoor_fl"
-    "ags\030\006 \001(\0132\027.mapdata.Exit.DoorFlags\032\250\001\n\tE"
-    "xitFlags\022\023\n\004exit\030\001 \001(\010:\005false\022\023\n\004door\030\002 "
-    "\001(\010:\005false\022\023\n\004road\030\003 \001(\010:\005false\022\024\n\005climb"
-    "\030\004 \001(\010:\005false\022\025\n\006random\030\005 \001(\010:\005false\022\026\n\007"
-    "special\030\006 \001(\010:\005false\022\027\n\010no_match\030\007 \001(\010:\005"
-    "false\032\231\001\n\tDoorFlags\022\025\n\006hidden\030\001 \001(\010:\005fal"
-    "se\022\026\n\007needkey\030\002 \001(\010:\005false\022\026\n\007noblock\030\003 "
-    "\001(\010:\005false\022\026\n\007nobreak\030\004 \001(\010:\005false\022\025\n\006no"
-    "pick\030\005 \001(\010:\005false\022\026\n\007delayed\030\006 \001(\010:\005fals"
-    "e\"b\n\010ExitType\022\r\n\tET_NORMAL\020\000\022\013\n\007ET_LOOP\020"
-    "\001\022\r\n\tET_ONEWAY\020\002\022\020\n\014ET_UNDEFINED\020\003\022\014\n\010ET"
-    "_DEATH\020\004\022\013\n\007ET_NONE\020\005\"m\n\rExitDirection\022\014"
-    "\n\010ED_NORTH\020\000\022\014\n\010ED_SOUTH\020\001\022\013\n\007ED_EAST\020\002\022"
-    "\013\n\007ED_WEST\020\003\022\t\n\005ED_UP\020\004\022\013\n\007ED_DOWN\020\005\022\016\n\n"
-    "ED_UNKNOWN\020\006\"\206\020\n\004Room\022\n\n\002id\030\001 \002(\005\022\014\n\004nam"
-    "e\030\002 \002(\t\022\014\n\004desc\030\003 \002(\t\022%\n\003pos\030\004 \002(\0132\030.map"
-    "data.Room.Coordinate\022\032\n\tarea_name\030\006 \001(\t:"
-    "\007default\022\023\n\013dynamicDesc\030\007 \001(\t\022=\n\007terrain"
-    "\030\010 \001(\0162\035.mapdata.Room.RoomTerrainType:\rR"
-    "TT_UNDEFINED\022\034\n\005exits\030\t \003(\0132\r.mapdata.Ex"
-    "it\022\014\n\004note\030\017 \001(\t\022\022\n\nnote_color\030\020 \001(\t\022\014\n\004"
-    "info\030\021 \001(\t\022D\n\rflag_portable\030\022 \001(\0162\036.mapd"
-    "ata.Room.RoomPortableType:\rRPT_UNDEFINED"
-    "\022>\n\nflag_light\030\023 \001(\0162\033.mapdata.Room.Room"
-    "LightType:\rRLT_UNDEFINED\022C\n\rflag_rideabl"
-    "e\030\024 \001(\0162\035.mapdata.Room.RoomRidableType:\r"
-    "RRT_UNDEFINED\022>\n\nflag_align\030\025 \001(\0162\033.mapd"
-    "ata.Room.RoomAlignType:\rRAT_UNDEFINED\022)\n"
-    "\tmob_flags\030\026 \001(\0132\026.mapdata.Room.MobFlags"
-    "\022+\n\nload_flags\030\027 \001(\0132\027.mapdata.Room.Load"
-    "Flags\032\372\002\n\010MobFlags\022\023\n\004rent\030\001 \001(\010:\005false\022"
-    "\023\n\004shop\030\002 \001(\010:\005false\022\031\n\nweaponshop\030\003 \001(\010"
-    ":\005false\022\031\n\narmourshop\030\004 \001(\010:\005false\022\027\n\010fo"
-    "odshop\030\005 \001(\010:\005false\022\026\n\007petshop\030\006 \001(\010:\005fa"
-    "lse\022\024\n\005guild\030\007 \001(\010:\005false\022\031\n\nscoutguild\030"
-    "\010 \001(\010:\005false\022\030\n\tmageguild\030\t \001(\010:\005false\022\032"
-    "\n\013clericguild\030\n \001(\010:\005false\022\033\n\014warriorgui"
-    "ld\030\013 \001(\010:\005false\022\032\n\013rangerguild\030\014 \001(\010:\005fa"
-    "lse\022\023\n\004smob\030\r \001(\010:\005false\022\024\n\005quest\030\016 \001(\010:"
-    "\005false\022\022\n\003any\030\017 \001(\010:\005false\032\373\002\n\tLoadFlags"
-    "\022\027\n\010treasure\030\001 \001(\010:\005false\022\025\n\006armour\030\002 \001("
-    "\010:\005false\022\025\n\006weapon\030\003 \001(\010:\005false\022\024\n\005water"
-    "\030\004 \001(\010:\005false\022\023\n\004food\030\005 \001(\010:\005false\022\023\n\004he"
-    "rb\030\006 \001(\010:\005false\022\022\n\003key\030\007 \001(\010:\005false\022\023\n\004m"
-    "ule\030\010 \001(\010:\005false\022\024\n\005horse\030\t \001(\010:\005false\022\030"
-    "\n\tpackhorse\030\n \001(\010:\005false\022\033\n\014trainedhorse"
-    "\030\013 \001(\010:\005false\022\027\n\010rohirrim\030\014 \001(\010:\005false\022\023"
-    "\n\004warg\030\r \001(\010:\005false\022\023\n\004boat\030\016 \001(\010:\005false"
-    "\022\030\n\tattention\030\017 \001(\010:\005false\022\024\n\005tower\030\020 \001("
-    "\010:\005false\032\?\n\nCoordinate\022\t\n\001x\030\001 \002(\002\022\t\n\001y\030\002"
-    " \002(\002\022\t\n\001z\030\003 \002(\002\022\020\n\005scale\030\004 \001(\002:\0011\"\250\002\n\017Ro"
-    "omTerrainType\022\021\n\rRTT_UNDEFINED\020\000\022\017\n\013RTT_"
-    "INDOORS\020\001\022\014\n\010RTT_CITY\020\002\022\r\n\tRTT_FIELD\020\003\022\016"
-    "\n\nRTT_FOREST\020\004\022\r\n\tRTT_HILLS\020\005\022\021\n\rRTT_MOU"
-    "NTAINS\020\006\022\017\n\013RTT_SHALLOW\020\007\022\r\n\tRTT_WATER\020\010"
-    "\022\016\n\nRTT_RAPIDS\020\t\022\022\n\016RTT_UNDERWATER\020\n\022\014\n\010"
-    "RTT_ROAD\020\013\022\r\n\tRTT_BRUSH\020\014\022\016\n\nRTT_TUNNEL\020"
-    "\r\022\016\n\nRTT_CAVERN\020\016\022\021\n\rRTT_DEATHTRAP\020\017\022\016\n\n"
-    "RTT_RANDOM\020\020\"L\n\020RoomPortableType\022\021\n\rRPT_"
-    "UNDEFINED\020\000\022\020\n\014RPT_PORTABLE\020\001\022\023\n\017RPT_NOT"
-    "PORTABLE\020\002\"=\n\rRoomLightType\022\021\n\rRLT_UNDEF"
-    "INED\020\000\022\014\n\010RLT_DARK\020\001\022\013\n\007RLT_LIT\020\002\"O\n\rRoo"
-    "mAlignType\022\021\n\rRAT_UNDEFINED\020\000\022\014\n\010RAT_GOO"
-    "D\020\001\022\017\n\013RAT_NEUTRAL\020\002\022\014\n\010RAT_EVIL\020\003\"I\n\017Ro"
-    "omRidableType\022\021\n\rRRT_UNDEFINED\020\000\022\017\n\013RRT_"
-    "RIDABLE\020\001\022\022\n\016RRT_NOTRIDABLE\020\002", 3029);
+    "ags\030\006 \001(\0132\027.mapdata.Exit.DoorFlags\032~\n\tEx"
+    "itFlags\022\023\n\004road\030\001 \001(\010:\005false\022\024\n\005climb\030\002 "
+    "\001(\010:\005false\022\025\n\006random\030\003 \001(\010:\005false\022\026\n\007spe"
+    "cial\030\004 \001(\010:\005false\022\027\n\010no_match\030\005 \001(\010:\005fal"
+    "se\032\202\001\n\tDoorFlags\022\026\n\007needkey\030\001 \001(\010:\005false"
+    "\022\026\n\007noblock\030\002 \001(\010:\005false\022\026\n\007nobreak\030\003 \001("
+    "\010:\005false\022\025\n\006nopick\030\004 \001(\010:\005false\022\026\n\007delay"
+    "ed\030\005 \001(\010:\005false\"F\n\010ExitType\022\r\n\tET_NORMAL"
+    "\020\000\022\020\n\014ET_UNDEFINED\020\003\022\014\n\010ET_DEATH\020\004\022\013\n\007ET"
+    "_NONE\020\005\"m\n\rExitDirection\022\014\n\010ED_NORTH\020\000\022\014"
+    "\n\010ED_SOUTH\020\001\022\013\n\007ED_EAST\020\002\022\013\n\007ED_WEST\020\003\022\t"
+    "\n\005ED_UP\020\004\022\013\n\007ED_DOWN\020\005\022\016\n\nED_UNKNOWN\020\006\"\206"
+    "\020\n\004Room\022\n\n\002id\030\001 \002(\005\022\014\n\004name\030\002 \002(\t\022\014\n\004des"
+    "c\030\003 \002(\t\022%\n\003pos\030\004 \002(\0132\030.mapdata.Room.Coor"
+    "dinate\022\032\n\tarea_name\030\006 \001(\t:\007default\022\023\n\013dy"
+    "namicDesc\030\007 \001(\t\022=\n\007terrain\030\010 \001(\0162\035.mapda"
+    "ta.Room.RoomTerrainType:\rRTT_UNDEFINED\022\034"
+    "\n\005exits\030\t \003(\0132\r.mapdata.Exit\022\014\n\004note\030\017 \001"
+    "(\t\022\022\n\nnote_color\030\020 \001(\t\022\014\n\004info\030\021 \001(\t\022D\n\r"
+    "flag_portable\030\022 \001(\0162\036.mapdata.Room.RoomP"
+    "ortableType:\rRPT_UNDEFINED\022>\n\nflag_light"
+    "\030\023 \001(\0162\033.mapdata.Room.RoomLightType:\rRLT"
+    "_UNDEFINED\022C\n\rflag_rideable\030\024 \001(\0162\035.mapd"
+    "ata.Room.RoomRidableType:\rRRT_UNDEFINED\022"
+    ">\n\nflag_align\030\025 \001(\0162\033.mapdata.Room.RoomA"
+    "lignType:\rRAT_UNDEFINED\022)\n\tmob_flags\030\026 \001"
+    "(\0132\026.mapdata.Room.MobFlags\022+\n\nload_flags"
+    "\030\027 \001(\0132\027.mapdata.Room.LoadFlags\032\372\002\n\010MobF"
+    "lags\022\023\n\004rent\030\001 \001(\010:\005false\022\023\n\004shop\030\002 \001(\010:"
+    "\005false\022\031\n\nweaponshop\030\003 \001(\010:\005false\022\031\n\narm"
+    "ourshop\030\004 \001(\010:\005false\022\027\n\010foodshop\030\005 \001(\010:\005"
+    "false\022\026\n\007petshop\030\006 \001(\010:\005false\022\024\n\005guild\030\007"
+    " \001(\010:\005false\022\031\n\nscoutguild\030\010 \001(\010:\005false\022\030"
+    "\n\tmageguild\030\t \001(\010:\005false\022\032\n\013clericguild\030"
+    "\n \001(\010:\005false\022\033\n\014warriorguild\030\013 \001(\010:\005fals"
+    "e\022\032\n\013rangerguild\030\014 \001(\010:\005false\022\023\n\004smob\030\r "
+    "\001(\010:\005false\022\024\n\005quest\030\016 \001(\010:\005false\022\022\n\003any\030"
+    "\017 \001(\010:\005false\032\373\002\n\tLoadFlags\022\027\n\010treasure\030\001"
+    " \001(\010:\005false\022\025\n\006armour\030\002 \001(\010:\005false\022\025\n\006we"
+    "apon\030\003 \001(\010:\005false\022\024\n\005water\030\004 \001(\010:\005false\022"
+    "\023\n\004food\030\005 \001(\010:\005false\022\023\n\004herb\030\006 \001(\010:\005fals"
+    "e\022\022\n\003key\030\007 \001(\010:\005false\022\023\n\004mule\030\010 \001(\010:\005fal"
+    "se\022\024\n\005horse\030\t \001(\010:\005false\022\030\n\tpackhorse\030\n "
+    "\001(\010:\005false\022\033\n\014trainedhorse\030\013 \001(\010:\005false\022"
+    "\027\n\010rohirrim\030\014 \001(\010:\005false\022\023\n\004warg\030\r \001(\010:\005"
+    "false\022\023\n\004boat\030\016 \001(\010:\005false\022\030\n\tattention\030"
+    "\017 \001(\010:\005false\022\024\n\005tower\030\020 \001(\010:\005false\032\?\n\nCo"
+    "ordinate\022\t\n\001x\030\001 \002(\002\022\t\n\001y\030\002 \002(\002\022\t\n\001z\030\003 \002("
+    "\002\022\020\n\005scale\030\004 \001(\002:\0011\"\250\002\n\017RoomTerrainType\022"
+    "\021\n\rRTT_UNDEFINED\020\000\022\017\n\013RTT_INDOORS\020\001\022\014\n\010R"
+    "TT_CITY\020\002\022\r\n\tRTT_FIELD\020\003\022\016\n\nRTT_FOREST\020\004"
+    "\022\r\n\tRTT_HILLS\020\005\022\021\n\rRTT_MOUNTAINS\020\006\022\017\n\013RT"
+    "T_SHALLOW\020\007\022\r\n\tRTT_WATER\020\010\022\016\n\nRTT_RAPIDS"
+    "\020\t\022\022\n\016RTT_UNDERWATER\020\n\022\014\n\010RTT_ROAD\020\013\022\r\n\t"
+    "RTT_BRUSH\020\014\022\016\n\nRTT_TUNNEL\020\r\022\016\n\nRTT_CAVER"
+    "N\020\016\022\021\n\rRTT_DEATHTRAP\020\017\022\016\n\nRTT_RANDOM\020\020\"L"
+    "\n\020RoomPortableType\022\021\n\rRPT_UNDEFINED\020\000\022\020\n"
+    "\014RPT_PORTABLE\020\001\022\023\n\017RPT_NOTPORTABLE\020\002\"=\n\r"
+    "RoomLightType\022\021\n\rRLT_UNDEFINED\020\000\022\014\n\010RLT_"
+    "DARK\020\001\022\013\n\007RLT_LIT\020\002\"O\n\rRoomAlignType\022\021\n\r"
+    "RAT_UNDEFINED\020\000\022\014\n\010RAT_GOOD\020\001\022\017\n\013RAT_NEU"
+    "TRAL\020\002\022\014\n\010RAT_EVIL\020\003\"I\n\017RoomRidableType\022"
+    "\021\n\rRRT_UNDEFINED\020\000\022\017\n\013RRT_RIDABLE\020\001\022\022\n\016R"
+    "RT_NOTRIDABLE\020\002", 2935);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "map.proto", &protobuf_RegisterTypes);
   MapHeader::default_instance_ = new MapHeader();
@@ -1316,8 +1311,6 @@ const ::google::protobuf::EnumDescriptor* Exit_ExitType_descriptor() {
 bool Exit_ExitType_IsValid(int value) {
   switch(value) {
     case 0:
-    case 1:
-    case 2:
     case 3:
     case 4:
     case 5:
@@ -1329,8 +1322,6 @@ bool Exit_ExitType_IsValid(int value) {
 
 #ifndef _MSC_VER
 const Exit_ExitType Exit::ET_NORMAL;
-const Exit_ExitType Exit::ET_LOOP;
-const Exit_ExitType Exit::ET_ONEWAY;
 const Exit_ExitType Exit::ET_UNDEFINED;
 const Exit_ExitType Exit::ET_DEATH;
 const Exit_ExitType Exit::ET_NONE;
@@ -1370,8 +1361,6 @@ const Exit_ExitDirection Exit::ExitDirection_MAX;
 const int Exit::ExitDirection_ARRAYSIZE;
 #endif  // _MSC_VER
 #ifndef _MSC_VER
-const int Exit_ExitFlags::kExitFieldNumber;
-const int Exit_ExitFlags::kDoorFieldNumber;
 const int Exit_ExitFlags::kRoadFieldNumber;
 const int Exit_ExitFlags::kClimbFieldNumber;
 const int Exit_ExitFlags::kRandomFieldNumber;
@@ -1395,8 +1384,6 @@ Exit_ExitFlags::Exit_ExitFlags(const Exit_ExitFlags& from)
 
 void Exit_ExitFlags::SharedCtor() {
   _cached_size_ = 0;
-  exit_ = false;
-  door_ = false;
   road_ = false;
   climb_ = false;
   random_ = false;
@@ -1437,8 +1424,6 @@ Exit_ExitFlags* Exit_ExitFlags::New() const {
 
 void Exit_ExitFlags::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    exit_ = false;
-    door_ = false;
     road_ = false;
     climb_ = false;
     random_ = false;
@@ -1455,42 +1440,10 @@ bool Exit_ExitFlags::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional bool exit = 1 [default = false];
+      // optional bool road = 1 [default = false];
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &exit_)));
-          set_has_exit();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(16)) goto parse_door;
-        break;
-      }
-
-      // optional bool door = 2 [default = false];
-      case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_door:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &door_)));
-          set_has_door();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(24)) goto parse_road;
-        break;
-      }
-
-      // optional bool road = 3 [default = false];
-      case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_road:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
                  input, &road_)));
@@ -1498,12 +1451,12 @@ bool Exit_ExitFlags::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(32)) goto parse_climb;
+        if (input->ExpectTag(16)) goto parse_climb;
         break;
       }
 
-      // optional bool climb = 4 [default = false];
-      case 4: {
+      // optional bool climb = 2 [default = false];
+      case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_climb:
@@ -1514,12 +1467,12 @@ bool Exit_ExitFlags::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(40)) goto parse_random;
+        if (input->ExpectTag(24)) goto parse_random;
         break;
       }
 
-      // optional bool random = 5 [default = false];
-      case 5: {
+      // optional bool random = 3 [default = false];
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_random:
@@ -1530,12 +1483,12 @@ bool Exit_ExitFlags::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(48)) goto parse_special;
+        if (input->ExpectTag(32)) goto parse_special;
         break;
       }
 
-      // optional bool special = 6 [default = false];
-      case 6: {
+      // optional bool special = 4 [default = false];
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_special:
@@ -1546,12 +1499,12 @@ bool Exit_ExitFlags::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(56)) goto parse_no_match;
+        if (input->ExpectTag(40)) goto parse_no_match;
         break;
       }
 
-      // optional bool no_match = 7 [default = false];
-      case 7: {
+      // optional bool no_match = 5 [default = false];
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_no_match:
@@ -1584,39 +1537,29 @@ bool Exit_ExitFlags::MergePartialFromCodedStream(
 
 void Exit_ExitFlags::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional bool exit = 1 [default = false];
-  if (has_exit()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(1, this->exit(), output);
-  }
-
-  // optional bool door = 2 [default = false];
-  if (has_door()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->door(), output);
-  }
-
-  // optional bool road = 3 [default = false];
+  // optional bool road = 1 [default = false];
   if (has_road()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->road(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(1, this->road(), output);
   }
 
-  // optional bool climb = 4 [default = false];
+  // optional bool climb = 2 [default = false];
   if (has_climb()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->climb(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->climb(), output);
   }
 
-  // optional bool random = 5 [default = false];
+  // optional bool random = 3 [default = false];
   if (has_random()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->random(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->random(), output);
   }
 
-  // optional bool special = 6 [default = false];
+  // optional bool special = 4 [default = false];
   if (has_special()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(6, this->special(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->special(), output);
   }
 
-  // optional bool no_match = 7 [default = false];
+  // optional bool no_match = 5 [default = false];
   if (has_no_match()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->no_match(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->no_match(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -1627,39 +1570,29 @@ void Exit_ExitFlags::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* Exit_ExitFlags::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional bool exit = 1 [default = false];
-  if (has_exit()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(1, this->exit(), target);
-  }
-
-  // optional bool door = 2 [default = false];
-  if (has_door()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->door(), target);
-  }
-
-  // optional bool road = 3 [default = false];
+  // optional bool road = 1 [default = false];
   if (has_road()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->road(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(1, this->road(), target);
   }
 
-  // optional bool climb = 4 [default = false];
+  // optional bool climb = 2 [default = false];
   if (has_climb()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->climb(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->climb(), target);
   }
 
-  // optional bool random = 5 [default = false];
+  // optional bool random = 3 [default = false];
   if (has_random()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->random(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->random(), target);
   }
 
-  // optional bool special = 6 [default = false];
+  // optional bool special = 4 [default = false];
   if (has_special()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(6, this->special(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->special(), target);
   }
 
-  // optional bool no_match = 7 [default = false];
+  // optional bool no_match = 5 [default = false];
   if (has_no_match()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->no_match(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->no_match(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -1673,37 +1606,27 @@ int Exit_ExitFlags::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional bool exit = 1 [default = false];
-    if (has_exit()) {
-      total_size += 1 + 1;
-    }
-
-    // optional bool door = 2 [default = false];
-    if (has_door()) {
-      total_size += 1 + 1;
-    }
-
-    // optional bool road = 3 [default = false];
+    // optional bool road = 1 [default = false];
     if (has_road()) {
       total_size += 1 + 1;
     }
 
-    // optional bool climb = 4 [default = false];
+    // optional bool climb = 2 [default = false];
     if (has_climb()) {
       total_size += 1 + 1;
     }
 
-    // optional bool random = 5 [default = false];
+    // optional bool random = 3 [default = false];
     if (has_random()) {
       total_size += 1 + 1;
     }
 
-    // optional bool special = 6 [default = false];
+    // optional bool special = 4 [default = false];
     if (has_special()) {
       total_size += 1 + 1;
     }
 
-    // optional bool no_match = 7 [default = false];
+    // optional bool no_match = 5 [default = false];
     if (has_no_match()) {
       total_size += 1 + 1;
     }
@@ -1735,12 +1658,6 @@ void Exit_ExitFlags::MergeFrom(const ::google::protobuf::Message& from) {
 void Exit_ExitFlags::MergeFrom(const Exit_ExitFlags& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_exit()) {
-      set_exit(from.exit());
-    }
-    if (from.has_door()) {
-      set_door(from.door());
-    }
     if (from.has_road()) {
       set_road(from.road());
     }
@@ -1779,8 +1696,6 @@ bool Exit_ExitFlags::IsInitialized() const {
 
 void Exit_ExitFlags::Swap(Exit_ExitFlags* other) {
   if (other != this) {
-    std::swap(exit_, other->exit_);
-    std::swap(door_, other->door_);
     std::swap(road_, other->road_);
     std::swap(climb_, other->climb_);
     std::swap(random_, other->random_);
@@ -1804,7 +1719,6 @@ void Exit_ExitFlags::Swap(Exit_ExitFlags* other) {
 // -------------------------------------------------------------------
 
 #ifndef _MSC_VER
-const int Exit_DoorFlags::kHiddenFieldNumber;
 const int Exit_DoorFlags::kNeedkeyFieldNumber;
 const int Exit_DoorFlags::kNoblockFieldNumber;
 const int Exit_DoorFlags::kNobreakFieldNumber;
@@ -1828,7 +1742,6 @@ Exit_DoorFlags::Exit_DoorFlags(const Exit_DoorFlags& from)
 
 void Exit_DoorFlags::SharedCtor() {
   _cached_size_ = 0;
-  hidden_ = false;
   needkey_ = false;
   noblock_ = false;
   nobreak_ = false;
@@ -1869,7 +1782,6 @@ Exit_DoorFlags* Exit_DoorFlags::New() const {
 
 void Exit_DoorFlags::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    hidden_ = false;
     needkey_ = false;
     noblock_ = false;
     nobreak_ = false;
@@ -1886,26 +1798,10 @@ bool Exit_DoorFlags::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional bool hidden = 1 [default = false];
+      // optional bool needkey = 1 [default = false];
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &hidden_)));
-          set_has_hidden();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(16)) goto parse_needkey;
-        break;
-      }
-
-      // optional bool needkey = 2 [default = false];
-      case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_needkey:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
                  input, &needkey_)));
@@ -1913,12 +1809,12 @@ bool Exit_DoorFlags::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(24)) goto parse_noblock;
+        if (input->ExpectTag(16)) goto parse_noblock;
         break;
       }
 
-      // optional bool noblock = 3 [default = false];
-      case 3: {
+      // optional bool noblock = 2 [default = false];
+      case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_noblock:
@@ -1929,12 +1825,12 @@ bool Exit_DoorFlags::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(32)) goto parse_nobreak;
+        if (input->ExpectTag(24)) goto parse_nobreak;
         break;
       }
 
-      // optional bool nobreak = 4 [default = false];
-      case 4: {
+      // optional bool nobreak = 3 [default = false];
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_nobreak:
@@ -1945,12 +1841,12 @@ bool Exit_DoorFlags::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(40)) goto parse_nopick;
+        if (input->ExpectTag(32)) goto parse_nopick;
         break;
       }
 
-      // optional bool nopick = 5 [default = false];
-      case 5: {
+      // optional bool nopick = 4 [default = false];
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_nopick:
@@ -1961,12 +1857,12 @@ bool Exit_DoorFlags::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(48)) goto parse_delayed;
+        if (input->ExpectTag(40)) goto parse_delayed;
         break;
       }
 
-      // optional bool delayed = 6 [default = false];
-      case 6: {
+      // optional bool delayed = 5 [default = false];
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_delayed:
@@ -1999,34 +1895,29 @@ bool Exit_DoorFlags::MergePartialFromCodedStream(
 
 void Exit_DoorFlags::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional bool hidden = 1 [default = false];
-  if (has_hidden()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(1, this->hidden(), output);
-  }
-
-  // optional bool needkey = 2 [default = false];
+  // optional bool needkey = 1 [default = false];
   if (has_needkey()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->needkey(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(1, this->needkey(), output);
   }
 
-  // optional bool noblock = 3 [default = false];
+  // optional bool noblock = 2 [default = false];
   if (has_noblock()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->noblock(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->noblock(), output);
   }
 
-  // optional bool nobreak = 4 [default = false];
+  // optional bool nobreak = 3 [default = false];
   if (has_nobreak()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->nobreak(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->nobreak(), output);
   }
 
-  // optional bool nopick = 5 [default = false];
+  // optional bool nopick = 4 [default = false];
   if (has_nopick()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->nopick(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->nopick(), output);
   }
 
-  // optional bool delayed = 6 [default = false];
+  // optional bool delayed = 5 [default = false];
   if (has_delayed()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(6, this->delayed(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->delayed(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -2037,34 +1928,29 @@ void Exit_DoorFlags::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* Exit_DoorFlags::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional bool hidden = 1 [default = false];
-  if (has_hidden()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(1, this->hidden(), target);
-  }
-
-  // optional bool needkey = 2 [default = false];
+  // optional bool needkey = 1 [default = false];
   if (has_needkey()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->needkey(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(1, this->needkey(), target);
   }
 
-  // optional bool noblock = 3 [default = false];
+  // optional bool noblock = 2 [default = false];
   if (has_noblock()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->noblock(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->noblock(), target);
   }
 
-  // optional bool nobreak = 4 [default = false];
+  // optional bool nobreak = 3 [default = false];
   if (has_nobreak()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->nobreak(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->nobreak(), target);
   }
 
-  // optional bool nopick = 5 [default = false];
+  // optional bool nopick = 4 [default = false];
   if (has_nopick()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->nopick(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->nopick(), target);
   }
 
-  // optional bool delayed = 6 [default = false];
+  // optional bool delayed = 5 [default = false];
   if (has_delayed()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(6, this->delayed(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->delayed(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -2078,32 +1964,27 @@ int Exit_DoorFlags::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional bool hidden = 1 [default = false];
-    if (has_hidden()) {
-      total_size += 1 + 1;
-    }
-
-    // optional bool needkey = 2 [default = false];
+    // optional bool needkey = 1 [default = false];
     if (has_needkey()) {
       total_size += 1 + 1;
     }
 
-    // optional bool noblock = 3 [default = false];
+    // optional bool noblock = 2 [default = false];
     if (has_noblock()) {
       total_size += 1 + 1;
     }
 
-    // optional bool nobreak = 4 [default = false];
+    // optional bool nobreak = 3 [default = false];
     if (has_nobreak()) {
       total_size += 1 + 1;
     }
 
-    // optional bool nopick = 5 [default = false];
+    // optional bool nopick = 4 [default = false];
     if (has_nopick()) {
       total_size += 1 + 1;
     }
 
-    // optional bool delayed = 6 [default = false];
+    // optional bool delayed = 5 [default = false];
     if (has_delayed()) {
       total_size += 1 + 1;
     }
@@ -2135,9 +2016,6 @@ void Exit_DoorFlags::MergeFrom(const ::google::protobuf::Message& from) {
 void Exit_DoorFlags::MergeFrom(const Exit_DoorFlags& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_hidden()) {
-      set_hidden(from.hidden());
-    }
     if (from.has_needkey()) {
       set_needkey(from.needkey());
     }
@@ -2176,7 +2054,6 @@ bool Exit_DoorFlags::IsInitialized() const {
 
 void Exit_DoorFlags::Swap(Exit_DoorFlags* other) {
   if (other != this) {
-    std::swap(hidden_, other->hidden_);
     std::swap(needkey_, other->needkey_);
     std::swap(noblock_, other->noblock_);
     std::swap(nobreak_, other->nobreak_);

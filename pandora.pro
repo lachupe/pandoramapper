@@ -6,7 +6,8 @@ MOC_DIR = moc
 
 UI_DIR = ui
 
-RESOURCES = resources/pandora.qrc
+RESOURCES = resources/pandora.qrc \
+    src/resources/mmapper2.qrc
 RC_FILE = resources/pandora.rc
 
 CONFIG += qt \
@@ -79,7 +80,6 @@ HEADERS += src/Gui/CActionManager.h \
     src/Gui/CSelectionManager.h \
     src/Gui/finddialog.h \
     src/Gui/mainwindow.h \
-    src/Gui/RoomEditDialog.h \
     src/Gui/SpellsDialog.h \
     src/Gui/CGroupSettingsDialog.h
 
