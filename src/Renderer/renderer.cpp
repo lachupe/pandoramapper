@@ -153,10 +153,10 @@ void RendererWidget::initializeGL()
     }
 
     // load the exits texture
-    conf->loadNormalTexture("images/exit_normal.png", &exit_normal_texture );
-    conf->loadNormalTexture("images/exit_door.png", &exit_door_texture );
-    conf->loadNormalTexture("images/exit_secret.png", &exit_secret_texture );
-    conf->loadNormalTexture("images/exit_undef.png", &exit_undef_texture );
+    conf->loadNormalTexture(":/textures/exit_normal.png", &exit_normal_texture );
+    conf->loadNormalTexture(":/textures/exit_door.png", &exit_door_texture );
+    conf->loadNormalTexture(":/textures/exit_secret.png", &exit_secret_texture );
+    conf->loadNormalTexture(":/textures/exit_undef.png", &exit_undef_texture );
 }
 
 

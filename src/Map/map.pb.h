@@ -1727,7 +1727,7 @@ class Room : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 id() const;
   inline void set_id(::google::protobuf::int32 value);
 
-  // required string name = 2;
+  // optional string name = 2 [default = ""];
   inline bool has_name() const;
   inline void clear_name();
   static const int kNameFieldNumber = 2;
@@ -1739,7 +1739,7 @@ class Room : public ::google::protobuf::Message {
   inline ::std::string* release_name();
   inline void set_allocated_name(::std::string* name);
 
-  // required string desc = 3;
+  // optional string desc = 3 [default = ""];
   inline bool has_desc() const;
   inline void clear_desc();
   static const int kDescFieldNumber = 3;
@@ -3521,7 +3521,7 @@ inline void Room::set_id(::google::protobuf::int32 value) {
   id_ = value;
 }
 
-// required string name = 2;
+// optional string name = 2 [default = ""];
 inline bool Room::has_name() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -3591,7 +3591,7 @@ inline void Room::set_allocated_name(::std::string* name) {
   }
 }
 
-// required string desc = 3;
+// optional string desc = 3 [default = ""];
 inline bool Room::has_desc() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }

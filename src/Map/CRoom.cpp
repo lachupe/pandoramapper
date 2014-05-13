@@ -81,26 +81,10 @@ CRoom::~CRoom()
 }
 
 
-bool CRoom::writeToStream(std::ostream *outstream) const
-{
-    try {
-        return room.SerializeToOstream(outstream);
-    } catch(std::exception &e) {
-        printf("Error: %s\r\n", e.what());
-    }
-}
-
-bool CRoom::readFromStream(std::fstream &instream)
-{
-//    return room.ParseFromIstream(instream);
-    return true;
-}
-
-
 void CRoom::setSector(RoomTerrainType val)
 {
     room.set_terrain( static_cast<mapdata::Room::RoomTerrainType>(val) );
-    rebuildDisplayList();
+//    rebuildDisplayList();
 }
 
 
@@ -860,10 +844,13 @@ bool CRoom::isNameSet()
 
 bool CRoom::isDoorSecret(ExitDirection dir) const
 {
+    if (!isDoorSet(dir))
+        return false;
+
     if (room.exits(dir).door() == std::string("exit"))
         return false;
-    else 
-        return true;
+
+    return true;
 }
 
 QByteArray CRoom::getRegionName() const

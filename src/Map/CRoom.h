@@ -80,8 +80,7 @@ public:
     ~CRoom();
     
 
-    bool writeToStream(std::ostream *outstream) const;
-    bool readFromStream(std::fstream &instream);
+    mapdata::Room* getInnerRoomData() { return &room; }
 
     RoomId getId() const { return room.id(); }
     void setId(RoomId id) { room.set_id(id); }

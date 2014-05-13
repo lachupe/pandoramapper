@@ -163,8 +163,8 @@ message Room {
 		
 	// most important
 	required int32  		id = 1; 
-	required string 		name = 2;
-	required string 		desc = 3;
+	optional string 		name = 2 [default = ""];
+	optional string 		desc = 3 [default = ""];
 	
 	// coordinates
 	required Coordinate 	pos = 4;

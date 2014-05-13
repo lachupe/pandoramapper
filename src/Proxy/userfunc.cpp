@@ -1487,7 +1487,12 @@ USERCMD(usercmd_mload)
 
     send_to_user(" * Loading the base %s from disk...\r\n", p);
     //xml_readbase(arg);
-    Map.loadMap( p );
+    try {
+        Map.loadMap( p );
+    } catch(const std::runtime_error &er) {
+        send_to_user(" * Failed to load the map. Error: %s\r\n",
+                      er.what()  );
+    }
 
   }
 

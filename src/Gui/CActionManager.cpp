@@ -825,7 +825,6 @@ void CActionManager::open()
       try {
           Map.loadMap( s );
       } catch(const std::runtime_error &er) {
-          QMessageBox::information(parent, "Failed to load the map", "", QMessageBox::Ok);
           send_to_user(" * Failed to load the map. Error: %s\r\n",
                         er.what()  );
           QMessageBox::critical(parent, "Pandora",

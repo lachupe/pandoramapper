@@ -44,6 +44,8 @@ struct TTree;
 class CRoomManager : public QObject {
 	Q_OBJECT
 
+    static const unsigned __int32       pmf_magic_number = 0x00504D46; // " PMF"
+
 	QList<CRegion *>    regions;
     QVector<CRoom* > 	rooms;   		/* rooms */
     CRoom* 				ids[MAX_ROOMS];	/* array of pointers */
