@@ -714,7 +714,7 @@ QList<int> CRoomManager::searchExits(QString s, Qt::CaseSensitivity cs)
 
 bool CRoomManager::loadMap(QString filename)
 {
-    setBlocked( true );
+    MapBlocker blocker(*this);
 
     reinit();
 
@@ -722,7 +722,6 @@ bool CRoomManager::loadMap(QString filename)
     std::ifstream mFs(filename.toLocal8Bit(), std::ios::in | std::ios::binary);
 
     if (!mFs.good()) {
-        setBlocked(false);
         throw std::runtime_error(std::string("Failed to open map file"));
     }
 
@@ -735,7 +734,6 @@ bool CRoomManager::loadMap(QString filename)
 
         bool ret = _CodedInputStream->ReadVarint32(&magic);
         if (!ret || magic != pmf_magic_number) {
-            setBlocked(false);
             throw std::runtime_error(std::string("The file given does not look like PMF map file"));
         }
     }
@@ -755,12 +753,10 @@ bool CRoomManager::loadMap(QString filename)
             }
         }
         if (!ret) {
-            setBlocked(false);
             throw std::runtime_error("Failed to parse the header");
         }
 
     }
-    printf("Parsed header - regions: %d, rooms: %d\r\n", header.areas_amount(), header.rooms_amount());
 
     // load areas (regions) data
     for (int i = 0; i < header.areas_amount(); i++) {
@@ -786,7 +782,6 @@ bool CRoomManager::loadMap(QString filename)
             }
         }
         if (!ret) {
-            setBlocked(false);
             throw std::runtime_error("Failed to parse area data");
         }
 
@@ -811,19 +806,17 @@ bool CRoomManager::loadMap(QString filename)
         }
 
         if (!ret) {
-            setBlocked(false);
             throw std::runtime_error("Failed to parse the room entry");
         }
 
     }
 
-    setBlocked(false);
     return true;
 }
 
 bool CRoomManager::saveMap(QString filename)
 {
-    setBlocked( true );
+    MapBlocker blocker(*this);
 
     std::ofstream mFs(filename.toLocal8Bit(), std::ios::out | std::ios::binary);
 
@@ -841,12 +834,11 @@ bool CRoomManager::saveMap(QString filename)
     // construct header
     mapdata::MapHeader header;
     header.set_areas_amount(regions.size());
-    header.set_rooms_amount(size());
+    header.set_rooms_amount( size() );
 
     // write the header
     _CodedOutputStream->WriteVarint32(header.ByteSize());
     if ( !header.SerializeToCodedStream(_CodedOutputStream) ) {
-        setBlocked(false);
         throw std::runtime_error(std::string("Failed to serialize the header of the map"));
     }
 
@@ -857,8 +849,6 @@ bool CRoomManager::saveMap(QString filename)
         for (int i=0; i < regions.size(); i++) {
             mapdata::Area area;
             CRegion    *region = regions[i];
-            if (region->getName() == "default")
-                continue;   // skip the default region -> its always in memory as the first one anyway!
 
             area.set_name(region->getName().constData());
 
@@ -875,7 +865,6 @@ bool CRoomManager::saveMap(QString filename)
             // write the region
             _CodedOutputStream->WriteVarint32(area.ByteSize());
             if ( !area.SerializeToCodedStream(_CodedOutputStream) ) {
-                setBlocked(false);
                 throw std::runtime_error(std::string("Failed to serialize region data"));
             }
         }
@@ -890,11 +879,12 @@ bool CRoomManager::saveMap(QString filename)
 
         _CodedOutputStream->WriteVarint32(roomData->ByteSize());
         if ( !roomData->SerializeToCodedStream(_CodedOutputStream) ) {
-            setBlocked(false);
             throw std::runtime_error(std::string("Failed to serialize the header of the map"));
         }
     }
 
-    setBlocked(false);
+
+    delete _CodedOutputStream;
+    delete _OstreamOutputStream;
     return true;
 }

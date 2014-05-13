@@ -41,6 +41,8 @@ class CSquare;
 class CTree;
 struct TTree;
 
+
+
 class CRoomManager : public QObject {
 	Q_OBJECT
 
@@ -135,11 +137,21 @@ public:
     void saveXmlMap(QString filename);
     void clearAllSecrets();
 
-    void loadMMapperMap(QString filename);
+    bool loadMMapperMap(QString filename);
+
 
     void setBlocked(bool b) { blocked = b; }
     bool isBlocked() { return blocked; }
 };
+
+class MapBlocker {
+  public:
+    MapBlocker(CRoomManager &in_data) : data(in_data) { data.setBlocked(true);}
+    ~MapBlocker() {data.setBlocked(false);}
+  private:
+    CRoomManager & data;
+};
+
 
 extern class CRoomManager Map;/* room manager */
 
