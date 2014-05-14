@@ -46,7 +46,7 @@
 
 using namespace google::protobuf::io;
 
-class CRoomManager Map;
+//class CRoomManager __Map;
 
 /*------------- Constructor of the room manager ---------------*/
 CRoomManager::CRoomManager()
@@ -80,7 +80,7 @@ void CRoomManager::init()
 
 
 
-    CRegion *region = new CRegion;
+    CRegion *region = new CRegion(this);
     region->setName("default");
 
     regions.push_back(region);
@@ -112,11 +112,11 @@ CRoom* CRoomManager::createRoom(RoomId id, int x, int y, int z)
 
 CRoom* CRoomManager::createRoom(QByteArray name, QByteArray desc, int x, int y, int z)
 {
-    Map.fixFreeRooms();	// making this call just for more safety - might remove
+    fixFreeRooms();	// making this call just for more safety - might remove
 
     CRoom *addedroom = new CRoom(this);
 
-    addedroom->setId( Map.next_free );
+    addedroom->setId( next_free );
     addedroom->setName(name);
     addedroom->setDesc(desc);
 
@@ -155,18 +155,19 @@ void CRoomManager::clearAllSecrets()
 
     // "wave" over all rooms reacheable over non-secret exits.
     memset(mark, 0, MAX_ROOMS);
+
+    CStacksManager stacker;
     stacker.reset();
     stacker.put(1);
     stacker.swap();
 
-    Map.setBlocked( true );
+    MapBlocker blocker(*this);
 
     QProgressDialog progress("Removing secret exits...", "Abort", 0, MAX_ROOMS, renderer_window);
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
 
 
-    //lockForWrite();
     while (stacker.amount() != 0) {
         for (i = 0; i < stacker.amount(); i++) {
             progress.setValue(i);
@@ -213,50 +214,36 @@ void CRoomManager::clearAllSecrets()
 
     }
 
-    Map.setBlocked( false );
-    //unlock();
 }
 
 
-bool CRoomManager::isDuplicate(CRoom *addedroom)
+CRoom * CRoomManager::isDuplicate(CRoom *addedroom)
 {
     CRoom *r;
     unsigned int i;
     ExitDirection j;
 
-    //QWriteLocker locker(&mapLock);
-
     print_debug(DEBUG_ANALYZER, "Room-desc check for new room");
 
     j = ED_UNKNOWN;
 
-    if (addedroom == NULL) {
-        print_debug(DEBUG_ANALYZER, "Failure in check_desc function!\n");
-        return false;
-    }
-
-    if (conf->getAutomerge() == false) {
-        print_debug(DEBUG_ANALYZER, "autodesc check if OFF - quiting this routine.\n");
-        stacker.put(addedroom);
-
-        return false;
-    }
     /* theory - new added room has only one exit dir defined - the one we came from */
     /* so if we find same looking (name, desc) room in base with the same undefined */
     /* exit as the defined exit in current room, we can merge them. */
-
-
     if (addedroom->getName().isEmpty()) {
         /* now thats sounds bad ... */
         print_debug(DEBUG_ANALYZER, "ERROR: in check_description() - empty roomname in new room.\r\n");
-        return false;
+        return NULL;
     }
-
 
     if (addedroom->getDesc().isEmpty()) {
         send_to_user("--[Pandora: Error, empty roomdesc in new added room.\r\n");
         addedroom->setDesc("");
+        return addedroom;
     }
+
+    if (!conf->getAutomerge())
+        return addedroom;
 
     /* find the only defined exit in new room - the one we came from */
     for (i = 0; i <= 5; i++) {
@@ -274,17 +261,16 @@ bool CRoomManager::isDuplicate(CRoom *addedroom)
         }
 
         /* in this case we do an exact match for both roomname and description */
-        if (addedroom->getDesc() == r->getDesc())
-            if (addedroom->getName() == r->getName())
-                if (tryMergeRooms(r, addedroom, j))
-                    return true;
+        if (addedroom->getName() == r->getName() && addedroom->getDesc() == r->getDesc()) {
+            CRoom *result = tryMergeRooms(r, addedroom, j);
+            if (result != NULL)
+                return result;
+
+        }
     }
 
-    /* if we are still here, then we didnt manage to merge the room */
-    /* so put addedroom->id in stack */
     print_debug(DEBUG_ANALYZER, "------- Returning with return 0\r\n");
-    stacker.put(engine->addedroom);
-    return false;
+    return addedroom;
 }
 
 
@@ -311,7 +297,7 @@ CRoom* CRoomManager::findDuplicateRoom(CRoom *orig)
 
 
 //------------ merge_rooms -------------------------
-int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, ExitDirection j)
+CRoom* CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, ExitDirection j)
 {
   CRoom *p;
 
@@ -331,9 +317,7 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, ExitDirection j)
 
     smallDeleteRoom(copy);
 
-
-    stacker.put(r);
-    return 1;
+    return r;
   }
 
   if ( r->isExitUndefined(j) ) {
@@ -345,10 +329,9 @@ int CRoomManager::tryMergeRooms(CRoom *r, CRoom *copy, ExitDirection j)
 
     smallDeleteRoom(copy);
 
-    stacker.put(r);
-    return 1;
+    return r;
   }
-  return 0;
+  return NULL;
 }
 
 /* ------------ fixfree ------------- */

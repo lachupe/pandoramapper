@@ -128,7 +128,7 @@ public:
 				if (r->isConnected(cmd.dir) ) {
                     int id = r->getExitLeadsTo(cmd.dir);
                     list->append(id);
-                    r = Map.getRoom(id);
+                    r = r->getExitRoom(cmd.dir);
 				}
 				else if (r->isExitUndefined( cmd.dir ) )
 					break;

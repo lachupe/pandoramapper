@@ -228,16 +228,14 @@ int main(int argc, char *argv[])
     conf->setConfigModified( false );
 
     splash->showMessage("Starting Analyzer and Proxy...");
-    engine = new CEngine();
+
+    engine = new CEngine(new CRoomManager());
     proxy = new Proxy();
 
     /* special init for the mud emulation */
     if (mud_emulation) {
-      print_debug(DEBUG_SYSTEM, "Starting in MUD emulation mode...");
-
-      engine->setPrompt("-->");
-      stacker.put(1);
-      stacker.swap();
+        print_debug(DEBUG_SYSTEM, "Starting in MUD emulation mode...");
+        engine->initEmulationMode();
     }
 
     proxy->setMudEmulation( mud_emulation );
@@ -289,7 +287,8 @@ int main(int argc, char *argv[])
     QObject::connect(proxy, SIGNAL(startEngine()), engine, SLOT(slotRunEngine()), Qt::QueuedConnection );
     QObject::connect(proxy, SIGNAL(startRenderer()), renderer_window->renderer, SLOT(display()), Qt::QueuedConnection);
 
-    userland_parser->parse_user_input_line("mload");
+    // this will be done via mainwindow itself
+    //userland_parser->parse_user_input_line("mload");
 
     return app.exec();
 }

@@ -32,8 +32,6 @@
 
 #include "Map/CRoomManager.h"
 
-class CStacksManager stacker;
-
 
 CRoom * CStacksManager::first()  
 { 
@@ -82,9 +80,9 @@ void CStacksManager::removeRoom(RoomId id)
   unsigned int i;
 
   for (i = 0; i < sa->size(); i++) 
-    if (stacker.get(i)->getId() != id)
-      stacker.put( stacker.get(i) );
-  stacker.swap();
+    if (get(i)->getId() != id)
+      put( get(i) );
+  swap();
 }
 
 void CStacksManager::put(CRoom *r)
@@ -98,7 +96,7 @@ void CStacksManager::put(CRoom *r)
 
 void CStacksManager::put(RoomId id)
 {
-    put(Map.getRoom(id));
+    put(parent->getRoomManager()->getRoom(id));
 }
 
 

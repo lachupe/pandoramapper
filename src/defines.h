@@ -21,19 +21,16 @@
 #define DEFINES_H
 
 
-#define SVN_REVISION	208
+#define SVN_REVISION	220
 
 class QString;
 
-#define MAX_ROOMS       45000		/* maximal amount of rooms */
+#define MAX_ROOMS       200000		/* maximal amount of rooms */
 
 
 #define MAX_STR_LEN     400
 #define MAX_LINES_DESC  20
 
-/* coordinate's cap */
-#define MAX_X           32000
-#define MIN_X           -32000
 
 typedef unsigned int RoomId;
 
@@ -65,6 +62,10 @@ enum RoomPortableType   { RPT_UNDEFINED = 0, RPT_PORTABLE, RPT_NOTPORTABLE };
 enum RoomLightType      { RLT_UNDEFINED = 0, RLT_DARK, RLT_LIT };
 enum RoomAlignType      { RAT_UNDEFINED = 0, RAT_GOOD, RAT_NEUTRAL, RAT_EVIL };
 enum RoomRidableType    { RRT_UNDEFINED = 0, RRT_RIDABLE, RRT_NOTRIDABLE };
+
+
+
+
 
 
 /* global flags */

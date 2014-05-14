@@ -103,6 +103,7 @@ public:
     
     void setDesc(QByteArray newdesc);
     void setName(QByteArray newname);
+    void setDynamicDesc(QByteArray newdyndesc);
     void setTerrain(char terrain);
     void setNote(QByteArray note);
 

@@ -101,8 +101,8 @@ public:
     	if (ids[id]) return (*(ids[id])).getName(); return "";
     }
 
-    int tryMergeRooms(CRoom* room, CRoom* copy, ExitDirection j);
-    bool isDuplicate(CRoom* addedroom);
+    CRoom *tryMergeRooms(CRoom* room, CRoom* copy, ExitDirection j);
+    CRoom *isDuplicate(CRoom* addedroom);
 
     void fixFreeRooms();
     CRegion* getRegionByName(QByteArray name);
@@ -153,7 +153,7 @@ class MapBlocker {
 };
 
 
-extern class CRoomManager Map;/* room manager */
+//extern class CRoomManager __Map;/* room manager */
 
 #endif
 

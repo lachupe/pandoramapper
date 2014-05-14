@@ -23,12 +23,14 @@
 #include <QDialog>
 #include "ui_finddialog.h"
 
+class CRoomManager;
 class FindDialog : public QDialog, public Ui::FindDialog
 {
     Q_OBJECT
 
+    CRoomManager *map;
 public:
-    FindDialog(QWidget *parent = 0);
+    FindDialog(CRoomManager *_map, QWidget *parent = 0);
 
 private:
     void adjustResultTable();

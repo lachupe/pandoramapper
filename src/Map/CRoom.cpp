@@ -67,7 +67,8 @@ CRoom::CRoom(CRoomManager *parent) :
     // populate room.exits with "none" exits
 
     // the infamoust cycle
-    for (int i = 0; i <= 5; i++) {
+    // special version tho! this one creates the "ED_UNKNOWN" exit, for compatibility sake
+    for (int i = 0; i <= 6; i++) {
         mapdata::Exit::ExitDirection dir = static_cast<mapdata::Exit::ExitDirection>(i);
         mapdata::Exit* exit = room.add_exits();
         exit->set_dir(dir);
@@ -84,15 +85,15 @@ CRoom::~CRoom()
 void CRoom::setSector(RoomTerrainType val)
 {
     room.set_terrain( static_cast<mapdata::Room::RoomTerrainType>(val) );
-//    rebuildDisplayList();
+    setModified(true);
+    rebuildDisplayList();
 }
 
 
 void CRoom::setTerrain(char terrain)
 {
     RoomTerrainType sector = conf->getSectorByPattern(terrain);
-    setModified(true);
-    rebuildDisplayList();
+    setSector(sector);
 }
 
 
@@ -402,6 +403,13 @@ void CRoom::setDesc(QByteArray newdesc)
     setModified(true);    
 }
       
+void CRoom::setDynamicDesc(QByteArray newdyndesc)
+{
+    room.set_dynamicdesc(newdyndesc);
+    setModified(true);
+}
+
+
 QByteArray CRoom::getSecretsInfo() const
 {
     int i;
@@ -861,9 +869,9 @@ QByteArray CRoom::getRegionName() const
 void CRoom::setRegion(QByteArray name)
 {
     if (name == "")
-        setRegion(Map.getRegionByName("default"));
+        setRegion(parent->getRegionByName("default"));
     else 
-        setRegion(Map.getRegionByName(name)); 
+        setRegion(parent->getRegionByName(name));
 }
 
 void CRoom::setRegion(CRegion *reg)

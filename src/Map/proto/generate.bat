@@ -1,1 +1,1 @@
-"../../../protobuf/bin/protoc" --cpp_out=./../ map.proto
+"../../3dParty/protobuf/bin/protoc" --cpp_out=./../ map.proto

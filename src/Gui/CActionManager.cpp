@@ -851,7 +851,14 @@ void CActionManager::importMap()
         Map.loadXmlMap(s);
         return;
     } else if(s.endsWith(".mm2")) {
-        Map.loadMMapperMap(s);
+        try {
+            Map.loadMMapperMap(s);
+        } catch(const std::runtime_error &er) {
+            send_to_user(" * Failed to import the map. Error: %s\r\n",
+                          er.what()  );
+            QMessageBox::critical(parent, "Pandora",
+                              QString("Failed to import the map.\r\nError:%1").arg(QString(er.what())));
+        }
         return;
     }
 

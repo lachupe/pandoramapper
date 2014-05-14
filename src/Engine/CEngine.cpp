@@ -40,6 +40,8 @@
 
 #include "Proxy/userfunc.h"
 
+#include "Engine/CStacksManager.h"
+
 class CEngine *engine;
 
 
@@ -74,10 +76,10 @@ void CEngine::resync()
   mappingOff();
 
   print_debug(DEBUG_ANALYZER, "FULL RESYNC");
-  n = Map.findByName(last_name);
+  n = map->findByName(last_name);
   if (n != NULL)
     for (j = 0; j < n->ids.size(); j++) {
-      if (last_name == Map.getName( n->ids[j] )) {
+      if (last_name == map->getName( n->ids[j] )) {
 //        print_debug(DEBUG_ANALYZER, "Adding matches");
         stacker.put( n->ids[j] );
       }
@@ -85,6 +87,15 @@ void CEngine::resync()
 
   stacker.swap();
 }
+
+
+void CEngine::initEmulationMode()
+{
+    setPrompt("-->");
+    stacker.put(1);
+    stacker.swap();
+}
+
 
 bool CEngine::testRoom(CRoom *room)
 {
@@ -233,7 +244,7 @@ void CEngine::slotRunEngine()
 {
     print_debug(DEBUG_ANALYZER, "In slotRunEngine");
 
-    if (Map.isBlocked()) {
+    if (map->isBlocked()) {
     	// well, not much we can do - ignore the message
     	printf("The Map is blocked. Delaying the execution of the slotRunEngine.\r\n");
 		print_debug(DEBUG_GENERAL, "The Map is blocked. Delaying the execution of the slotRunEngine.");
@@ -342,7 +353,7 @@ void CEngine::parseEvent()
 
 
 
-CEngine::CEngine() : QObject()
+CEngine::CEngine(CRoomManager *_map) : QObject(), map(_map), stacker(this)
 {
   /* setting defaults */
 
@@ -470,7 +481,7 @@ void CEngine::mapCurrentRoom(CRoom *room, ExitDirection dir)
     if (dir == ED_DOWN)
         z -= 2;
 
-    addedroom = Map.createRoom(event.name, event.desc, x, y, z);
+    addedroom = map->createRoom(event.name, event.desc, x, y, z);
 
     addedroom->setRegion( users_region );
 
@@ -478,22 +489,28 @@ void CEngine::mapCurrentRoom(CRoom *room, ExitDirection dir)
     if (conf->getDuallinker() == true)
         addedroom->setExitLeadsTo(reversenum(dir), room);
     else
-        Map.oneway_room_id = room->getId();
+        map->oneway_room_id = room->getId();
 
     setExits(event.exits);
     do_exits((const char *) event.exits);
 
-    stacker.put(addedroom);
+    //stacker.put(addedroom);
 
-    if (Map.isDuplicate(addedroom) == true) {
-    	resetAddedRoomVar();
-    	send_to_user("--[Pandora: Twin rooms merged!\n");
-    	proxy->send_line_to_user( (const char *) last_prompt );
-    	print_debug(DEBUG_ANALYZER, "Twins merged");
+    CRoom *checkedDups = map->isDuplicate(addedroom);
+    if (checkedDups == NULL) {
+        resetAddedRoomVar();
     } else {
-        angryLinker(addedroom);
+        stacker.put(checkedDups);
+        if (checkedDups == addedroom) {
+            // was not a duplicate, so see what angryLinker might be able to achieve
+            angryLinker(addedroom);
+        } else {
+            resetAddedRoomVar();
+            send_to_user("--[Pandora: Twin rooms merged!\n");
+            proxy->send_line_to_user( (const char *) last_prompt );
+            print_debug(DEBUG_ANALYZER, "Twins merged");
+        }
     }
-
     print_debug(DEBUG_ANALYZER, "leaving mapCurrentRoom");
 
     return;
@@ -534,12 +551,12 @@ void CEngine::angryLinker(CRoom *r)
   // if you are performing the full run over all rooms, it's better
   // to lock the Map completely.
   // else the other thread might delete the room you are examining at the moment!
-  //Map.lockForWrite();
+  //map->lockForWrite();
 
 
-  QVector<CRoom *> rooms = Map.getRooms();
+  QVector<CRoom *> rooms = map->getRooms();
   /* find the closest neighbours by coordinate */
-  for (i = 0; i < Map.size(); i++) {
+  for (i = 0; i < map->size(); i++) {
       p = rooms[i];
 
     /* z-axis: up and down exits */
@@ -657,7 +674,7 @@ void CEngine::angryLinker(CRoom *r)
       }
   }
 
-  //Map.unlock();
+  //map->unlock();
 }
 
 
@@ -699,8 +716,8 @@ void CEngine::clear()
     last_prompt = "-->";
     last_movement = "";
 
-    set_users_region(Map.getRegionByName("default"));
-    set_last_region(Map.getRegionByName("default"));
+    set_users_region(map->getRegionByName("default"));
+    set_last_region(map->getRegionByName("default"));
 
     resetAddedRoomVar();
 }
@@ -714,8 +731,8 @@ void CEngine::set_users_region(CRegion *reg)
 
 	users_region = reg;
 
-	Map.rebuildRegion( prev_reg );
-	Map.rebuildRegion( reg );
+    map->rebuildRegion( prev_reg );
+    map->rebuildRegion( reg );
 }
 
 void CEngine::set_last_region(CRegion *reg)
@@ -761,7 +778,7 @@ void CEngine::do_exits(const char *exits_line)
         ExitDirection iDir = static_cast<ExitDirection>(i);
         if (r->isExitPresent(iDir) == true) {
             if (exits[i] == 0) {	/* oneway case */
-                Map.oneway_room_id = r->getExitLeadsTo(iDir);
+                map->oneway_room_id = r->getExitLeadsTo(iDir);
                 r->removeExit(iDir);
             }
 

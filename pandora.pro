@@ -164,7 +164,7 @@ win32:CONFIG(release, debug|release): LIBS += -L$$PWD/src/3dParty/protobuf/libs/
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/src/3dParty/protobuf/libs/ -llibprotobufd
 else:unix: LIBS += -L$$PWD/src/3dParty/protobuf/libs/ -llibprotobuf
 
-INCLUDEPATH += $$PWD/src/3dParty/protobuf/libs
+INCLUDEPATH += $$PWD/src/3dParty/protobuf/include
 DEPENDPATH += $$PWD/src/3dParty/protobuf/libs
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/protobuf/libs/liblibprotobuf.a
@@ -173,15 +173,10 @@ else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/sr
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/protobuf/libs/libprotobufd.lib
 else:unix: PRE_TARGETDEPS += $$PWD/src/3dParty/protobuf/libs/liblibprotobuf.a
 
+
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/src/3dParty/zlib/lib/ -lzlib
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/src/3dParty/zlib/lib/ -lzlib
 else:unix: LIBS += -L$$PWD/src/3dParty/zlib/lib/ -lzlib
 
 INCLUDEPATH += $$PWD/src/3dParty/zlib/include
 DEPENDPATH += $$PWD/src/3dParty/zlib/include
-
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/zlib/lib/libzlib.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/zlib/lib/libzlib.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/zlib/lib/zlib.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/zlib/lib/zlib.lib
-else:unix: PRE_TARGETDEPS += $$PWD/src/3dParty/zlib/lib/libzlib.a

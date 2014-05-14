@@ -280,6 +280,8 @@ CMainWindow::CMainWindow(QWidget *parent)
 }
 
 
+
+
 void CMainWindow::addDockLogEntry(const QString& module, const QString& message)
 {
   logWindow->append("[" + module + "] " + message);
@@ -385,6 +387,13 @@ void CMainWindow::update_status_bar()
 bool CMainWindow::event(QEvent *event)
 {
     unsigned int id;
+
+    if (event->type() == QEvent::Polish)
+    {
+        Map.loadMap(conf->getBaseFile());
+        return true;
+    }
+
 
     if (event->type() == QEvent::ToolTip) {
         QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);

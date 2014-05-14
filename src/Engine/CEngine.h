@@ -27,14 +27,16 @@
 
 #include "Engine/CEvent.h"
 #include "Engine/CCommandQueue.h"
-
+#include "Engine/CStacksManager.h"
 
 
 class CEngine : public QObject {
 Q_OBJECT
 
 
-	enum ExitFlags { E_NOEXIT = 0, E_NORMAL, E_OPENDOOR, E_CLOSEDDOOR, E_PORTAL, E_CLIMBUP, E_CLIMBDOWN };
+    enum ExitFlags { E_NOEXIT = 0, E_NORMAL, E_OPENDOOR, E_CLOSEDDOOR, E_PORTAL, E_CLIMBUP, E_CLIMBDOWN };
+
+    CRoomManager *  map;        // the map, we are working on
 
   /* flags */
     bool mapping;                 /* mapping is On/OFF */
@@ -46,17 +48,19 @@ Q_OBJECT
     CRegion  *last_region;
     CRegion	 *last_warning_region;
 
-    QByteArray last_name;
-    QByteArray last_desc;
-    QByteArray last_exits;
-    QByteArray last_prompt;
-    char 	   last_terrain;
-    QByteArray last_movement;
+    QByteArray      last_name;
+    QByteArray      last_desc;
+    QByteArray      last_exits;
+    QByteArray      last_prompt;
+    char            last_terrain;
+    QByteArray      last_movement;
 
-    PipeManager  eventPipe;
-    Event        event;
+    PipeManager     eventPipe;
+    Event           event;
 
-    CCommandQueue commandQueue;
+    CCommandQueue   commandQueue;
+    CStacksManager  stacker;
+
 
 
     void parseEvent();
@@ -72,7 +76,7 @@ Q_OBJECT
     void mapCurrentRoom(CRoom *room, ExitDirection dir);
 
 public:
-    CEngine();
+    CEngine(CRoomManager *map);
     ~CEngine();
 
     CRoom *addedroom;	/* fresh added room */
@@ -83,7 +87,7 @@ public:
     QVector<RoomId> *getPrespammedDirs();
 
 
-
+    CRoomManager* getRoomManager() { return map; }
 
     void exec();
 
@@ -123,6 +127,9 @@ public:
     void updateRegions();
 
     void resetAddedRoomVar() { addedroom = NULL; }
+
+    void initEmulationMode();
+
 public slots:
     void slotRunEngine();
     void setPrompt(QByteArray s) { last_prompt = s; }

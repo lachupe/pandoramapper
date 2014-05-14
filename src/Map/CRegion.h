@@ -25,11 +25,14 @@
 #include <QByteArray>
 #include "Map/CRoom.h"
 
+
+class CRoomManager;
 class CRegion {
     QByteArray name;
     QMap<QByteArray, QByteArray> doors;
+    CRoomManager *  m_map;
 public:
-    CRegion();
+    CRegion(CRoomManager* parent);
     ~CRegion();
     
     void setName(QByteArray newname);

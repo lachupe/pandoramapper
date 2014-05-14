@@ -27,6 +27,7 @@
 #include "Map/CRoom.h"
 #include "Map/CRoomManager.h"
 
+class CEngine;
 class CStacksManager {
 private:
 
@@ -38,7 +39,11 @@ private:
 
   unsigned int  mark[MAX_ROOMS];
   unsigned int  turn;
+
+  CEngine *parent;
 public:
+  CStacksManager(CEngine *_parent) : parent(_parent) {}
+
   unsigned int amount() { return sa->size(); }
   unsigned int next()    { return sb->size(); }
 
@@ -64,7 +69,6 @@ public:
 
 };
 
-extern class CStacksManager stacker;
 
 
 #endif
