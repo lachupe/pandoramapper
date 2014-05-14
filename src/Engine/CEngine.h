@@ -110,6 +110,10 @@ public:
     void parse_exits(const char *exits_line, int exits[]);
     void do_exits(const char *exits_line);
 
+    // returns first if many possible
+    CRoom* getCurrentRoom();
+    void setCurrentRoom(CRoom *r);
+    void setCurrentRoom(RoomId id);
 
     bool isMapping() { return mapping; }
     void setMapping(bool b) { mapping = b; }
@@ -129,6 +133,14 @@ public:
     void resetAddedRoomVar() { addedroom = NULL; }
 
     void initEmulationMode();
+
+    CStacksManager * getStacker() { return &stacker; }
+    int  getCandidatesAmount() const { return stacker.amount(); }
+    bool inSync() const { return (stacker.amount() == 1); }
+    bool isMapBlocked() const { return map->isBlocked(); }
+    void swapStacker() { stacker.swap(); }
+
+    CSelectionManager* getSelections() const { return &map->selections; }
 
 public slots:
     void slotRunEngine();

@@ -370,14 +370,15 @@ void CActionManager::bindRooms()
 {
     CRoom *one, *two;
 
-    if (Map.selections.size() != 2) {
+    CRoomManager *map = engine->getRoomManager();
+    if (map->selections.size() != 2) {
         QMessageBox::critical(parent, "Failure", QString("You have to select two rooms to bind them."));
         return;
     }
 
 
-    one = Map.getRoom( Map.selections.get(0) );
-    two = Map.getRoom( Map.selections.get(1) );
+    one = map->getRoom( map->selections.get(0) );
+    two = map->getRoom( map->selections.get(1) );
 
     // roll over all dirs
     for (int d = 0; d <= 5; d++) {
@@ -417,13 +418,13 @@ void CActionManager::edit_current_room()
 {
     RoomId id;
 
-    if (Map.selections.isEmpty()) {
-        id = Map.selections.getFirst();
-        if (stacker.amount() != 1) {
+    if (engine->getRoomManager()->selections.isEmpty()) {
+        id = engine->getRoomManager()->selections.getFirst();
+        if (!engine->inSync()) {
             QMessageBox::critical(parent, "Room Info Edit", QString("You are not in sync!"));
             return;
         }
-        Map.selections.select( stacker.first()->getId() );
+        engine->getSelections()->select( engine->getCurrentRoom()->getId() );
     }
 
     parent->editRoomDialog();
@@ -542,8 +543,7 @@ void CActionManager::newFile()
 
     }
 
-	Map.reinit();  /* this one reinits Ctree structure also */
-	stacker.reset();  /* resetting stacks */
+    engine->getRoomManager()->reinit();  /* this one reinits Ctree structure also */
 	engine->clear();
 	engine->setMapping(false);
 	toggle_renderer_reaction();
@@ -570,7 +570,7 @@ void CActionManager::enable_online_actions()
 
 void CActionManager::delete_room()
 {
-    if (Map.selections.size() > 1) {
+    if (engine->getRoomManager()->selections.size() > 1) {
         int ret = QMessageBox::warning(parent, tr("Pandora: Room's Deletion"),
                    tr("Do you really want to delete this room/rooms?"),
                    QMessageBox::Ok |  QMessageBox::Cancel,
@@ -624,21 +624,21 @@ void CActionManager::refreshRoom()
     QString command;
     CRoom *r;
 
-    if (Map.selections.isEmpty() == true) {
-        if (stacker.amount() != 1) {
+    if (engine->getSelections()->isEmpty() == true) {
+        if (!engine->inSync()) {
             QMessageBox::critical(parent, "Pandora",
                               QString("You have to be in sync or select just one room!"));
             return;
         }
-        r = stacker.first();
+        r = engine->getCurrentRoom();
     } else {
-        if (Map.selections.size() != 1) {
+        if (engine->getSelections()->size() != 1) {
             QMessageBox::critical(parent, "Pandora",
                               QString("You have to select just one room!"));
             return;
         }
 
-        r = Map.getRoom( Map.selections.getFirst() );
+        r = engine->getRoomManager()->getRoom( engine->getSelections()->getFirst() );
     }
 
     command = QString("mgoto %1").arg(r->getId());
@@ -732,8 +732,8 @@ void CActionManager::emulation_mode()
         }
         proxy->setMudEmulation( true );
         engine->setPrompt("-->");
-        stacker.put(1);
-        stacker.swap();
+        userland_parser->parse_user_input_line("mgoto 1");
+        userland_parser->parse_user_input_line("look");
     } else {
         proxy->setMudEmulation( false );
 
@@ -752,7 +752,7 @@ void CActionManager::publish_map()
         return;
     }
 
-    Map.clearAllSecrets();
+    engine->getRoomManager()->clearAllSecrets();
 
     print_debug(DEBUG_INTERFACE && DEBUG_ROOMS,"Finished removing secrets from the map!\r\n");
     //    QMessageBox::information(parent, "Removing secrets...", "Done!\n", QMessageBox::Ok);
@@ -767,7 +767,7 @@ void CActionManager::gotoAction() {
 void CActionManager::find()
 {
     if (!parent->findDialog) {
-        parent->findDialog = new FindDialog(parent);
+        parent->findDialog = new FindDialog(engine->getRoomManager(), parent);
     }
     parent->findDialog->show();
     parent->findDialog->activateWindow();
@@ -799,7 +799,7 @@ void CActionManager::saveAs()
 
   if (!s.isEmpty()) {
       try {
-          Map.saveMap(s);
+          engine->getRoomManager()->saveMap(s);
       } catch(const std::runtime_error& er) {
 
       }
@@ -823,7 +823,7 @@ void CActionManager::open()
 
   if (!s.isEmpty()) {
       try {
-          Map.loadMap( s );
+          engine->getRoomManager()->loadMap( s );
       } catch(const std::runtime_error &er) {
           send_to_user(" * Failed to load the map. Error: %s\r\n",
                         er.what()  );
@@ -848,11 +848,11 @@ void CActionManager::importMap()
 
 
     if (s.endsWith(".xml")) {
-        Map.loadXmlMap(s);
+        engine->getRoomManager()->loadXmlMap(s);
         return;
     } else if(s.endsWith(".mm2")) {
         try {
-            Map.loadMMapperMap(s);
+            engine->getRoomManager()->loadMMapperMap(s);
         } catch(const std::runtime_error &er) {
             send_to_user(" * Failed to import the map. Error: %s\r\n",
                           er.what()  );
@@ -878,7 +878,7 @@ void CActionManager::exportMap()
     strcpy(data, qPrintable(s));
 
     if (!s.isEmpty()) {
-      Map.saveXmlMap(s);
+      engine->getRoomManager()->saveXmlMap(s);
       //usercmd_msave(0, 0,  data, data);
       QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
     }

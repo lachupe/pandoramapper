@@ -31,41 +31,41 @@ class CEngine;
 class CStacksManager {
 private:
 
-  std::vector<CRoom *> stacka;
-  std::vector<CRoom *> stackb;
+    std::vector<CRoom *> stacka;
+    std::vector<CRoom *> stackb;
 
-  std::vector<CRoom *> *sa;
-  std::vector<CRoom *> *sb;
+    std::vector<CRoom *> *sa;
+    std::vector<CRoom *> *sb;
 
-  unsigned int  mark[MAX_ROOMS];
-  unsigned int  turn;
+    unsigned int  mark[MAX_ROOMS];
+    unsigned int  turn;
 
-  CEngine *parent;
+    CEngine *parent;
 public:
-  CStacksManager(CEngine *_parent) : parent(_parent) {}
+    CStacksManager(CEngine *_parent) : parent(_parent) {}
 
-  unsigned int amount() { return sa->size(); }
-  unsigned int next()    { return sb->size(); }
+    unsigned int amount() const { return sa->size(); }
+    unsigned int next()   const { return sb->size(); }
 
-  CRoom * first();
-  CRoom * nextFirst();
+    CRoom * first();
+    CRoom * nextFirst();
 
-  void swap();
-  CStacksManager();
-  void reset();
+    void swap();
+    CStacksManager();
+    void clear();
 
-  CRoom * get(unsigned int i);
+    CRoom * get(unsigned int i);
 
-  CRoom * getNext(unsigned int i);
+    CRoom * getNext(unsigned int i);
 
-  void put(RoomId id);
-  void put(CRoom *r);
-  void removeRoom(RoomId id);    /* swaps */
+    void put(RoomId id);
+    void put(CRoom *r);
+    void removeRoom(RoomId id);    /* swaps */
 
-  /* DEBUG */
-  void printStacks();
+    /* DEBUG */
+    void printStacks();
 
-  void getCurrent(char *);
+    void getCurrent(char *);
 
 };
 

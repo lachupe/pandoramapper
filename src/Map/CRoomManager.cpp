@@ -157,7 +157,7 @@ void CRoomManager::clearAllSecrets()
     memset(mark, 0, MAX_ROOMS);
 
     CStacksManager stacker;
-    stacker.reset();
+    stacker.clear();
     stacker.put(1);
     stacker.swap();
 
@@ -391,7 +391,7 @@ bool CRoomManager::addRegion(QByteArray name)
 	// TODO: threadsafety the class regions QMutexLocker locker(mapLock);
 
     if (getRegionByName(name) == false) {
-        region = new CRegion();
+        region = new CRegion(this);
         region->setName( name );
         regions.push_back(region);
         return true;
@@ -500,7 +500,8 @@ void CRoomManager::smallDeleteRoom(CRoom *r)
     }
 
 	removeFromPlane(r);
-    stacker.removeRoom(r->getId());
+    //FIXME: add notificiation signal
+    //stacker.removeRoom(r->getId());
     selections.unselect(r->getId());
 	if (engine->addedroom == r)
         engine->resetAddedRoomVar();
@@ -755,7 +756,7 @@ bool CRoomManager::loadMap(QString filename)
                 _CodedInputStream->PopLimit(msgLimit);
 
                 // process area data
-                CRegion *region = new CRegion;
+                CRegion *region = new CRegion(this);
                 region->setName(area.name().c_str());
                 for (int k = 0; k < area.alias_size(); k++) {
                     auto alias = area.alias(k);

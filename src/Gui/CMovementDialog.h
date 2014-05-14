@@ -24,11 +24,13 @@
 #include <QDialog>
 #include "ui_movementdialog.h"
 
-
+class CRoomManager;
 class CMovementDialog : public QDialog, public Ui::MovementDialog {
 Q_OBJECT
+
+    CRoomManager *map;
 public:
-    CMovementDialog(QWidget *parent = 0);
+    CMovementDialog(CRoomManager *_map, QWidget *parent = 0);
     int x;
     int y;
     int z;

@@ -97,7 +97,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     print_debug(DEBUG_INTERFACE, "in mainwindow constructor");
 
     setWindowTitle("Pandora");
-    renderer =  new RendererWidget( this );
+    renderer =  new RendererWidget( engine->getRoomManager(), this );
     setCentralWidget( renderer );
 
     if (!renderer->format().sampleBuffers()) {
@@ -294,7 +294,7 @@ void CMainWindow::moveRoomDialog()
     print_debug(DEBUG_INTERFACE, "move room dialog action called");
 
     // check if there is an objective for this operation
-    if (Map.selections.size() == 0 && stacker.amount() != 1) {
+    if (engine->getSelections()->size() == 0 && !engine->inSync()) {
         QMessageBox::critical(this, "Movement Dialog",
                              QString("You have to either get in sync or select some rooms!"));
         return;
@@ -302,7 +302,7 @@ void CMainWindow::moveRoomDialog()
 
     // create the dialog if needed
     if (!movementDialog) {
-        movementDialog = new CMovementDialog (this);
+        movementDialog = new CMovementDialog (engine->getRoomManager(), this);
     }
 
     // launch the dialog
@@ -331,7 +331,7 @@ void CMainWindow::editRoomDialog()
     RoomEditAttrDlg m_roomEditDialog;
 
 
-    m_roomEditDialog.setRoomSelection( Map.selections.getList(), &Map);
+    m_roomEditDialog.setRoomSelection( engine->getSelections()->getList(), engine->getRoomManager());
     m_roomEditDialog.exec();
 }
 
@@ -374,11 +374,11 @@ void CMainWindow::update_status_bar()
     else
         firstPart = "Data: --- ";
 
-    modLabel = QString("Rooms Selected %1 ").arg( Map.selections.size() );
+    modLabel = QString("Rooms Selected %1 ").arg( engine->getSelections()->size() );
 
     emit newModLabel(modLabel + firstPart);
 
-    stacker.getCurrent(str);
+    engine->getStacker()->getCurrent(str);
     emit newLocationLabel(str);
     print_debug(DEBUG_INTERFACE, "Done updating interface!\r\n");
 }
@@ -386,11 +386,11 @@ void CMainWindow::update_status_bar()
 /* Reimplement main even handler to catch tooltip events. */
 bool CMainWindow::event(QEvent *event)
 {
-    unsigned int id;
+    RoomId id;
 
     if (event->type() == QEvent::Polish)
     {
-        Map.loadMap(conf->getBaseFile());
+        engine->getRoomManager()->loadMap(conf->getBaseFile());
         return true;
     }
 
@@ -398,7 +398,7 @@ bool CMainWindow::event(QEvent *event)
     if (event->type() == QEvent::ToolTip) {
         QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
         if (renderer->doSelect( mousePosInRenderer( helpEvent->pos() ), id ))
-            QToolTip::showText(helpEvent->globalPos(), Map.getRoom(id)->toolTip());
+            QToolTip::showText(helpEvent->globalPos(), engine->getRoomManager()->getRoom(id)->toolTip());
         else
 #if QT_VERSION >= 0x040200
             QToolTip::hideText();
@@ -575,7 +575,7 @@ void CMainWindow::createContextMenu( QMouseEvent *e )
 
 
     if (renderer->doSelect( mousePosInRenderer( e->pos() ), id )) {
-        roomName = Map.getRoom(id)->getName();
+        roomName = engine->getRoomManager()->getRoom(id)->getName();
     } else {
         roomName = tr("No room here");
     }
@@ -596,7 +596,7 @@ void CMainWindow::createContextMenu( QMouseEvent *e )
     menu.addAction(actionManager->refreshAct);
 
     menu.addAction(actionManager->bindRoomsAct);
-    if (Map.selections.size() == 2)
+    if (engine->getSelections()->size() == 2)
         actionManager->bindRoomsAct->setEnabled(true);
     else
         actionManager->bindRoomsAct->setEnabled(false);
@@ -620,15 +620,17 @@ bool CMainWindow::checkMouseSelection( QMouseEvent *e )
 {
     unsigned int id;
 
+    CSelectionManager *selections = engine->getSelections();
+
     if (mouseState.delta( e->pos() ) <= 100) {
         if (renderer->doSelect( mousePosInRenderer( e->pos() ), id ) == true) {
             if (e->modifiers() & Qt::ControlModifier) {
-                if (Map.selections.isSelected( id) == true)
-                    Map.selections.unselect( id );
+                if (selections->isSelected( id) == true)
+                    selections->unselect( id );
                 else
-                    Map.selections.select( id );
+                    selections->select( id );
             } else
-                Map.selections.exclusiveSelection( id );
+                selections->exclusiveSelection( id );
 
             return true;
         }

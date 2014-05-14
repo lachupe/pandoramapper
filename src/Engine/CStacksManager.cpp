@@ -113,10 +113,10 @@ CRoom *CStacksManager::getNext(unsigned int i)
 
 CStacksManager::CStacksManager()
 {
-    reset();
+    clear();
 }
 
-void CStacksManager::reset()
+void CStacksManager::clear()
 {
     sa = &stacka;
     sb = &stackb;

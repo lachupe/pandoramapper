@@ -64,8 +64,8 @@ GLfloat marker_colour[4] =  {1.0, 0.1, 0.1, 1.0};
 #define PICK_TOL              50 
 
 
-RendererWidget::RendererWidget( QWidget *parent )
-     : QGLWidget( parent )
+RendererWidget::RendererWidget(CRoomManager *_map, QWidget *parent )
+     : map(_map), QGLWidget( parent )
 {
   print_debug(DEBUG_RENDERER , "in renderer constructor");
 
@@ -284,14 +284,15 @@ void RendererWidget::glDrawMarkers()
     QByteArray lastMovement;
     int dx, dy, dz;
 
-    if (stacker.amount() == 0)
+    if (engine->getCandidatesAmount() == 0)
         return;
     
     
     glColor4f(marker_colour[0],marker_colour[1],marker_colour[2],marker_colour[3]);
-    for (k = 0; k < stacker.amount(); k++) {
+    CStacksManager * stacker = engine->getStacker();
+    for (k = 0; k < stacker->amount(); k++) {
         
-        p = stacker.get(k);
+        p = stacker->get(k);
     
         if (p == NULL) {
             print_debug(DEBUG_RENDERER, "RENDERER ERROR: Stuck upon corrupted room while drawing red pointers.\r\n");
@@ -337,9 +338,9 @@ void RendererWidget::glDrawMarkers()
         
     }
     
-    if (last_drawn_marker != stacker.first()->getId()) {
+    if (last_drawn_marker != stacker->first()->getId()) {
         last_drawn_trail = last_drawn_marker;
-        last_drawn_marker = stacker.first()->getId();
+        last_drawn_marker = stacker->first()->getId();
         renderer_window->getGroupManager()->setCharPosition(last_drawn_marker);
         //emit updateCharPosition(last_drawn_marker);
     }
@@ -368,7 +369,7 @@ void RendererWidget::glDrawPrespamLine()
 	if (line == NULL)
 		return;
 
-    CRoom *p = Map.getRoom( line->at(0) );
+    CRoom *p = map->getRoom( line->at(0) );
 
     if (p == NULL) {
         return;
@@ -384,7 +385,7 @@ void RendererWidget::glDrawPrespamLine()
 		// connect all rooms with lines
 		unsigned int id = line->at(i);
 
-        CRoom *p = Map.getRoom(id);
+        CRoom *p = map->getRoom(id);
 
         if (p == NULL)
             continue;
@@ -447,7 +448,7 @@ void RendererWidget::glDrawGroupMarkers()
         double alpha = color.alpha()/255.;
 
         glColor4f(red, green, blue, alpha);
-        p = Map.getRoom(pos);
+        p = map->getRoom(pos);
 
         if (p == NULL) {
             continue;
@@ -861,11 +862,11 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
             }
 
             // if needed, draw selected rooms
-            if (!Map.selections.isEmpty()) {
+            if (!map->selections.isEmpty()) {
 				glColor4f(0.20, 0.20, 0.80, colour[3]-0.1);
 
 				for (k = 0; k < p->rooms.size(); k++) {
-                    if (Map.selections.isSelected( p->rooms[k]->getId() ) == true ) {
+                    if (map->selections.isSelected( p->rooms[k]->getId() ) == true ) {
 	                    int dx = p->rooms[k]->getX() - curx;
 	                    int dy = p->rooms[k]->getY() - cury;
 	                    int dz = p->rooms[k]->getZ() - curz;
@@ -916,13 +917,13 @@ void RendererWidget::setupNewBaseCoordinates()
     print_debug(DEBUG_RENDERER, "calculating new Base coordinates");
 
     // in case we lost sync, stay at the last position 
-    if (stacker.amount() == 0) 
+    if (engine->getCandidatesAmount() == 0)
         return;
 
     // initial unbeatably worst value for euclidean test
     bestDistance = (long long) 32000*32000*1000;
-    for (i = 0; i < stacker.amount(); i++) {
-        p = stacker.get(i);
+    for (i = 0; i < engine->getStacker()->amount(); i++) {
+        p = engine->getStacker()->get(i);
         newX = curx - p->getX();
         newY = cury - p->getY();
         newZ = curz - p->getZ() + userLayerShift;
@@ -948,7 +949,7 @@ void RendererWidget::setupNewBaseCoordinates()
 
 void RendererWidget::centerOnRoom(unsigned int id)
 {
-    CRoom *r = Map.getRoom(id);
+    CRoom *r = map->getRoom(id);
 
     userX = (double) (curx - r->getX());
     userY = (double) (cury - r->getY());
@@ -973,7 +974,7 @@ void RendererWidget::draw(void)
     const float alphaChannelTable[] = { 0.95, 0.25, 0.20, 0.15, 0.10, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
 //                                       0    1     2      3    4      5     6    7    8     9    10
 
-    if (Map.isBlocked()) {
+    if (map->isBlocked()) {
     	// well, not much we can do - ignore the message
     	printf("Map is blocked. Delaying the redraw\r\n");
     	fflush(stdout);
@@ -1024,7 +1025,7 @@ void RendererWidget::draw(void)
     colour[0] = 0.1; colour[1] = 0.8; colour[2] = 0.8; colour[3] = 0.4; 
     
 
-    plane = Map.getPlanes();
+    plane = map->getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
             plane = plane->next;
@@ -1099,7 +1100,7 @@ void RendererWidget::renderPickupObjects()
 
     // Sensitive ! lock for WRITE!
 //    Map.lockForRead();
-    plane = Map.getPlanes();
+    plane = map->getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
             plane = plane->next;
@@ -1184,7 +1185,7 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
         zval = 50000;
         for ( i = 0; i < hits; i++) { // for each hit
             int tempId = selectBuf[ 4 * i + 3 ] - 1;
-            CRoom *r = Map.getRoom( tempId );
+            CRoom *r = map->getRoom( tempId );
             if (r == NULL) 
                 continue;
             

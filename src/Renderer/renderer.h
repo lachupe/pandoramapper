@@ -43,6 +43,7 @@ class RendererWidget : public QGLWidget
 {
     Q_OBJECT
     
+    CRoomManager    * map;
     GLfloat       colour[4];
     GLuint        global_list;
     int           curx;
@@ -90,7 +91,7 @@ public:
     GLuint basic_gllist;
     bool redraw;
     unsigned int deletedRoom;
-    RendererWidget(QWidget *parent = 0);
+    RendererWidget(CRoomManager *_map, QWidget *parent = 0);
     void initializeGL();
     void resizeGL(int width, int height);
     void changeUserLayerShift(int byValue)

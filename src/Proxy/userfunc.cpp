@@ -82,16 +82,16 @@ class Userland *userland_parser;
 #define PARSE_DIR_ARGUMENT(dir, arg) \
     dir = parse_dir(arg);               \
     if (dir == ED_UNKNOWN) {                            \
-    send_to_user("--[ %s is not a dirrection.\r\n", arg);     \
-    send_prompt(); \
-    return USER_PARSE_SKIP;             \
+        send_to_user("--[ %s is not a dirrection.\r\n", arg);     \
+        send_prompt(); \
+        return USER_PARSE_SKIP;             \
     }
 
 #define CHECK_SYNC \
-    if (stacker.amount() != 1) {      \
-    send_to_user("--[Pandora: Current position is undefined(out of sync).\n");       \
-    send_prompt(); \
-    return USER_PARSE_SKIP;       \
+    if (!engine->inSync()) {      \
+        send_to_user("--[Pandora: Current position is undefined(out of sync).\n");       \
+        send_prompt(); \
+        return USER_PARSE_SKIP;       \
     }
 
 
@@ -426,7 +426,7 @@ int Userland::parse_user_input_line(const char *line)
                     toggle_renderer_reaction();
             }
             else {
-                if (Map.isBlocked()) {
+                if (engine->isMapBlocked()) {
                     send_to_user("--[ Map is blocked! Delaying the execution of your command...\r\n\r\n");
                     send_prompt();
                 }
@@ -552,15 +552,14 @@ USERCMD(usercmd_maddroom)
     send_to_user("--[ (Forced) adding new room!\n");
     print_debug(DEBUG_ANALYZER, "adding new room!");
 
-    r = Map.createRoom(engine->getRoomName(), engine->getDesc(), 100, 100, 100);
+    r = engine->getRoomManager()->createRoom(engine->getRoomName(), engine->getDesc(), 100, 100, 100);
     r->setTerrain( engine->getTerrain() );
     r->setRegion( engine->get_users_region() );
 
     engine->addedroom = r;
     engine->do_exits(engine->getExits());
 
-    stacker.put(r);
-    stacker.swap();
+    engine->setCurrentRoom(r);
 
     send_prompt();
     return USER_PARSE_SKIP;
@@ -638,13 +637,13 @@ USERCMD(usercmd_maction)
     original[0] = 0;      /* nullify the incoming line and get ready to put generated commands */
 
 
-    if (stacker.amount() == 0) {
+    if (engine->getCandidatesAmount() == 0) {
         exit = 1;
     } else {
         exit = 0;
     }
 
-    if (Map.isBlocked()) {
+    if (engine->isMapBlocked()) {
         // well, the Map is obviously blocked - something fishy is happening to rooms data RIGHT NOW
         // and the user wants SOME OUTPUT *RIGHT NOW*
         // the easy way out is to use normal exits and avoiding Map. requests
@@ -652,14 +651,14 @@ USERCMD(usercmd_maction)
         // TODO: the other alternative would be to build a synced list of exits after each Engine run
     }
 
-    if (dir != -1 && conf->getMactionUsesPrespam() && !Map.isBlocked()) {
+    if (dir != -1 && conf->getMactionUsesPrespam() && !engine->isMapBlocked()) {
         /* for the case of prespam and sync, try to follow */
-        QVector<unsigned int> *prespam = engine->getPrespammedDirs();
+        QVector<RoomId> *prespam = engine->getPrespammedDirs();
         if (prespam != NULL && dir != -1) {
             // follow-up all dirs and use the last one for maction
 
             // get the last room
-            CRoom *p = Map.getRoom( prespam->at( prespam->size() - 1 ) );
+            CRoom *p = engine->getRoomManager()->getRoom( prespam->at( prespam->size() - 1 ) );
             delete prespam;
 
             if (p != NULL) {
@@ -680,10 +679,11 @@ USERCMD(usercmd_maction)
     }
 
     /* get the door names */
-    for (i = 0; i < stacker.amount(); i++) {
-        if (Map.isBlocked())
+    CStacksManager * stacker = engine->getStacker();
+    for (i = 0; i < stacker->amount(); i++) {
+        if (engine->isMapBlocked())
             break;
-        r = stacker.get(i);
+        r = stacker->get(i);
 
         if (r != NULL) {
             if (dir == -1) {
@@ -742,19 +742,19 @@ USERCMD(usercmd_mdelete)
 
     }
 
-    if (Map.selections.isEmpty() == false) {
-        //r = Map.getRoom( Map.selections.getFirst() );
-        ids = Map.selections.getList();
-
+    CRoomManager *map = engine->getRoomManager();
+    if (map->selections.isEmpty() == false) {
+        ids = map->selections.getList();
     } else {
         CHECK_SYNC;
-        r = stacker.first();
-        ids.append(r->getId());
+        r = engine->getCurrentRoom();
+        if (r)
+            ids.append(r->getId());
     }
 
 
     for (int i = 0; i < ids.size(); ++i) {
-        r = Map.getRoom( ids.at(i) );
+        r = map->getRoom( ids.at(i) );
         if ( r == NULL )
             continue;
         if (r->getId() == 1) {
@@ -764,13 +764,13 @@ USERCMD(usercmd_mdelete)
         }
 
         if (remove)
-            Map.deleteRoom(r, 0);
+            map->deleteRoom(r, 0);
         else
-            Map.deleteRoom(r, 1);
+            map->deleteRoom(r, 1);
     }
 
 
-    stacker.swap();
+    engine->swapStacker();
 
     toggle_renderer_reaction();
 
@@ -788,11 +788,10 @@ USERCMD(usercmd_mnote)
 
     userfunc_print_debug;
 
-    r = stacker.first();
+    r = engine->getCurrentRoom();
 
     p = skip_spaces(line);
     r->setNote(p);
-
 
     send_to_user("--[ Added.\r\n");
     send_prompt();
@@ -806,7 +805,7 @@ USERCMD(usercmd_mnotecolor)
 
     userfunc_print_debug;
 
-    r = stacker.first();
+    r = engine->getCurrentRoom();
 
     p = skip_spaces(line);
 
@@ -831,7 +830,7 @@ USERCMD(usercmd_mtreestats)
     skip_spaces(line);
 
 
-    Map.getRoomNamesTree()->printTreeStats();
+    engine->getRoomManager()->getRoomNamesTree()->printTreeStats();
 
     send_prompt();
     return USER_PARSE_SKIP;
@@ -843,9 +842,10 @@ USERCMD(usercmd_mrefresh)
     userfunc_print_debug;
     skip_spaces(line);
 
-    stacker.first()->setName(engine->getRoomName());
-    stacker.first()->setDesc(engine->getDesc());
-    stacker.first()->setTerrain(engine->getTerrain());
+    CRoom *r = engine->getCurrentRoom();
+    r->setName(engine->getRoomName());
+    r->setDesc(engine->getDesc());
+    r->setTerrain(engine->getTerrain());
 
     send_to_user("--[ Refreshed.\r\n");
     send_prompt();
@@ -863,12 +863,14 @@ USERCMD(usercmd_mgoto)
 
     userfunc_print_debug;
 
+    CRoomManager *map = engine->getRoomManager();
+    CStacksManager *stacker = engine->getStacker();
     // check for mgoto ID syntax
     p = skip_spaces(line);
     // if not go on with selection
     if (!*p) {
-        if (Map.selections.isEmpty() == false) {
-            stacker.put(Map.selections.getFirst());
+        if (map->selections.isEmpty() == false) {
+            stacker->put(map->selections.getFirst());
         } else
             MISSING_ARGUMENTS
 
@@ -876,17 +878,17 @@ USERCMD(usercmd_mgoto)
         p = one_argument(p, arg, 0);
         if (is_integer(arg)) {
             id = atoi(arg);
-            if (Map.getRoom(id) == NULL) {
+            if (map->getRoom(id) == NULL) {
                 send_to_user("--[ There is no room with id %s.\r\n", arg);
                 send_prompt();
                 return USER_PARSE_SKIP;
             }
 
-            stacker.put(Map.getRoom(id));
+            stacker->put(map->getRoom(id));
 
         } else {
             CHECK_SYNC;
-            r = stacker.first();
+            r = stacker->first();
 
             PARSE_DIR_ARGUMENT(dir, arg);
 
@@ -896,7 +898,7 @@ USERCMD(usercmd_mgoto)
                 return USER_PARSE_SKIP;
             }
 
-            stacker.put(r->getExitLeadsTo(dir));
+            stacker->put(r->getExitLeadsTo(dir));
         }
     }
 
@@ -905,7 +907,7 @@ USERCMD(usercmd_mgoto)
 
 
     engine->setMgoto(true);  /* ignore prompt while we are in mgoto mode */
-    stacker.swap();
+    stacker->swap();
     send_prompt();
     return USER_PARSE_SKIP;
 }
@@ -941,7 +943,7 @@ USERCMD(usercmd_mdetach)
         }
     }
 
-    r = stacker.first();
+    r = engine->getCurrentRoom();
     if (r->isExitPresent(dir) == true) {
         s = r->getExitRoom(dir);
         if (del) {
@@ -985,8 +987,7 @@ USERCMD(usercmd_mlink)
 
     userfunc_print_debug;
 
-    r = stacker.first();
-
+    r = engine->getCurrentRoom();
 
     /* get essential arguments - id and direction */
     p = skip_spaces(line);
@@ -1003,7 +1004,7 @@ USERCMD(usercmd_mlink)
 
     GET_INT_ARGUMENT(arg, id);
 
-    second = Map.getRoom(id);
+    second = engine->getRoomManager()->getRoom(id);
 
     if (second == NULL) {
         send_to_user("--[ There is no room with id %i.\r\n", id);
@@ -1082,7 +1083,7 @@ USERCMD(usercmd_mmark)
 
             p = one_argument(p, arg, 0);    /* flag */
 
-    r = stacker.first();
+    r = engine->getCurrentRoom();
 
 
     i = 0;
@@ -1133,7 +1134,7 @@ USERCMD(usercmd_mdoor)
 
         p = one_argument(p, arg2, 0);    /* direction */
 
-    r = stacker.first();
+    r = engine->getCurrentRoom();
 
     PARSE_DIR_ARGUMENT(i, arg2);
 
@@ -1164,7 +1165,7 @@ USERCMD(usercmd_mcoord)
 
     userfunc_print_debug;
 
-    r = stacker.first();
+    r = engine->getCurrentRoom();
 
     p = skip_spaces(line);
     if (!*p) {
@@ -1225,7 +1226,7 @@ USERCMD(usercmd_mdec)
         GET_INT_ARGUMENT(arg, value);
     }
 
-    r = stacker.first();
+    r = engine->getCurrentRoom();
 
     switch (subcmd)
     {
@@ -1423,12 +1424,13 @@ USERCMD(usercmd_msave)
 
     userfunc_print_debug;
 
+    CRoomManager *map = engine->getRoomManager();
 
     p = skip_spaces(line);
     if (!*p) {
         /* no arguments */
         //xml_writebase( conf->get_base_file() );
-        Map.saveMap(conf->getBaseFile() );
+        map->saveMap(conf->getBaseFile() );
         send_to_user("--[Pandora: Saved...\r\n");
         conf->setDatabaseModified(false);
 
@@ -1438,7 +1440,7 @@ USERCMD(usercmd_msave)
     } else {
         p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
 
-        Map.saveMap( arg );
+        map->saveMap( arg );
 
         send_to_user("--[Pandora: Saved to %s...\r\n", p);
 
@@ -1456,13 +1458,6 @@ USERCMD(usercmd_mload)
     userfunc_print_debug;
 
     send_to_user("--[Pandora: Reloading the database ...\n");
-    send_to_user(" * Clearing the database class...\r\n");
-    Map.reinit();  /* this one reinits Ctree structure also */
-
-    send_to_user(" * Resetting possibility stacks...\r\n");
-    stacker.reset();  /* resetting stacks */
-
-    send_to_user(" * Clearing events stacks...\r\n");
     engine->clear();
 
     engine->setMapping(false);
@@ -1474,31 +1469,25 @@ USERCMD(usercmd_mload)
         send_to_user(" * Loading the file %s from disk...\r\n",
                      (const char *) conf->getBaseFile()  );
 
-        //xml_readbase( conf->get_base_file() );
         try {
-            Map.loadMap( conf->getBaseFile() );
+            engine->getRoomManager()->loadMap( conf->getBaseFile() );
         } catch(const std::runtime_error &er) {
             send_to_user(" * Failed to load the map. Error: %s\r\n",
                          er.what()  );
         }
 
     } else {
-        //p = one_argument(p, arg, 1);        /* do not lower or upper case - filename */
-
         send_to_user(" * Loading the base %s from disk...\r\n", p);
-        //xml_readbase(arg);
         try {
-            Map.loadMap( p );
+            engine->getRoomManager()->loadMap( p );
         } catch(const std::runtime_error &er) {
             send_to_user(" * Failed to load the map. Error: %s\r\n",
                          er.what()  );
         }
-
     }
 
     send_to_user("--[Pandora: Done.\r\n");
     conf->setDatabaseModified(false);
-
 
     send_prompt();
     return USER_PARSE_SKIP;
@@ -1512,9 +1501,7 @@ USERCMD(usercmd_mreset)
 
     engine->clear();
 
-    stacker.reset();
-
-
+    // FIXME: reset group manager state
 
     send_to_user("--[Pandora: Resetted!\n");
 
@@ -1549,12 +1536,14 @@ USERCMD(usercmd_mmerge)
         }
     }
 
+
+    CRoomManager *map = engine->getRoomManager();
     p = skip_spaces(line);
     if (!*p) {
         /* no arguments at all - so, find ID */
 
         // yet again, sensitive!
-        t = Map.findDuplicateRoom(engine->addedroom);
+        t = map->findDuplicateRoom(engine->addedroom);
         if (t == NULL) {
             send_to_user("--[ No matching room found.\r\n");
             send_prompt();
@@ -1572,7 +1561,7 @@ USERCMD(usercmd_mmerge)
             return USER_PARSE_SKIP;
         }
 
-        t = Map.getRoom(id);
+        t = map->getRoom(id);
         if (t == NULL) {
             send_to_user("--[ There is no room with this id %i.\r\n", id);
             send_prompt();
@@ -1597,17 +1586,16 @@ USERCMD(usercmd_mmerge)
 
     }
 
-    if (Map.tryMergeRooms(t, engine->addedroom, j)) {
+    CRoom *merged = map->tryMergeRooms(t, engine->addedroom, j);
+    if (merged != NULL) {
         send_to_user("--[ merged.\r\n");
+        engine->setCurrentRoom(merged);
     } else {
         send_to_user("--[ failed.\r\n");
-        stacker.put(engine->addedroom);
+        engine->setCurrentRoom(engine->addedroom);
     }
 
-    stacker.swap();
-
     /* now make sure we have a room in stack */
-
     send_prompt();
     return USER_PARSE_SKIP;
 }
@@ -1648,7 +1636,7 @@ USERCMD(usercmd_minfo)
             return USER_PARSE_SKIP;
         }
 
-        t = Map.getRoom(id);
+        t = engine->getRoomManager()->getRoom(id);
         if (t == NULL) {
             send_to_user("--[ There is no room with this id %i.\r\n", id);
             send_prompt();
@@ -1662,8 +1650,8 @@ USERCMD(usercmd_minfo)
 
 
 
-    for (i = 0; i < stacker.amount(); i++) {
-        t = stacker.get(i);
+    for (i = 0; i < engine->getStacker()->amount(); i++) {
+        t = engine->getStacker()->get(i);
         t->sendRoom();
     }
 
@@ -1712,14 +1700,14 @@ USERCMD(usercmd_move)
 
     if (proxy->isMudEmulation()) {
 
-        if (stacker.amount() == 0) {
+        if (engine->getCandidatesAmount() == 0) {
             send_to_user( "You are in an undefined position.\r\n");
             send_to_user( "Use mgoto <room_id> to go to some place...\r\n");
 
             send_prompt();
             return USER_PARSE_SKIP;
         }
-        r = stacker.first();
+        r = engine->getCurrentRoom();
 
 
         switch (subcmd)
@@ -1738,11 +1726,9 @@ USERCMD(usercmd_move)
         if ( r->isConnected(dir)  == false ) {
             send_to_user("Alas, you cannot go this way.\r\n\r\n");
         } else {
-            stacker.put(r->getExitLeadsTo(dir));
-            stacker.swap();
+            engine->setCurrentRoom(r->getExitLeadsTo(dir));
 
-
-            r = stacker.first();
+            r =engine->getCurrentRoom();
             engine->updateRegions();
 
             toggle_renderer_reaction();
@@ -1800,7 +1786,7 @@ USERCMD(usercmd_mregion)
             return USER_PARSE_SKIP;
         }
         p = one_argument(p, arg, 0);
-        if (Map.addRegion(arg) == true) {
+        if (engine->getRoomManager()->addRegion(arg) == true) {
             //            engine->set_users_region( Map.getRegionByName( arg ) );
             send_to_user("Ok. Done.\r\n");
         } else {
@@ -1845,7 +1831,7 @@ USERCMD(usercmd_mregion)
             engine->get_users_region()->addDoor(arg, p);
 
             // try to rebuild at least current square with rooms
-            CRoom *r = stacker.first();
+            CRoom *r = engine->getCurrentRoom();
             if (r != NULL) {
                 r->rebuildDisplayList();
             }
@@ -1928,7 +1914,7 @@ USERCMD(usercmd_mregion)
         p = one_argument(p, arg, 0);
         CRegion *reg;
 
-        reg = Map.getRegionByName( arg );
+        reg = engine->getRoomManager()->getRegionByName( arg );
         if (reg != NULL) {
             engine->set_users_region( reg );
         } else {
@@ -1943,7 +1929,7 @@ USERCMD(usercmd_mregion)
     // ---------------------------------------------------------------- LIST ALL REGIONS -------------------------------------------------------
     if (is_abbrev(arg, "list") ) {
         /* show a list of all regions  */
-        Map.sendRegionsList();
+        engine->getRoomManager()->sendRegionsList();
         send_prompt();
         return USER_PARSE_SKIP;
     }
@@ -1954,7 +1940,7 @@ USERCMD(usercmd_mregion)
         /* set region in current ROOM (reset) */
         CRoom *r;
 
-        if (stacker.amount() != 1) {
+        if (!engine->inSync()) {
             send_to_user( "Error. Must be in sync to use this subcommand!\r\n");
             send_prompt();
             return USER_PARSE_SKIP;
@@ -1969,12 +1955,12 @@ USERCMD(usercmd_mregion)
         p = one_argument(p, arg, 0);
         CRegion *reg;
 
-        reg = Map.getRegionByName( arg );
+        reg = engine->getRoomManager()->getRegionByName( arg );
         if (reg != NULL) {
 
 
             send_to_user( "Ok. Setting current room's region to %s.\r\n", (const char *) reg->getName() );
-            r = stacker.first();
+            r = engine->getCurrentRoom();
             r->setRegion( reg );
             engine->set_last_region( reg );
             engine->set_users_region( reg );

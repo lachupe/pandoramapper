@@ -63,7 +63,7 @@ void CRoomManager::loadXmlMap( QString filename)
   // so, when we come here, we are sequentially blocking the RoomManager (Map)
   // when progressBar updates it's status, it lets the App Loop to call whatever it wants (depepnding on events)
   // and we want those events to, well, fail, since there is no such thing as waiting for your own thread :-/
-  Map.setBlocked( true );
+  MapBlocker blocker( *this );
   
   unsigned int currentMaximum = 22000;
   QProgressDialog progress("Loading the database...", "Abort Loading", 0, currentMaximum, renderer_window);
@@ -85,7 +85,6 @@ void CRoomManager::loadXmlMap( QString filename)
 	  reinit();
   }
 
-  Map.setBlocked( false );
 
   delete handler;
   return;
@@ -238,7 +237,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
       s = attributes.value("region");
       r->setRegion(s.toLocal8Bit());
   } else if (qName == "region") {
-     region = new CRegion;
+     region = new CRegion( parent );
             
      readingRegion = true;
      s = attributes.value("name");
@@ -272,7 +271,7 @@ void CRoomManager::saveXmlMap(QString filename)
   }
 
 
-  Map.setBlocked( true );
+  MapBlocker block(*this);
   
   QProgressDialog progress("Saving the database...", "Abort Saving", 0, size(), renderer_window);
   progress.setWindowModality(Qt::WindowModal);
@@ -362,7 +361,5 @@ void CRoomManager::saveXmlMap(QString filename)
   fflush(f);
   fclose(f);
     
-  Map.setBlocked( false );
-
   print_debug(DEBUG_XML, "xml_writebase() is done.\r\n");
 }

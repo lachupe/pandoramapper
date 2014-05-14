@@ -89,6 +89,25 @@ void CEngine::resync()
 }
 
 
+CRoom* CEngine::getCurrentRoom()
+{
+    return stacker.first();
+}
+
+void CEngine::setCurrentRoom(CRoom *r)
+{
+    stacker.put(r);
+    stacker.swap();
+}
+
+void CEngine::setCurrentRoom(RoomId id)
+{
+    stacker.put(id);
+    stacker.swap();
+}
+
+
+
 void CEngine::initEmulationMode()
 {
     setPrompt("-->");
@@ -702,6 +721,7 @@ void CEngine::clear()
 {
     eventPipe.clear();
     commandQueue.clear();
+    stacker.clear();
 
     print_debug(DEBUG_ANALYZER, "Engine INIT.\r\n");
     mapping =                0;

@@ -68,6 +68,7 @@
 #include "Engine/CEngine.h"
 #include "Engine/CStacksManager.h"
 
+#include "Proxy/userfunc.h"
 
 class Proxy *proxy;
 
@@ -252,20 +253,9 @@ void Proxy::send_line_to_user(const char *line) {
 }
 
 void Proxy::sendMudEmulationGreeting() {
-	CRoom *r;
-
 	user->send_line("Welcome to PandoraMapper MUD Emulation!\r\n\r\n");
-
-	if (stacker.amount() == 0)
-		r = Map.getRoom(1);
-	else
-		r = stacker.first();
-
-	if (r != NULL)
-		r->sendRoom();
-	else
-		user->send_line("Your database has no room with ID 1!");
-
+    userland_parser->parse_user_input_line("mgoto 1");
+    userland_parser->parse_user_input_line("look");
 	user->send_line("-->");
 }
 
