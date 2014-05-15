@@ -58,6 +58,44 @@
 
 GLfloat marker_colour[4] =  {1.0, 0.1, 0.1, 1.0};
 
+GLubyte halftone[] = {
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
+  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55};
+
+
+  GLubyte quadtoneline = 0x88;
+  GLubyte quadtone[] = {
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
+    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22};
+
 
 #define MARKER_SIZE           (ROOM_SIZE/1.85)
 #define CONNECTION_THICKNESS_DIVIDOR	  5
@@ -99,13 +137,12 @@ void RendererWidget::initializeGL()
 	setMouseTracking(true);
 	setAutoBufferSwap( false );
     textFont = new QFont("Times", 12, QFont::Bold );
+    textFont->setStyleHint(QFont::System, QFont::OpenGLCompatible);
+    textFont->setStretch(QFont::Unstretched);
 
-
-	//textFont = new QFont("Times", 10, QFont::Bold);
-
-	glShadeModel(GL_SMOOTH);
-	glClearColor (0.15, 0.15, 0.15, 0.0);	/* This Will Clear The Background Color To Black */
-	glPointSize (4.0);		/* Add point size, to make it clear */
+    glShadeModel(GL_FLAT);
+    glClearColor (0.25, 0.25, 0.25, 0.0);	/* This Will Clear The Background Color To Black */
+    glPointSize (3.0);		/* Add point size, to make it clear */
 	glLineWidth (2.0);		/* Add line width,   ditto */
 
 	glEnable(GL_BLEND);
@@ -157,8 +194,34 @@ void RendererWidget::initializeGL()
     conf->loadNormalTexture(":/textures/exit_door.png", &exit_door_texture );
     conf->loadNormalTexture(":/textures/exit_secret.png", &exit_secret_texture );
     conf->loadNormalTexture(":/textures/exit_undef.png", &exit_undef_texture );
+
+
+    //
+    m_roomShadowPixmap = new QPixmap(30,30);
+    m_roomShadowPixmap->fill(QColor(0,0,0,175));
+
+
+    for (int i=0; i<16; i++)
+    {
+        m_terrainPixmaps[i] = new QPixmap(QString(":/textures/terrain%1.png").arg(i));
+        m_roadPixmaps[i] = new QPixmap(QString(":/pixmaps/road%1.png").arg(i));
+        m_loadPixmaps[i] = new QPixmap(QString(":/pixmaps/load%1.png").arg(i));
+        m_mobPixmaps[i] = new QPixmap(QString(":/pixmaps/mob%1.png").arg(i));
+        m_trailPixmaps[i] = new QPixmap(QString(":/pixmaps/trail%1.png").arg(i));
+    }
+
 }
 
+
+QSize RendererWidget::minimumSizeHint() const
+{
+    return QSize(100, 100);
+}
+
+QSize RendererWidget::sizeHint() const
+{
+    return QSize(300, 200);
+}
 
 void RendererWidget::setupViewingModel(  int width, int height ) 
 {
@@ -212,7 +275,7 @@ void RendererWidget::paintGL()
 /* mode 1 = full marker, mode 2 - partial marker */
 void RendererWidget::drawMarker(int dx, int dy, int dz, int mode)
 {
-          /* upper */
+      /* upper */
       glBegin(GL_TRIANGLES);
       glVertex3f(               dx, MARKER_SIZE + dy + ROOM_SIZE,  0.0f + dz);
       glVertex3f(-MARKER_SIZE + dx,               dy + ROOM_SIZE,  0.0f + dz);
@@ -495,6 +558,37 @@ void RendererWidget::glDrawGroupMarkers()
     }
 }
 
+
+void RendererWidget::alphaOverlayTexture(const QString &texture)
+{
+    bindTexture(QPixmap(texture));
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0, 1.0);
+        glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
+        glTexCoord2f(0.0, 0.0);
+        glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
+        glTexCoord2f(1.0, 0.0);
+        glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
+        glTexCoord2f(1.0, 1.0);
+        glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
+    glEnd();
+}
+
+void RendererWidget::alphaOverlayTexture(QPixmap *pix)
+{
+    bindTexture(*pix);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0, 1.0);
+        glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
+        glTexCoord2f(0.0, 0.0);
+        glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
+        glTexCoord2f(1.0, 0.0);
+        glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
+        glTexCoord2f(1.0, 1.0);
+        glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
+    glEnd();
+}
+
 // TODO: removed:
 // selection markers
 // billboards of any kind
@@ -521,11 +615,25 @@ void RendererWidget::generateDisplayList(CSquare *square)
         dy = p->getY() - square->centery;
         dz = 0;
 
+        quint32 roadindex = 0;
+        if ( p->isExitFlagSet(ED_NORTH, EF_ROAD)) SET_BIT(roadindex, bit1);
+        if ( p->isExitFlagSet(ED_SOUTH, EF_ROAD)) SET_BIT(roadindex, bit2);
+        if ( p->isExitFlagSet(ED_EAST,  EF_ROAD)) SET_BIT(roadindex, bit3);
+        if ( p->isExitFlagSet(ED_WEST,  EF_ROAD)) SET_BIT(roadindex, bit4);
+
+
+
+        glPushMatrix();
         glTranslatef(dx, dy, dz);
         if (p->getTerrain()) {
 
+
             glEnable(GL_TEXTURE_2D);
-            glBindTexture(GL_TEXTURE_2D, conf->sectors[ p->getTerrain() ].texture );
+            if ( p->getTerrain() == RTT_ROAD)
+                bindTexture(*m_roadPixmaps[roadindex]);
+            else
+                glBindTexture(GL_TEXTURE_2D, conf->sectors[ p->getTerrain() ].texture );
+                //bindTexture(*m_terrainPixmaps[ p->getTerrain() ]);
             glBegin(GL_QUADS);
                 glTexCoord2f(0.0, 1.0);
                 glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
@@ -536,12 +644,143 @@ void RendererWidget::generateDisplayList(CSquare *square)
                 glTexCoord2f(1.0, 1.0);
                 glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
             glEnd();
-            glDisable(GL_TEXTURE_2D);
 
         } else {
             glRectf( -ROOM_SIZE, -ROOM_SIZE, ROOM_SIZE, ROOM_SIZE);
         }
-        glTranslatef(-dx, -dy, -dz);
+
+        glEnable(GL_BLEND);
+
+        // Make dark rooms look dark
+        if (p->getLightType() == RLT_DARK)
+        {
+            GLdouble oldcolour[4];
+            glGetDoublev(GL_CURRENT_COLOR, oldcolour);
+
+            glTranslated(0, 0, 0.005);
+
+            glColor4d(0.2f, 0.0f, 0.0f, 0.6f);
+            const float kantik = 1.1f;
+
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBegin(GL_QUADS);
+                glTexCoord2f(0.0, 1.0);
+                glVertex3f(-ROOM_SIZE * kantik,  ROOM_SIZE * kantik, 0.0f);
+                glTexCoord2f(0.0, 0.0);
+                glVertex3f(-ROOM_SIZE * kantik, -ROOM_SIZE * kantik, 0.0f);
+                glTexCoord2f(1.0, 0.0);
+                glVertex3f( ROOM_SIZE * kantik, -ROOM_SIZE * kantik, 0.0f);
+                glTexCoord2f(1.0, 1.0);
+                glVertex3f( ROOM_SIZE * kantik,  ROOM_SIZE * kantik, 0.0f);
+            glEnd();
+
+            glColor4d(oldcolour[0], oldcolour[1], oldcolour[2], oldcolour[3]);
+        }
+
+        // Draw a little red cross on noride rooms
+        if (p->getRidableType()==RRT_NOTRIDABLE)
+        {
+            GLdouble oldcolour[4];
+            glGetDoublev(GL_CURRENT_COLOR, oldcolour);
+
+            qglColor(Qt::red);
+            glBegin(GL_LINES);
+            glVertex3d(0.6, 0.2, 0.005);
+            glVertex3d(0.8, 0.4, 0.005);
+            glVertex3d(0.8, 0.2, 0.005);
+            glVertex3d(0.6, 0.4, 0.005);
+            glEnd();
+
+            glColor4d(oldcolour[0], oldcolour[1], oldcolour[2], oldcolour[3]);
+        }
+
+        // Trail Support
+        glTranslated(0, 0, 0.005);
+        if (roadindex > 0 && (p->getTerrain()) != RTT_ROAD) {
+            alphaOverlayTexture(m_trailPixmaps[roadindex]);
+            glTranslated(0, 0, 0.005);
+        }
+
+        //RMF_RENT, RMF_SHOP, RMF_WEAPONSHOP, RMF_ARMOURSHOP, RMF_FOODSHOP, RMF_PETSHOP,
+        //RMF_GUILD, RMF_SCOUTGUILD, RMF_MAGEGUILD, RMF_CLERICGUILD, RMF_WARRIORGUILD,
+        //RMF_RANGERGUILD, RMF_SMOB, RMF_QUEST, RMF_ANY
+        if (p->isMobFlagSet(RMF_RENT))
+            alphaOverlayTexture(m_mobPixmaps[0]);
+        if (p->isMobFlagSet(RMF_SHOP))
+            alphaOverlayTexture(m_mobPixmaps[1]);
+        if (p->isMobFlagSet(RMF_WEAPONSHOP))
+            alphaOverlayTexture(m_mobPixmaps[2]);
+        if (p->isMobFlagSet(RMF_ARMOURSHOP))
+            alphaOverlayTexture(m_mobPixmaps[3]);
+        if (p->isMobFlagSet(RMF_FOODSHOP))
+            alphaOverlayTexture(m_mobPixmaps[4]);
+        if (p->isMobFlagSet(RMF_PETSHOP))
+            alphaOverlayTexture(m_mobPixmaps[5]);
+        if (p->isMobFlagSet(RMF_GUILD))
+            alphaOverlayTexture(m_mobPixmaps[6]);
+        if (p->isMobFlagSet(RMF_SCOUTGUILD))
+            alphaOverlayTexture(m_mobPixmaps[7]);
+        if (p->isMobFlagSet(RMF_MAGEGUILD))
+            alphaOverlayTexture(m_mobPixmaps[8]);
+        if (p->isMobFlagSet(RMF_CLERICGUILD))
+            alphaOverlayTexture(m_mobPixmaps[9]);
+        if (p->isMobFlagSet(RMF_WARRIORGUILD))
+            alphaOverlayTexture(m_mobPixmaps[10]);
+        if (p->isMobFlagSet(RMF_RANGERGUILD))
+            alphaOverlayTexture(m_mobPixmaps[11]);
+        if (p->isMobFlagSet(RMF_SMOB))
+            alphaOverlayTexture(m_mobPixmaps[12]);
+        if (p->isMobFlagSet(RMF_QUEST))
+            alphaOverlayTexture(m_mobPixmaps[13]);
+        if (p->isMobFlagSet(RMF_ANY))
+            alphaOverlayTexture(m_mobPixmaps[14]);
+
+        //RLF_TREASURE, RLF_ARMOUR, RLF_WEAPON, RLF_WATER, RLF_FOOD, RLF_HERB
+        //RLF_KEY, RLF_MULE, RLF_HORSE, RLF_PACKHORSE, RLF_TRAINEDHORSE
+        //RLF_ROHIRRIM, RLF_WARG, RLF_BOAT
+        glTranslated(0, 0, 0.005);
+        if (p->isLoadFlagSet(RLF_TREASURE))
+            alphaOverlayTexture(m_loadPixmaps[0]);
+        if (p->isLoadFlagSet(RLF_ARMOUR))
+            alphaOverlayTexture(m_loadPixmaps[1]);
+        if (p->isLoadFlagSet(RLF_WEAPON))
+            alphaOverlayTexture(m_loadPixmaps[2]);
+        if (p->isLoadFlagSet(RLF_WATER))
+            alphaOverlayTexture(m_loadPixmaps[3]);
+        if (p->isLoadFlagSet(RLF_FOOD))
+            alphaOverlayTexture(m_loadPixmaps[4]);
+        if (p->isLoadFlagSet(RLF_HERB))
+            alphaOverlayTexture(m_loadPixmaps[5]);
+        if (p->isLoadFlagSet(RLF_KEY))
+            alphaOverlayTexture(m_loadPixmaps[6]);
+        if (p->isLoadFlagSet(RLF_MULE))
+            alphaOverlayTexture(m_loadPixmaps[7]);
+        if (p->isLoadFlagSet(RLF_HORSE))
+            alphaOverlayTexture(m_loadPixmaps[8]);
+        if (p->isLoadFlagSet(RLF_PACKHORSE))
+            alphaOverlayTexture(m_loadPixmaps[9]);
+        if (p->isLoadFlagSet(RLF_TRAINEDHORSE))
+            alphaOverlayTexture(m_loadPixmaps[10]);
+        if (p->isLoadFlagSet(RLF_ROHIRRIM))
+            alphaOverlayTexture(m_loadPixmaps[11]);
+        if (p->isLoadFlagSet(RLF_WARG))
+            alphaOverlayTexture(m_loadPixmaps[12]);
+        if (p->isLoadFlagSet(RLF_BOAT))
+            alphaOverlayTexture(m_loadPixmaps[13]);
+
+        glTranslated(0, 0, 0.005);
+        if (p->isLoadFlagSet(RLF_ATTENTION))
+            alphaOverlayTexture(m_loadPixmaps[14]);
+        if (p->isLoadFlagSet(RLF_TOWER))
+            alphaOverlayTexture(m_loadPixmaps[15]);
+
+
+        glDisable(GL_TEXTURE_2D);
+
+
+        // jump back to the old coordinates
+        glPopMatrix();
+        //glTranslatef(-dx, -dy, -dz);
 
 
         if (p->getNote().isEmpty() != true) {
@@ -550,6 +789,7 @@ void RendererWidget::generateDisplayList(CSquare *square)
                 color = QColor((QString)conf->getNoteColor());
             else
                 color = QColor((QString)p->getNoteColor());
+
 
         	square->notesBillboards.append( new Billboard(p->getX(), p->getY(), p->getZ() + ROOM_SIZE / 2, p->getNote(), color) );
         }
@@ -636,9 +876,22 @@ void RendererWidget::generateDisplayList(CSquare *square)
 							info += "]";
 						}
 
-						double deltaX = (r->getX() - p->getX()) / 3.0;
-						double deltaY = (r->getY() - p->getY()) / 3.0;
-						double deltaZ = (r->getZ() - p->getZ()) / 3.0;
+
+                        bool twinSecret = false;
+                        CRoom *other = p->getExitRoom(k);
+                        if (other != NULL) {
+                            ExitDirection revDir = reversenum(k);
+                            if (other->getDoor(revDir) == p->getDoor(k))
+                                twinSecret = true;
+                        }
+
+                        double divFactor = 3.0;
+                        if (twinSecret) {
+                            divFactor = 2.0;
+                        }
+                        double deltaX = (r->getX() - p->getX()) / divFactor;
+                        double deltaY = (r->getY() - p->getY()) / divFactor;
+                        double deltaZ = (r->getZ() - p->getZ()) / divFactor;
 
 						double shiftX = 0;
 						double shiftY = 0;
@@ -662,13 +915,16 @@ void RendererWidget::generateDisplayList(CSquare *square)
 						double y = p->getY() + deltaY + shiftY;
 						double z = p->getZ() + deltaZ + shiftZ;
 
-			        	square->doorsBillboards.append( new Billboard( x, y , z, info, QColor(255, 255, 255, 255)) );
+                        // in case of "twinSecret", i.e. same named secret doors in both rooms
+                        // only draw the billboard once, and in room with higher ID
+                        if (!twinSecret || other->getId() < p->getId() )
+                            square->doorsBillboards.append( new Billboard( x, y , z, info, QColor(255, 255, 255, 255)) );
                     }
                 }
 
 
                 glEnable(GL_TEXTURE_2D);
-                glBindTexture(GL_TEXTURE_2D, exit_texture  );
+                glBindTexture(GL_TEXTURE_2D, exit_texture);
 
                 glBegin(GL_QUAD_STRIP);
                 glTexCoord2f(0.0, 1.0);
@@ -947,7 +1203,7 @@ void RendererWidget::setupNewBaseCoordinates()
     }
 }
 
-void RendererWidget::centerOnRoom(unsigned int id)
+void RendererWidget::centerOnRoom(RoomId id)
 {
     CRoom *r = map->getRoom(id);
 

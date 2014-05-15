@@ -592,6 +592,7 @@ void CRoom::setMobFlag(RoomMobFlag flag, bool value)
             room.mutable_mob_flags()->set_any(value);
             break;
     }
+    rebuildDisplayList();
 }
 
 
@@ -701,6 +702,7 @@ void CRoom::setLoadFlag(RoomLoadFlag flag, bool value)
         room.mutable_load_flags()->set_tower(value);
         break;
     }
+    rebuildDisplayList();
 }
 
 
@@ -779,6 +781,8 @@ void CRoom::setExitFlag(ExitDirection dir, ExitFlag flag, bool value)
             room.mutable_exits(dir)->mutable_exit_flags()->set_no_match(value);
             break;
     };
+
+    rebuildDisplayList();
 }
 
 void CRoom::setDoorFlag(ExitDirection dir, DoorFlag flag, bool value)
@@ -803,6 +807,7 @@ void CRoom::setDoorFlag(ExitDirection dir, DoorFlag flag, bool value)
         room.mutable_exits(dir)->mutable_door_flags()->set_delayed(value);
         break;
     };
+    rebuildDisplayList();
 }
 
 
