@@ -680,18 +680,20 @@ void RendererWidget::generateDisplayList(CSquare *square)
         // Draw a little red cross on noride rooms
         if (p->getRidableType()==RRT_NOTRIDABLE)
         {
-            GLdouble oldcolour[4];
-            glGetDoublev(GL_CURRENT_COLOR, oldcolour);
+            // doesn't work, looks bad anyways
+//            GLdouble oldcolour[4];
+//            glGetDoublev(GL_CURRENT_COLOR, oldcolour);
 
-            qglColor(Qt::red);
-            glBegin(GL_LINES);
-            glVertex3d(0.6, 0.2, 0.005);
-            glVertex3d(0.8, 0.4, 0.005);
-            glVertex3d(0.8, 0.2, 0.005);
-            glVertex3d(0.6, 0.4, 0.005);
-            glEnd();
+//            glColor4d(1.0, 0.0, 0.0, 1.0);
 
-            glColor4d(oldcolour[0], oldcolour[1], oldcolour[2], oldcolour[3]);
+//            glBegin(GL_LINES);
+//            glVertex3d(0.6, 0.2, 0.005);
+//            glVertex3d(0.8, 0.4, 0.005);
+//            glVertex3d(0.8, 0.2, 0.005);
+//            glVertex3d(0.6, 0.4, 0.005);
+//            glEnd();
+
+//            glColor4d(oldcolour[0], oldcolour[1], oldcolour[2], oldcolour[3]);
         }
 
         // Trail Support
