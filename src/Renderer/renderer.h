@@ -43,7 +43,6 @@ class RendererWidget : public QGLWidget
 {
     Q_OBJECT
     
-    CRoomManager    * map;
     GLfloat       colour[4];
     GLuint        global_list;
     int           curx;
@@ -66,20 +65,6 @@ class RendererWidget : public QGLWidget
     float userZ;
     int userLayerShift;
 
-    GLuint	exit_normal_texture;
-    GLuint	exit_door_texture;
-    GLuint	exit_secret_texture;
-    GLuint	exit_undef_texture;
-
-
-    QPixmap *m_terrainPixmaps[16];
-    QPixmap *m_roadPixmaps[16];
-    QPixmap *m_loadPixmaps[16];
-    QPixmap *m_mobPixmaps[16];
-    QPixmap *m_trailPixmaps[16]; // trail support
-
-    QPixmap *m_roomShadowPixmap;
-
 
     void glDrawGroupMarkers();
     void glDrawPrespamLine();
@@ -94,22 +79,14 @@ class RendererWidget : public QGLWidget
     void drawCone();
     void generateDisplayList(CSquare *p);
 
-    void alphaOverlayTexture(const QString &texture);
-    void alphaOverlayTexture(QPixmap *pix);
-
 public:
     int current_plane_z;
     GLuint basic_gllist;
     bool redraw;
     unsigned int deletedRoom;
-    RendererWidget(CRoomManager *_map, QWidget *parent = 0);
+    RendererWidget(QWidget *parent = 0);
     void initializeGL();
     void resizeGL(int width, int height);
-
-    QSize sizeHint() const;
-    QSize minimumSizeHint() const;
-
-
     void changeUserLayerShift(int byValue)
     {
         userLayerShift += byValue;
@@ -117,7 +94,7 @@ public:
     }
 
     bool doSelect(QPoint pos, unsigned int & id);
-    void centerOnRoom(RoomId id);
+    void centerOnRoom(unsigned int id);
 
     void resetViewSettings() {
     	angleY = 0;

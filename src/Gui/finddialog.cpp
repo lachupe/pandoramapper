@@ -24,13 +24,11 @@
 #include "Gui/mainwindow.h"
 
 #include "Map/CRoomManager.h"
-#include "Engine/CEngine.h"
 
 #include "Renderer/renderer.h"
 
-FindDialog::FindDialog(CRoomManager *_map, QWidget *parent)
-    : QDialog(parent),
-      map(_map)
+FindDialog::FindDialog(QWidget *parent)
+    : QDialog(parent)
 {
     setupUi(this);
 
@@ -63,17 +61,17 @@ void FindDialog::findClicked()
     resultTable->clear();
 
     if (nameRadioButton->isChecked())
-        results = map->searchNames(text, cs);
+        results = Map.searchNames(text, cs);
     else if (descRadioButton->isChecked())
-        results = map->searchDescs(text, cs);
+        results = Map.searchDescs(text, cs);
     else if (notesRadioButton->isChecked())
-        results = map->searchNotes(text, cs);
+        results = Map.searchNotes(text, cs);
     else if (exitsRadioButton->isChecked())
-        results = map->searchExits(text, cs);
+        results = Map.searchExits(text, cs);
 
     for (int i = 0; i < results.size(); i++) {
         QString id = QString(tr("%1").arg( results.at(i) ));
-        QString roomName = QString(map->getName( results.at(i) ));
+        QString roomName = QString(Map.getName( results.at(i) ));
 
         item = new QTreeWidgetItem(resultTable);
         item->setText(0, id);
@@ -92,7 +90,7 @@ void FindDialog::itemDoubleClicked(QTreeWidgetItem *item)
 
     id = item->text(0).toInt();
 
-    map->selections.exclusiveSelection(id);
+    Map.selections.exclusiveSelection(id);
     renderer_window->renderer->centerOnRoom(id);
 }
 

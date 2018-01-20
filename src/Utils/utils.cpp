@@ -149,15 +149,15 @@ void print_debug(unsigned int flag, const char *messg, ...)
 }
 
 
-ExitDirection parse_dir(char *dir)
+int parse_dir(char *dir)
 {
   int i;
 
   for (i = 0; i<= 5; i++)
     if (is_abbrev(dir, exits[i]) )
-      return static_cast<ExitDirection>(i);
+      return i;
 
-  return ED_UNKNOWN;
+  return -1;
 }
 
 
@@ -250,43 +250,43 @@ int is_abbrev(const char *arg1, const char *arg2)
 
 }
 
-ExitDirection numbydir(char dir)
+int numbydir(char dir)
 {
     if (LOWER(dir) == 'n')
-    return ED_NORTH;
+	return NORTH;
     if (LOWER(dir) == 's')
-    return ED_SOUTH;
+	return SOUTH;
     if (LOWER(dir) == 'e')
-    return ED_EAST;
+	return EAST;
     if (LOWER(dir) == 'w')
-    return ED_WEST;
+	return WEST;
     if (LOWER(dir) == 'u')
-    return ED_UP;
+	return UP;
     if (LOWER(dir) == 'd')
-    return ED_DOWN;
+	return DOWN;
 
-    return ED_UNKNOWN;
+    return -1;
 }
 
-char dirbynum(ExitDirection dir)
+char dirbynum(int dir)
 {
   switch (dir) {
-    case  ED_NORTH :
+	case  NORTH :
                 return 'n';
 		break;
-    case  ED_SOUTH :
+	case  SOUTH :
                 return 's';
 		break;
-    case  ED_EAST :
+	case  EAST :
                 return 'e';
 		break;
-    case  ED_WEST :
+	case  WEST :
                 return 'w';
 		break;
-    case  ED_UP :
+	case  UP :
                 return 'u';
 		break;
-    case  ED_DOWN :
+	case  DOWN :
                 return 'd';
 		break;
   }
@@ -295,22 +295,21 @@ char dirbynum(ExitDirection dir)
   return -1;
 }
 
-ExitDirection reversenum(ExitDirection num)
+int reversenum(int num)
 {
-    if (num == ED_NORTH)
-        return ED_SOUTH;
-    if (num == ED_SOUTH)
-        return ED_NORTH;
-    if (num == ED_EAST)
-        return ED_WEST;
-    if (num == ED_WEST)
-        return ED_EAST;
-    if (num == ED_UP)
-        return ED_DOWN;
-    if (num == ED_DOWN)
-        return ED_UP;
-
-    return ED_UNKNOWN;
+    if (num == NORTH)
+	return SOUTH;
+    if (num == SOUTH)
+	return NORTH;
+    if (num == EAST)
+	return WEST;
+    if (num == WEST)
+	return EAST;
+    if (num == UP)
+	return DOWN;
+    if (num == DOWN)
+	return UP;
+    return -1;
 }
 
 void send_to_user(const char *messg, ...)

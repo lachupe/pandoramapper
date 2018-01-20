@@ -40,8 +40,6 @@
 
 #include "Proxy/userfunc.h"
 
-#include "Engine/CStacksManager.h"
-
 class CEngine *engine;
 
 
@@ -76,10 +74,10 @@ void CEngine::resync()
   mappingOff();
 
   print_debug(DEBUG_ANALYZER, "FULL RESYNC");
-  n = map->findByName(last_name);
+  n = NameMap.findByName(last_name);
   if (n != NULL)
     for (j = 0; j < n->ids.size(); j++) {
-      if (last_name == map->getName( n->ids[j] )) {
+      if (last_name == Map.getName( n->ids[j] )) {
 //        print_debug(DEBUG_ANALYZER, "Adding matches");
         stacker.put( n->ids[j] );
       }
@@ -87,34 +85,6 @@ void CEngine::resync()
 
   stacker.swap();
 }
-
-
-CRoom* CEngine::getCurrentRoom()
-{
-    return stacker.first();
-}
-
-void CEngine::setCurrentRoom(CRoom *r)
-{
-    stacker.put(r);
-    stacker.swap();
-}
-
-void CEngine::setCurrentRoom(RoomId id)
-{
-    stacker.put(id);
-    stacker.swap();
-}
-
-
-
-void CEngine::initEmulationMode()
-{
-    setPrompt("-->");
-    stacker.put(1);
-    stacker.swap();
-}
-
 
 bool CEngine::testRoom(CRoom *room)
 {
@@ -132,6 +102,7 @@ bool CEngine::testRoom(CRoom *room)
 
 void CEngine::tryDir()
 {
+    int dir;
     unsigned int i;
     CRoom *room;
     CRoom *candidate;
@@ -140,8 +111,8 @@ void CEngine::tryDir()
     descMatch = 0;
 
     print_debug(DEBUG_ANALYZER, "in try_dir");
-    ExitDirection dir = numbydir(event.dir[0]);
-    if (dir == ED_UNKNOWN) {
+    dir = numbydir(event.dir[0]);
+    if (dir == -1) {
         print_debug(DEBUG_ANALYZER, "Error in try_dir - faulty DIR given as input!\r\n");
         return;
     }
@@ -165,7 +136,7 @@ void CEngine::tryDir()
     for (i = 0; i < stacker.amount(); i++) {
         room = stacker.get(i);
         if (room->isConnected(dir)) {
-            candidate = room->getExitRoom(dir);
+            candidate = room->exits[dir];
             if  (testRoom(candidate) ) {
                 stacker.put(candidate);
             }
@@ -209,6 +180,7 @@ void CEngine::tryDir()
 /* resyncs only if the stacks are empty */
 void CEngine::tryAllDirs()
 {
+    int dir;
     unsigned int i;
     CRoom *room;
     CRoom *candidate;
@@ -223,11 +195,9 @@ void CEngine::tryAllDirs()
 
     for (i = 0; i < stacker.amount(); i++) {
         room = stacker.get(i);
-        // dodgy part - iterate over enum! so iterate over 6 exits
-        for (int d = 0; d < 6; d++) {
-            ExitDirection dir = static_cast<ExitDirection>(d);
+        for (dir = 0; dir <= 5; dir++) {
             if (room->isConnected(dir)) {
-                candidate = room->getExitRoom(dir);
+                candidate = room->exits[dir];
                 if  (testRoom(candidate) )
                     stacker.put(candidate);
             }
@@ -263,7 +233,7 @@ void CEngine::slotRunEngine()
 {
     print_debug(DEBUG_ANALYZER, "In slotRunEngine");
 
-    if (map->isBlocked()) {
+    if (Map.isBlocked()) {
     	// well, not much we can do - ignore the message
     	printf("The Map is blocked. Delaying the execution of the slotRunEngine.\r\n");
 		print_debug(DEBUG_GENERAL, "The Map is blocked. Delaying the execution of the slotRunEngine.");
@@ -372,7 +342,7 @@ void CEngine::parseEvent()
 
 
 
-CEngine::CEngine(CRoomManager *_map) : QObject(), map(_map), stacker(this)
+CEngine::CEngine() : QObject()
 {
   /* setting defaults */
 
@@ -458,7 +428,7 @@ void CEngine::updateRegions()
 
 
 // where from where to ... map it!
-void CEngine::mapCurrentRoom(CRoom *room, ExitDirection dir)
+void CEngine::mapCurrentRoom(CRoom *room, int dir)
 {
     print_debug(DEBUG_ANALYZER, "in mapCurrentRoom");
 
@@ -483,53 +453,53 @@ void CEngine::mapCurrentRoom(CRoom *room, ExitDirection dir)
     }
     send_to_user("--[ Adding new room!\n");
 
-    int x = room->getX();
-    int y = room->getY();
-    int z = room->getZ();
+    Map.fixFreeRooms();	// making this call just for more safety - might remove
 
-    if (dir == ED_NORTH)
-        y += 2;
-    if (dir == ED_SOUTH)
-        y -= 2;
-    if (dir == ED_EAST)
-        x+= 2;
-    if (dir == ED_WEST)
-        x -= 2;
-    if (dir == ED_UP)
-        z += 2;
-    if (dir == ED_DOWN)
-        z -= 2;
+    addedroom = new CRoom;
 
-    addedroom = map->createRoom(event.name, event.desc, x, y, z);
-
+    addedroom->id = Map.next_free;
+    addedroom->setName(event.name);
+    addedroom->setDesc(event.desc);
     addedroom->setRegion( users_region );
 
-    room->setExitLeadsTo(dir, addedroom);
+    room->setExit(dir, addedroom);
     if (conf->getDuallinker() == true)
-        addedroom->setExitLeadsTo(reversenum(dir), room);
+        addedroom->setExit(reversenum(dir), room);
     else
-        map->oneway_room_id = room->getId();
+        Map.oneway_room_id = room->id;
 
     setExits(event.exits);
     do_exits((const char *) event.exits);
 
-    //stacker.put(addedroom);
 
-    CRoom *checkedDups = map->isDuplicate(addedroom);
-    if (checkedDups == NULL) {
-        resetAddedRoomVar();
+    int x = room->getX();
+    int y = room->getY();
+    int z = room->getZ();
+
+    if (dir == NORTH)	    y += 2;
+    if (dir == SOUTH)       y -= 2;
+    if (dir == EAST)          x+= 2;
+    if (dir == WEST)         x -= 2;
+    if (dir == UP)	            z += 2;
+    if (dir == DOWN)        z -= 2;
+
+    addedroom->setX(x);
+    addedroom->setY(y);
+    addedroom->simpleSetZ(z);
+
+
+    Map.addRoom(addedroom);
+    stacker.put(addedroom);
+
+    if (Map.isDuplicate(addedroom) == true) {
+    	resetAddedRoomVar();
+    	send_to_user("--[Pandora: Twin rooms merged!\n");
+    	proxy->send_line_to_user( (const char *) last_prompt );
+    	print_debug(DEBUG_ANALYZER, "Twins merged");
     } else {
-        stacker.put(checkedDups);
-        if (checkedDups == addedroom) {
-            // was not a duplicate, so see what angryLinker might be able to achieve
-            angryLinker(addedroom);
-        } else {
-            resetAddedRoomVar();
-            send_to_user("--[Pandora: Twin rooms merged!\n");
-            proxy->send_line_to_user( (const char *) last_prompt );
-            print_debug(DEBUG_ANALYZER, "Twins merged");
-        }
+        angryLinker(addedroom);
     }
+
     print_debug(DEBUG_ANALYZER, "leaving mapCurrentRoom");
 
     return;
@@ -570,12 +540,12 @@ void CEngine::angryLinker(CRoom *r)
   // if you are performing the full run over all rooms, it's better
   // to lock the Map completely.
   // else the other thread might delete the room you are examining at the moment!
-  //map->lockForWrite();
+  //Map.lockForWrite();
 
 
-  QVector<CRoom *> rooms = map->getRooms();
+  QVector<CRoom *> rooms = Map.getRooms();
   /* find the closest neighbours by coordinate */
-  for (i = 0; i < map->size(); i++) {
+  for (i = 0; i < Map.size(); i++) {
       p = rooms[i];
 
     /* z-axis: up and down exits */
@@ -587,20 +557,20 @@ void CEngine::angryLinker(CRoom *r)
       /* up exit */
       if (p->getZ() > r->getZ()) {
         z = p->getZ() - r->getZ();
-        if (z < distances[ED_UP]) {
+        if (z < distances[UP]) {
           /* update */
-          distances[ED_UP] = z;
-          candidates[ED_UP] = p;
+          distances[UP] = z;
+          candidates[UP] = p;
         }
       }
 
       /* DOWN exit */
       if (r->getZ() > p->getZ()) {
         z = r->getZ() - p->getZ();
-        if (z < distances[ED_DOWN]) {
+        if (z < distances[DOWN]) {
           /* update */
-          distances[ED_DOWN] = z;
-          candidates[ED_DOWN] = p;
+          distances[DOWN] = z;
+          candidates[DOWN] = p;
         }
       }
 
@@ -616,20 +586,20 @@ void CEngine::angryLinker(CRoom *r)
       /* EAST exit */
       if (p->getX() > r->getX()) {
         z = p->getX() - r->getX();
-        if (z < distances[ED_EAST]) {
+        if (z < distances[EAST]) {
           /* update */
-          distances[ED_EAST] = z;
-          candidates[ED_EAST] = p;
+          distances[EAST] = z;
+          candidates[EAST] = p;
         }
       }
 
       /* WEST exit */
       if (r->getX() > p->getX()) {
         z = r->getX() - p->getX();
-        if (z < distances[ED_WEST]) {
+        if (z < distances[WEST]) {
           /* update */
-          distances[ED_WEST] = z;
-          candidates[ED_WEST] = p;
+          distances[WEST] = z;
+          candidates[WEST] = p;
         }
       }
 
@@ -643,20 +613,20 @@ void CEngine::angryLinker(CRoom *r)
       /* NORTH exit */
       if (p->getY() > r->getY()) {
         z = p->getY() - r->getY();
-        if (z < distances[ED_NORTH]) {
+        if (z < distances[NORTH]) {
           /* update */
-          distances[ED_NORTH] = z;
-          candidates[ED_NORTH] = p;
+          distances[NORTH] = z;
+          candidates[NORTH] = p;
         }
       }
 
       /* SOUTH exit */
       if (r->getY() > p->getY()) {
         z = r->getY() - p->getY();
-        if (z < distances[ED_SOUTH]) {
+        if (z < distances[SOUTH]) {
           /* update */
-          distances[ED_SOUTH] = z;
-          candidates[ED_SOUTH] = p;
+          distances[SOUTH] = z;
+          candidates[SOUTH] = p;
         }
       }
 
@@ -669,22 +639,20 @@ void CEngine::angryLinker(CRoom *r)
 
   /* ok, now we have candidates for linking - lets check directions and connections*/
   for (i=0; i <= 5; i++) {
-    ExitDirection iDir = static_cast<ExitDirection> (i);
-
-    if (r->isExitUndefined(iDir) && candidates[i] != NULL)
-      if (candidates[i]->isExitUndefined( reversenum(iDir) )  == true) {
+    if (r->isExitUndefined(i) && candidates[i] != NULL)
+      if (candidates[i]->isExitUndefined( reversenum(i) )  == true) {
 
         if (distances[ i ] <= 2) {
           print_debug(DEBUG_ROOMS, "we have a match for AngryLinker!");
-          print_debug(DEBUG_ROOMS, "ID: %i to %i exit %s.", r->getId(), candidates[i]->getId(), exits[i] );
+          print_debug(DEBUG_ROOMS, "ID: %i to %i exit %s.", r->id, candidates[i]->id, exits[i] );
 
           /* ok, do the linking */
-          candidates[ i ]->setExitLeadsTo( reversenum(iDir), r);
-          r->setExitLeadsTo(iDir, candidates[ i ]);
-          print_debug(DEBUG_ROOMS, "Linked.", r->getId(), candidates[i]->getId(), exits[i] );
+          candidates[ i ]->setExit( reversenum(i), r);
+          r->setExit(i, candidates[ i ]);
+          print_debug(DEBUG_ROOMS, "Linked.", r->id, candidates[i]->id, exits[i] );
 
           send_to_user("--[ (AngryLinker) Linked exit %s with %s [%i].\r\n",
-                      exits[ i ], (const char*) candidates[i]->getName(), candidates[i]->getId());
+                      exits[ i ], (const char*) candidates[i]->getName(), candidates[i]->id);
 
         }
 
@@ -693,7 +661,7 @@ void CEngine::angryLinker(CRoom *r)
       }
   }
 
-  //map->unlock();
+  //Map.unlock();
 }
 
 
@@ -721,7 +689,6 @@ void CEngine::clear()
 {
     eventPipe.clear();
     commandQueue.clear();
-    stacker.clear();
 
     print_debug(DEBUG_ANALYZER, "Engine INIT.\r\n");
     mapping =                0;
@@ -736,8 +703,8 @@ void CEngine::clear()
     last_prompt = "-->";
     last_movement = "";
 
-    set_users_region(map->getRegionByName("default"));
-    set_last_region(map->getRegionByName("default"));
+    set_users_region(Map.getRegionByName("default"));
+    set_last_region(Map.getRegionByName("default"));
 
     resetAddedRoomVar();
 }
@@ -751,8 +718,8 @@ void CEngine::set_users_region(CRegion *reg)
 
 	users_region = reg;
 
-    map->rebuildRegion( prev_reg );
-    map->rebuildRegion( reg );
+	Map.rebuildRegion( prev_reg );
+	Map.rebuildRegion( reg );
 }
 
 void CEngine::set_last_region(CRegion *reg)
@@ -771,7 +738,7 @@ CRegion *CEngine::get_last_region()
 }
 
 // this method ensures that we are in sync!
-QVector<RoomId> *CEngine::getPrespammedDirs()
+QVector<unsigned int> *CEngine::getPrespammedDirs()
 {
     if ( commandQueue.isEmpty() || stacker.amount() != 1 )
 		return NULL; // return an empty list
@@ -795,21 +762,20 @@ void CEngine::do_exits(const char *exits_line)
                     "Exits: Adding exits information to the new room.");
 
     for (i = 0; i <= 5; i++) {
-        ExitDirection iDir = static_cast<ExitDirection>(i);
-        if (r->isExitPresent(iDir) == true) {
+        if (r->isExitPresent(i) == true) {
             if (exits[i] == 0) {	/* oneway case */
-                map->oneway_room_id = r->getExitLeadsTo(iDir);
-                r->removeExit(iDir);
+                Map.oneway_room_id = r->exits[i]->id;
+                r->removeExit(i);
             }
 
             if (exits[i] == E_CLOSEDDOOR)
-                r->setDoor(iDir, "exit");
+                r->setDoor(i, "exit");
 
 
             continue;
         }
         if (exits[i] == E_CLOSEDDOOR) {
-            r->setDoor(iDir, "exit");
+            r->setDoor(i, "exit");
         }
 
         if (exits[i] == E_PORTAL) {
@@ -817,7 +783,7 @@ void CEngine::do_exits(const char *exits_line)
         }
 
         if ((exits[i] > 0) && (exits[i] != E_PORTAL))
-            r->setExitUndefined(iDir);
+            r->setExitUndefined(i);
         }
 
         stacker.put(engine->addedroom);
@@ -841,9 +807,8 @@ int CEngine::compare_exits(CRoom *p, int exits[])
 
     print_debug(DEBUG_ANALYZER, "compare_exits called.");
     for (i = 0; i <= 5; i++) {
-        ExitDirection iDir = static_cast<ExitDirection>(i);
-        localExit = p->getExitRoom(iDir);
-        localDoor = p->getDoor(iDir);
+        localExit = p->exits[i];
+        localDoor = p->getDoor(i);
         if ((exits[i] == 3) && (localExit != NULL) && (localDoor != ""))
             if (localDoor != "exit")
                 break;		/* situation 0) */

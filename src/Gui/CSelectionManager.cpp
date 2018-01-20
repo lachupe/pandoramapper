@@ -68,7 +68,7 @@ CSelectionManager::~CSelectionManager()
 }
 
 
-void CSelectionManager::exclusiveSelection(RoomId id) 
+void CSelectionManager::exclusiveSelection(unsigned int id) 
 {
     if (selection.contains(id)) 
         return;

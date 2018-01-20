@@ -23,16 +23,12 @@
 
 #include <QMap>
 #include <QByteArray>
-#include "Map/CRoom.h"
 
-
-class CRoomManager;
 class CRegion {
     QByteArray name;
     QMap<QByteArray, QByteArray> doors;
-    CRoomManager *  m_map;
 public:
-    CRegion(CRoomManager* parent);
+    CRegion();
     ~CRegion();
     
     void setName(QByteArray newname);
@@ -44,7 +40,7 @@ public:
     
     QMap<QByteArray, QByteArray> getAllDoors();
     
-    QByteArray getAliasByDoor(QByteArray door, ExitDirection dir);
+    QByteArray getAliasByDoor(QByteArray door, int dir);
     
     void showRegion();
 };

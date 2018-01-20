@@ -34,8 +34,7 @@
 #include "Map/CRegion.h"
 #include "Map/CRoomManager.h"
 
-CRegion::CRegion(CRoomManager* parent) :
-      m_map(parent)
+CRegion::CRegion()
 {
     name.clear();
     doors.clear();
@@ -63,7 +62,7 @@ QByteArray CRegion::getName()
 void CRegion::addDoor(QByteArray alias, QByteArray name)
 {
     doors.insert(alias.trimmed(), name.simplified());
-    m_map->rebuildRegion( this );
+    Map.rebuildRegion( this );
 }
 
 QByteArray CRegion::getDoor(QByteArray alias)
@@ -76,7 +75,7 @@ QByteArray CRegion::getDoor(QByteArray alias)
 bool CRegion::removeDoor(QByteArray alias)
 {
 	bool b = doors.remove(alias);
-    m_map->rebuildRegion( this );
+    Map.rebuildRegion( this );
 	return b;
 }
 
@@ -97,7 +96,7 @@ QMap<QByteArray, QByteArray> CRegion::getAllDoors()
     return doors;
 }
 
-QByteArray CRegion::getAliasByDoor(QByteArray door, ExitDirection dir)
+QByteArray CRegion::getAliasByDoor(QByteArray door, int dir)
 {
     QByteArray fulldoor;
     

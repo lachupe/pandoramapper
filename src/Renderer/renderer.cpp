@@ -58,52 +58,14 @@
 
 GLfloat marker_colour[4] =  {1.0, 0.1, 0.1, 1.0};
 
-GLubyte halftone[] = {
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55,
-  0xAA, 0xAA, 0xAA, 0xAA, 0x55, 0x55, 0x55, 0x55};
-
-
-  GLubyte quadtoneline = 0x88;
-  GLubyte quadtone[] = {
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22,
-    0x88, 0x88, 0x88, 0x88, 0x22, 0x22, 0x22, 0x22};
-
 
 #define MARKER_SIZE           (ROOM_SIZE/1.85)
 #define CONNECTION_THICKNESS_DIVIDOR	  5
 #define PICK_TOL              50 
 
 
-RendererWidget::RendererWidget(CRoomManager *_map, QWidget *parent )
-     : map(_map), QGLWidget( parent )
+RendererWidget::RendererWidget( QWidget *parent )
+     : QGLWidget( parent )
 {
   print_debug(DEBUG_RENDERER , "in renderer constructor");
 
@@ -137,12 +99,13 @@ void RendererWidget::initializeGL()
 	setMouseTracking(true);
 	setAutoBufferSwap( false );
     textFont = new QFont("Times", 12, QFont::Bold );
-    textFont->setStyleHint(QFont::System, QFont::OpenGLCompatible);
-    textFont->setStretch(QFont::Unstretched);
 
-    glShadeModel(GL_FLAT);
-    glClearColor (0.25, 0.25, 0.25, 0.0);	/* This Will Clear The Background Color To Black */
-    glPointSize (3.0);		/* Add point size, to make it clear */
+
+	//textFont = new QFont("Times", 10, QFont::Bold);
+
+	glShadeModel(GL_SMOOTH);
+	glClearColor (0.15, 0.15, 0.15, 0.0);	/* This Will Clear The Background Color To Black */
+	glPointSize (4.0);		/* Add point size, to make it clear */
 	glLineWidth (2.0);		/* Add line width,   ditto */
 
 	glEnable(GL_BLEND);
@@ -184,44 +147,17 @@ void RendererWidget::initializeGL()
 
     print_debug(DEBUG_RENDERER, "loading %i secto textures", conf->sectors.size());
 
-
     for (i = 0; i < conf->sectors.size(); i++) {
         conf->loadSectorTexture(&conf->sectors[i]);
     }
 
     // load the exits texture
-    conf->loadNormalTexture(":/textures/exit_normal.png", &exit_normal_texture );
-    conf->loadNormalTexture(":/textures/exit_door.png", &exit_door_texture );
-    conf->loadNormalTexture(":/textures/exit_secret.png", &exit_secret_texture );
-    conf->loadNormalTexture(":/textures/exit_undef.png", &exit_undef_texture );
-
-
-    //
-    m_roomShadowPixmap = new QPixmap(30,30);
-    m_roomShadowPixmap->fill(QColor(0,0,0,175));
-
-
-    for (int i=0; i<16; i++)
-    {
-        m_terrainPixmaps[i] = new QPixmap(QString(":/textures/terrain%1.png").arg(i));
-        m_roadPixmaps[i] = new QPixmap(QString(":/pixmaps/road%1.png").arg(i));
-        m_loadPixmaps[i] = new QPixmap(QString(":/pixmaps/load%1.png").arg(i));
-        m_mobPixmaps[i] = new QPixmap(QString(":/pixmaps/mob%1.png").arg(i));
-        m_trailPixmaps[i] = new QPixmap(QString(":/pixmaps/trail%1.png").arg(i));
-    }
-
+    conf->loadNormalTexture("images/exit_normal.png", &conf->exit_normal_texture );
+    conf->loadNormalTexture("images/exit_door.png", &conf->exit_door_texture );
+    conf->loadNormalTexture("images/exit_secret.png", &conf->exit_secret_texture );
+    conf->loadNormalTexture("images/exit_undef.png", &conf->exit_undef_texture );
 }
 
-
-QSize RendererWidget::minimumSizeHint() const
-{
-    return QSize(100, 100);
-}
-
-QSize RendererWidget::sizeHint() const
-{
-    return QSize(300, 200);
-}
 
 void RendererWidget::setupViewingModel(  int width, int height ) 
 {
@@ -275,7 +211,7 @@ void RendererWidget::paintGL()
 /* mode 1 = full marker, mode 2 - partial marker */
 void RendererWidget::drawMarker(int dx, int dy, int dz, int mode)
 {
-      /* upper */
+          /* upper */
       glBegin(GL_TRIANGLES);
       glVertex3f(               dx, MARKER_SIZE + dy + ROOM_SIZE,  0.0f + dz);
       glVertex3f(-MARKER_SIZE + dx,               dy + ROOM_SIZE,  0.0f + dz);
@@ -347,15 +283,14 @@ void RendererWidget::glDrawMarkers()
     QByteArray lastMovement;
     int dx, dy, dz;
 
-    if (engine->getCandidatesAmount() == 0)
+    if (stacker.amount() == 0)
         return;
     
     
     glColor4f(marker_colour[0],marker_colour[1],marker_colour[2],marker_colour[3]);
-    CStacksManager * stacker = engine->getStacker();
-    for (k = 0; k < stacker->amount(); k++) {
+    for (k = 0; k < stacker.amount(); k++) {
         
-        p = stacker->get(k);
+        p = stacker.get(k);
     
         if (p == NULL) {
             print_debug(DEBUG_RENDERER, "RENDERER ERROR: Stuck upon corrupted room while drawing red pointers.\r\n");
@@ -401,9 +336,9 @@ void RendererWidget::glDrawMarkers()
         
     }
     
-    if (last_drawn_marker != stacker->first()->getId()) {
+    if (last_drawn_marker != stacker.first()->id) {
         last_drawn_trail = last_drawn_marker;
-        last_drawn_marker = stacker->first()->getId();
+        last_drawn_marker = stacker.first()->id;
         renderer_window->getGroupManager()->setCharPosition(last_drawn_marker);
         //emit updateCharPosition(last_drawn_marker);
     }
@@ -432,7 +367,7 @@ void RendererWidget::glDrawPrespamLine()
 	if (line == NULL)
 		return;
 
-    CRoom *p = map->getRoom( line->at(0) );
+    CRoom *p = Map.getRoom( line->at(0) );
 
     if (p == NULL) {
         return;
@@ -448,7 +383,7 @@ void RendererWidget::glDrawPrespamLine()
 		// connect all rooms with lines
 		unsigned int id = line->at(i);
 
-        CRoom *p = map->getRoom(id);
+        CRoom *p = Map.getRoom(id);
 
         if (p == NULL)
             continue;
@@ -511,7 +446,7 @@ void RendererWidget::glDrawGroupMarkers()
         double alpha = color.alpha()/255.;
 
         glColor4f(red, green, blue, alpha);
-        p = map->getRoom(pos);
+        p = Map.getRoom(pos);
 
         if (p == NULL) {
             continue;
@@ -558,37 +493,6 @@ void RendererWidget::glDrawGroupMarkers()
     }
 }
 
-
-void RendererWidget::alphaOverlayTexture(const QString &texture)
-{
-    bindTexture(QPixmap(texture));
-    glBegin(GL_QUADS);
-        glTexCoord2f(0.0, 1.0);
-        glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
-        glTexCoord2f(0.0, 0.0);
-        glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
-        glTexCoord2f(1.0, 0.0);
-        glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
-        glTexCoord2f(1.0, 1.0);
-        glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
-    glEnd();
-}
-
-void RendererWidget::alphaOverlayTexture(QPixmap *pix)
-{
-    bindTexture(*pix);
-    glBegin(GL_QUADS);
-        glTexCoord2f(0.0, 1.0);
-        glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
-        glTexCoord2f(0.0, 0.0);
-        glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
-        glTexCoord2f(1.0, 0.0);
-        glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
-        glTexCoord2f(1.0, 1.0);
-        glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
-    glEnd();
-}
-
 // TODO: removed:
 // selection markers
 // billboards of any kind
@@ -596,7 +500,7 @@ void RendererWidget::generateDisplayList(CSquare *square)
 {
     GLfloat dx, dx2, dy, dy2, dz, dz2;
     CRoom *r;
-    ExitDirection k;
+    int k;
 
     square->clearDoorsList();
     square->clearNotesList();
@@ -615,25 +519,11 @@ void RendererWidget::generateDisplayList(CSquare *square)
         dy = p->getY() - square->centery;
         dz = 0;
 
-        quint32 roadindex = 0;
-        if ( p->isExitFlagSet(ED_NORTH, EF_ROAD)) SET_BIT(roadindex, bit1);
-        if ( p->isExitFlagSet(ED_SOUTH, EF_ROAD)) SET_BIT(roadindex, bit2);
-        if ( p->isExitFlagSet(ED_EAST,  EF_ROAD)) SET_BIT(roadindex, bit3);
-        if ( p->isExitFlagSet(ED_WEST,  EF_ROAD)) SET_BIT(roadindex, bit4);
-
-
-
-        glPushMatrix();
         glTranslatef(dx, dy, dz);
         if (p->getTerrain()) {
 
-
             glEnable(GL_TEXTURE_2D);
-            if ( p->getTerrain() == RTT_ROAD)
-                bindTexture(*m_roadPixmaps[roadindex]);
-            else
-                glBindTexture(GL_TEXTURE_2D, conf->sectors[ p->getTerrain() ].texture );
-                //bindTexture(*m_terrainPixmaps[ p->getTerrain() ]);
+            glBindTexture(GL_TEXTURE_2D, conf->sectors[ p->getTerrain() ].texture );
             glBegin(GL_QUADS);
                 glTexCoord2f(0.0, 1.0);
                 glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
@@ -644,145 +534,12 @@ void RendererWidget::generateDisplayList(CSquare *square)
                 glTexCoord2f(1.0, 1.0);
                 glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
             glEnd();
+            glDisable(GL_TEXTURE_2D);
 
         } else {
             glRectf( -ROOM_SIZE, -ROOM_SIZE, ROOM_SIZE, ROOM_SIZE);
         }
-
-        glEnable(GL_BLEND);
-
-        // Make dark rooms look dark
-        if (p->getLightType() == RLT_DARK)
-        {
-            GLdouble oldcolour[4];
-            glGetDoublev(GL_CURRENT_COLOR, oldcolour);
-
-            glTranslated(0, 0, 0.005);
-
-            glColor4d(0.2f, 0.0f, 0.0f, 0.6f);
-            const float kantik = 1.1f;
-
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glBegin(GL_QUADS);
-                glTexCoord2f(0.0, 1.0);
-                glVertex3f(-ROOM_SIZE * kantik,  ROOM_SIZE * kantik, 0.0f);
-                glTexCoord2f(0.0, 0.0);
-                glVertex3f(-ROOM_SIZE * kantik, -ROOM_SIZE * kantik, 0.0f);
-                glTexCoord2f(1.0, 0.0);
-                glVertex3f( ROOM_SIZE * kantik, -ROOM_SIZE * kantik, 0.0f);
-                glTexCoord2f(1.0, 1.0);
-                glVertex3f( ROOM_SIZE * kantik,  ROOM_SIZE * kantik, 0.0f);
-            glEnd();
-
-            glColor4d(oldcolour[0], oldcolour[1], oldcolour[2], oldcolour[3]);
-        }
-
-        // Draw a little red cross on noride rooms
-        if (p->getRidableType()==RRT_NOTRIDABLE)
-        {
-            // doesn't work, looks bad anyways
-//            GLdouble oldcolour[4];
-//            glGetDoublev(GL_CURRENT_COLOR, oldcolour);
-
-//            glColor4d(1.0, 0.0, 0.0, 1.0);
-
-//            glBegin(GL_LINES);
-//            glVertex3d(0.6, 0.2, 0.005);
-//            glVertex3d(0.8, 0.4, 0.005);
-//            glVertex3d(0.8, 0.2, 0.005);
-//            glVertex3d(0.6, 0.4, 0.005);
-//            glEnd();
-
-//            glColor4d(oldcolour[0], oldcolour[1], oldcolour[2], oldcolour[3]);
-        }
-
-        // Trail Support
-        glTranslated(0, 0, 0.005);
-        if (roadindex > 0 && (p->getTerrain()) != RTT_ROAD) {
-            alphaOverlayTexture(m_trailPixmaps[roadindex]);
-            glTranslated(0, 0, 0.005);
-        }
-
-        //RMF_RENT, RMF_SHOP, RMF_WEAPONSHOP, RMF_ARMOURSHOP, RMF_FOODSHOP, RMF_PETSHOP,
-        //RMF_GUILD, RMF_SCOUTGUILD, RMF_MAGEGUILD, RMF_CLERICGUILD, RMF_WARRIORGUILD,
-        //RMF_RANGERGUILD, RMF_SMOB, RMF_QUEST, RMF_ANY
-        if (p->isMobFlagSet(RMF_RENT))
-            alphaOverlayTexture(m_mobPixmaps[0]);
-        if (p->isMobFlagSet(RMF_SHOP))
-            alphaOverlayTexture(m_mobPixmaps[1]);
-        if (p->isMobFlagSet(RMF_WEAPONSHOP))
-            alphaOverlayTexture(m_mobPixmaps[2]);
-        if (p->isMobFlagSet(RMF_ARMOURSHOP))
-            alphaOverlayTexture(m_mobPixmaps[3]);
-        if (p->isMobFlagSet(RMF_FOODSHOP))
-            alphaOverlayTexture(m_mobPixmaps[4]);
-        if (p->isMobFlagSet(RMF_PETSHOP))
-            alphaOverlayTexture(m_mobPixmaps[5]);
-        if (p->isMobFlagSet(RMF_GUILD))
-            alphaOverlayTexture(m_mobPixmaps[6]);
-        if (p->isMobFlagSet(RMF_SCOUTGUILD))
-            alphaOverlayTexture(m_mobPixmaps[7]);
-        if (p->isMobFlagSet(RMF_MAGEGUILD))
-            alphaOverlayTexture(m_mobPixmaps[8]);
-        if (p->isMobFlagSet(RMF_CLERICGUILD))
-            alphaOverlayTexture(m_mobPixmaps[9]);
-        if (p->isMobFlagSet(RMF_WARRIORGUILD))
-            alphaOverlayTexture(m_mobPixmaps[10]);
-        if (p->isMobFlagSet(RMF_RANGERGUILD))
-            alphaOverlayTexture(m_mobPixmaps[11]);
-        if (p->isMobFlagSet(RMF_SMOB))
-            alphaOverlayTexture(m_mobPixmaps[12]);
-        if (p->isMobFlagSet(RMF_QUEST))
-            alphaOverlayTexture(m_mobPixmaps[13]);
-        if (p->isMobFlagSet(RMF_ANY))
-            alphaOverlayTexture(m_mobPixmaps[14]);
-
-        //RLF_TREASURE, RLF_ARMOUR, RLF_WEAPON, RLF_WATER, RLF_FOOD, RLF_HERB
-        //RLF_KEY, RLF_MULE, RLF_HORSE, RLF_PACKHORSE, RLF_TRAINEDHORSE
-        //RLF_ROHIRRIM, RLF_WARG, RLF_BOAT
-        glTranslated(0, 0, 0.005);
-        if (p->isLoadFlagSet(RLF_TREASURE))
-            alphaOverlayTexture(m_loadPixmaps[0]);
-        if (p->isLoadFlagSet(RLF_ARMOUR))
-            alphaOverlayTexture(m_loadPixmaps[1]);
-        if (p->isLoadFlagSet(RLF_WEAPON))
-            alphaOverlayTexture(m_loadPixmaps[2]);
-        if (p->isLoadFlagSet(RLF_WATER))
-            alphaOverlayTexture(m_loadPixmaps[3]);
-        if (p->isLoadFlagSet(RLF_FOOD))
-            alphaOverlayTexture(m_loadPixmaps[4]);
-        if (p->isLoadFlagSet(RLF_HERB))
-            alphaOverlayTexture(m_loadPixmaps[5]);
-        if (p->isLoadFlagSet(RLF_KEY))
-            alphaOverlayTexture(m_loadPixmaps[6]);
-        if (p->isLoadFlagSet(RLF_MULE))
-            alphaOverlayTexture(m_loadPixmaps[7]);
-        if (p->isLoadFlagSet(RLF_HORSE))
-            alphaOverlayTexture(m_loadPixmaps[8]);
-        if (p->isLoadFlagSet(RLF_PACKHORSE))
-            alphaOverlayTexture(m_loadPixmaps[9]);
-        if (p->isLoadFlagSet(RLF_TRAINEDHORSE))
-            alphaOverlayTexture(m_loadPixmaps[10]);
-        if (p->isLoadFlagSet(RLF_ROHIRRIM))
-            alphaOverlayTexture(m_loadPixmaps[11]);
-        if (p->isLoadFlagSet(RLF_WARG))
-            alphaOverlayTexture(m_loadPixmaps[12]);
-        if (p->isLoadFlagSet(RLF_BOAT))
-            alphaOverlayTexture(m_loadPixmaps[13]);
-
-        glTranslated(0, 0, 0.005);
-        if (p->isLoadFlagSet(RLF_ATTENTION))
-            alphaOverlayTexture(m_loadPixmaps[14]);
-        if (p->isLoadFlagSet(RLF_TOWER))
-            alphaOverlayTexture(m_loadPixmaps[15]);
-
-
-        glDisable(GL_TEXTURE_2D);
-
-
-        // jump back to the old coordinates
-        glPopMatrix();
-        //glTranslatef(-dx, -dy, -dz);
+        glTranslatef(-dx, -dy, -dz);
 
 
         if (p->getNote().isEmpty() != true) {
@@ -792,54 +549,52 @@ void RendererWidget::generateDisplayList(CSquare *square)
             else
                 color = QColor((QString)p->getNoteColor());
 
-
         	square->notesBillboards.append( new Billboard(p->getX(), p->getY(), p->getZ() + ROOM_SIZE / 2, p->getNote(), color) );
         }
 
-        for (int kind = 0; kind <= 5; kind++) {
-            ExitDirection k = static_cast<ExitDirection>(kind);
+        for (k = 0; k <= 5; k++)
           if (p->isExitPresent(k) == true) {
               GLfloat kx, ky, kz;
               GLfloat sx, sy, sz;
-              GLuint exit_texture = exit_normal_texture;
+              GLuint exit_texture = conf->exit_normal_texture;
               int thickness = CONNECTION_THICKNESS_DIVIDOR;
 
-              if (k == ED_NORTH) {
+              if (k == NORTH) {
                   kx = 0;
                   ky = +(ROOM_SIZE + 0.2);
                   kz = 0;
                   sx = 0;
                   sy = +ROOM_SIZE;
                   sz = 0;
-              } else if (k == ED_EAST) {
+              } else if (k == EAST) {
                   kx = +(ROOM_SIZE + 0.2);
                   ky = 0;
                   kz = 0;
                   sx = +ROOM_SIZE;
                   sy = 0;
                   sz = 0;
-              } else if (k == ED_SOUTH) {
+              } else if (k == SOUTH) {
                   kx = 0;
                   ky = -(ROOM_SIZE + 0.2);
                   kz = 0;
                   sx = 0;
                   sy = -ROOM_SIZE;
                   sz = 0;
-              } else if (k == ED_WEST) {
+              } else if (k == WEST) {
                   kx = -(ROOM_SIZE + 0.2);
                   ky = 0;
                   kz = 0;
                   sx = -ROOM_SIZE;
                   sy = 0;
                   sz = 0;
-              } else if (k == ED_UP) {
+              } else if (k == UP) {
                   kx = 0;
                   ky = 0;
                   kz = +(ROOM_SIZE + 0.2);
                   sx = ROOM_SIZE / 2;
                   sy = 0;
                   sz = 0;
-              } else if (k == ED_DOWN) {
+              } else {
                   kx = 0;
                   ky = 0;
                   kz = -(ROOM_SIZE + 0.2);
@@ -850,7 +605,7 @@ void RendererWidget::generateDisplayList(CSquare *square)
 
               if (p->isExitNormal(k)) {
 
-                r = p->getExitRoom(k);
+                r = p->exits[k];
 
                 dx2 = r->getX() - square->centerx;
                 dy2 = r->getY() - square->centery;
@@ -863,9 +618,9 @@ void RendererWidget::generateDisplayList(CSquare *square)
 
                 if (p->getDoor(k) != "") {
                     if (p->isDoorSecret(k) == false) {
-                        exit_texture = exit_door_texture;
+                    	exit_texture = conf->exit_door_texture;
                     } else {
-                        exit_texture = exit_secret_texture;
+                    	exit_texture = conf->exit_secret_texture;
 
 						// Draw the secret door ...
 						QByteArray info;
@@ -878,22 +633,9 @@ void RendererWidget::generateDisplayList(CSquare *square)
 							info += "]";
 						}
 
-
-                        bool twinSecret = false;
-                        CRoom *other = p->getExitRoom(k);
-                        if (other != NULL) {
-                            ExitDirection revDir = reversenum(k);
-                            if (other->getDoor(revDir) == p->getDoor(k))
-                                twinSecret = true;
-                        }
-
-                        double divFactor = 3.0;
-                        if (twinSecret) {
-                            divFactor = 2.0;
-                        }
-                        double deltaX = (r->getX() - p->getX()) / divFactor;
-                        double deltaY = (r->getY() - p->getY()) / divFactor;
-                        double deltaZ = (r->getZ() - p->getZ()) / divFactor;
+						double deltaX = (r->getX() - p->getX()) / 3.0;
+						double deltaY = (r->getY() - p->getY()) / 3.0;
+						double deltaZ = (r->getZ() - p->getZ()) / 3.0;
 
 						double shiftX = 0;
 						double shiftY = 0;
@@ -917,16 +659,13 @@ void RendererWidget::generateDisplayList(CSquare *square)
 						double y = p->getY() + deltaY + shiftY;
 						double z = p->getZ() + deltaZ + shiftZ;
 
-                        // in case of "twinSecret", i.e. same named secret doors in both rooms
-                        // only draw the billboard once, and in room with higher ID
-                        if (!twinSecret || other->getId() < p->getId() )
-                            square->doorsBillboards.append( new Billboard( x, y , z, info, QColor(255, 255, 255, 255)) );
+			        	square->doorsBillboards.append( new Billboard( x, y , z, info, QColor(255, 255, 255, 255)) );
                     }
                 }
 
 
                 glEnable(GL_TEXTURE_2D);
-                glBindTexture(GL_TEXTURE_2D, exit_texture);
+                glBindTexture(GL_TEXTURE_2D, exit_texture  );
 
                 glBegin(GL_QUAD_STRIP);
                 glTexCoord2f(0.0, 1.0);
@@ -950,27 +689,27 @@ void RendererWidget::generateDisplayList(CSquare *square)
             } else {
                 GLfloat kx, ky, kz;
 
-                if (k == ED_NORTH) {
+                if (k == NORTH) {
                     dx2 = dx;
                     dy2 = dy + 0.5;
                     dz2 = dz;
-                } else if (k == ED_EAST) {
+                } else if (k == EAST) {
                     dx2 = dx + 0.5;
                     dy2 = dy;
                     dz2 = dz;
-                } else if (k == ED_SOUTH) {
+                } else if (k == SOUTH) {
                     dx2 = dx;
                     dy2 = dy - 0.5;
                     dz2 = dz;
-                } else if (k == ED_WEST) {
+                } else if (k == WEST) {
                     dx2 = dx - 0.5;
                     dy2 = dy;
                     dz2 = dz;
-                } else if (k == ED_UP) {
+                } else if (k == UP) {
                     dx2 = dx;
                     dy2 = dy;
                     dz2 = dz + 0.5;
-                } else if (k == ED_DOWN) {
+                } else if (k == DOWN) {
                     dx2 = dx;
                     dy2 = dy;
                     dz2 = dz - 0.5;
@@ -981,21 +720,21 @@ void RendererWidget::generateDisplayList(CSquare *square)
                 kz = 0;
 
 
-                if (k == ED_NORTH) {
+                if (k == NORTH) {
                     ky = +(ROOM_SIZE);
-                } else if (k == ED_EAST) {
+                } else if (k == EAST) {
                     kx = +(ROOM_SIZE);
-                } else if (k == ED_SOUTH) {
+                } else if (k == SOUTH) {
                     ky = -(ROOM_SIZE);
-                } else if (k == ED_WEST) {
+                } else if (k == WEST) {
                     kx = -(ROOM_SIZE);
-                } else if (k == ED_UP) {
+                } else if (k == UP) {
                     kz = 0;
-                } else if (k == ED_DOWN) {
+                } else if (k == DOWN) {
                     kz = 0;
                 }
 
-                exit_texture = exit_undef_texture;
+            	exit_texture = conf->exit_undef_texture;
 
                 glEnable(GL_TEXTURE_2D);
                 glBindTexture(GL_TEXTURE_2D, exit_texture  );
@@ -1014,7 +753,7 @@ void RendererWidget::generateDisplayList(CSquare *square)
                 glDisable(GL_TEXTURE_2D);
 
 
-                GLuint death_terrain = conf->getTerrainTextureByDesc("DEATH");
+                GLuint death_terrain = conf->getTextureByDesc("DEATH");
                 if (death_terrain && p->isExitDeath(k)) {
     				glTranslatef(dx2 + kx, dy2 + ky, dz2);
 
@@ -1040,8 +779,8 @@ void RendererWidget::generateDisplayList(CSquare *square)
 
             }
         }
-        }
     }
+
     glEndList();
 
     square->rebuild_display_list = false;
@@ -1120,11 +859,11 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
             }
 
             // if needed, draw selected rooms
-            if (!map->selections.isEmpty()) {
+            if (!Map.selections.isEmpty()) {
 				glColor4f(0.20, 0.20, 0.80, colour[3]-0.1);
 
 				for (k = 0; k < p->rooms.size(); k++) {
-                    if (map->selections.isSelected( p->rooms[k]->getId() ) == true ) {
+					if (Map.selections.isSelected( p->rooms[k]->id ) == true ) {
 	                    int dx = p->rooms[k]->getX() - curx;
 	                    int dy = p->rooms[k]->getY() - cury;
 	                    int dz = p->rooms[k]->getZ() - curz;
@@ -1175,13 +914,13 @@ void RendererWidget::setupNewBaseCoordinates()
     print_debug(DEBUG_RENDERER, "calculating new Base coordinates");
 
     // in case we lost sync, stay at the last position 
-    if (engine->getCandidatesAmount() == 0)
+    if (stacker.amount() == 0) 
         return;
 
     // initial unbeatably worst value for euclidean test
     bestDistance = (long long) 32000*32000*1000;
-    for (i = 0; i < engine->getStacker()->amount(); i++) {
-        p = engine->getStacker()->get(i);
+    for (i = 0; i < stacker.amount(); i++) {
+        p = stacker.get(i);
         newX = curx - p->getX();
         newY = cury - p->getY();
         newZ = curz - p->getZ() + userLayerShift;
@@ -1205,9 +944,9 @@ void RendererWidget::setupNewBaseCoordinates()
     }
 }
 
-void RendererWidget::centerOnRoom(RoomId id)
+void RendererWidget::centerOnRoom(unsigned int id)
 {
-    CRoom *r = map->getRoom(id);
+    CRoom *r = Map.getRoom(id);
 
     userX = (double) (curx - r->getX());
     userY = (double) (cury - r->getY());
@@ -1232,7 +971,7 @@ void RendererWidget::draw(void)
     const float alphaChannelTable[] = { 0.95, 0.25, 0.20, 0.15, 0.10, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
 //                                       0    1     2      3    4      5     6    7    8     9    10
 
-    if (map->isBlocked()) {
+    if (Map.isBlocked()) {
     	// well, not much we can do - ignore the message
     	printf("Map is blocked. Delaying the redraw\r\n");
     	fflush(stdout);
@@ -1283,7 +1022,7 @@ void RendererWidget::draw(void)
     colour[0] = 0.1; colour[1] = 0.8; colour[2] = 0.8; colour[3] = 0.4; 
     
 
-    plane = map->getPlanes();
+    plane = Map.getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
             plane = plane->next;
@@ -1358,7 +1097,7 @@ void RendererWidget::renderPickupObjects()
 
     // Sensitive ! lock for WRITE!
 //    Map.lockForRead();
-    plane = map->getPlanes();
+    plane = Map.getPlanes();
     while (plane) {
         if (plane->z < lowerZ || plane->z > upperZ) {
             plane = plane->next;
@@ -1395,7 +1134,7 @@ void RendererWidget::renderPickupRoom(CRoom *p)
     //printf("Rendering the pickup room %i\r\n", p->id);
 
     glTranslatef(dx, dy, dz);
-    glLoadName( p->getId() + 1 );
+    glLoadName( p->id + 1 );
     glCallList(basic_gllist);
     glTranslatef(-dx, -dy, -dz);
 }
@@ -1409,7 +1148,6 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
     GLuint  zval;
     bool    selected;
 
-    glSelectBuffer( MAXHITS, selectBuf );
     glRenderMode( GL_SELECT );
     glInitNames();
 
@@ -1443,7 +1181,7 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
         zval = 50000;
         for ( i = 0; i < hits; i++) { // for each hit
             int tempId = selectBuf[ 4 * i + 3 ] - 1;
-            CRoom *r = map->getRoom( tempId );
+            CRoom *r = Map.getRoom( tempId );
             if (r == NULL) 
                 continue;
             

@@ -22,44 +22,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "defines.h"
-#include "Map/CRoom.h"
-
 class QByteArray;
 
-
-#define bit1 1
-#define bit2 2
-#define bit3 4
-#define bit4 8
-#define bit5 16
-#define bit6 32
-#define bit7 64
-#define bit8 128
-#define bit9 256
-#define bit10 512
-#define bit11 1024
-#define bit12 2048
-#define bit13 4096
-#define bit14 8192
-#define bit15 16384
-#define bit16 32768
-#define bit17 65536
-#define bit18 131072
-#define bit19 262144
-#define bit20 524288
-#define bit21 1048576
-#define bit22 2097152
-#define bit23 4194304
-#define bit24 8388608
-#define bit25 16777216
-#define bit26 33554432
-#define bit27 67108864
-#define bit28 134217728
-#define bit29 268435456
-#define bit30 536870912
-#define bit31 1073741824
-#define bit32 2147483648
 
 #define LOWER(c)   (((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
 #define UPPER(c)   (((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c) )
@@ -126,14 +90,14 @@ char *skip_spaces(const char *str);
 char *next_space(char *str);
 char *one_argument(char *argument, char *first_arg, int mode);
 int is_abbrev(const char *arg1, const char *arg2);
-ExitDirection reversenum(ExitDirection num);
-char dirbynum(ExitDirection dir);
-ExitDirection numbydir(char dir);
+int reversenum(int num);
+char dirbynum(int dir);
+int numbydir(char dir);
 void send_prompt();
 void send_to_user(const char *messg, ...);
 void send_to_mud(const char *messg, ...);
 int get_input_boolean(char *input);
-ExitDirection parse_dir(char *dir);
+int parse_dir(char *dir);
 void basic_mud_log(const char *format, ...);
 int MIN(int a, int b);
 

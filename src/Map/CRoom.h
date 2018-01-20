@@ -39,8 +39,6 @@
 #include "Map/CRegion.h"
 #include "Renderer/CSquare.h"
 
-#include "map.pb.h"
-
 
 struct room_flag_data {
   QByteArray name;
@@ -65,86 +63,88 @@ class Strings_Comparator {
 
 extern Strings_Comparator comparator;
 
-class CRoomManager;
 
 class CRoom {
-    // inner serializable (protocol buffers) object
-    mapdata::Room room;
+    unsigned int    flags;          
+    QByteArray      name; 			/* POINTER to the room name */ 
+    QByteArray      note; 			/* note, if needed, additional info etc */
+    QByteArray      noteColor;      /* note color in this room */
+    QByteArray      desc;			/* descrition */
+    char            sector;                 /* terrain marker */
+                                        /* _no need to free this one_ */
+    CRegion         *region;               /* region of this room */
+    
+    
+    QByteArray    doors[6];		/* if the door is secret */
+    unsigned  char exitFlags[6];
 
     CSquare			*square;  		/* which square this room belongs to */
-    CRegion         *region;
 
-    CRoomManager    *parent;
+    int x, y, z;		/* coordinates on our map */
+
 public:
-    CRoom(CRoomManager *parent);
+    enum ExitFlags { EXIT_NONE = 0, EXIT_UNDEFINED, EXIT_DEATH};
+  
+    unsigned int    id; 		        /* identifier, public for speed up - its very often used  */
+    CRoom           *exits[6];              /* very often used in places where performance matters */
+  
+  
+    CRoom();
     ~CRoom();
     
-
-    mapdata::Room* getInnerRoomData() { return &room; }
-
-    RoomId getId() const { return room.id(); }
-    void setId(RoomId id) { room.set_id(id); }
-
-    CRoom* getExitRoom(ExitDirection dir) const;
-
-    RoomId getExitLeadsTo(ExitDirection dir) const;
-
-    void CRoom::setSector(RoomTerrainType val);
-
-
-    QByteArray getName() const;
-    QByteArray getDesc() const;
-    QByteArray getDynamicDesc() const;
-    RoomTerrainType getTerrain() const;
-    QByteArray getNote() const;
+    QByteArray getName();
+    QByteArray getDesc();
+    char getTerrain();
+    QByteArray getNote();
     
-    QByteArray getNoteColor() const;
+    QByteArray getNoteColor();
     void setNoteColor(QByteArray color);
     
     void setDesc(QByteArray newdesc);
     void setName(QByteArray newname);
-    void setDynamicDesc(QByteArray newdyndesc);
     void setTerrain(char terrain);
+    void setSector(char val);
     void setNote(QByteArray note);
 
     void setSquare(CSquare *square);
-    CSquare* getSquare() const { return square; }
+    CSquare* getSquare() { return square; }
     
     bool isDescSet();
     bool isNameSet();
     bool isEqualNameAndDesc(CRoom *room);
     
-    QString toolTip() const;
+    QString toolTip();
     
     void setModified(bool b);
-    bool isConnected(ExitDirection dir) const;
-    void sendRoom() const;
+    bool isConnected(int dir);
+    void sendRoom();
     
     // door stuff
-    int setDoor(ExitDirection dir, QByteArray door);
-    void removeDoor(ExitDirection dir);
-    QByteArray getDoor(ExitDirection dir) const;
-    bool isDoorSet(ExitDirection dir) const;
-    bool isDoorSecret(ExitDirection dir) const;
+    int setDoor(int dir, QByteArray door);
+    void removeDoor(int dir);
+    QByteArray getDoor(int dir);
+    bool isDoorSet(int dir);
+    bool isDoorSecret(int dir);
     
-    void disconnectExit(ExitDirection dir);       /* just detaches the connection */
-    void removeExit(ExitDirection dir);           /* also removes the door */
-    void setExitLeadsTo(ExitDirection dir, CRoom *room);
-    void setExitLeadsTo(ExitDirection dir, RoomId id);
+    void disconnectExit(int dir);       /* just detaches the connection */
+    void removeExit(int dir);           /* also removes the door */
+    void setExit(int dir, CRoom *room);
+    void setExit(int dir, unsigned int id);
 //    CRoom *getExit(int dir);
-    bool isExitLeadingTo(ExitDirection dir, CRoom *room);
+    bool isExitLeadingTo(int dir, CRoom *room);
     
-    bool isExitDeath(ExitDirection dir) const;
-    void setExitDeath(ExitDirection dir);
+    bool isExitDeath(int dir);
+    void setExitDeath(int dir);
 
-    bool isExitNormal(ExitDirection dir) const;
-    bool isExitPresent(ExitDirection dir) const;       /* if there is anything at all in this direction, deathtrap, undefined exit or normal one */
-    bool isExitUndefined(ExitDirection dir) const;
-    void setExitUndefined(ExitDirection dir);
+    bool isExitNormal(int dir);
+    bool isExitPresent(int dir);       /* if there is anything at all in this direction, deathtrap, undefined exit or normal one */
+    bool isExitUndefined(int dir);
+    void setExitUndefined(int dir);
     
     
-    bool anyUndefinedExits() const;
+    bool anyUndefinedExits();
     
+    void setExitFlags(int dir, unsigned char flag);
     
     // coordinates     
     void setX(int x);
@@ -152,45 +152,22 @@ public:
     void setZ(int x);
     void simpleSetZ(int val); // does not perform any Plane operations (see rendering) on  CPlane in Map.h
     
-    int getX() const;
-    int getY() const;
-    int getZ() const;
+    inline int getX() { return x; }
+    inline int getY() { return y; }
+    inline int getZ() { return z; }
     
-    int descCmp(QByteArray desc) const;
-    int roomnameCmp(QByteArray name) const;
+    int descCmp(QByteArray desc);
+    int roomnameCmp(QByteArray name);
     
-    // exit functions
-    bool isExitFlagSet(ExitDirection dir, ExitFlag flag) const;
-    bool isDoorFlagSet(ExitDirection dir, DoorFlag flag) const;
-
-    void setExitFlag(ExitDirection dir, ExitFlag flag, bool value);
-    void setDoorFlag(ExitDirection dir, DoorFlag flag, bool value);
-
-    bool isMobFlagSet(RoomMobFlag flag) const;
-    void setMobFlag(RoomMobFlag flag, bool value);
-
-    bool isLoadFlagSet(RoomLoadFlag flag) const;
-    void setLoadFlag(RoomLoadFlag flag, bool value);
-
-    RoomAlignType getAlignType() const;
-    RoomPortableType getPortableType() const;
-    RoomLightType getLightType() const;
-    RoomRidableType getRidableType() const;
-
-    void setAlignType(RoomAlignType val);
-    void setPortableType(RoomPortableType val);
-    void setLightType(RoomLightType val);
-    void setRidableType(RoomRidableType val);
-
-
-    QByteArray getRegionName() const;
-    CRegion *getRegion() const;
+    
+    QByteArray getRegionName();
+    CRegion *getRegion();
     void setRegion(QByteArray name);
     void setRegion(CRegion *reg);
-    QByteArray getSecretsInfo() const;
-    QByteArray getDoorAlias(int i) const;
+    QByteArray getSecretsInfo();
+    QByteArray getDoorAlias(int i);
     
-    char dirbynum(ExitDirection dir) const;
+    char dirbynum(int dir);
 
     void rebuildDisplayList() {if (square) square->rebuildDisplayList(); }
 };

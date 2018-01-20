@@ -6,8 +6,7 @@ MOC_DIR = moc
 
 UI_DIR = ui
 
-RESOURCES = resources/pandora.qrc
-RC_FILE = resources/pandora.rc
+
 
 CONFIG += qt \
     opengl \
@@ -26,29 +25,20 @@ QT += xml \
 
 DEFINES += NOMINMAX
 
-INCLUDEPATH = src src/Utils src/3dParty/protobuf/include
+INCLUDEPATH = src src/Utils
 	
 FORMS += src/Ui/configedit.ui \
     src/Ui/finddialog.ui \
     src/Ui/groupmanagersettings.ui \
     src/Ui/logdialog.ui \
     src/Ui/movementdialog.ui \
-    src/Ui/spellsdialog.ui \
-    src/Ui/roomeditattrdlg.ui
+    src/Ui/roomedit.ui \
+    src/Ui/spellsdialog.ui
+
 	
 ################################################ 	Main		######################################################
-HEADERS += src/defines.h \ 
-    src/Map/map.pb.h \
-    src/mmapper/mmapper_importer.h \
-    src/Gui/roomeditattrdlg.h \
-    src/mmapper/qtiocompressor.h \
-    src/mmapper/coordinate.h
-SOURCES += src/main.cpp \ 
-    src/Map/map.pb.cc \
-    src/mmapper/mmapper_importer.cpp \
-    src/Gui/roomeditattrdlg.cpp \
-    src/mmapper/qtiocompressor.cpp \
-    src/mmapper/coordinate.cpp
+HEADERS += src/defines.h 
+SOURCES += src/main.cpp 
 
 	
 ################################################ 	Engine		######################################################
@@ -83,6 +73,7 @@ HEADERS += src/Gui/CActionManager.h \
     src/Gui/CSelectionManager.h \
     src/Gui/finddialog.h \
     src/Gui/mainwindow.h \
+    src/Gui/RoomEditDialog.h \
     src/Gui/SpellsDialog.h \
     src/Gui/CGroupSettingsDialog.h
 
@@ -93,6 +84,7 @@ SOURCES += src/Gui/CActionManager.cpp \
     src/Gui/CSelectionManager.cpp \
     src/Gui/finddialog.cpp \
     src/Gui/mainwindow.cpp \
+    src/Gui/RoomEditDialog.cpp \
     src/Gui/SpellsDialog.cpp \
     src/Gui/CGroupSettingsDialog.cpp
 
@@ -101,12 +93,13 @@ SOURCES += src/Gui/CActionManager.cpp \
 HEADERS += src/Map/CRoom.h \
     src/Map/CRoomManager.h \
     src/Map/CTree.h \
-    src/Map/CRegion.h
+    src/Map/CRegion.h 
+
 
 SOURCES += src/Map/CRoom.cpp \
     src/Map/CRoomManager.cpp \
     src/Map/CTree.cpp \
-    src/Map/CRegion.cpp
+    src/Map/CRegion.cpp 
 
 	
 ################################################ 	Proxy		######################################################
@@ -152,31 +145,10 @@ unix:!macx{
 }
 
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
-win32:LIBS += -lwsock32
+win32:LIBS += -lwsock32 -lopengl32 -lglu32
 unix:LIBS += -lm
 
 #QMAKE_CXXFLAGS_RELEASE += -O2 \
 #    -pipe \
 #    $$CFLAGS_VAR
 #QMAKE_CXXFLAGS_DEBUG += $$CFLAGS_VAR
-
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/src/3dParty/protobuf/libs/ -llibprotobuf
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/src/3dParty/protobuf/libs/ -llibprotobufd
-else:unix: LIBS += -L$$PWD/src/3dParty/protobuf/libs/ -llibprotobuf
-
-INCLUDEPATH += $$PWD/src/3dParty/protobuf/include
-DEPENDPATH += $$PWD/src/3dParty/protobuf/libs
-
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/protobuf/libs/liblibprotobuf.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/protobuf/libs/liblibprotobufd.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/protobuf/libs/libprotobuf.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/src/3dParty/protobuf/libs/libprotobufd.lib
-else:unix: PRE_TARGETDEPS += $$PWD/src/3dParty/protobuf/libs/liblibprotobuf.a
-
-
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/src/3dParty/zlib/lib/ -lzlib
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/src/3dParty/zlib/lib/ -lzlib
-else:unix: LIBS += -L$$PWD/src/3dParty/zlib/lib/ -lzlib
-
-INCLUDEPATH += $$PWD/src/3dParty/zlib/include
-DEPENDPATH += $$PWD/src/3dParty/zlib/include

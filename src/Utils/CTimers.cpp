@@ -11,7 +11,7 @@
 
 #include "utils.h"
 
-CTimers::CTimers() {
+CTimers::CTimers(QObject *parent) {
 	m_nextId = 1;
 }
 

@@ -29,10 +29,8 @@
 
 #include "Map/CRoomManager.h"
 #include "Engine/CStacksManager.h"
-#include "Engine/CEngine.h"
 
-
-CMovementDialog::CMovementDialog(CRoomManager *_map, QWidget *parent) : map(_map), QDialog(parent)
+CMovementDialog::CMovementDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);                        
     setWindowTitle(tr("Room's Movement Dialog"));
@@ -50,7 +48,7 @@ void CMovementDialog::run()
 
 void CMovementDialog::accept()
 {
-    QList<RoomId> ids;
+    QList<int> ids;
     CRoom *r;
 
 
@@ -65,19 +63,19 @@ void CMovementDialog::accept()
         print_debug(DEBUG_INTERFACE, "moving rooms by shift : x %i, y %i, z %i", x, y, z);
 
         // collect the room for the movement            
-        if (map->selections.isEmpty() == false) {
-            ids = map->selections.getList();
+        if (Map.selections.isEmpty() == false) {
+            ids = Map.selections.getList();
         } else {
-            if (!engine->inSync()) {
+            if (stacker.amount() != 1) {
                 QMessageBox::critical(this, "Movement Dialog", QString("You are not in sync!"));
                 done(Accepted);
                 return;
             } 
-            ids.append( engine->getCurrentRoom()->getId() );
+            ids.append(stacker.first()->id);
         }
 
         for (int i = 0; i < ids.size(); ++i) {
-            r = map->getRoom( ids.at(i) );
+            r = Map.getRoom( ids.at(i) );
             r->setX( r->getX() + x);
             r->setY( r->getY() + y);
             if (z != 0) 

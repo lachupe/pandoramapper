@@ -26,11 +26,7 @@
 #include "utils.h"
 #include "Map/CTree.h"
 
-
-CTree::~CTree()
-{
-    deleteAll(root);
-}
+class CTree NameMap;
 
 
 void CTree::removeId(unsigned int id, TTree *p)

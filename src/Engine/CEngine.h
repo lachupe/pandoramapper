@@ -27,16 +27,14 @@
 
 #include "Engine/CEvent.h"
 #include "Engine/CCommandQueue.h"
-#include "Engine/CStacksManager.h"
+
 
 
 class CEngine : public QObject {
 Q_OBJECT
 
 
-    enum ExitFlags { E_NOEXIT = 0, E_NORMAL, E_OPENDOOR, E_CLOSEDDOOR, E_PORTAL, E_CLIMBUP, E_CLIMBDOWN };
-
-    CRoomManager *  map;        // the map, we are working on
+	enum ExitFlags { E_NOEXIT = 0, E_NORMAL, E_OPENDOOR, E_CLOSEDDOOR, E_PORTAL, E_CLIMBUP, E_CLIMBDOWN };
 
   /* flags */
     bool mapping;                 /* mapping is On/OFF */
@@ -48,19 +46,17 @@ Q_OBJECT
     CRegion  *last_region;
     CRegion	 *last_warning_region;
 
-    QByteArray      last_name;
-    QByteArray      last_desc;
-    QByteArray      last_exits;
-    QByteArray      last_prompt;
-    char            last_terrain;
-    QByteArray      last_movement;
+    QByteArray last_name;
+    QByteArray last_desc;
+    QByteArray last_exits;
+    QByteArray last_prompt;
+    char 	   last_terrain;
+    QByteArray last_movement;
 
-    PipeManager     eventPipe;
-    Event           event;
+    PipeManager  eventPipe;
+    Event        event;
 
-    CCommandQueue   commandQueue;
-    CStacksManager  stacker;
-
+    CCommandQueue commandQueue;
 
 
     void parseEvent();
@@ -73,21 +69,21 @@ Q_OBJECT
 
     bool testRoom(CRoom *room);
 
-    void mapCurrentRoom(CRoom *room, ExitDirection dir);
+    void mapCurrentRoom(CRoom *room, int dir);
 
 public:
-    CEngine(CRoomManager *map);
+    CEngine();
     ~CEngine();
 
     CRoom *addedroom;	/* fresh added room */
 
     void addEvent(Event e) { eventPipe.addEvent(e); }
 
-    void addMovementCommand(ExitDirection dir) { commandQueue.addCommand(CCommand::MOVEMENT, dir); }
-    QVector<RoomId> *getPrespammedDirs();
+    void addMovementCommand(int dir) { commandQueue.addCommand(CCommand::MOVEMENT, dir); }
+    QVector<unsigned int> *getPrespammedDirs();
 
 
-    CRoomManager* getRoomManager() { return map; }
+
 
     void exec();
 
@@ -110,17 +106,13 @@ public:
     void parse_exits(const char *exits_line, int exits[]);
     void do_exits(const char *exits_line);
 
-    // returns first if many possible
-    CRoom* getCurrentRoom();
-    void setCurrentRoom(CRoom *r);
-    void setCurrentRoom(RoomId id);
 
     bool isMapping() { return mapping; }
     void setMapping(bool b) { mapping = b; }
 
     void setMgoto(bool b) { mgoto = b; }
     bool isMgoto() { return mgoto; }
-    bool empty() { return eventPipe.isEmpty(); }                      /* are pipes empty? */
+    bool empty() { return eventPipe.isEmpty(); };                      /* are pipes empty? */
     void clear();                      /* clears events pipes */
 
     void set_users_region(CRegion *reg);
@@ -131,17 +123,6 @@ public:
     void updateRegions();
 
     void resetAddedRoomVar() { addedroom = NULL; }
-
-    void initEmulationMode();
-
-    CStacksManager * getStacker() { return &stacker; }
-    int  getCandidatesAmount() const { return stacker.amount(); }
-    bool inSync() const { return (stacker.amount() == 1); }
-    bool isMapBlocked() const { return map->isBlocked(); }
-    void swapStacker() { stacker.swap(); }
-
-    CSelectionManager* getSelections() const { return &map->selections; }
-
 public slots:
     void slotRunEngine();
     void setPrompt(QByteArray s) { last_prompt = s; }

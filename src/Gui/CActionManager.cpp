@@ -33,7 +33,7 @@
 #include "Gui/CMovementDialog.h"
 #include "Gui/CLogDialog.h"
 #include "Gui/finddialog.h"
-#include "Gui/roomeditattrdlg.h"
+#include "Gui/RoomEditDialog.h"
 
 #include "GroupManager/CGroupCommunicator.h"
 
@@ -61,18 +61,6 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     openAct->setShortcut(tr("Ctrl+L"));
     openAct->setStatusTip(tr("Open an existing map"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-
-
-    importAct = new QAction(tr("Import"), this);
-    //importAct->setShortcut(tr("Ctrl+L"));
-    importAct->setStatusTip(tr("Import existing map XML or MM2 map"));
-    connect(importAct, SIGNAL(triggered()), this, SLOT(importMap()));
-
-    exportAct = new QAction(tr("Export"), this);
-    //importAct->setShortcut(tr("Ctrl+L"));
-    exportAct->setStatusTip(tr("Export to XML format"));
-    connect(exportAct, SIGNAL(triggered()), this, SLOT(exportMap() ));
-
 
     reloadAct = new QAction(tr("&Reload..."), this);
     reloadAct->setShortcut(tr("Ctrl+R"));
@@ -369,45 +357,43 @@ void CActionManager::groupSettings()
 void CActionManager::bindRooms()
 {
     CRoom *one, *two;
+    int dir;
 
-    CRoomManager *map = engine->getRoomManager();
-    if (map->selections.size() != 2) {
+    if (Map.selections.size() != 2) {
         QMessageBox::critical(parent, "Failure", QString("You have to select two rooms to bind them."));
         return;
     }
 
 
-    one = map->getRoom( map->selections.get(0) );
-    two = map->getRoom( map->selections.get(1) );
+    one = Map.getRoom( Map.selections.get(0) );
+    two = Map.getRoom( Map.selections.get(1) );
 
     // roll over all dirs
-    for (int d = 0; d <= 5; d++) {
-        ExitDirection dir = static_cast<ExitDirection>(d);
-
+    for (dir = 0; dir <= 5; dir++)
         // and check if there are connections like undefined exits north-south etc
         if (one->isExitUndefined( dir) == true && two->isExitUndefined( reversenum( dir ) ) ) {
             // now test is the connection is geometrically right
             bool fits = false;
 
-            if ( (dir == ED_NORTH && one->getY() < two->getY()) ||
-                 (dir == ED_EAST && one->getX() < two->getX())  ||
-                 (dir == ED_WEST && one->getX() > two->getX())  ||
-                 (dir == ED_SOUTH && one->getY() > two->getY()) ||
-                 (dir == ED_UP && one->getZ() < two->getZ())    ||
-                 (dir == ED_DOWN && one->getZ() > two->getZ()) )
+            if ( (dir == NORTH && one->getY() < two->getY()) ||
+                 (dir == EAST && one->getX() < two->getX())  ||
+                 (dir == WEST && one->getX() > two->getX())  ||
+                 (dir == SOUTH && one->getY() > two->getY()) ||
+                 (dir == UP && one->getZ() < two->getZ())    ||
+                 (dir == DOWN && one->getZ() > two->getZ()) )
             {
                 fits = true;
             }
 
             if (fits == true) {
-                one->setExitLeadsTo(dir, two);
+                one->setExit(dir, two);
                 if (conf->getDuallinker() == true)
-                    two->setExitLeadsTo( reversenum( dir ), one);
+                    two->setExit( reversenum( dir ), one);
                 return;
             }
 
         }
-    }
+
 
     QMessageBox::critical(parent, "Failure", QString("No fitting exits found. Rooms are badly positioned or exits are not marked as Undefined."));
 
@@ -416,18 +402,19 @@ void CActionManager::bindRooms()
 
 void CActionManager::edit_current_room()
 {
-    RoomId id;
+    unsigned int id;
 
-    if (engine->getRoomManager()->selections.isEmpty()) {
-        id = engine->getRoomManager()->selections.getFirst();
-        if (!engine->inSync()) {
+    if (Map.selections.isEmpty() == false) {
+        id = Map.selections.getFirst();
+    } else {
+        if (stacker.amount() != 1) {
             QMessageBox::critical(parent, "Room Info Edit", QString("You are not in sync!"));
             return;
         }
-        engine->getSelections()->select( engine->getCurrentRoom()->getId() );
+        id = stacker.first()->id;
     }
 
-    parent->editRoomDialog();
+    parent->editRoomDialog( id );
 }
 
 
@@ -543,7 +530,8 @@ void CActionManager::newFile()
 
     }
 
-    engine->getRoomManager()->reinit();  /* this one reinits Ctree structure also */
+	Map.reinit();  /* this one reinits Ctree structure also */
+	stacker.reset();  /* resetting stacks */
 	engine->clear();
 	engine->setMapping(false);
 	toggle_renderer_reaction();
@@ -570,7 +558,7 @@ void CActionManager::enable_online_actions()
 
 void CActionManager::delete_room()
 {
-    if (engine->getRoomManager()->selections.size() > 1) {
+    if (Map.selections.size() > 1) {
         int ret = QMessageBox::warning(parent, tr("Pandora: Room's Deletion"),
                    tr("Do you really want to delete this room/rooms?"),
                    QMessageBox::Ok |  QMessageBox::Cancel,
@@ -606,7 +594,51 @@ void CActionManager::merge_room()
     userland_parser->parse_user_input_line("mmerge");
 }
 
+void CActionManager::open()
+{
+  QString s = QFileDialog::getOpenFileName(
+                    parent,
+                    "Choose a database",
+                    "database/",
+                    "XML files (*.xml)");
+  char data[MAX_STR_LEN];
 
+  print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));
+  strcpy(data, qPrintable(s));
+
+  if (!s.isEmpty()) {
+    usercmd_mload(0, 0,  data, data);
+  }
+}
+
+void CActionManager::reload()
+{
+    userland_parser->parse_user_input_line("mload");
+}
+
+void CActionManager::save()
+{
+    userland_parser->parse_user_input_line("msave");
+    QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
+}
+
+void CActionManager::saveAs()
+{
+  char data[MAX_STR_LEN];
+
+  QString s = QFileDialog::getSaveFileName(
+                    parent,
+                    "Choose a filename to save under",
+                    "database/",
+                    "XML database files (*.xml)");
+
+  strcpy(data, qPrintable(s));
+
+  if (!s.isEmpty()) {
+    usercmd_msave(0, 0,  data, data);
+    QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
+  }
+}
 
 
 void CActionManager::mapping_mode()
@@ -624,24 +656,24 @@ void CActionManager::refreshRoom()
     QString command;
     CRoom *r;
 
-    if (engine->getSelections()->isEmpty() == true) {
-        if (!engine->inSync()) {
+    if (Map.selections.isEmpty() == true) {
+        if (stacker.amount() != 1) {
             QMessageBox::critical(parent, "Pandora",
                               QString("You have to be in sync or select just one room!"));
             return;
         }
-        r = engine->getCurrentRoom();
+        r = stacker.first();
     } else {
-        if (engine->getSelections()->size() != 1) {
+        if (Map.selections.size() != 1) {
             QMessageBox::critical(parent, "Pandora",
                               QString("You have to select just one room!"));
             return;
         }
 
-        r = engine->getRoomManager()->getRoom( engine->getSelections()->getFirst() );
+        r = Map.getRoom( Map.selections.getFirst() );
     }
 
-    command = QString("mgoto %1").arg(r->getId());
+    command = QString("mgoto %1").arg(r->id);
     userland_parser->parse_user_input_line( (const char *) command.toLocal8Bit() );
     userland_parser->parse_user_input_line("mrefresh");
 }
@@ -697,7 +729,7 @@ void CActionManager::saveAsConfig()
                     parent,
                     "Choose a filename to save under",
                     "configs/",
-                    "INI config files (*.ini)");
+                    "XML config files (*.xml)");
     if (s.isEmpty())
         return;
     conf->saveConfigAs("", s.toLocal8Bit());
@@ -710,7 +742,7 @@ void CActionManager::loadConfig()
                     parent,
                     "Choose another configuration file to load",
                     "configs/",
-                    "INI config files (*.ini)");
+                    "XML config files (*.xml)");
   if (s.isEmpty())
         return;
 
@@ -732,8 +764,8 @@ void CActionManager::emulation_mode()
         }
         proxy->setMudEmulation( true );
         engine->setPrompt("-->");
-        userland_parser->parse_user_input_line("mgoto 1");
-        userland_parser->parse_user_input_line("look");
+        stacker.put(1);
+        stacker.swap();
     } else {
         proxy->setMudEmulation( false );
 
@@ -752,7 +784,7 @@ void CActionManager::publish_map()
         return;
     }
 
-    engine->getRoomManager()->clearAllSecrets();
+    Map.clearAllSecrets();
 
     print_debug(DEBUG_INTERFACE && DEBUG_ROOMS,"Finished removing secrets from the map!\r\n");
     //    QMessageBox::information(parent, "Removing secrets...", "Done!\n", QMessageBox::Ok);
@@ -767,120 +799,8 @@ void CActionManager::gotoAction() {
 void CActionManager::find()
 {
     if (!parent->findDialog) {
-        parent->findDialog = new FindDialog(engine->getRoomManager(), parent);
+        parent->findDialog = new FindDialog(parent);
     }
     parent->findDialog->show();
     parent->findDialog->activateWindow();
-}
-
-
-void CActionManager::reload()
-{
-    userland_parser->parse_user_input_line("mload");
-}
-
-void CActionManager::save()
-{
-    userland_parser->parse_user_input_line("msave");
-    QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
-}
-
-void CActionManager::saveAs()
-{
-  char data[MAX_STR_LEN];
-
-  QString s = QFileDialog::getSaveFileName(
-                    parent,
-                    "Choose a filename to save under",
-                    "database/",
-                    "Pandora map files (*.pmf)");
-
-  strcpy(data, qPrintable(s));
-
-  if (!s.isEmpty()) {
-      try {
-          engine->getRoomManager()->saveMap(s);
-      } catch(const std::runtime_error& er) {
-
-      }
-
-      QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
-  }
-}
-
-
-void CActionManager::open()
-{
-  QString s = QFileDialog::getOpenFileName(
-                    parent,
-                    "Choose a database",
-                    "database/",
-                    "Pandora map files (*.pmf)");
-  char data[MAX_STR_LEN];
-
-  print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));
-  strcpy(data, qPrintable(s));
-
-  if (!s.isEmpty()) {
-      try {
-          engine->getRoomManager()->loadMap( s );
-      } catch(const std::runtime_error &er) {
-          send_to_user(" * Failed to load the map. Error: %s\r\n",
-                        er.what()  );
-          QMessageBox::critical(parent, "Pandora",
-                            QString("Failed to load the map\r\nError:%1").arg(QString(er.what())));
-      }
-
-  }
-}
-
-
-void CActionManager::importMap()
-{
-    QString s = QFileDialog::getOpenFileName(
-                        parent,
-                        "Choose a database",
-                        "database/",
-                        "Old XML format (*.xml);;MMapper2 map files (*.mm2)");
-    char data[MAX_STR_LEN];
-
-    print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));
-
-
-    if (s.endsWith(".xml")) {
-        engine->getRoomManager()->loadXmlMap(s);
-        return;
-    } else if(s.endsWith(".mm2")) {
-        try {
-            engine->getRoomManager()->loadMMapperMap(s);
-        } catch(const std::runtime_error &er) {
-            send_to_user(" * Failed to import the map. Error: %s\r\n",
-                          er.what()  );
-            QMessageBox::critical(parent, "Pandora",
-                              QString("Failed to import the map.\r\nError:%1").arg(QString(er.what())));
-        }
-        return;
-    }
-
-    QMessageBox::information(parent, "Error", "Unknown file extention", QMessageBox::Ok);
-}
-
-void CActionManager::exportMap()
-{
-    char data[MAX_STR_LEN];
-
-    QString s = QFileDialog::getSaveFileName(
-                      parent,
-                      "Choose a filename to export",
-                      "database/",
-                      "Old pandora XML maps (*.xml)");
-
-    strcpy(data, qPrintable(s));
-
-    if (!s.isEmpty()) {
-      engine->getRoomManager()->saveXmlMap(s);
-      //usercmd_msave(0, 0,  data, data);
-      QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
-    }
-
 }

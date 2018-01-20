@@ -68,7 +68,6 @@
 #include "Engine/CEngine.h"
 #include "Engine/CStacksManager.h"
 
-#include "Proxy/userfunc.h"
 
 class Proxy *proxy;
 
@@ -126,8 +125,11 @@ int Proxy::init() {
 	proxy_name.sin_addr.s_addr = INADDR_ANY;
 	proxy_name.sin_port = htons(conf->getLocalPort());
 
-	if (bind(proxy_hangsock, (struct sockaddr *) &proxy_name,
-			sizeof(struct sockaddr_in))) {
+
+    sockaddr_in service;
+    //iResult = bind(ListenSocket, (SOCKADDR *) &service, sizeof (service));
+    int iResult = ::bind( proxy_hangsock, (struct sockaddr *) &proxy_name, sizeof(service) );
+    if (iResult == SOCKET_ERROR) {
 		print_debug(DEBUG_PROXY, "proxy: Cannot bind socket\n");
 		emit log("MUD Proxy", "Could not bind socket! Check port availability! You will not be able to connect to the mapper.");
 		return -1;
@@ -253,9 +255,20 @@ void Proxy::send_line_to_user(const char *line) {
 }
 
 void Proxy::sendMudEmulationGreeting() {
+	CRoom *r;
+
 	user->send_line("Welcome to PandoraMapper MUD Emulation!\r\n\r\n");
-    userland_parser->parse_user_input_line("mgoto 1");
-    userland_parser->parse_user_input_line("look");
+
+	if (stacker.amount() == 0)
+		r = Map.getRoom(1);
+	else
+		r = stacker.first();
+
+	if (r != NULL)
+		r->sendRoom();
+	else
+		user->send_line("Your database has no room with ID 1!");
+
 	user->send_line("-->");
 }
 

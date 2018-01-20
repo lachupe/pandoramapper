@@ -38,24 +38,15 @@
 
 class CPlane;
 class CSquare;
-class CTree;
-struct TTree;
-
-
 
 class CRoomManager : public QObject {
 	Q_OBJECT
-
-    static const unsigned __int32       pmf_magic_number = 0x00504D46; // " PMF"
 
 	QList<CRegion *>    regions;
     QVector<CRoom* > 	rooms;   		/* rooms */
     CRoom* 				ids[MAX_ROOMS];	/* array of pointers */
 
     CPlane        		*planes;        /* planes/levels of the map, sorted by the Z coordinate, lower at first */
-
-    CTree               *roomNamesTree;
-
 
 //    void deleteRoomUnlocked(CRoom* r, int mode);  /* user interface function */
 //    void smallDeleteRoomUnlocked(CRoom* r);  /* user interface function */
@@ -70,8 +61,8 @@ public:
     QVector<CRoom* > getRooms() { return rooms; }
     CPlane* getPlanes() { return planes; }
 
-    RoomId next_free; 	/* next free id */
-    RoomId oneway_room_id;
+    unsigned int next_free; 	/* next free id */
+    unsigned int oneway_room_id;
 
     unsigned int size()  { return rooms.size(); }
 
@@ -83,26 +74,24 @@ public:
     void          removeFromPlane(CRoom* room);
     void          expandPlane(CPlane *plane, CRoom* room);
 
-    CTree*        getRoomNamesTree() { return roomNamesTree; }
-
-
-    CRoom* createRoom(QByteArray name, QByteArray desc, int x, int y, int z);
-    CRoom* createRoom(RoomId id, int x = 0, int y = 0, int z = 0);
 
     void addRoom(CRoom* room);
-    inline CRoom* getRoom(RoomId id)        {
+
+
+
+    inline CRoom* getRoom(unsigned int id)        {
 		if (id < MAX_ROOMS)
 			return ids[id];
 		else
 			return NULL;
     }
 
-    inline QByteArray getName(RoomId id)  {
+    inline QByteArray getName(unsigned int id)  {
     	if (ids[id]) return (*(ids[id])).getName(); return "";
     }
 
-    CRoom *tryMergeRooms(CRoom* room, CRoom* copy, ExitDirection j);
-    CRoom *isDuplicate(CRoom* addedroom);
+    int tryMergeRooms(CRoom* room, CRoom* copy, int j);
+    bool isDuplicate(CRoom* addedroom);
 
     void fixFreeRooms();
     CRegion* getRegionByName(QByteArray name);
@@ -117,8 +106,6 @@ public:
     void deleteRoom(CRoom* r, int mode);
     void smallDeleteRoom(CRoom* r);
 
-    TTree* findByName(QByteArray last_name);
-
     QList<int> searchNames(QString s, Qt::CaseSensitivity cs);
     QList<int> searchDescs(QString s, Qt::CaseSensitivity cs);
     QList<int> searchNotes(QString s, Qt::CaseSensitivity cs);
@@ -127,33 +114,15 @@ public:
 
     CRoom* findDuplicateRoom(CRoom *orig);
 
-    bool loadMap(QString filename);
-    bool saveMap(QString filename);
-
-
-
-
-    void loadXmlMap(QString filename);
-    void saveXmlMap(QString filename);
+    void loadMap(QString filename);
+    void saveMap(QString filename);
     void clearAllSecrets();
-
-    bool loadMMapperMap(QString filename);
-
 
     void setBlocked(bool b) { blocked = b; }
     bool isBlocked() { return blocked; }
 };
 
-class MapBlocker {
-  public:
-    MapBlocker(CRoomManager &in_data) : data(in_data) { data.setBlocked(true);}
-    ~MapBlocker() {data.setBlocked(false);}
-  private:
-    CRoomManager & data;
-};
-
-
-//extern class CRoomManager __Map;/* room manager */
+extern class CRoomManager Map;/* room manager */
 
 #endif
 

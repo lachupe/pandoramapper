@@ -32,6 +32,8 @@
 
 #include "Map/CRoomManager.h"
 
+class CStacksManager stacker;
+
 
 CRoom * CStacksManager::first()  
 { 
@@ -59,7 +61,7 @@ void CStacksManager::getCurrent(char *str)
     return;
   }
   
-  sprintf(str, "%i", ((*sa)[0])->getId() );
+  sprintf(str, "%i", ((*sa)[0])->id );
 }
 
 
@@ -71,32 +73,32 @@ void CStacksManager::printStacks()
     if (sa->size() == 0)
     	send_to_user(" Current position is unknown!\n");
     for (i = 0; i < sa->size(); i++) {
-        send_to_user(" %i\n", (*sa)[i]->getId());
+    	send_to_user(" %i\n", (*sa)[i]->id);
     }
 }
 
-void CStacksManager::removeRoom(RoomId id)
+void CStacksManager::removeRoom(unsigned int id)
 {
   unsigned int i;
 
   for (i = 0; i < sa->size(); i++) 
-    if (get(i)->getId() != id)
-      put( get(i) );
-  swap();
+    if (stacker.get(i)->id != id) 
+      stacker.put( stacker.get(i) );
+  stacker.swap();
 }
 
 void CStacksManager::put(CRoom *r)
 {
-    if (mark[r->getId()] == turn)
+    if (mark[r->id] == turn)
     	return;
     sb->push_back(r);
-    mark[r->getId()] = turn;
+    mark[r->id] = turn;
 }
 
 
-void CStacksManager::put(RoomId id)
+void CStacksManager::put(unsigned int id)
 {
-    put(parent->getRoomManager()->getRoom(id));
+    put(Map.getRoom(id));
 }
 
 
@@ -113,10 +115,10 @@ CRoom *CStacksManager::getNext(unsigned int i)
 
 CStacksManager::CStacksManager()
 {
-    clear();
+    reset();
 }
 
-void CStacksManager::clear()
+void CStacksManager::reset()
 {
     sa = &stacka;
     sb = &stackb;

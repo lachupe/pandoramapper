@@ -182,7 +182,7 @@ void CSquare::remove(CRoom *room)
         if (!p->toBePassed()) {       
             /* just for check */
             for ( i=0; i < p->rooms.size(); ++i) {
-                if ( room->getId() == p->rooms[i]->getId()) {
+                if ( room->id == p->rooms[i]->id ) {
                     p->rooms[i]->setSquare( NULL );
                     p->rooms.remove(i);
                     return;

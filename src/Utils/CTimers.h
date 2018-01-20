@@ -12,6 +12,7 @@
 #include <QTime>
 #include <QList>
 #include <QMutex>
+#include <QObject>
 
 struct TTimer {
 	int 		id;
@@ -37,7 +38,7 @@ class CTimers : public QObject {
 
 
 public:
-	CTimers();
+    CTimers(QObject *parent = 0);
 	virtual ~CTimers();
 
 	static QString msToMinSec(int ms)

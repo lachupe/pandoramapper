@@ -153,4 +153,6 @@ public:
     Cdispatcher();
 };
 
+//extern class Cdispatcher *dispatcher;
+
 #endif

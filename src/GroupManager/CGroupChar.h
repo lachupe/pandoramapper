@@ -30,13 +30,11 @@
 #include <QTreeWidgetItem>
 #include <QTime>
 
-#include "defines.h"
-
 class CGroupChar
 {
 	CGroup *parent;
 
-    RoomId pos;
+	unsigned int pos;
 	QByteArray name;
 	QByteArray textHP;
 	QByteArray textMoves;

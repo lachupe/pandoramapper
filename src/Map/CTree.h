@@ -54,7 +54,6 @@ public:
 
 
   CTree();
-  ~CTree();
 
   void addName(const char *name, unsigned int id);	
   void resetTTree(TTree *t);
@@ -65,6 +64,7 @@ public:
   void removeId(unsigned int id, TTree *t);
 };
 
+extern class CTree NameMap;
 
 #endif
 

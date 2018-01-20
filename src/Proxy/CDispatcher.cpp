@@ -520,7 +520,9 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                 xmlState = STATE_DESC;
                 continue;
             } else if ((buffer[i].xmlType == XML_START_TERRAIN)  && (xmlState == STATE_ROOM)) {
-                event.blind = true;                 // BLIND detection
+                // this seems to misbehave for mapping, when the weather is up or terrain tag comes right after
+                // description tag
+                //event.blind = true;                 // BLIND detection
                 continue;
             } else if (buffer[i].xmlType == XML_START_EXITS) {
                 xmlState = STATE_EXITS;

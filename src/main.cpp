@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     strcpy(resPath, appPath);
     strcat(resPath, "/Contents/Resources/");
 
-    char    default_base_file[MAX_STR_LEN] = "mume.pmf";
+    char    default_base_file[MAX_STR_LEN] = "mume.xml";
     char    default_remote_host[MAX_STR_LEN] = "";
     strcpy(configfile, "configs/default.conf");
 
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 
 #else
     resPath = "";
-    char    default_base_file[MAX_STR_LEN] = "mume.pmf";
+    char    default_base_file[MAX_STR_LEN] = "mume.xml";
     char    default_remote_host[MAX_STR_LEN] = "129.241.210.221";
 #endif
     QApplication::setColorSpec( QApplication::CustomColor );
@@ -228,14 +228,21 @@ int main(int argc, char *argv[])
     conf->setConfigModified( false );
 
     splash->showMessage("Starting Analyzer and Proxy...");
-
-    engine = new CEngine(new CRoomManager());
+    engine = new CEngine();
     proxy = new Proxy();
+
+    //splash->showMessage("Loading the database, please wait...");
+    //print_debug(DEBUG_SYSTEM, "Loading the database ... ");
+    //xml_readbase( conf->get_base_file() );
+    //print_debug(DEBUG_SYSTEM, "Successfuly loaded %i rooms!", Map.size());
 
     /* special init for the mud emulation */
     if (mud_emulation) {
-        print_debug(DEBUG_SYSTEM, "Starting in MUD emulation mode...");
-        engine->initEmulationMode();
+      print_debug(DEBUG_SYSTEM, "Starting in MUD emulation mode...");
+
+      engine->setPrompt("-->");
+      stacker.put(1);
+      stacker.swap();
     }
 
     proxy->setMudEmulation( mud_emulation );
@@ -287,8 +294,7 @@ int main(int argc, char *argv[])
     QObject::connect(proxy, SIGNAL(startEngine()), engine, SLOT(slotRunEngine()), Qt::QueuedConnection );
     QObject::connect(proxy, SIGNAL(startRenderer()), renderer_window->renderer, SLOT(display()), Qt::QueuedConnection);
 
-    // this will be done via mainwindow itself
-    //userland_parser->parse_user_input_line("mload");
+    userland_parser->parse_user_input_line("mload");
 
     return app.exec();
 }

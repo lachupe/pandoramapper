@@ -29,7 +29,7 @@
 
 #include "Gui/mainwindow.h"
 #include "Gui/CActionManager.h"
-#include "Gui/roomeditattrdlg.h"
+#include "Gui/RoomEditDialog.h"
 #include "Gui/ConfigWidget.h"
 #include "Gui/SpellsDialog.h"
 #include "Gui/CMovementDialog.h"
@@ -97,7 +97,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     print_debug(DEBUG_INTERFACE, "in mainwindow constructor");
 
     setWindowTitle("Pandora");
-    renderer =  new RendererWidget( engine->getRoomManager(), this );
+    renderer =  new RendererWidget( this );
     setCentralWidget( renderer );
 
     if (!renderer->format().sampleBuffers()) {
@@ -136,11 +136,9 @@ CMainWindow::CMainWindow(QWidget *parent)
     fileMenu->addSeparator();
     fileMenu->addAction(actionManager->openAct);
     fileMenu->addAction(actionManager->reloadAct);
-    fileMenu->addAction(actionManager->importAct);
     fileMenu->addSeparator();
     fileMenu->addAction(actionManager->saveAct);
     fileMenu->addAction(actionManager->saveAsAct);
-    fileMenu->addAction(actionManager->exportAct);
     fileMenu->addSeparator();
     fileMenu->addAction(actionManager->quitAct);
 
@@ -280,8 +278,6 @@ CMainWindow::CMainWindow(QWidget *parent)
 }
 
 
-
-
 void CMainWindow::addDockLogEntry(const QString& module, const QString& message)
 {
   logWindow->append("[" + module + "] " + message);
@@ -294,7 +290,7 @@ void CMainWindow::moveRoomDialog()
     print_debug(DEBUG_INTERFACE, "move room dialog action called");
 
     // check if there is an objective for this operation
-    if (engine->getSelections()->size() == 0 && !engine->inSync()) {
+    if (Map.selections.size() == 0 && stacker.amount() != 1) {
         QMessageBox::critical(this, "Movement Dialog",
                              QString("You have to either get in sync or select some rooms!"));
         return;
@@ -302,7 +298,7 @@ void CMainWindow::moveRoomDialog()
 
     // create the dialog if needed
     if (!movementDialog) {
-        movementDialog = new CMovementDialog (engine->getRoomManager(), this);
+        movementDialog = new CMovementDialog (this);
     }
 
     // launch the dialog
@@ -326,13 +322,18 @@ void CMainWindow::hide_status()
   }
 }
 
-void CMainWindow::editRoomDialog()
+void CMainWindow::editRoomDialog(unsigned int id)
 {
-    RoomEditAttrDlg m_roomEditDialog;
+    if (!edit_dialog) {
+        edit_dialog = new RoomEditDialog(this);
+    }
 
+    edit_dialog->clear_data();
+    edit_dialog->load_room_data(id);
 
-    m_roomEditDialog.setRoomSelection( engine->getSelections()->getList(), engine->getRoomManager());
-    m_roomEditDialog.exec();
+    edit_dialog->show();
+    edit_dialog->raise();
+    edit_dialog->activateWindow();
 }
 
 
@@ -374,11 +375,11 @@ void CMainWindow::update_status_bar()
     else
         firstPart = "Data: --- ";
 
-    modLabel = QString("Rooms Selected %1 ").arg( engine->getSelections()->size() );
+    modLabel = QString("Rooms Selected %1 ").arg( Map.selections.size() );
 
     emit newModLabel(modLabel + firstPart);
 
-    engine->getStacker()->getCurrent(str);
+    stacker.getCurrent(str);
     emit newLocationLabel(str);
     print_debug(DEBUG_INTERFACE, "Done updating interface!\r\n");
 }
@@ -386,19 +387,12 @@ void CMainWindow::update_status_bar()
 /* Reimplement main even handler to catch tooltip events. */
 bool CMainWindow::event(QEvent *event)
 {
-    RoomId id;
-
-    if (event->type() == QEvent::Polish)
-    {
-        engine->getRoomManager()->loadMap(conf->getBaseFile());
-        return true;
-    }
-
+    unsigned int id;
 
     if (event->type() == QEvent::ToolTip) {
         QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
         if (renderer->doSelect( mousePosInRenderer( helpEvent->pos() ), id ))
-            QToolTip::showText(helpEvent->globalPos(), engine->getRoomManager()->getRoom(id)->toolTip());
+            QToolTip::showText(helpEvent->globalPos(), Map.getRoom(id)->toolTip());
         else
 #if QT_VERSION >= 0x040200
             QToolTip::hideText();
@@ -575,7 +569,7 @@ void CMainWindow::createContextMenu( QMouseEvent *e )
 
 
     if (renderer->doSelect( mousePosInRenderer( e->pos() ), id )) {
-        roomName = engine->getRoomManager()->getRoom(id)->getName();
+        roomName = Map.getRoom(id)->getName();
     } else {
         roomName = tr("No room here");
     }
@@ -596,7 +590,7 @@ void CMainWindow::createContextMenu( QMouseEvent *e )
     menu.addAction(actionManager->refreshAct);
 
     menu.addAction(actionManager->bindRoomsAct);
-    if (engine->getSelections()->size() == 2)
+    if (Map.selections.size() == 2)
         actionManager->bindRoomsAct->setEnabled(true);
     else
         actionManager->bindRoomsAct->setEnabled(false);
@@ -620,17 +614,15 @@ bool CMainWindow::checkMouseSelection( QMouseEvent *e )
 {
     unsigned int id;
 
-    CSelectionManager *selections = engine->getSelections();
-
     if (mouseState.delta( e->pos() ) <= 100) {
         if (renderer->doSelect( mousePosInRenderer( e->pos() ), id ) == true) {
             if (e->modifiers() & Qt::ControlModifier) {
-                if (selections->isSelected( id) == true)
-                    selections->unselect( id );
+                if (Map.selections.isSelected( id) == true)
+                    Map.selections.unselect( id );
                 else
-                    selections->select( id );
+                    Map.selections.select( id );
             } else
-                selections->exclusiveSelection( id );
+                Map.selections.exclusiveSelection( id );
 
             return true;
         }

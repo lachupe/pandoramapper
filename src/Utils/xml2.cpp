@@ -43,7 +43,7 @@
 #define XML_DESC        (1 << 1)
 #define XML_NOTE        (1 << 2)
 
-void CRoomManager::loadXmlMap( QString filename)
+void CRoomManager::loadMap( QString filename)
 {
   QFile xmlFile( filename);
   QXmlInputSource source( &xmlFile );
@@ -63,7 +63,7 @@ void CRoomManager::loadXmlMap( QString filename)
   // so, when we come here, we are sequentially blocking the RoomManager (Map)
   // when progressBar updates it's status, it lets the App Loop to call whatever it wants (depepnding on events)
   // and we want those events to, well, fail, since there is no such thing as waiting for your own thread :-/
-  MapBlocker blocker( *this );
+  Map.setBlocked( true );
   
   unsigned int currentMaximum = 22000;
   QProgressDialog progress("Loading the database...", "Abort Loading", 0, currentMaximum, renderer_window);
@@ -80,11 +80,36 @@ void CRoomManager::loadXmlMap( QString filename)
 //  lockForWrite();
   reader.parse( source );
 
+  
+ 
   if (progress.wasCanceled()) {
 	  print_debug(DEBUG_XML, "Loading was canceled");
 	  reinit();
+  } else {
+	  progress.setLabelText("Preparing the loaded database");
+	  progress.setMaximum(size());
+	  progress.setValue(0);
+
+	  for (unsigned int i = 0; i < size(); i++) {
+		  	progress.setValue(i);
+	
+		  	if (progress.wasCanceled()) {
+		  		reinit();
+		  		break;
+		  	}
+	
+		  	CRoom *r = rooms[i];
+	        for (int exit = 0; exit <= 5; exit++)
+	            if (r->exits[ exit ] > 0) {
+	                r->exits[exit] = getRoom( (unsigned long) r->exits[exit] );
+	            }
+	  }
+	  progress.setValue(size());
+	  
+	  print_debug(DEBUG_XML, "done.");
   }
 
+  Map.setBlocked( false );
 
   delete handler;
   return;
@@ -106,13 +131,13 @@ bool StructureParser::endElement( const QString& , const QString& , const QStrin
   if (qName == "room") {
       parent->addRoom(r);	/* tada! */
       
-      if (r->getId() > currentMaximum) {
-          currentMaximum = r->getId();
+      if (r->id > currentMaximum) {
+    	  currentMaximum = r->id;
     	  progress->setMaximum(currentMaximum);
       }
 	  unsigned int size = parent->size();
 	  progress->setValue( size );
-  }  
+  }
   if (qName == "region" && readingRegion)  {
       parent->addRegion( region );
       region = NULL;      
@@ -170,7 +195,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
    }
         
   if (qName == "exit") {
-    ExitDirection dir;
+    unsigned int dir;
     unsigned int to;
         
     /* special */
@@ -184,14 +209,14 @@ bool StructureParser::startElement( const QString& , const QString& ,
       
     s = attributes.value("to");
     if (s == "DEATH") {
-        r->setExitDeath( dir );
+	r->setExitDeath( dir );
     } else if (s == "UNDEFINED") {
-        r->setExitUndefined( dir);
+	r->setExitUndefined( dir);
     } else {
     	i = 0;
     	bool NoError = false;
     	to = s.toInt(&NoError);
-        r->setExitLeadsTo(dir, to);
+    	r->exits[dir] = (CRoom *) to;        
     }
 
     s = attributes.value("door");
@@ -215,10 +240,10 @@ bool StructureParser::startElement( const QString& , const QString& ,
       flag = XML_NOTE;
     return true;
   } else if (qName == "room") {
+      r = new CRoom;
 
       s = attributes.value("id");
-
-      r = parent->createRoom( s.toInt() );
+      r->id = s.toInt();
       
       s = attributes.value("x");
       r->setX( s.toInt() );
@@ -230,14 +255,12 @@ bool StructureParser::startElement( const QString& , const QString& ,
       r->simpleSetZ( s.toInt() );
 
       s = attributes.value("terrain");
-
       r->setSector( conf->getSectorByDesc(s.toLocal8Bit()) );
-
       
       s = attributes.value("region");
       r->setRegion(s.toLocal8Bit());
   } else if (qName == "region") {
-     region = new CRegion( parent );
+     region = new CRegion;
             
      readingRegion = true;
      s = attributes.value("name");
@@ -255,10 +278,11 @@ bool StructureParser::startElement( const QString& , const QString& ,
 }
 
 /* plain text file alike writing */
-void CRoomManager::saveXmlMap(QString filename)
+void CRoomManager::saveMap(QString filename)
 {
   FILE *f;
   CRoom *p;
+  int i;
   char tmp[4028];
   unsigned int z;
     
@@ -271,7 +295,7 @@ void CRoomManager::saveXmlMap(QString filename)
   }
 
 
-  MapBlocker block(*this);
+  Map.setBlocked( true );
   
   QProgressDialog progress("Saving the database...", "Abort Saving", 0, size(), renderer_window);
   progress.setWindowModality(Qt::WindowModal);
@@ -303,7 +327,11 @@ void CRoomManager::saveXmlMap(QString filename)
             fprintf(f, "    </region>\n");
         }
         fprintf(f, "  </regions>\n");
-   }
+  
+  
+  
+  
+  }
   
   
     for (z = 0; z < size(); z++) {
@@ -317,7 +345,7 @@ void CRoomManager::saveXmlMap(QString filename)
     
         fprintf(f,  "  <room id=\"%i\" x=\"%i\" y=\"%i\" z=\"%i\" "
                 "terrain=\"%s\" region=\"%s\">\n",
-                p->getId(), p->getX(), p->getY(), p->getZ(),
+                p->id, p->getX(), p->getY(), p->getZ(), 
                 (const char *) conf->sectors[ p->getTerrain() ].desc, 
                 (const char *) p->getRegionName());
             
@@ -332,12 +360,11 @@ void CRoomManager::saveXmlMap(QString filename)
     
     
             
-        for (int ind = 0; ind <= 5; ind++) {
-            ExitDirection i = static_cast<ExitDirection>(ind);
+        for (i = 0; i <= 5; i++) {
             if (p->isExitPresent(i) == true) {
     
                 if (p->isExitNormal(i) == true) {
-                    sprintf(tmp, "%d", p->getExitLeadsTo(i));
+                    sprintf(tmp, "%d", p->exits[i]->id);
                 } else {
                     if (p->isExitUndefined(i) == true)
                         sprintf(tmp, "%s", "UNDEFINED");
@@ -361,5 +388,7 @@ void CRoomManager::saveXmlMap(QString filename)
   fflush(f);
   fclose(f);
     
+  Map.setBlocked( false );
+
   print_debug(DEBUG_XML, "xml_writebase() is done.\r\n");
 }
