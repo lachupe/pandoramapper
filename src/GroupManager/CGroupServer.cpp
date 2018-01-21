@@ -31,7 +31,8 @@ CGroupServer::CGroupServer(int localPort, QObject *parent) :
 		print_debug(DEBUG_GROUP, "Failed to start a group Manager server!");
 		emit failedToStart();
 	} else {
-		print_debug(DEBUG_GROUP, "Listening on port %i!", localPort);
+        printf( "Loaded %s\r\n,", serverAddress().toString().toLatin1().data() );
+        print_debug(DEBUG_GROUP, "Listening on port %i!", localPort);
 	}
 }
 
@@ -40,7 +41,7 @@ CGroupServer::~CGroupServer()
 	
 }
 
-void CGroupServer::incomingConnection(int socketDescriptor)
+void CGroupServer::incomingConnection(qintptr socketDescriptor)
 {
 	print_debug(DEBUG_GROUP, "Incoming connection");
 	// connect the client straight to the Communicator, as he handles all the state changes 

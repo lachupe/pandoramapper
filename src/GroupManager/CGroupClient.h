@@ -47,7 +47,7 @@ public:
 	CGroupClient(QByteArray host, int remotePort, QObject *parent);
 	virtual ~CGroupClient();
 
-	void setSocket(int socketDescriptor);
+    void setSocket(qintptr socketDescriptor);
 
     bool isLogged() { if (protocolState == Logged) return true; return false;}
 	int getConnectionState() {return connectionState; }

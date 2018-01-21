@@ -48,9 +48,6 @@ class CRoomManager : public QObject {
 
     CPlane        		*planes;        /* planes/levels of the map, sorted by the Z coordinate, lower at first */
 
-//    void deleteRoomUnlocked(CRoom* r, int mode);  /* user interface function */
-//    void smallDeleteRoomUnlocked(CRoom* r);  /* user interface function */
-
     bool	blocked;
 public:
     CRoomManager();

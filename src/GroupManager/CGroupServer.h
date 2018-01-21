@@ -42,7 +42,7 @@ public:
 	void closeAll();
 	
 protected:
-    void incomingConnection(int socketDescriptor);
+    void incomingConnection(qintptr socketDescriptor);
     
 public slots:
 	void connectionClosed(CGroupClient *connection);

@@ -564,7 +564,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                 event.prompt = cutColours(event.prompt);
                 // TODO: this prompt setting might be dangerous and non-thread safe!
 //                engine->setPrompt(event.prompt);
-                last_prompt = event.prompt;
+                lastPrompt = event.prompt;
                 proxy->sendPromptLineEvent(event.prompt);
                 event.terrain = parseTerrain(event.prompt);
                 SEND_EVENT_TO_ENGINE;
@@ -726,7 +726,7 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
             	print_debug(DEBUG_GROUP, "Sending a G-tell from local user: %s", (const char *) data);
             	proxy->sendGroupTellEvent(data);
             	send_to_user("Ok.\r\n\r\n");
-            	send_to_user(last_prompt);
+                send_to_user(lastPrompt);
 //            	send_prompt();
             	continue;
             }

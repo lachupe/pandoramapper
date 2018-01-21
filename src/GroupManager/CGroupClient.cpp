@@ -69,7 +69,7 @@ CGroupClient::CGroupClient(QObject *parent) :
 }
 
 
-void CGroupClient::setSocket(int socketDescriptor)
+void CGroupClient::setSocket(qintptr socketDescriptor)
 {
 	if (setSocketDescriptor(socketDescriptor) == false) {
 		// failure ... what to do?

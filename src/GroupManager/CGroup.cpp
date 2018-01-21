@@ -49,6 +49,11 @@ CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
     }
     setGeometry( conf->getGroupManagerRect() );
 
+    Qt::WindowFlags flags = windowFlags();
+    flags |= Qt::WindowStaysOnTopHint;
+    setWindowFlags(flags);
+
+
 	tree = new QTreeWidget(this);
 	tree->setColumnCount(8);
 	tree->setHeaderHidden(true);
@@ -338,42 +343,30 @@ void CGroup::connectionRefused(QString message)
 {
 	sendLog( QString("Connection refused: %1").arg( message ) );
     print_debug(DEBUG_GROUP, "Connection refused: %s", (const char *) message.toLocal8Bit());
-//	if (network->getType() == CGroupCommunicator::Client)
-//		QMessageBox::information(this, "groupManager", QString("Connection refused: %1.").arg(message));
 }
 
 void CGroup::connectionFailed(QString message)
 {
 	sendLog( QString("Failed to connect: %1").arg( message ) );
     print_debug(DEBUG_GROUP, "Failed to connect: %s", (const char *) message.toLocal8Bit());
-//	if (network->getType() == CGroupCommunicator::Client)
-//		QMessageBox::information(this, "groupManager", QString("Failed to connect: %1.").arg(message));
 }
 
 void CGroup::connectionClosed(QString message)
 {
     print_debug(DEBUG_GROUP, "Connection closed: %s", (const char *) message.toLocal8Bit());
 	sendLog( QString("Connection closed: %1").arg( message ) );
-
-//	if (network->getType() == CGroupCommunicator::Client)
-//		QMessageBox::information(this, "groupManager", QString("Connection closed: %1.").arg(message));
 }
 
 void CGroup::connectionError(QString message)
 {
     print_debug(DEBUG_GROUP, "Connection error: %s", (const char *) message.toLocal8Bit());
 	sendLog( QString("Connection error: %1").arg( message ) );
-
-//	if (network->getType() == CGroupCommunicator::Client)
-//		QMessageBox::information(this, "groupManager", QString("Connection error: %1.").arg(message));
 }
 
 void CGroup::serverStartupFailed(QString message)
 {
     print_debug(DEBUG_GROUP, "Failed to start the Group server: %s", (const char *) message.toLocal8Bit());
 	sendLog( QString("Failed to start the group server: %1").arg( message ) );
-
-//    QMessageBox::information(this, "groupManager", QString("Failed to start the groupManager server: %1.").arg(message));
 }
 
 void CGroup::gotKicked(QDomNode message)
@@ -392,8 +385,6 @@ void CGroup::gotKicked(QDomNode message)
 	}
 
 	QDomElement text = e.toElement();
-	// somehow this always leads to crash! :-(
-	//QMessageBox::critical(this, "groupManager", QString("You got kicked! Reason: %1.").arg(text.text()));
 
 	print_debug(DEBUG_GROUP, "Kicked from group manager! Reason: %s",
             (const char *) text.text().toLocal8Bit());
@@ -404,7 +395,6 @@ void CGroup::gotKicked(QDomNode message)
 	send_prompt();
 
 	sendLog( QString("You were kicked from the group manager! Reason: %1").arg( text.text() ) );
-
 }
 
 void CGroup::gTellArrived(QDomNode node)
@@ -417,8 +407,7 @@ void CGroup::gTellArrived(QDomNode node)
 
 	QDomNode e = node.firstChildElement();
 
-//	QDomElement root = node.toElement();
-	QString from = e.toElement().attribute("from");
+    QString from = e.toElement().attribute("from");
 
 
 	if (e.nodeName() != "gtell") {
