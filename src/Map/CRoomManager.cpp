@@ -345,7 +345,7 @@ bool CRoomManager::addRegion(QByteArray name)
     CRegion    *region;
     // TODO: threadsafety the class regions QMutexLocker locker(mapLock);
 
-    if (getRegionByName(name) == false) {
+    if (getRegionByName(name) == NULL) {
         region = new CRegion();
         region->setName( name );
         regions.push_back(region);

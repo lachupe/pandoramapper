@@ -24,6 +24,7 @@
 
 
 #include <QMainWindow>
+#include <QAction>
 
 class CMainWindow;
 class QActionGroup;

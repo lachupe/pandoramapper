@@ -129,7 +129,7 @@ int Proxy::init() {
     sockaddr_in service;
     //iResult = bind(ListenSocket, (SOCKADDR *) &service, sizeof (service));
     int iResult = ::bind( proxy_hangsock, (struct sockaddr *) &proxy_name, sizeof(service) );
-    if (iResult == SOCKET_ERROR) {
+    if (iResult == SO_ERROR) {
 		print_debug(DEBUG_PROXY, "proxy: Cannot bind socket\n");
 		emit log("MUD Proxy", "Could not bind socket! Check port availability! You will not be able to connect to the mapper.");
 		return -1;

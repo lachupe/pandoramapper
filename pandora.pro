@@ -146,7 +146,7 @@ unix:!macx{
 
 macx:LIBS += /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
 win32:LIBS += -lwsock32 -lopengl32 -lglu32
-unix:LIBS += -lm
+unix:LIBS += -lm -lGLU
 
 #QMAKE_CXXFLAGS_RELEASE += -O2 \
 #    -pipe \

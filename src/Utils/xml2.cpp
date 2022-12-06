@@ -100,7 +100,7 @@ void CRoomManager::loadMap( QString filename)
 	
 		  	CRoom *r = rooms[i];
 	        for (int exit = 0; exit <= 5; exit++)
-	            if (r->exits[ exit ] > 0) {
+	            if (r->exits[ exit ] != NULL) {
 	                r->exits[exit] = getRoom( (unsigned long) r->exits[exit] );
 	            }
 	  }

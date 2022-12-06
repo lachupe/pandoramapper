@@ -165,7 +165,6 @@ void RendererWidget::setupViewingModel(  int width, int height )
     glMatrixMode (GL_MODELVIEW);	
 }
 
-
 void RendererWidget::resizeGL( int width, int height )
 {
     print_debug(DEBUG_RENDERER, "in resizeGL()");
