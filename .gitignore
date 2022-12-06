@@ -1,7 +1,9 @@
-        .qmake.stash
-        Makefile
-        Makefile.Debug
-        Makefile.Release
-        obj/
-        ui/
-        
+.vscode/
+Makefile
+Makefile.Debug
+Makefile.Release
+moc/
+obj/
+release/
+ui/
+
