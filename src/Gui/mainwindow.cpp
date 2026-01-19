@@ -100,7 +100,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     renderer =  new RendererWidget( this );
     setCentralWidget( renderer );
 
-    if (!renderer->format().sampleBuffers()) {
+    if (renderer->format().samples() <= 0) {
     	print_debug(DEBUG_SYSTEM, "This system does not have sample buffer support.\r\n");
     	printf("This system does not have sample buffer support.\r\n");
      }

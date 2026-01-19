@@ -28,6 +28,8 @@
 #include <QSplashScreen>
 #include <QRect>
 #include <QDesktopWidget>
+#include <QSurfaceFormat>
+#include <QScreen>
 
 #include "defines.h"
 
@@ -250,12 +252,21 @@ int main(int argc, char *argv[])
 
     print_debug(DEBUG_SYSTEM, "Starting renderer ...\n");
 
-    if ( !QGLFormat::hasOpenGL() ) {
-        qWarning( "This system has no OpenGL support. Quiting." );
-        return -1;
+    // Set up OpenGL format using QSurfaceFormat (replaces deprecated QGLFormat)
+    QSurfaceFormat format;
+    format.setDepthBufferSize(24);
+    format.setStencilBufferSize(8);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    format.setAlphaBufferSize(8);
+    // Request compatibility profile for legacy OpenGL functions (GL_SELECT mode for picking)
+    format.setProfile(QSurfaceFormat::CompatibilityProfile);
+    format.setVersion(2, 1);  // OpenGL 2.1 compatibility
+    if (conf->getMultisampling()) {
+        format.setSamples(4);
     }
+    QSurfaceFormat::setDefaultFormat(format);
 
-    QRect rect = app.desktop()->availableGeometry(-1);
+    QRect rect = QGuiApplication::primaryScreen()->availableGeometry();
     if (conf->getWindowRect().x() == 0 || conf->getWindowRect().x() >= rect.width() ||
         conf->getWindowRect().y() >= rect.height() ) {
         print_debug(DEBUG_SYSTEM && DEBUG_INTERFACE, "Autosettings for window size and position");
@@ -268,20 +279,6 @@ int main(int argc, char *argv[])
 
         conf->setWindowRect( x, y, width, height);
     }
-
-
-    QGLFormat f = QGLFormat::defaultFormat();
-    f.setDoubleBuffer( true );
-    f.setDirectRendering( true );
-    f.setRgba( true );
-    f.setDepth( true );
-    f.setAlpha( true );
-
-    if (conf->getMultisampling())
-   	f.setSampleBuffers( true );
-    //f.setSamples(4);
-
-    QGLFormat::setDefaultFormat( f );
 
     renderer_window = new CMainWindow;
 

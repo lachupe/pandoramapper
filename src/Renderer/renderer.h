@@ -18,8 +18,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef RENDERER_H 
-#define RENDERER_H 
+#ifndef RENDERER_H
+#define RENDERER_H
 
 
 #include "defines.h"
@@ -30,6 +30,9 @@
 #include "Map/CRoom.h"
 #include "Map/CRoomManager.h"
 
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+
 class QFont;
 
 //#define DIST_Z	2	/* the distance between 2 rooms */
@@ -39,7 +42,7 @@ class QFont;
 #define MAXHITS 200
 
 
-class RendererWidget : public QGLWidget
+class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
     
@@ -69,14 +72,12 @@ class RendererWidget : public QGLWidget
     void glDrawGroupMarkers();
     void glDrawPrespamLine();
     void glDrawMarkers();
-    void drawMarker(int, int, int, int);
     void glDrawCSquare(CSquare *p, int renderingMode);
     void setupViewingModel(int width, int height);
     void renderPickupObjects();
     void renderPickupRoom(CRoom *p);
     void setupNewBaseCoordinates();
     void draw();
-    void drawCone();
     void generateDisplayList(CSquare *p);
 
 public:
@@ -85,8 +86,8 @@ public:
     bool redraw;
     unsigned int deletedRoom;
     RendererWidget(QWidget *parent = 0);
-    void initializeGL();
-    void resizeGL(int width, int height);
+    void initializeGL() override;
+    void resizeGL(int width, int height) override;
     void changeUserLayerShift(int byValue)
     {
         userLayerShift += byValue;
@@ -192,7 +193,7 @@ public:
 
 public slots:
 	void display(void);
-    void paintGL();
+    void paintGL() override;
 
 signals:
 	void updateCharPosition(unsigned int);
