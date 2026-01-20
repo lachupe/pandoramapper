@@ -21,8 +21,7 @@
 #ifndef GLPRIMITIVES_H
 #define GLPRIMITIVES_H
 
-#include <QtOpenGL>
-#include <GL/glu.h>
+#include <GL/gl.h>
 
 // Constants used by primitive drawing functions
 #define ROOM_SIZE 0.47f

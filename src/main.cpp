@@ -257,7 +257,8 @@ int main(int argc, char *argv[])
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
     format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    format.setAlphaBufferSize(8);
+    // Keep the default framebuffer opaque; scene blending still works without alpha.
+    format.setAlphaBufferSize(0);
     // Request compatibility profile for legacy OpenGL functions (GL_SELECT mode for picking)
     format.setProfile(QSurfaceFormat::CompatibilityProfile);
     format.setVersion(2, 1);  // OpenGL 2.1 compatibility

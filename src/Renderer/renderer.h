@@ -30,8 +30,14 @@
 #include "Map/CRoom.h"
 #include "Map/CRoomManager.h"
 
-#include <QOpenGLWidget>
+#include <QMatrix4x4>
+#include <QOpenGLBuffer>
+#include <QOpenGLFramebufferObject>
 #include <QOpenGLFunctions>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLWidget>
+#include <QVector>
+#include <QVector3D>
 
 class QFont;
 
@@ -45,7 +51,27 @@ class QFont;
 class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
-    
+
+    struct RenderVertex {
+        GLfloat position[3];
+        GLfloat texCoord[2];
+        GLfloat color[4];
+    };
+
+    struct RenderCommand {
+        GLenum mode;
+        int first;
+        int count;
+        GLuint texture;
+        bool useTexture;
+    };
+
+    struct TextBillboard {
+        QVector3D position;
+        QString text;
+        QColor color;
+    };
+
     GLfloat       colour[4];
     GLuint        global_list;
     int           curx;
@@ -68,6 +94,14 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     float userZ;
     int userLayerShift;
 
+    QMatrix4x4 projectionMatrix;
+    QOpenGLShaderProgram *mapProgram;
+    QOpenGLBuffer mapVbo;
+    QOpenGLFramebufferObject *selectionFbo;
+    QVector<RenderVertex> renderVertices;
+    QVector<RenderCommand> renderCommands;
+    QVector<TextBillboard> textBillboards;
+
 
     void glDrawGroupMarkers();
     void glDrawPrespamLine();
@@ -78,7 +112,30 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     void renderPickupRoom(CRoom *p);
     void setupNewBaseCoordinates();
     void draw();
-    void generateDisplayList(CSquare *p);
+    void rebuildSquareBillboards(CSquare *square);
+    void appendRoomGeometry(CRoom *room);
+    void appendSquareGeometry(CSquare *square);
+    void resetRenderBatch();
+    void appendCommand(GLenum mode, bool useTexture, GLuint texture, int first, int count);
+    void appendQuad(const QVector3D &a, const QVector3D &b, const QVector3D &c, const QVector3D &d,
+                    const GLfloat *color);
+    void appendTexturedQuad(const QVector3D &a, const QVector3D &b, const QVector3D &c, const QVector3D &d,
+                            const QVector2D &ta, const QVector2D &tb, const QVector2D &tc, const QVector2D &td,
+                            const GLfloat *color, GLuint texture);
+    void appendQuadStrip4(const QVector3D &v0, const QVector3D &v1, const QVector3D &v2, const QVector3D &v3,
+                          const QVector2D &t0, const QVector2D &t1, const QVector2D &t2, const QVector2D &t3,
+                          const GLfloat *color, GLuint texture);
+    void appendQuadStrip6(const QVector3D &v0, const QVector3D &v1, const QVector3D &v2,
+                          const QVector3D &v3, const QVector3D &v4, const QVector3D &v5,
+                          const QVector2D &t0, const QVector2D &t1, const QVector2D &t2,
+                          const QVector2D &t3, const QVector2D &t4, const QVector2D &t5,
+                          const GLfloat *color, GLuint texture);
+    void appendLine(const QVector3D &a, const QVector3D &b, const GLfloat *color);
+    void appendMarkerGeometry(float dx, float dy, float dz, int mode, const GLfloat *color);
+    void appendConeGeometry(float dx, float dy, float dz, float rotX, float rotY, const GLfloat *color);
+    void renderBatch(const QVector<RenderVertex> &vertices, const QVector<RenderCommand> &commands,
+                     const QMatrix4x4 &mvp);
+    void drawTextOverlay();
 
 public:
     int current_plane_z;
