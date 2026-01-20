@@ -18,8 +18,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QGuiApplication>
 #include <QMessageBox>
+#include <QScreen>
 #include <QTimer>
 
 #include "utils.h"
@@ -33,8 +34,8 @@
 CGroup::CGroup(QByteArray name, QWidget *parent) : QDialog(parent)
 {
 	setWindowTitle("GroupManager");
-	QApplication *app = qApp;
-    QRect rect = app->desktop()->availableGeometry(-1);
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect rect = screen ? screen->availableGeometry() : QRect();
     if (conf->getGroupManagerRect().x() == 0 || conf->getGroupManagerRect().x() >= rect.width() ||
         conf->getGroupManagerRect().y() >= rect.height() ) {
         print_debug(DEBUG_GROUP, "Autosettings for window size and position");

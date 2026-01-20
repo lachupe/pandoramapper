@@ -20,6 +20,7 @@
 
 
 
+#include <QActionGroup>
 #include <QFileDialog>
 #include <QMessageBox>
 

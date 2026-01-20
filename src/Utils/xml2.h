@@ -29,22 +29,23 @@
 //void xmlReadMap(QString filename);
 
 #include <QString>
-#include <QXmlDefaultHandler>
+#include <QXmlStreamReader>
 
 class QProgressDialog;
 class CRoomManager;
 class CRoom;
 class CRegion;
 
-class StructureParser: public QXmlDefaultHandler
+class StructureParser
 {
 public:
   StructureParser(QProgressDialog *progress, unsigned int& currentMaximum, CRoomManager *parent);
+  bool parse(QXmlStreamReader &reader);
   bool characters(const QString& ch);
     
-  bool startElement( const QString&, const QString&, const QString& ,
-		     const QXmlAttributes& );
-  bool endElement( const QString&, const QString&, const QString& );
+  bool startElement(const QString& qName, const QXmlStreamAttributes& attributes);
+  bool endElement(const QString& qName);
+  bool isAborted() const;
 
 private:
   /* some flags */

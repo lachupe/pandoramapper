@@ -28,7 +28,7 @@
 #include <QGridLayout>
 #include <QFrame>
 #include <QTreeWidgetItem>
-#include <QTime>
+#include <QElapsedTimer>
 
 class CGroupChar
 {
@@ -62,9 +62,9 @@ class CGroupChar
 	int 	blind_elapsed;
 	int 	sanc_elapsed;
 	int 	bless_elapsed;
-	QTime	tblind;
-	QTime	tsanc;
-	QTime	tbless;
+	QElapsedTimer	tblind;
+	QElapsedTimer	tsanc;
+	QElapsedTimer	tbless;
 
 	void setNameField(QString name);
 	void setField(int i, QString name);
@@ -72,7 +72,7 @@ class CGroupChar
 	void setScoreFields();
 	void setStateFields();
 
-	QString calculateTimeElapsed(QTime& timer, int delay);
+	QString calculateTimeElapsed(QElapsedTimer& timer, int delay);
 
 public:
 	enum States { STANDING = 0, ENGAGED, BASHED, SLEEPING, RESTING, DEAD, INCAP };

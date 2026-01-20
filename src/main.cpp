@@ -27,7 +27,7 @@
 #include <QObject>
 #include <QSplashScreen>
 #include <QRect>
-#include <QDesktopWidget>
+#include <QGuiApplication>
 #include <QSurfaceFormat>
 #include <QScreen>
 
@@ -107,7 +107,6 @@ int main(int argc, char *argv[])
     char    default_base_file[MAX_STR_LEN] = "mume.xml";
     char    default_remote_host[MAX_STR_LEN] = "129.241.210.221";
 #endif
-    QApplication::setColorSpec( QApplication::CustomColor );
     QApplication app( argc, argv );
 
     QPixmap pixmap("images/logo.png");

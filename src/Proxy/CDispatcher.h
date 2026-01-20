@@ -22,6 +22,8 @@
 #define CDISPATCHER_H
 
 
+#include <QRegularExpression>
+
 #include "Proxy/proxy.h"
 #include "Engine/CEngine.h"
 
@@ -120,8 +122,8 @@ class Cdispatcher
         T_SKIP,
     };
 
-    QRegExp scoreExp;
-    QRegExp scoreTrollExp;
+    QRegularExpression scoreExp;
+    QRegularExpression scoreTrollExp;
 
 
     char parseTerrain(QByteArray prompt);

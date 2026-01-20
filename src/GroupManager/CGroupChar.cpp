@@ -88,11 +88,11 @@ void CGroupChar::setNameField(QString name)
 {
 	charItem->setTextAlignment(0, Qt::AlignCenter);
 	charItem->setText(0, name);
-	charItem->setBackgroundColor(0, color);
+	charItem->setBackground(0, QBrush(color));
 	if (color.value() < 150)
-		charItem->setTextColor(0, Qt::white);
+		charItem->setForeground(0, QBrush(Qt::white));
 	else
-		charItem->setTextColor(0, Qt::black);
+		charItem->setForeground(0, QBrush(Qt::black));
 }
 
 void CGroupChar::setField(int i, QString text)
@@ -100,7 +100,7 @@ void CGroupChar::setField(int i, QString text)
 	charItem->setText(i, text);
 }
 
-QString CGroupChar::calculateTimeElapsed(QTime& timer, int delay)
+QString CGroupChar::calculateTimeElapsed(QElapsedTimer& timer, int delay)
 {
     QString s;
     int min;
@@ -193,44 +193,44 @@ void CGroupChar::setSpellsFields()
 
 	statusItem->setTextAlignment(0, Qt::AlignCenter);
 	if (blind) {
-		statusItem->setBackgroundColor(0, Qt::red);
+		statusItem->setBackground(0, QBrush(Qt::red));
 		statusItem->setText(0, "BLIND " + calculateTimeElapsed(tblind, blind_elapsed) );
 	} else {
-		statusItem->setBackgroundColor(0, Qt::darkGray);
+		statusItem->setBackground(0, QBrush(Qt::darkGray));
 		statusItem->setText(0, "BLIND - 00:00");
 	}
 
 	charItem->setTextAlignment(5, Qt::AlignCenter);
-	charItem->setBackgroundColor(5, arm ? Qt::green : Qt::red);
+	charItem->setBackground(5, QBrush(arm ? Qt::green : Qt::red));
 	charItem->setText(5, "ARM");
 
 	statusItem->setTextAlignment(5, Qt::AlignCenter);
-	statusItem->setBackgroundColor(5, shld ? Qt::green : Qt::darkGray);
+	statusItem->setBackground(5, QBrush(shld ? Qt::green : Qt::darkGray));
 	statusItem->setText(5, "SHLD");
 
 	charItem->setTextAlignment(6, Qt::AlignCenter);
-	charItem->setBackgroundColor(6, bob ? Qt::green : Qt::darkGray);
+	charItem->setBackground(6, QBrush(bob ? Qt::green : Qt::darkGray));
 	charItem->setText(6, "BOB");
 
 	statusItem->setTextAlignment(6, Qt::AlignCenter);
-	statusItem->setBackgroundColor(6, str ? Qt::green : Qt::darkGray);
+	statusItem->setBackground(6, QBrush(str ? Qt::green : Qt::darkGray));
 	statusItem->setText(6, "STR");
 
 	charItem->setTextAlignment(7, Qt::AlignCenter);
 	if (bls) {
-		charItem->setBackgroundColor(7, Qt::green);
+		charItem->setBackground(7, QBrush(Qt::green));
 		charItem->setText(7, "BLESS " + calculateTimeElapsed(tbless, bless_elapsed) );
 	} else {
-		charItem->setBackgroundColor(7, Qt::darkGray);
+		charItem->setBackground(7, QBrush(Qt::darkGray));
 		charItem->setText(7, "BLESS - 00:00");
 	}
 
 	statusItem->setTextAlignment(7, Qt::AlignCenter);
 	if (sanc) {
-		statusItem->setBackgroundColor(7, Qt::green);
+		statusItem->setBackground(7, QBrush(Qt::green));
 		statusItem->setText(7, "SANC " + calculateTimeElapsed(tsanc, sanc_elapsed));
 	} else {
-		statusItem->setBackgroundColor(7, Qt::darkGray);
+		statusItem->setBackground(7, QBrush(Qt::darkGray));
 		statusItem->setText(7, "SANC - 00:00");
 	}
 }
@@ -256,7 +256,7 @@ void CGroupChar::setScoreFields()
 	} else 	if (textHP == "Awful") {
 		col = QColor(qRgb(255, 0, 0));
 	}
-	charItem->setBackgroundColor(2, col);
+	charItem->setBackground(2, QBrush(col));
 	charItem->setText(2, textHP);
 
 
@@ -270,7 +270,7 @@ void CGroupChar::setScoreFields()
 	} else 	if (textMana == "Icy") {
 		col = QColor(qRgb(0, 255, 247));
 	}
-	charItem->setBackgroundColor(3, col);
+	charItem->setBackground(3, QBrush(col));
 	charItem->setText(3, textMana);
 
 	col = QColor(qRgb(94, 36, 14));
@@ -285,7 +285,7 @@ void CGroupChar::setScoreFields()
 	} else 	if (textMoves == "Exhausted") {
 		col = QColor(qRgb(255, 0, 0));
 	}
-	charItem->setBackgroundColor(4, col);
+	charItem->setBackground(4, QBrush(col));
 	charItem->setText(4, textMoves);
 
 	statusItem->setText(2, QString("%1/%2").arg(hp).arg(maxhp));
@@ -299,31 +299,31 @@ void CGroupChar::setStateFields()
 
 	switch (state) {
 		case STANDING:
-			statusItem->setBackgroundColor(1, Qt::white);
+			statusItem->setBackground(1, QBrush(Qt::white));
 			statusItem->setText(1, "STANDING");
 			break;
 		case ENGAGED:
-			statusItem->setBackgroundColor(1, Qt::yellow);
+			statusItem->setBackground(1, QBrush(Qt::yellow));
 			statusItem->setText(1, "ENGAGED");
 			break;
 		case BASHED:
-			statusItem->setBackgroundColor(1, Qt::red);
+			statusItem->setBackground(1, QBrush(Qt::red));
 			statusItem->setText(1, "BASHED");
 		break;
 		case SLEEPING:
-			statusItem->setBackgroundColor(1, Qt::blue);
+			statusItem->setBackground(1, QBrush(Qt::blue));
 			statusItem->setText(1, "SLEEPING");
 			break;
 		case RESTING:
-			statusItem->setBackgroundColor(1, Qt::gray);
+			statusItem->setBackground(1, QBrush(Qt::gray));
 			statusItem->setText(1, "RESTING");
 			break;
 		case DEAD:
-			statusItem->setBackgroundColor(1, Qt::black);
+			statusItem->setBackground(1, QBrush(Qt::black));
 			statusItem->setText(1, "DEAD");
 			break;
 		case INCAP:
-			statusItem->setBackgroundColor(1, Qt::magenta);
+			statusItem->setBackground(1, QBrush(Qt::magenta));
 			statusItem->setText(1, "INCAP");
 		break;
 	}
@@ -803,5 +803,3 @@ bool CGroupChar::updatePromptFromXML(QDomNode node)
 
 	return updated; // hrmpf!
 }
-
-

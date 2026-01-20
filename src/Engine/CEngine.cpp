@@ -19,7 +19,7 @@
  */
 
 #include <QMutex>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QTimer>
 
 #include "defines.h"
@@ -361,7 +361,7 @@ void CEngine::exec()
 {
 
     print_debug(DEBUG_ANALYZER, "in main cycle");
-    QTime t;
+    QElapsedTimer t;
     t.start();
 
 
@@ -378,7 +378,7 @@ void CEngine::exec()
     updateRegions();
 
 
-    print_debug(DEBUG_ANALYZER, "done. Time elapsed %d ms", t.elapsed());
+    print_debug(DEBUG_ANALYZER, "done. Time elapsed %lld ms", t.elapsed());
     return;
 }
 

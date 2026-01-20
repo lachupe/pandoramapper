@@ -15,9 +15,11 @@ CONFIG += qt \
 
 
 CONFIG += debug_and_release
+CONFIG += c++17
     
 QT += xml \
     opengl \
+    openglwidgets \
     gui \
     network \
     core \

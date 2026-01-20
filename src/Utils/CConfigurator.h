@@ -22,9 +22,10 @@
 #define CONFIGURATOR_H
 /* configurator */
 
-#include <QXmlDefaultHandler>
-#include <QGLWidget>
-#include <QTime>
+#include <QElapsedTimer>
+#include <QImage>
+#include <QRegularExpression>
+#include <QtGui/qopengl.h>
 
 #include <vector>
 #include "Map/CRoom.h"
@@ -46,7 +47,7 @@ typedef struct {
     QByteArray  up_mes;         /* up message/pattern */
     QByteArray  down_mes;       /* down message */
     QByteArray  refresh_mes;    /* refresh message */
-    QTime       timer;          /* timer */
+    QElapsedTimer       timer;          /* timer */
     bool        addon;          /* if this spell has to be added after the "Affected by:" line */
     bool        up;             /* is this spell currently up ? */
     bool		silently_up;	/* this spell is up, but time wasn't set for ome reason (reconnect) */
@@ -64,7 +65,7 @@ class Cconfigurator : public QObject {
 
     /* patterns/regexps */
     QByteArray exitsPattern;
-    QRegExp     exitsExpr;
+    QRegularExpression     exitsExpr;
 
     /* data */
     QByteArray  databasePath;
@@ -232,7 +233,7 @@ public:
     void setScorePattern(QByteArray str) { scorePattern = str; setConfigModified(true); }
     void setShortScorePattern(QByteArray str) { scorePatternShort = str; setConfigModified(true); }
 
-    QRegExp getExitsExpr() { return exitsExpr; }
+    QRegularExpression getExitsExpr() { return exitsExpr; }
 
     /* data / global flags */
     void setBaseFile(QByteArray str);

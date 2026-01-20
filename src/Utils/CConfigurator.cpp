@@ -23,8 +23,8 @@
 /* configuration reader/saver and handler */
 #include <QFile>
 #include <QImage>
-#include <QXmlDefaultHandler>
-#include <QGLWidget>
+#include <QImage>
+#include <QRegularExpression>
 #include <QMutex>
 #include <QSettings>
 
@@ -367,7 +367,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 void Cconfigurator::setExitsPattern(QByteArray str)
 {
     exitsPattern = str;
-    exitsExpr.setPattern(QRegExp::escape(str) );
+    exitsExpr = QRegularExpression(QRegularExpression::escape(str));
 
     setConfigModified(true);
 }
@@ -673,7 +673,7 @@ int Cconfigurator::loadNormalTexture(QByteArray filename, GLuint *texture)
         print_debug(DEBUG_CONFIG, "Failed to load the %s!", (const char *) filename);
         return -1;
     }
-    tex1 = QGLWidget::convertToGLFormat( buf1 );
+    tex1 = buf1.convertToFormat(QImage::Format_RGBA8888).mirrored();
     glGenTextures(1, texture );
     glBindTexture(GL_TEXTURE_2D, *texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -717,4 +717,3 @@ int Cconfigurator::loadSectorTexture(struct roomSectorsData *p)
     }
     return 1;
 }
-

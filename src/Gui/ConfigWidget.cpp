@@ -33,6 +33,7 @@ ConfigWidget::ConfigWidget (QWidget *parent) : QDialog(parent)
     setWindowTitle(tr("General Settings"));
     
     connect(checkBox_autorefresh, SIGNAL(toggled(bool)), this, SLOT(autorefreshUpdated(bool)) );
+    connect(misc_noteColorButton, &QPushButton::clicked, this, &ConfigWidget::selectNoteColor);
 }
 
 
@@ -216,4 +217,3 @@ void ConfigWidget::selectNoteColor() {
         */
     }
 }
-
