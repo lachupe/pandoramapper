@@ -18,7 +18,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #include <QFile>
 #include <QMessageBox>
 #include <QTextStream>
@@ -37,7 +36,7 @@
 
 CLogDialog::CLogDialog(QWidget *parent) : QDialog(parent)
 {
-    setupUi(this);                        
+    setupUi(this);
     setWindowTitle(tr("Pandora's Log File"));
 }
 
@@ -45,11 +44,20 @@ void CLogDialog::run()
 {
     QUrl url;
 
-    url.fromLocalFile( *logFileName );
+    if (logFileName == nullptr || logFileName->isEmpty()) {
+        textBrowser->append("No debug log file available.");
+        textBrowser->setReadOnly(true);
+        return;
+    }
+
+    url.fromLocalFile(*logFileName);
 
     QFile file(*logFileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        textBrowser->append("Failed to open debug log file.");
+        textBrowser->setReadOnly(true);
         return;
+    }
 
     QTextStream in(&file);
     while (!in.atEnd()) {
@@ -62,6 +70,5 @@ void CLogDialog::run()
 
 void CLogDialog::accept()
 {
-
     done(Accepted);
 }

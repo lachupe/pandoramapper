@@ -39,8 +39,10 @@ FORMS += src/Ui/configedit.ui \
 
 	
 ################################################ 	Main		######################################################
-HEADERS += src/defines.h 
-SOURCES += src/main.cpp 
+HEADERS += src/defines.h \
+    src/AppContext.h
+SOURCES += src/main.cpp \
+    src/AppContext.cpp 
 
 	
 ################################################ 	Engine		######################################################

@@ -18,36 +18,36 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef SPELLSDIALOG_H 
-#define SPELLSDITDIALOG_H 
+#ifndef SPELLSDIALOG_H
+#define SPELLSDITDIALOG_H
 
 #include <QDialog>
 #include "ui_spellsdialog.h"
 #include "CConfigurator.h"
 
-class SpellsDialog : public QDialog, public Ui::SpellsDialog {
-Q_OBJECT
+class SpellsDialog : public QDialog, public Ui::SpellsDialog
+{
+    Q_OBJECT
 
     int editing_index;
-    
+
     vector<TSpell> spells;
     void enableFrame();
     void disableFrame();
     void load_item_data(int index);
 
-public:
+  public:
     SpellsDialog(QWidget *parent = 0);
     void run();
     void redraw();
-public slots:
+  public slots:
     void edit_clicked();
     void save_clicked();
     void add_clicked();
     void remove_clicked();
     virtual void accept();
-private slots:
+  private slots:
     void on_listWidget_itemSelectionChanged();
 };
-
 
 #endif

@@ -27,98 +27,90 @@
 #include "Gui/CGroupSettingsDialog.h"
 #include "Gui/mainwindow.h"
 
-
 #include "GroupManager/CGroup.h"
-
 
 CGroupSettingsDialog::CGroupSettingsDialog(QWidget *parent) : QDialog(parent)
 {
-	print_debug(DEBUG_INTERFACE, "in GroupManager Settings Dialog Constructor");
+    print_debug(DEBUG_INTERFACE, "in GroupManager Settings Dialog Constructor");
     setupUi(this);
-    connect(pushButton_changeColour, SIGNAL(clicked()), this, SLOT(selectColor()) );
-	print_debug(DEBUG_INTERFACE, "exiting the GroupManager Settings Dialog Constructor");
+    connect(pushButton_changeColour, SIGNAL(clicked()), this, SLOT(selectColor()));
+    print_debug(DEBUG_INTERFACE, "exiting the GroupManager Settings Dialog Constructor");
 }
 
-CGroupSettingsDialog::~CGroupSettingsDialog()
-{
-}
+CGroupSettingsDialog::~CGroupSettingsDialog() {}
 
 void CGroupSettingsDialog::run()
 {
-	color = conf->getGroupManagerColor();
-	lineEdit_charName->setText( conf->getGroupManagerCharName() );
-	lineEdit_remoteHost->setText( conf->getGroupManagerHost() );
-	lineEdit_localPort->setText( QString("%1").arg( conf->getGroupManagerLocalPort() ) );
-	lineEdit_remotePort->setText( QString("%1").arg( conf->getGroupManagerRemotePort() ) );
-	checkBox_showSelf->setChecked( conf->getGroupManagerShowSelf() );
-	checkBox_notifyArm->setChecked( conf->getGroupManagerNotifyArmour() );
-	checkBox_notifySanc->setChecked( conf->getGroupManagerNotifySanc() );
-	checkBox_notifyBash->setChecked( conf->getGroupManagerNotifyBash() );
+    color = conf->getGroupManagerColor();
+    lineEdit_charName->setText(conf->getGroupManagerCharName());
+    lineEdit_remoteHost->setText(conf->getGroupManagerHost());
+    lineEdit_localPort->setText(QString("%1").arg(conf->getGroupManagerLocalPort()));
+    lineEdit_remotePort->setText(QString("%1").arg(conf->getGroupManagerRemotePort()));
+    checkBox_showSelf->setChecked(conf->getGroupManagerShowSelf());
+    checkBox_notifyArm->setChecked(conf->getGroupManagerNotifyArmour());
+    checkBox_notifySanc->setChecked(conf->getGroupManagerNotifySanc());
+    checkBox_notifyBash->setChecked(conf->getGroupManagerNotifyBash());
 }
 
 void CGroupSettingsDialog::accept()
 {
-	CGroup *group = renderer_window->getGroupManager();
+    CGroup *group = renderer_window->getGroupManager();
 
-	QString s;
-	s = lineEdit_charName->text();
-	if (s != conf->getGroupManagerCharName() ) {
-		conf->setGroupManagerCharName(s.toLocal8Bit());
-		group->resetName();
-	}
+    QString s;
+    s = lineEdit_charName->text();
+    if (s != conf->getGroupManagerCharName()) {
+        conf->setGroupManagerCharName(s.toLocal8Bit());
+        group->resetName();
+    }
 
-	if (color != conf->getGroupManagerColor()) {
-		conf->setGroupManagerColor(color);
-		group->resetColor();
-	}
+    if (color != conf->getGroupManagerColor()) {
+        conf->setGroupManagerColor(color);
+        group->resetColor();
+    }
 
-	QByteArray remoteHost = lineEdit_remoteHost->text().toLocal8Bit();
-	int remotePort = lineEdit_remotePort->text().toInt();
-	if (remotePort != conf->getGroupManagerRemotePort() ||
-		remoteHost != conf->getGroupManagerHost()	) {
+    QByteArray remoteHost = lineEdit_remoteHost->text().toLocal8Bit();
+    int remotePort = lineEdit_remotePort->text().toInt();
+    if (remotePort != conf->getGroupManagerRemotePort() || remoteHost != conf->getGroupManagerHost()) {
+        conf->setGroupManagerHost(remoteHost);
+        conf->setGroupManagerRemotePort(remotePort);
 
-		conf->setGroupManagerHost(remoteHost);
-		conf->setGroupManagerRemotePort(remotePort);
+        if (group->isConnected())
+            group->reconnect();
+    }
 
-		if (group->isConnected())
-			group->reconnect();
-	}
+    int localPort = lineEdit_localPort->text().toInt();
+    if (localPort != conf->getGroupManagerLocalPort()) {
+        conf->setGroupManagerLocalPort(localPort);
+        if (group->getType() == CGroupCommunicator::Server)
+            group->reconnect();
+    }
 
-	int localPort = lineEdit_localPort->text().toInt();
-	if (localPort != conf->getGroupManagerLocalPort() ) {
-		conf->setGroupManagerLocalPort(localPort);
-		if (group->getType() == CGroupCommunicator::Server)
-			group->reconnect();
-	}
+    bool showSelf = checkBox_showSelf->isChecked();
+    if (showSelf != conf->getGroupManagerShowSelf()) {
+        conf->setGroupManagerShowSelf(showSelf);
+        if (showSelf)
+            group->addSelf();
+        else
+            group->hideSelf();
+    }
 
-	bool showSelf = checkBox_showSelf->isChecked();
-	if (showSelf != conf->getGroupManagerShowSelf()) {
-		conf->setGroupManagerShowSelf(showSelf);
-		if (showSelf)
-			group->addSelf();
-		else
-			group->hideSelf();
-	}
+    bool notifyArm = checkBox_notifyArm->isChecked();
+    if (notifyArm != conf->getGroupManagerNotifyArmour()) {
+        conf->setGroupManagerNotifyArmour(notifyArm);
+    }
 
-	bool notifyArm = checkBox_notifyArm->isChecked();
-	if (notifyArm != conf->getGroupManagerNotifyArmour() ) {
-		conf->setGroupManagerNotifyArmour(notifyArm);
-	}
+    bool notifySanc = checkBox_notifySanc->isChecked();
+    if (notifySanc != conf->getGroupManagerNotifySanc()) {
+        conf->setGroupManagerNotifySanc(notifySanc);
+    }
 
-	bool notifySanc = checkBox_notifySanc->isChecked();
-	if (notifySanc != conf->getGroupManagerNotifySanc() ) {
-		conf->setGroupManagerNotifySanc(notifySanc);
-	}
-
-	bool notifyBash = checkBox_notifyBash->isChecked();
-	if (notifyBash != conf->getGroupManagerNotifyBash() ) {
-		conf->setGroupManagerNotifyBash(notifyBash);
-	}
-
+    bool notifyBash = checkBox_notifyBash->isChecked();
+    if (notifyBash != conf->getGroupManagerNotifyBash()) {
+        conf->setGroupManagerNotifyBash(notifyBash);
+    }
 
     done(Accepted);
 }
-
 
 void CGroupSettingsDialog::selectColor()
 {
@@ -127,7 +119,7 @@ void CGroupSettingsDialog::selectColor()
     QColor newColor = QColorDialog::getColor(color, this);
     if (newColor.isValid()) {
         color = newColor;
-        print_debug(DEBUG_GROUP, "color selected: %s",(const char*)color.name().toLocal8Bit());
+        print_debug(DEBUG_GROUP, "color selected: %s", (const char *)color.name().toLocal8Bit());
         /*
         colorLabel->setText(color.name());
         colorLabel->setPalette(QPalette(color));

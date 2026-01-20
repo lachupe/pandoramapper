@@ -32,104 +32,120 @@
 
 class CGroupChar
 {
-	CGroup *parent;
+    CGroup *parent;
 
-	unsigned int pos;
-	QByteArray name;
-	QByteArray textHP;
-	QByteArray textMoves;
-	QByteArray textMana;
-	QByteArray lastMovement;
-	int hp, maxhp;
-	int mana, maxmana;
-	int moves, maxmoves;
-	int state;
-	QColor color;
-	QPixmap pixmap;
+    unsigned int pos;
+    QByteArray name;
+    QByteArray textHP;
+    QByteArray textMoves;
+    QByteArray textMana;
+    QByteArray lastMovement;
+    int hp, maxhp;
+    int mana, maxmana;
+    int moves, maxmoves;
+    int state;
+    QColor color;
+    QPixmap pixmap;
 
-	QTreeWidgetItem*	charItem;
-	QTreeWidgetItem*	statusItem;
-	bool 				hidden;
+    QTreeWidgetItem *charItem;
+    QTreeWidgetItem *statusItem;
+    bool hidden;
 
-	bool	arm;
-	bool	shld;
-	bool	str;
-	bool	bob;
-	bool	bls;
-	bool	sanc;
-	bool	blind;
+    bool arm;
+    bool shld;
+    bool str;
+    bool bob;
+    bool bls;
+    bool sanc;
+    bool blind;
 
-	int 	blind_elapsed;
-	int 	sanc_elapsed;
-	int 	bless_elapsed;
-	QElapsedTimer	tblind;
-	QElapsedTimer	tsanc;
-	QElapsedTimer	tbless;
+    int blind_elapsed;
+    int sanc_elapsed;
+    int bless_elapsed;
+    QElapsedTimer tblind;
+    QElapsedTimer tsanc;
+    QElapsedTimer tbless;
 
-	void setNameField(QString name);
-	void setField(int i, QString name);
-	void setSpellsFields();
-	void setScoreFields();
-	void setStateFields();
+    void setNameField(QString name);
+    void setField(int i, QString name);
+    void setSpellsFields();
+    void setScoreFields();
+    void setStateFields();
 
-	QString calculateTimeElapsed(QElapsedTimer& timer, int delay);
+    QString calculateTimeElapsed(QElapsedTimer &timer, int delay);
 
-public:
-	enum States { STANDING = 0, ENGAGED, BASHED, SLEEPING, RESTING, DEAD, INCAP };
-	CGroupChar(CGroup *parent, QTreeWidget*);
-	virtual ~CGroupChar();
+  public:
+    enum States
+    {
+        STANDING = 0,
+        ENGAGED,
+        BASHED,
+        SLEEPING,
+        RESTING,
+        DEAD,
+        INCAP
+    };
+    CGroupChar(CGroup *parent, QTreeWidget *);
+    virtual ~CGroupChar();
 
-	QByteArray getName() { return name; }
-	void setName(QByteArray _name) { name = _name; }
-	void setColor(QColor col) { color = col; updateLabels(); }
-	void setState(int state) { this->state = state;}
-	int getState() { return state; }
-	QColor getColor() { return color; }
-	QDomNode toXML();
-	QDomNode promptToXML();
-	QDomNode positionToXML();
-	QDomNode scoreToXML();
-	QDomNode stateToXML();
+    QByteArray getName() { return name; }
+    void setName(QByteArray _name) { name = _name; }
+    void setColor(QColor col)
+    {
+        color = col;
+        updateLabels();
+    }
+    void setState(int state) { this->state = state; }
+    int getState() { return state; }
+    QColor getColor() { return color; }
+    QDomNode toXML();
+    QDomNode promptToXML();
+    QDomNode positionToXML();
+    QDomNode scoreToXML();
+    QDomNode stateToXML();
 
+    bool updateFromXML(QDomNode blob);
+    bool updatePositionFromXML(QDomNode blob);
+    bool updatePromptFromXML(QDomNode blob);
+    bool updateScoreFromXML(QDomNode blob);
+    bool updateStateFromXML(QDomNode node);
 
-	bool updateFromXML(QDomNode blob);
-	bool updatePositionFromXML(QDomNode blob);
-	bool updatePromptFromXML(QDomNode blob);
-	bool updateScoreFromXML(QDomNode blob);
-	bool updateStateFromXML(QDomNode node);
+    void updateSpells();
 
+    void setHidden(bool b);
+    bool isHidden() { return hidden; }
 
-	void updateSpells();
+    QTreeWidgetItem *getCharItem() { return charItem; }
 
-	void setHidden(bool b);
-	bool isHidden() { return hidden; }
+    void setLastMovement(QByteArray move) { lastMovement = move; }
+    void setPosition(unsigned int id) { pos = id; }
+    unsigned int getPosition() { return pos; }
+    QByteArray getLastMovement() { return lastMovement; }
+    static QByteArray getNameFromXML(QDomNode node);
 
-	QTreeWidgetItem *getCharItem() { return charItem; }
+    void draw(int x, int y);
+    void updateLabels();
 
+    // for local char only
+    void setScore(int _hp, int _maxhp, int _mana, int _maxmana, int _moves, int _maxmoves)
+    {
+        hp = _hp;
+        maxhp = _maxhp;
+        mana = _mana;
+        maxmana = _maxmana;
+        moves = _moves;
+        maxmoves = _maxmoves;
+    }
 
-	void setLastMovement(QByteArray move) { lastMovement = move; }
-	void setPosition(unsigned int id) { pos = id; }
-	unsigned int getPosition() { return pos; }
-	QByteArray getLastMovement() { return lastMovement; }
-	static QByteArray getNameFromXML(QDomNode node);
+    void setTextScore(QByteArray hp, QByteArray mana, QByteArray moves)
+    {
+        textHP = hp;
+        textMana = mana;
+        textMoves = moves;
+    }
 
-	void draw(int x, int y);
-	void updateLabels();
-
-	// for local char only
-	void setScore(int _hp, int _maxhp, int _mana, int _maxmana, int _moves, int _maxmoves)
-	{
-		hp = _hp; maxhp = _maxhp; mana = _mana; maxmana = _maxmana;
-		moves = _moves; maxmoves = _maxmoves;
-	}
-
-	void setTextScore(QByteArray hp, QByteArray mana, QByteArray moves)
-	{
-		textHP = hp; textMana = mana; textMoves = moves;
-	}
-
-private:
-    QTreeWidget* charTable;
+  private:
+    QTreeWidget *charTable;
 };
 
 #endif /*CGROUPCHAR_H_*/

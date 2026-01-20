@@ -21,7 +21,6 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-
 #include "defines.h"
 #include "CConfigurator.h"
 
@@ -41,24 +40,25 @@
 
 class QFont;
 
-//#define DIST_Z	2	/* the distance between 2 rooms */
-#define BASE_Z  -12	/* the distance to the "camera" */
-#define ROOM_SIZE 0.47f	/* the size of the rooms walls */
+// #define DIST_Z    2    /* the distance between 2 rooms */
+#define BASE_Z -12      /* the distance to the "camera" */
+#define ROOM_SIZE 0.47f /* the size of the rooms walls */
 
 #define MAXHITS 200
-
 
 class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
 
-    struct RenderVertex {
+    struct RenderVertex
+    {
         GLfloat position[3];
         GLfloat texCoord[2];
         GLfloat color[4];
     };
 
-    struct RenderCommand {
+    struct RenderCommand
+    {
         GLenum mode;
         int first;
         int count;
@@ -66,17 +66,18 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
         bool useTexture;
     };
 
-    struct TextBillboard {
+    struct TextBillboard
+    {
         QVector3D position;
         QString text;
         QColor color;
     };
 
-    GLfloat       colour[4];
-    GLuint        global_list;
-    int           curx;
-    int           cury;
-    int           curz;
+    GLfloat colour[4];
+    GLuint global_list;
+    int curx;
+    int cury;
+    int curz;
     CFrustum frustum;
     int lowerZ;
     int upperZ;
@@ -84,7 +85,7 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     unsigned int last_drawn_trail;
     GLuint selectBuf[MAXHITS];
 
-    QFont 		*textFont;
+    QFont *textFont;
 
     GLfloat angleY;
     GLfloat angleX;
@@ -101,7 +102,6 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     QVector<RenderVertex> renderVertices;
     QVector<RenderCommand> renderCommands;
     QVector<TextBillboard> textBillboards;
-
 
     void glDrawGroupMarkers();
     void glDrawPrespamLine();
@@ -125,10 +125,9 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     void appendQuadStrip4(const QVector3D &v0, const QVector3D &v1, const QVector3D &v2, const QVector3D &v3,
                           const QVector2D &t0, const QVector2D &t1, const QVector2D &t2, const QVector2D &t3,
                           const GLfloat *color, GLuint texture);
-    void appendQuadStrip6(const QVector3D &v0, const QVector3D &v1, const QVector3D &v2,
-                          const QVector3D &v3, const QVector3D &v4, const QVector3D &v5,
-                          const QVector2D &t0, const QVector2D &t1, const QVector2D &t2,
-                          const QVector2D &t3, const QVector2D &t4, const QVector2D &t5,
+    void appendQuadStrip6(const QVector3D &v0, const QVector3D &v1, const QVector3D &v2, const QVector3D &v3,
+                          const QVector3D &v4, const QVector3D &v5, const QVector2D &t0, const QVector2D &t1,
+                          const QVector2D &t2, const QVector2D &t3, const QVector2D &t4, const QVector2D &t5,
                           const GLfloat *color, GLuint texture);
     void appendLine(const QVector3D &a, const QVector3D &b, const GLfloat *color);
     void appendMarkerGeometry(float dx, float dy, float dz, int mode, const GLfloat *color);
@@ -137,7 +136,7 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
                      const QMatrix4x4 &mvp);
     void drawTextOverlay();
 
-public:
+  public:
     int current_plane_z;
     GLuint basic_gllist;
     bool redraw;
@@ -151,111 +150,86 @@ public:
         curz += byValue;
     }
 
-    bool doSelect(QPoint pos, unsigned int & id);
+    bool doSelect(QPoint pos, unsigned int &id);
     void centerOnRoom(unsigned int id);
 
-    void resetViewSettings() {
-    	angleY = 0;
+    void resetViewSettings()
+    {
+        angleY = 0;
         angleX = 0;
         angleZ = 0;
-        conf->setRendererAngles(angleX,angleY,angleZ);
+        conf->setRendererAngles(angleX, angleY, angleZ);
         userX = 0;
         userY = 0;
         userZ = BASE_Z;
-        conf->setRendererPosition(userX,userY,userZ);
+        conf->setRendererPosition(userX, userY, userZ);
         userLayerShift = 0;
     }
 
-    GLfloat getAngleX() const
-    {
-        return angleX;
-    }
+    GLfloat getAngleX() const { return angleX; }
 
-    GLfloat getAngleY() const
-    {
-        return angleY;
-    }
+    GLfloat getAngleY() const { return angleY; }
 
-    GLfloat getAngleZ() const
-    {
-        return angleZ;
-    }
+    GLfloat getAngleZ() const { return angleZ; }
 
-    int getUserLayerShift() const
-    {
-        return userLayerShift;
-    }
+    int getUserLayerShift() const { return userLayerShift; }
 
-    float getUserX() const
-    {
-        return userX;
-    }
+    float getUserX() const { return userX; }
 
-    float getUserY() const
-    {
-        return userY;
-    }
+    float getUserY() const { return userY; }
 
-    float getUserZ() const
-    {
-        return userZ;
-    }
+    float getUserZ() const { return userZ; }
 
     void setAngleX(GLfloat angleX, bool dontsave = false)
     {
         this->angleX = angleX;
         if (!dontsave)
-        	conf->setRendererAngles(angleX,angleY,angleZ);
+            conf->setRendererAngles(angleX, angleY, angleZ);
     }
 
     void setAngleY(GLfloat angleY, bool dontsave = false)
     {
         this->angleY = angleY;
         if (!dontsave)
-        	conf->setRendererAngles(angleX,angleY,angleZ);
+            conf->setRendererAngles(angleX, angleY, angleZ);
     }
 
     void setAngleZ(GLfloat angleZ, bool dontsave = false)
     {
         this->angleZ = angleZ;
         if (!dontsave)
-        	conf->setRendererAngles(angleX,angleY,angleZ);
+            conf->setRendererAngles(angleX, angleY, angleZ);
     }
 
-    void setUserLayerShift(int userLayerShift)
-    {
-        this->userLayerShift = userLayerShift;
-    }
+    void setUserLayerShift(int userLayerShift) { this->userLayerShift = userLayerShift; }
 
     void setUserX(float userX, bool dontsave = false)
     {
         this->userX = userX;
         if (!dontsave)
-        	conf->setRendererPosition(userX,userY,userZ);
+            conf->setRendererPosition(userX, userY, userZ);
     }
 
     void setUserY(float userY, bool dontsave = false)
     {
         this->userY = userY;
         if (!dontsave)
-            conf->setRendererPosition(userX,userY,userZ);
+            conf->setRendererPosition(userX, userY, userZ);
     }
 
     void setUserZ(float userZ, bool dontsave = false)
     {
         this->userZ = userZ;
         if (!dontsave)
-            conf->setRendererPosition(userX,userY,userZ);
+            conf->setRendererPosition(userX, userY, userZ);
     }
 
-public slots:
-	void display(void);
+  public slots:
+    void display(void);
     void paintGL() override;
 
-signals:
-	void updateCharPosition(unsigned int);
+  signals:
+    void updateCharPosition(unsigned int);
 };
-
-
 
 #endif

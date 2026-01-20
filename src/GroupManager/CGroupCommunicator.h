@@ -31,27 +31,41 @@ class CGroupClient;
 // draft for no peer
 class CGroupDraftConnection : public QObject
 {
-	Q_OBJECT
-public:
-	CGroupDraftConnection() {}
-	virtual ~CGroupDraftConnection() {}
+    Q_OBJECT
+  public:
+    CGroupDraftConnection() {}
+    virtual ~CGroupDraftConnection() {}
 };
 
 class CGroupCommunicator : public QObject
 {
-	Q_OBJECT
-	int type;
+    Q_OBJECT
+    int type;
 
-	enum Messages { NONE, ACK,
-					REQ_VERSION, REQ_ACK, REQ_LOGIN, REQ_INFO,
-					PROT_VERSION, GTELL,
-					STATE_LOGGED, STATE_KICKED,
-					ADD_CHAR, REMOVE_CHAR, UPDATE_CHAR, RENAME_CHAR,
-					CHAR_PROMPT, CHAR_SCORE, CHAR_POSITION, CHAR_STATE};
+    enum Messages
+    {
+        NONE,
+        ACK,
+        REQ_VERSION,
+        REQ_ACK,
+        REQ_LOGIN,
+        REQ_INFO,
+        PROT_VERSION,
+        GTELL,
+        STATE_LOGGED,
+        STATE_KICKED,
+        ADD_CHAR,
+        REMOVE_CHAR,
+        UPDATE_CHAR,
+        RENAME_CHAR,
+        CHAR_PROMPT,
+        CHAR_SCORE,
+        CHAR_POSITION,
+        CHAR_STATE
+    };
 
-	QObject *peer;	// server or client
-	CGroup *getGroup() { return (CGroup *)(parent());
-    }
+    QObject *peer;  // server or client
+    CGroup *getGroup() { return (CGroup *)(parent()); }
 
     void connectionClosed(CGroupClient *connection);
     void connectionEstablished(CGroupClient *connection);
@@ -67,18 +81,21 @@ class CGroupCommunicator : public QObject
     void userLoggedOff(CGroupClient *conn);
     void retrieveDataClient(CGroupClient *connection, int message, QDomNode data);
     void retrieveDataServer(CGroupClient *connection, int message, QDomNode data);
-    void kick(CGroupClient *& conn, QByteArray kickMessage);
-    QHash<QByteArray,int> clientsList;
-public:
+    void kick(CGroupClient *&conn, QByteArray kickMessage);
+    QHash<QByteArray, int> clientsList;
+
+  public:
     static const int protocolVersion = 108;
-    enum States{ Server, Client, Off};
+    enum States
+    {
+        Server,
+        Client,
+        Off
+    };
     CGroupCommunicator(int type, QObject *parent);
     virtual ~CGroupCommunicator();
     void changeType(int newState);
-    int getType()
-    {
-        return type;
-    }
+    int getType() { return type; }
 
     void sendCharUpdate(CGroupClient *conn, QDomNode blob);
     void sendCharUpdate(QDomNode blob);
@@ -95,15 +112,16 @@ public:
     void sendRemoveUserNotification(CGroupClient *conn, QByteArray name);
     void renameConnection(QByteArray oldName, QByteArray newName);
     void sendUpdateName(QByteArray oldName, QByteArray newName);
-public:
+
+  public:
     void connectionStateChanged(CGroupClient *connection);
     void errorInConnection(CGroupClient *connection);
     void serverStartupFailed();
     void incomingData(CGroupClient *connection, QByteArray data);
     void sendGTell(QByteArray tell);
     void relayMessage(CGroupClient *connection, int message, QDomNode node);
-signals:
-	void typeChanged(int type);
+  signals:
+    void typeChanged(int type);
 };
 
 #endif /*CGROUPCOMMUNICATOR_H_*/

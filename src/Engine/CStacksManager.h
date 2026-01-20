@@ -18,53 +18,51 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
-
 #ifndef STACKSMANAGER_H
 #define STACKSMANAGER_H
 
 #include <vector>
+#include <QString>
 #include "Map/CRoom.h"
 #include "Map/CRoomManager.h"
 
-class CStacksManager {
-private:
+class CStacksManager
+{
+  private:
+    std::vector<CRoom *> stacka;
+    std::vector<CRoom *> stackb;
 
-  std::vector<CRoom *> stacka;
-  std::vector<CRoom *> stackb;
+    std::vector<CRoom *> *sa;
+    std::vector<CRoom *> *sb;
 
-  std::vector<CRoom *> *sa;
-  std::vector<CRoom *> *sb;
+    unsigned int mark[MAX_ROOMS];
+    unsigned int turn;
 
-  unsigned int  mark[MAX_ROOMS];
-  unsigned int  turn;
-public:
-  unsigned int amount() { return sa->size(); }
-  unsigned int next()    { return sb->size(); }
+  public:
+    unsigned int amount() { return sa->size(); }
+    unsigned int next() { return sb->size(); }
 
-  CRoom * first();
-  CRoom * nextFirst();
+    CRoom *first();
+    CRoom *nextFirst();
 
-  void swap();
-  CStacksManager();
-  void reset();
+    void swap();
+    CStacksManager();
+    void reset();
 
-  CRoom * get(unsigned int i);
+    CRoom *get(unsigned int i);
 
-  CRoom * getNext(unsigned int i);
+    CRoom *getNext(unsigned int i);
 
-  void put(unsigned int id);
-  void put(CRoom *r);
-  void removeRoom(unsigned int id);    /* swaps */
+    void put(unsigned int id);
+    void put(CRoom *r);
+    void removeRoom(unsigned int id); /* swaps */
 
-  /* DEBUG */
-  void printStacks();
+    /* DEBUG */
+    void printStacks();
 
-  void getCurrent(char *);
-
+    QString getCurrent() const;
 };
 
 extern class CStacksManager stacker;
-
 
 #endif

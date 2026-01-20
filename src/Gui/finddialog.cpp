@@ -27,21 +27,17 @@
 
 #include "Renderer/renderer.h"
 
-FindDialog::FindDialog(QWidget *parent)
-    : QDialog(parent)
+FindDialog::FindDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);
 
     adjustResultTable();
 
-    connect(lineEdit, SIGNAL(textChanged(const QString &)),
-            this, SLOT(enableFindButton(const QString &)));
-    connect(findButton, SIGNAL(clicked()),
-            this, SLOT(findClicked()));
-    connect(closeButton, SIGNAL(clicked()),
-            this, SLOT(close()));
-    connect(resultTable, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
-            this, SLOT(itemDoubleClicked(QTreeWidgetItem *)));
+    connect(lineEdit, SIGNAL(textChanged(const QString &)), this, SLOT(enableFindButton(const QString &)));
+    connect(findButton, SIGNAL(clicked()), this, SLOT(findClicked()));
+    connect(closeButton, SIGNAL(clicked()), this, SLOT(close()));
+    connect(resultTable, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
+            SLOT(itemDoubleClicked(QTreeWidgetItem *)));
 }
 
 void FindDialog::on_lineEdit_textChanged()
@@ -52,9 +48,7 @@ void FindDialog::on_lineEdit_textChanged()
 void FindDialog::findClicked()
 {
     QString text = lineEdit->text().simplified();
-    Qt::CaseSensitivity cs =
-            caseCheckBox->isChecked() ? Qt::CaseSensitive
-                                      : Qt::CaseInsensitive;
+    Qt::CaseSensitivity cs = caseCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive;
     QTreeWidgetItem *item;
     QList<int> results;
 
@@ -70,22 +64,22 @@ void FindDialog::findClicked()
         results = Map.searchExits(text, cs);
 
     for (int i = 0; i < results.size(); i++) {
-        QString id = QString(tr("%1").arg( results.at(i) ));
-        QString roomName = QString(Map.getName( results.at(i) ));
+        QString id = QString(tr("%1").arg(results.at(i)));
+        QString roomName = QString(Map.getName(results.at(i)));
 
         item = new QTreeWidgetItem(resultTable);
         item->setText(0, id);
         item->setText(1, roomName);
     }
 
-    roomsFoundLabel->setText(tr("%1 room(s) found").arg( results.size() ));
+    roomsFoundLabel->setText(tr("%1 room(s) found").arg(results.size()));
 }
 
 void FindDialog::itemDoubleClicked(QTreeWidgetItem *item)
 {
     unsigned int id;
 
-    if (item == NULL)
+    if (item == nullptr)
         return;
 
     id = item->text(0).toInt();
@@ -102,10 +96,9 @@ void FindDialog::enableFindButton(const QString &text)
 void FindDialog::adjustResultTable()
 {
     resultTable->setColumnCount(2);
-    resultTable->setHeaderLabels(
-            QStringList() << tr("Room ID") << tr("Room Name"));
-//    resultTable->header()->setResizeMode(0, QHeaderView::Stretch);
-//    resultTable->header()->setResizeMode(QHeaderView::Stretch);
+    resultTable->setHeaderLabels(QStringList() << tr("Room ID") << tr("Room Name"));
+    //    resultTable->header()->setResizeMode(0, QHeaderView::Stretch);
+    //    resultTable->header()->setResizeMode(QHeaderView::Stretch);
     resultTable->setRootIsDecorated(false);
     resultTable->setAlternatingRowColors(true);
 }

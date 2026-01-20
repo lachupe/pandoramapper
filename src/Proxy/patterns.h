@@ -3,7 +3,7 @@
 ** Authors:   Ulf Hermann <ulfonk_mennhar@gmx.de> (Alve),
 **            Marek Krejza <krejza@gmail.com> (Caligor)
 **
-** This file is part of the MMapper project. 
+** This file is part of the MMapper project.
 ** Maintained by Nils Schimmelmann <nschimme@gmail.com>
 **
 ** This program is free software; you can redistribute it and/or
@@ -30,19 +30,19 @@
 #include <QtCore>
 #include <QRegularExpression>
 
-class Patterns {
-	
+class Patterns
+{
     static QRegularExpression m_rx;
-    
-public:
-	static bool matchMoveCancelPatterns(QString&);
-	static bool matchMoveForcePatterns(QString&);
 
-	static bool matchMoveCancelPatterns(QByteArray&);
-	static bool matchMoveForcePatterns(QByteArray&);
+  public:
+    static bool matchMoveCancelPatterns(QString &);
+    static bool matchMoveForcePatterns(QString &);
 
-    static bool matchPattern(QString pattern, QString& str);
-    static bool matchPattern(QByteArray pattern, QByteArray& str);
+    static bool matchMoveCancelPatterns(QByteArray &);
+    static bool matchMoveForcePatterns(QByteArray &);
+
+    static bool matchPattern(QString pattern, QString &str);
+    static bool matchPattern(QByteArray pattern, QByteArray &str);
 };
 
 #endif

@@ -22,65 +22,114 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <cctype>
+
 class QByteArray;
 
+// Modern C++ inline functions replacing legacy macros
+// These provide type safety and better debugging
 
-#define LOWER(c)   (((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
-#define UPPER(c)   (((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c) )
+inline constexpr char toLower(char c) noexcept
+{
+    return (c >= 'A' && c <= 'Z') ? static_cast<char>(c + ('a' - 'A')) : c;
+}
 
-#define ON_OFF(flag) ( (flag) ? "ON" : "OFF" )
-#define YES_NO(flag) ( (flag) ? "YES" : "NO" )
+inline constexpr char toUpper(char c) noexcept
+{
+    return (c >= 'a' && c <= 'z') ? static_cast<char>(c + ('A' - 'a')) : c;
+}
 
-#define IS_SET(flag,bit)  ((flag) & (bit))
-#define SET_BIT(var,bit)  ((var) |= (bit))
-#define REMOVE_BIT(var,bit)  ((var) &= ~(bit))
-#define TOGGLE_BIT(var,bit) ((var) = (var) ^ (bit))
+inline constexpr const char *onOff(bool flag) noexcept
+{
+    return flag ? "ON" : "OFF";
+}
 
-#define MAX_INPUT_LENGTH	1024	/* Max length per *line* of input */
+inline constexpr const char *yesNo(bool flag) noexcept
+{
+    return flag ? "YES" : "NO";
+}
 
-struct boolean_struct {
-  const char  *name;
-  int          state;
+// Bit manipulation functions with type safety
+template <typename T, typename U>
+inline constexpr bool isSet(T flag, U bit) noexcept
+{
+    return (flag & bit) != 0;
+}
+
+template <typename T, typename U>
+inline constexpr T &setBit(T &var, U bit) noexcept
+{
+    var |= bit;
+    return var;
+}
+
+template <typename T, typename U>
+inline constexpr T &removeBit(T &var, U bit) noexcept
+{
+    var &= ~bit;
+    return var;
+}
+
+template <typename T, typename U>
+inline constexpr T &toggleBit(T &var, U bit) noexcept
+{
+    var ^= bit;
+    return var;
+}
+
+// Legacy macro compatibility (for gradual migration)
+#define LOWER(c) toLower(c)
+#define UPPER(c) toUpper(c)
+#define ON_OFF(flag) onOff(flag)
+#define YES_NO(flag) yesNo(flag)
+#define IS_SET(flag, bit) isSet(flag, bit)
+#define SET_BIT(var, bit) setBit(var, bit)
+#define REMOVE_BIT(var, bit) removeBit(var, bit)
+#define TOGGLE_BIT(var, bit) toggleBit(var, bit)
+
+#define MAX_INPUT_LENGTH 1024 /* Max length per *line* of input */
+
+struct boolean_struct
+{
+    const char *name;
+    int state;
 };
 
-
-#define DEBUG_GENERAL           (1 << 0)
-#define DEBUG_ANALYZER          (1 << 1)
-#define DEBUG_SYSTEM            (1 << 2)
-#define DEBUG_CONFIG            (1 << 3)
-#define DEBUG_DISPATCHER        (1 << 4)
-#define DEBUG_PROXY             (1 << 5)
-#define DEBUG_RENDERER          (1 << 6)
-#define DEBUG_ROOMS             (1 << 7)
-#define DEBUG_STACKS            (1 << 8)
-#define DEBUG_TREE              (1 << 9)
-#define DEBUG_USERFUNC          (1 << 10)
-#define DEBUG_XML               (1 << 11)
-#define DEBUG_INTERFACE         (1 << 12)
-#define DEBUG_SPELLS            (1 << 13)
-#define DEBUG_GROUP             (1 << 14)
+#define DEBUG_GENERAL (1 << 0)
+#define DEBUG_ANALYZER (1 << 1)
+#define DEBUG_SYSTEM (1 << 2)
+#define DEBUG_CONFIG (1 << 3)
+#define DEBUG_DISPATCHER (1 << 4)
+#define DEBUG_PROXY (1 << 5)
+#define DEBUG_RENDERER (1 << 6)
+#define DEBUG_ROOMS (1 << 7)
+#define DEBUG_STACKS (1 << 8)
+#define DEBUG_TREE (1 << 9)
+#define DEBUG_USERFUNC (1 << 10)
+#define DEBUG_XML (1 << 11)
+#define DEBUG_INTERFACE (1 << 12)
+#define DEBUG_SPELLS (1 << 13)
+#define DEBUG_GROUP (1 << 14)
 
 /* special flag */
-#define DEBUG_TOUSER            (1 << 15)       /* send the message to user also */
+#define DEBUG_TOUSER (1 << 15) /* send the message to user also */
 
+extern const char *exitnames[];
 
-extern const char * exitnames[];
-
-struct debug_data_struct {
-  const char   *name;
-  const char   *title;
-  const char   *desc;
-  unsigned int  flag;
-  int           state;
+struct debug_data_struct
+{
+    const char *name;
+    const char *title;
+    const char *desc;
+    unsigned int flag;
+    int state;
 };
 
 void print_debug(unsigned int flag, const char *messg, ...);
 
-
 extern struct debug_data_struct debug_data[];
-extern char    timer_ken[MAX_INPUT_LENGTH];
-extern double  timer_now;
-
+extern char timer_ken[MAX_INPUT_LENGTH];
+extern double timer_now;
 
 extern const boolean_struct input_booleans[];
 extern const char *exits[];
@@ -104,5 +153,3 @@ int MIN(int a, int b);
 void latinToAscii(QByteArray &text);
 
 #endif
-
-

@@ -18,24 +18,23 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef USERLAND_H 
-#define USERLAND_H 
+#ifndef USERLAND_H
+#define USERLAND_H
 
-
-#define USERCMD(name)  int name(int cmd, int subcmd, char *line, char *original)
+#define USERCMD(name) int name(int cmd, int subcmd, char *line, char *original)
 #include <deque>
 #include <QMutex>
+#include <QByteArray>
 using namespace std;
 
-#define USER_DEC_X      1
-#define USER_DEC_Y      2
-#define USER_DEC_Z      3
-#define USER_INC_X      4
-#define USER_INC_Y      5
-#define USER_INC_Z      6
-#define USER_DOOR_NORMAL        0
-#define USER_DOOR_EXIT          1
-
+#define USER_DEC_X 1
+#define USER_DEC_Y 2
+#define USER_DEC_Z 3
+#define USER_INC_X 4
+#define USER_INC_Y 5
+#define USER_INC_Z 6
+#define USER_DOOR_NORMAL 0
+#define USER_DOOR_EXIT 1
 
 USERCMD(usercmd_mhelp);
 USERCMD(usercmd_config);
@@ -63,38 +62,34 @@ USERCMD(usercmd_mnotecolor);
 USERCMD(usercmd_mregion);
 USERCMD(usercmd_mtimer);
 
-
-
-
-
-
-struct user_command_type {
-  const char *name;
-  int (*command_pointer) (int cmd, int subcmd, char *line, char *orig);
-  int subcmd;           /* subcommand*/
-  unsigned int flags;
-  const char *desc;     /* short command description */
-  const char *help;     /* long description/helpfile */
+struct user_command_type
+{
+    const char *name;
+    int (*command_pointer)(int cmd, int subcmd, char *line, char *orig);
+    int subcmd; /* subcommand*/
+    unsigned int flags;
+    const char *desc; /* short command description */
+    const char *help; /* long description/helpfile */
 };
 
 extern const struct user_command_type user_commands[];
 
-struct queued_command_type {
-  int  id;
-  char arg[MAX_STR_LEN];  
+struct queued_command_type
+{
+    int id;
+    QByteArray arg;
 };
 
-class Userland {
-  QMutex queue_mutex;
-  deque<struct queued_command_type> commands_queue;
-public:
-    
-  void parse_command();
-  void add_command(int id, char *arg);
-  int is_empty() { return commands_queue.empty(); }
-  int parse_user_input_line(const char *line); 
- 
+class Userland
+{
+    QMutex queue_mutex;
+    deque<struct queued_command_type> commands_queue;
 
+  public:
+    void parse_command();
+    void add_command(int id, const char *arg);
+    int is_empty() { return commands_queue.empty(); }
+    int parse_user_input_line(const char *line);
 };
 
 extern class Userland *userland_parser;
@@ -104,4 +99,3 @@ extern class Userland *userland_parser;
 #define USER_PARSE_DONE 2 /* parsed the line, pass corrected line further */
 
 #endif
-

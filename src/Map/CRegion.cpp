@@ -21,7 +21,7 @@
 //
 // C++ Implementation: Regions
 //
-// Description: 
+// Description:
 //
 //
 // Author:  <aza@alpha>, (C) 2006
@@ -38,8 +38,6 @@ CRegion::CRegion()
 {
     name.clear();
     doors.clear();
-    
-
 }
 
 CRegion::~CRegion()
@@ -48,7 +46,6 @@ CRegion::~CRegion()
     doors.clear();
 }
 
-    
 void CRegion::setName(QByteArray newname)
 {
     name = newname;
@@ -62,31 +59,31 @@ QByteArray CRegion::getName()
 void CRegion::addDoor(QByteArray alias, QByteArray name)
 {
     doors.insert(alias.trimmed(), name.simplified());
-    Map.rebuildRegion( this );
+    Map.rebuildRegion(this);
 }
 
 QByteArray CRegion::getDoor(QByteArray alias)
 {
-    if (doors.contains(alias) == true) 
-        return doors[alias];        
+    if (doors.contains(alias) == true)
+        return doors[alias];
     return "";
 }
 
 bool CRegion::removeDoor(QByteArray alias)
 {
-	bool b = doors.remove(alias);
-    Map.rebuildRegion( this );
-	return b;
+    bool b = doors.remove(alias);
+    Map.rebuildRegion(this);
+    return b;
 }
 
 void CRegion::showRegion()
 {
-    send_to_user("-- Region: %s\r\n", (const char *) name);
-    
+    send_to_user("-- Region: %s\r\n", (const char *)name);
+
     QMapIterator<QByteArray, QByteArray> i(doors);
     while (i.hasNext()) {
         i.next();
-        send_to_user("Alias: %-15s Door: %-40s\r\n", (const char *)  i.key(), (const char *) i.value() );
+        send_to_user("Alias: %-15s Door: %-40s\r\n", (const char *)i.key(), (const char *)i.value());
     }
     send_to_user("\r\n");
 }
@@ -99,19 +96,16 @@ QMap<QByteArray, QByteArray> CRegion::getAllDoors()
 QByteArray CRegion::getAliasByDoor(QByteArray door, int dir)
 {
     QByteArray fulldoor;
-    
+
     fulldoor = door + " ";
-    fulldoor.append( dirbynum(dir) );
+    fulldoor.append(dirbynum(dir));
 
     QMapIterator<QByteArray, QByteArray> i(doors);
     while (i.hasNext()) {
         i.next();
-        print_debug(DEBUG_USERFUNC, "Checking ...%s...\r\n", (const char *) i.value() );
+        print_debug(DEBUG_USERFUNC, "Checking ...%s...\r\n", (const char *)i.value());
         if (i.value() == door || i.value() == fulldoor)
             return i.key();
     }
-    return "";    
+    return "";
 }
-
-
-

@@ -25,11 +25,12 @@
 #include <QSet>
 #include <QPoint>
 
-class CSelectionManager : public QObject {
-Q_OBJECT
+class CSelectionManager : public QObject
+{
+    Q_OBJECT
     QSet<int> selection;
-    
-public:
+
+  public:
     CSelectionManager();
     ~CSelectionManager();
     void resetSelection();
@@ -42,28 +43,28 @@ public:
     unsigned int getFirst() { return selection.values().at(0); }
     unsigned int get(int index) { return selection.values().at(index); }
 
-    int size() {return selection.size(); }
-    void exclusiveSelection(unsigned int id); 
+    int size() { return selection.size(); }
+    void exclusiveSelection(unsigned int id);
 
-    QList<int>  getList() { return selection.values(); }
+    QList<int> getList() { return selection.values(); }
     bool isEmpty() { return selection.empty(); }
 
-signals:
-  void roomSelected(unsigned int id);
+  signals:
+    void roomSelected(unsigned int id);
 };
 
-class CMouseState : public QObject {
-Q_OBJECT
+class CMouseState : public QObject
+{
+    Q_OBJECT
 
-public:
-    bool          LeftButtonPressed;
-    bool          RightButtonPressed;
-    QPoint        oldPos;       // last registred position
-    QPoint        origPos;      // original position of click
-
+  public:
+    bool LeftButtonPressed;
+    bool RightButtonPressed;
+    QPoint oldPos;   // last registred position
+    QPoint origPos;  // original position of click
 
     CMouseState();
     int delta(QPoint pos);  // delta from original Click position to given pos
-}; 
+};
 
 #endif

@@ -36,101 +36,99 @@
 
 class CGroup : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	QElapsedTimer deadTimer;
-	int ignoredState;
+    QElapsedTimer deadTimer;
+    int ignoredState;
 
-	void resetAllChars();
-public:
-	CGroup(QByteArray name, QWidget *parent);
-	virtual ~CGroup();
+    void resetAllChars();
 
-	QByteArray getName() { return self->getName(); }
-	CGroupChar* getCharByName(QByteArray name);
+  public:
+    CGroup(QByteArray name, QWidget *parent);
+    virtual ~CGroup();
 
-	void setType(int newState);
-	int getType() {return network->getType(); }
-	bool isConnected() { return network->isConnected(); }
-	void reconnect();
+    QByteArray getName() { return self->getName(); }
+    CGroupChar *getCharByName(QByteArray name);
 
-	void addSelf();
-	void hideSelf();
-	bool addChar(QDomNode blob);
-	void removeChar(QByteArray name);
-	void removeChar(QDomNode node);
-	bool isNamePresent(QByteArray name);
-	QByteArray getNameFromBlob(QDomNode blob);
-//	bool addCharIfUnique(QDomNode blob);
-	void updateChar(QDomNode blob); // updates given char from the blob
-	void updateCharPosition(QDomNode blob);
-	void updateCharScore(QDomNode blob);
-	void updateCharPrompt(QDomNode blob);
-	void updateCharState(QDomNode blob);
+    void setType(int newState);
+    int getType() { return network->getType(); }
+    bool isConnected() { return network->isConnected(); }
+    void reconnect();
 
+    void addSelf();
+    void hideSelf();
+    bool addChar(QDomNode blob);
+    void removeChar(QByteArray name);
+    void removeChar(QDomNode node);
+    bool isNamePresent(QByteArray name);
+    QByteArray getNameFromBlob(QDomNode blob);
+    //    bool addCharIfUnique(QDomNode blob);
+    void updateChar(QDomNode blob);  // updates given char from the blob
+    void updateCharPosition(QDomNode blob);
+    void updateCharScore(QDomNode blob);
+    void updateCharPrompt(QDomNode blob);
+    void updateCharState(QDomNode blob);
 
-	CGroupCommunicator *getCommunicator() { return network; }
+    CGroupCommunicator *getCommunicator() { return network; }
 
+    void resetChars();
+    QVector<CGroupChar *> getChars() { return chars; }
+    // changing settings
+    void resetName();
+    void resetColor();
 
-	void resetChars();
-	QVector<CGroupChar *>  getChars() { return chars; }
-	// changing settings
-	void resetName();
-	void resetColor();
+    QDomNode getLocalCharData() { return self->toXML(); }
+    void sendAllCharsData(CGroupClient *conn);
+    void issueLocalCharUpdate() { network->sendCharUpdate(self->toXML()); }
+    void issueLocalCharScoreUpdate() { network->sendCharScoreUpdate(self->scoreToXML()); }
+    void issueLocalCharPromptUpdate() { network->sendCharPromptUpdate(self->promptToXML()); }
+    void issueLocalCharPositionUpdate() { network->sendCharPositionUpdate(self->positionToXML()); }
+    void issueLocalCharStateUpdate() { network->sendCharStateUpdate(self->stateToXML()); }
 
-	QDomNode getLocalCharData() { return self->toXML(); }
-	void sendAllCharsData(CGroupClient *conn);
-	void issueLocalCharUpdate() { 	network->sendCharUpdate(self->toXML()); }
-	void issueLocalCharScoreUpdate() { 	network->sendCharScoreUpdate(self->scoreToXML()); }
-	void issueLocalCharPromptUpdate() { 	network->sendCharPromptUpdate(self->promptToXML()); }
-	void issueLocalCharPositionUpdate() { 	network->sendCharPositionUpdate(self->positionToXML()); }
-	void issueLocalCharStateUpdate() { 		network->sendCharStateUpdate(self->stateToXML()); }
+    void gTellArrived(QDomNode node);
 
+    // dispatcher/Engine hooks
+    bool isGroupTell(QByteArray tell);
 
-	void gTellArrived(QDomNode node);
+    void renameChar(QDomNode blob);
 
-	// dispatcher/Engine hooks
-	bool isGroupTell(QByteArray tell);
+    void sendLog(const QString &message) { emit log("GrpManager", message); }
 
-	void renameChar(QDomNode blob);
+  public slots:
+    void connectionRefused(QString message);
+    void connectionFailed(QString message);
+    void connectionClosed(QString message);
+    void connectionError(QString message);
+    void serverStartupFailed(QString message);
+    void gotKicked(QDomNode message);
+    void setCharPosition(unsigned int pos);
+    void setCharState(int state);
 
-	void sendLog(const QString& message) {
-		emit log("GrpManager", message);
-	}
+    void closeEvent(QCloseEvent *event)
+    {
+        hide();
+        event->accept();
+        emit hides();
+    }
+    void sendGTell(QByteArray tell);  // sends gtell from local user
+    void parseScoreInformation(QByteArray score);
+    void parsePromptInformation(QByteArray prompt);
 
+    void updateSpellsInfo();
 
-public slots:
-	void connectionRefused(QString message);
-	void connectionFailed(QString message);
-	void connectionClosed(QString message);
-	void connectionError(QString message);
-	void serverStartupFailed(QString message);
-	void gotKicked(QDomNode message);
-	void setCharPosition(unsigned int pos);
-	void setCharState(int state);
+    void updateGroupManagerWindow();
+    // remove the DEAD state from the char
+    void returnToLife();
 
+  signals:
+    void hides();
+    void log(const QString &module, const QString &message);
 
-	void closeEvent( QCloseEvent * event ) { hide(); event->accept(); emit hides();}
-	void sendGTell(QByteArray tell); // sends gtell from local user
-	void parseScoreInformation(QByteArray score);
-	void parsePromptInformation(QByteArray prompt);
-
-	void updateSpellsInfo();
-
-	void updateGroupManagerWindow();
-	// remove the DEAD state from the char
-	void returnToLife();
-
-signals:
-	void hides();
-	void log(const QString& module, const QString& message);
-
-
-private:
-	CGroupCommunicator*		network;
-	QVector<CGroupChar *> 	chars;
-	CGroupChar*				self;
-	QTreeWidget*			tree;
+  private:
+    CGroupCommunicator *network;
+    QVector<CGroupChar *> chars;
+    CGroupChar *self;
+    QTreeWidget *tree;
 };
 
 #endif /*CGROUP_H_*/

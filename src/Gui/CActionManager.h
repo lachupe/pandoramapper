@@ -22,82 +22,80 @@
 #ifndef CACTIONMANAGER_H
 #define CACTIONMANAGER_H
 
-
 #include <QMainWindow>
 #include <QAction>
 
 class CMainWindow;
 class QActionGroup;
 
-class CActionManager : public QObject {
+class CActionManager : public QObject
+{
     Q_OBJECT
 
     CMainWindow *parent;
-public:
+
+  public:
     CActionManager(CMainWindow *parent);
 
-    QAction       *newAct;
-    QAction       *openAct;
-    QAction       *reloadAct;
-    QAction       *saveAct;
-    QAction       *saveAsAct;
-    QAction       *quitAct;
-    QAction       *publishAct;
+    QAction *newAct;
+    QAction *openAct;
+    QAction *reloadAct;
+    QAction *saveAct;
+    QAction *saveAsAct;
+    QAction *quitAct;
+    QAction *publishAct;
 
-    QAction       *mappingAct;
-    QAction       *automergeAct;
-    QAction       *angryLinkerAct;
-    QAction       *duallinkerAct;
+    QAction *mappingAct;
+    QAction *automergeAct;
+    QAction *angryLinkerAct;
+    QAction *duallinkerAct;
 
-    QActionGroup  *toolsGroup;
-    QAction       *selectToolAct;
-    QAction       *mapMoveToolAct;
-    QAction       *deleteToolAct;
+    QActionGroup *toolsGroup;
+    QAction *selectToolAct;
+    QAction *mapMoveToolAct;
+    QAction *deleteToolAct;
 
-    QAction       *findAct;
-    QAction       *roomeditAct;
-    QAction       *deleteAct;
-    QAction       *mergeAct;
-    QAction       *moveRoomAct;
-    QAction       *selectionTypeAct;
-    QAction       *refreshAct;
-    QAction       *bindRoomsAct;
+    QAction *findAct;
+    QAction *roomeditAct;
+    QAction *deleteAct;
+    QAction *mergeAct;
+    QAction *moveRoomAct;
+    QAction *selectionTypeAct;
+    QAction *refreshAct;
+    QAction *bindRoomsAct;
 
-    QAction       *always_on_top_action;
-    QAction       *saveConfigAct;
-    QAction       *saveConfigAsAct;
-    QAction       *loadConfigAct;
-    QAction       *setupGeneralAct;
-    QAction       *spellsAct;
+    QAction *always_on_top_action;
+    QAction *saveConfigAct;
+    QAction *saveConfigAsAct;
+    QAction *loadConfigAct;
+    QAction *setupGeneralAct;
+    QAction *spellsAct;
 
-    QAction       *showLogAct;
+    QAction *showLogAct;
 
-    QAction       *gotoAct;
-    QAction       *deleteFullyAct;
-    
-    QAction       *aboutQtAct;
-    QAction       *aboutAct;
-    
-    QAction       *emulationAct;
-    
-    QActionGroup  *groupManagerGroup;
-    QAction		  *groupOffAct;
-    QAction		  *groupClientAct;
-    QAction		  *groupServerAct;
-    QAction		  *groupShowHideAct;
-    QAction		  *groupSettingsAct;
-    QAction		  *groupClearSpellsAct;
-    
-    
+    QAction *gotoAct;
+    QAction *deleteFullyAct;
+
+    QAction *aboutQtAct;
+    QAction *aboutAct;
+
+    QAction *emulationAct;
+
+    QActionGroup *groupManagerGroup;
+    QAction *groupOffAct;
+    QAction *groupClientAct;
+    QAction *groupServerAct;
+    QAction *groupShowHideAct;
+    QAction *groupSettingsAct;
+    QAction *groupClearSpellsAct;
+
     void setShowGroupManager(bool b);
 
-
-public slots:
+  public slots:
     void disable_online_actions();
     void enable_online_actions();
     void updateActionsSettings();
-    
-    
+
     void alwaysOnTop(bool);
     void newFile();
     void open();
@@ -106,33 +104,32 @@ public slots:
     void saveAs();
 
     void showLog();
-    
+
     void mapping_mode();
     void automerge();
     void angrylinker();
     void duallinker();
 
-    
-    void delete_room(); 
-    void merge_room(); 
+    void delete_room();
+    void merge_room();
     void selectionType();
     void refreshRoom();
     void bindRooms();
-    
+
     void saveConfig();
     void saveAsConfig();
     void loadConfig();
-    
+
     void generalSetting();
     void spellsSettings();
     void edit_current_room();
-    
-    void emulation_mode();  
+
+    void emulation_mode();
     void publish_map();
     void about();
     void gotoAction();
-    void deleteFully(); // delete with remove flag
-    
+    void deleteFully();  // delete with remove flag
+
     void groupOff(bool);
     void groupClient(bool);
     void groupServer(bool);
@@ -142,10 +139,8 @@ public slots:
     void groupManagerTypeChanged(int);
     void groupClearSpells();
 
-
-private slots:
+  private slots:
     void find();
 };
-
 
 #endif

@@ -27,13 +27,13 @@ class FindDialog : public QDialog, public Ui::FindDialog
 {
     Q_OBJECT
 
-public:
+  public:
     FindDialog(QWidget *parent = 0);
 
-private:
+  private:
     void adjustResultTable();
 
-private slots:
+  private slots:
     void on_lineEdit_textChanged();
     void findClicked();
     void enableFindButton(const QString &text);
