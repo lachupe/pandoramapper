@@ -108,7 +108,7 @@ int RoomEditDialog::updateExitsInfo(int dir, CRoom *r)
             r->setExitDeath(dir);
         } else  {        
             lead = leads->text().toInt();
-            if (Map.getRoom(lead) == NULL) {
+            if (Map.getRoom(lead) == nullptr) {
                 QMessageBox::critical(this, "Room Info Edit",
                               QString("Bad ID given for connection to the %1").arg(exits[dir]) );
                return -1;
@@ -308,7 +308,7 @@ void RoomEditDialog::accept()
     print_debug(DEBUG_INTERFACE, "Room id : %i\r\n", id);
     
     r = Map.getRoom(id);
-    if (r == NULL) {
+    if (r == nullptr) {
         QMessageBox::critical(this, "Room Info Edit",
                               QString("The room with this ID does not exist anymore."));
         return;    

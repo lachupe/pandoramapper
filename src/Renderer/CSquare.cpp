@@ -31,10 +31,10 @@
 
 CSquare::CSquare()
 {
-    subsquares[Left_Upper] = NULL;
-    subsquares[Right_Upper] = NULL;
-    subsquares[Left_Lower] = NULL;
-    subsquares[Right_Lower] = NULL;
+    subsquares[Left_Upper] = nullptr;
+    subsquares[Right_Upper] = nullptr;
+    subsquares[Left_Lower] = nullptr;
+    subsquares[Right_Lower] = nullptr;
     
     leftx =  -MAX_SQUARE_SIZE/2;      
     lefty =   MAX_SQUARE_SIZE/2;      
@@ -69,10 +69,10 @@ CSquare::~CSquare()
 
 CSquare::CSquare(int lx, int ly, int rx, int ry)
 {
-    subsquares[Left_Upper] = NULL;
-    subsquares[Right_Upper] = NULL;
-    subsquares[Left_Lower] = NULL;
-    subsquares[Right_Lower] = NULL;
+    subsquares[Left_Upper] = nullptr;
+    subsquares[Right_Upper] = nullptr;
+    subsquares[Left_Lower] = nullptr;
+    subsquares[Right_Lower] = nullptr;
 
     leftx = lx;
     lefty = ly;
@@ -123,7 +123,7 @@ void CSquare::addSubsquareByMode(int mode)
 void CSquare::addRoomByMode(CRoom *room, int mode)
 {
     mode = getMode(room);
-    if (subsquares[mode] == NULL) 
+    if (subsquares[mode] == nullptr) 
         this->addSubsquareByMode(mode);
         
     subsquares[ mode ]->add(room);
@@ -183,7 +183,7 @@ void CSquare::remove(CRoom *room)
             /* just for check */
             for ( i=0; i < p->rooms.size(); ++i) {
                 if ( room->id == p->rooms[i]->id ) {
-                    p->rooms[i]->setSquare( NULL );
+                    p->rooms[i]->setSquare( nullptr );
                     p->rooms.remove(i);
                     return;
                 }
@@ -231,8 +231,8 @@ bool CSquare::isInside(CRoom *room)
 CPlane::CPlane()
 {
     z = 0;
-    next = NULL;
-    squares = NULL;
+    next = nullptr;
+    squares = nullptr;
 }
 
 CPlane::~CPlane()
@@ -242,7 +242,7 @@ CPlane::~CPlane()
 
 CPlane::CPlane(CRoom *room)
 {
-    next = NULL;
+    next = nullptr;
 
     z = room->getZ();
 

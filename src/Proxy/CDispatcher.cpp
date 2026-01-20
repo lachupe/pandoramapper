@@ -129,9 +129,10 @@ bool Cdispatcher::parseXml(QByteArray tag)
             name = s.left(i);
             param = s.right(s.length() - i);
         }
+        name = name.toLower();
 
-//        printf("XML tag name : ...%s..., params : ...%s..., EndTag %s, endAfterTag %s\r\n",
- //                   (const char *) name,  (const char *) param, ON_OFF(endTag), ON_OFF(endAfterTag) );
+        printf("XML tag name : ...%s..., params : ...%s..., EndTag %s, endAfterTag %s\r\n",
+                    (const char *) name,  (const char *) param, ON_OFF(endTag), ON_OFF(endAfterTag) );
 
         // now parse the tags !
 
@@ -142,7 +143,7 @@ bool Cdispatcher::parseXml(QByteArray tag)
 
         // hard tags first
         if (name == "movement") {
-  //          printf("XML TAG: %s\r\n", TagTypes[p].name);
+            printf("XML TAG: %s\r\n", TagTypes[p].name);
             startType = XML_START_MOVEMENT;
             endType = XML_END_MOVEMENT;
 
@@ -172,11 +173,15 @@ bool Cdispatcher::parseXml(QByteArray tag)
             // the easy ones
             for (p = 0; TagTypes[p].startType != -1; p++) {
                 if (name == TagTypes[p].name) {
-//                    printf("XML TAG: %s\r\n", TagTypes[p].name);
+                    printf("XML TAG: %s\r\n", TagTypes[p].name);
                     startType = TagTypes[p].startType;
                     endType = TagTypes[p].endType;
                 }
             }
+        }
+
+        if (startType == -1 && endType == -1) {
+            return false;
         }
 
         buffer[amount].line = param;
@@ -482,6 +487,9 @@ QByteArray Cdispatcher::cutColours(QByteArray line)
 #define SEND_EVENT_TO_ENGINE \
 	{   \
 	    print_debug(DEBUG_DISPATCHER, " ---- sending event ---- "); \
+	    print_debug(DEBUG_DISPATCHER, "event payload: name_len=%i desc_len=%i exits_len=%i movement=%i dir=%s prompt_len=%i", \
+	                event.name.length(), event.desc.length(), event.exits.length(), \
+	                event.movement, (const char *) event.dir, event.prompt.length()); \
 	    awaitingData = false;               \
 	    engine->addEvent(event);                            \
 	    event.clear();                  \
@@ -521,18 +529,22 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                     SEND_EVENT_TO_ENGINE;
                 xmlState = STATE_ROOM;
                 continue;
-            } else if ((buffer[i].xmlType == XML_START_NAME) && (xmlState == STATE_ROOM)) {
+            } else if ((buffer[i].xmlType == XML_START_NAME) &&
+                       (xmlState == STATE_ROOM || xmlState == STATE_NORMAL)) {
                 xmlState = STATE_NAME;
                 continue;
-            } else if ((buffer[i].xmlType == XML_START_DESC)  && (xmlState == STATE_ROOM)) {
+            } else if ((buffer[i].xmlType == XML_START_DESC) &&
+                       (xmlState == STATE_ROOM || xmlState == STATE_NORMAL)) {
                 xmlState = STATE_DESC;
                 continue;
-            } else if ((buffer[i].xmlType == XML_START_TERRAIN)  && (xmlState == STATE_ROOM)) {
+            } else if ((buffer[i].xmlType == XML_START_TERRAIN) &&
+                       (xmlState == STATE_ROOM || xmlState == STATE_NORMAL)) {
                 // this seems to misbehave for mapping, when the weather is up or terrain tag comes right after
                 // description tag
                 //event.blind = true;                 // BLIND detection
                 continue;
-            } else if (buffer[i].xmlType == XML_START_EXITS) {
+            } else if (buffer[i].xmlType == XML_START_EXITS &&
+                       (xmlState == STATE_ROOM || xmlState == STATE_NORMAL)) {
                 xmlState = STATE_EXITS;
                 continue;
             } else if (buffer[i].xmlType == XML_START_PROMPT) {
@@ -541,7 +553,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             } else if (buffer[i].xmlType == XML_END_MOVEMENT) {
                 // nada
                 continue;
-            } else if (buffer[i].xmlType == XML_END_ROOM && xmlState == STATE_ROOM) {
+            } else if (buffer[i].xmlType == XML_END_ROOM) {
                 awaitingData = true;
                 xmlState = STATE_NORMAL;
                 continue;
@@ -571,7 +583,7 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
                 }
                 event.prompt = cutColours(event.prompt);
                 // TODO: this prompt setting might be dangerous and non-thread safe!
-//                engine->setPrompt(event.prompt);
+                engine->setPrompt(event.prompt);
                 lastPrompt = event.prompt;
                 proxy->sendPromptLineEvent(event.prompt);
                 event.terrain = parseTerrain(event.prompt);
@@ -605,8 +617,8 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
         if (mbrief_state == STATE_DESC && conf->getBriefMode())
             continue;
 
-        //printf("xmlState: %i, buff type %i, line: ...%s...\r\n", xmlState, buffer[i].type, (const char *) buffer[i].line );
-    	//fflush( stdout );
+        printf("xmlState: %i, buff type %i, line: ...%s...\r\n", xmlState, buffer[i].type, (const char *) buffer[i].line );
+    	fflush( stdout );
 
         if (xmlState == STATE_NORMAL && buffer[i].type == IS_NORMAL) {
             QByteArray a_line = cutColours( buffer[i].line );
@@ -616,8 +628,8 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             	continue;
             }
 
-//            printf("a_line: %s\r\n", (const char *) a_line );
-//        	fflush( stdout );
+            printf("a_line: %s\r\n", (const char *) a_line );
+        	fflush( stdout );
 
             checkStateChange(a_line);
 
@@ -718,14 +730,15 @@ int Cdispatcher::analyzeUserStream(ProxySocket &c)
 
             buffer[i].line.replace("\r", "");
             buffer[i].line.replace("\n", "");
-            memcpy(commandBuffer, buffer[i].line.constData(), buffer[i].line.length());
-            commandBuffer[ buffer[i].line.length() ] = 0;
+            commandBuffer = buffer[i].line;
 
             print_debug(DEBUG_DISPATCHER, "calling Userland parser");
-            if (userland_parser->parse_user_input_line(commandBuffer) == USER_PARSE_SKIP)
+            if (userland_parser->parse_user_input_line(commandBuffer.data()) == USER_PARSE_SKIP)
                 continue;
 
-            strcat(commandBuffer, "\r\n");
+            // The user parser may rewrite the line; trim to the new C-string length.
+            commandBuffer = QByteArray(commandBuffer.constData());
+            commandBuffer.append("\r\n");
 
             static QByteArray GTellCommand = "tell Group";
             if (buffer[i].line.startsWith(GTellCommand) == true) {

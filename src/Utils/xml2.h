@@ -25,7 +25,7 @@
 
 //void xmlWriteMap(QString filename);
 
-/* Loads a char, returns char struct or NULL */
+/* Loads a char, returns char struct or nullptr */
 //void xmlReadMap(QString filename);
 
 #include <QString>

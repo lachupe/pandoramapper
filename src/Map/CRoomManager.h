@@ -80,7 +80,7 @@ public:
 		if (id < MAX_ROOMS)
 			return ids[id];
 		else
-			return NULL;
+			return nullptr;
     }
 
     inline QByteArray getName(unsigned int id)  {

@@ -40,7 +40,7 @@ class Cdispatcher
 {
     struct Tincoming_line buffer[4096];
     int     amount;
-    char    commandBuffer[4096];
+    QByteArray commandBuffer;
     
     int       xmlState;          /* desc shall be incoming - just got roomname */
     int       mbrief_state;

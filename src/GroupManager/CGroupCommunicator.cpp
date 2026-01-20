@@ -591,7 +591,7 @@ void CGroupCommunicator::sendRemoveUserNotification(CGroupClient *conn, QByteArr
 
 	if (type == Server) {
 		CGroupChar *ch = getGroup()->getCharByName(name);
-		if (ch == NULL) {
+		if (ch == nullptr) {
 			getGroup()->sendLog("Error on server side! Failed to remove the user!");
 			return;
 		}

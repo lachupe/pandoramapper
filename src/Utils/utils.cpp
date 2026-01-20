@@ -20,6 +20,7 @@
 
 /* utilities, string functions and stuff */
 #include <QDateTime>
+#include <QDir>
 #include <QElapsedTimer>
 #include "defines.h"
 #include "CConfigurator.h"
@@ -33,7 +34,7 @@
 #include "Proxy/proxy.h"
 #include "Engine/CEngine.h"
 
-FILE *logfile = NULL;
+FILE *logfile = nullptr;
 const char *exitnames[] = { "north", "east", "south", "west", "up", "down" };
 
 struct debug_data_struct debug_data[] = {
@@ -54,7 +55,7 @@ struct debug_data_struct debug_data[] = {
   {"group", "GroupManager", "Group Manager messages",  DEBUG_GROUP, 1},
 
 
-  {NULL, NULL, NULL, 0, 0}
+  {nullptr, nullptr, nullptr, 0, 0}
 };
 
 const char *exits[] = {
@@ -80,7 +81,7 @@ const boolean_struct input_booleans[] = {
   {"false", false},
 
 
-  {NULL, false}
+  {nullptr, false}
 };
 
 QElapsedTimer debug_timer;
@@ -102,23 +103,31 @@ int write_debug(unsigned int flag, const char *format, va_list args)
     int size;
     int i;
 
-    if (conf != NULL && !conf->getLogFileEnabled())
+    if (conf != nullptr && !conf->getLogFileEnabled())
         return -1; // log file is disabled
 
-    if (logfile == NULL) {
+    if (logfile == nullptr) {
     	debug_timer.start();
 
-        QString fileName = QString("logs/" + QDateTime::currentDateTime().toString("dd.MM.yyyy-hh.mm.ss") + ".txt");
-        printf("Using the LOGFILE : %s\r\n", (const char *) fileName.toLocal8Bit() );
-
-        logFileName = new QString();
-        *logFileName = fileName;
-
-        logfile = fopen( (const char *) fileName.toLocal8Bit(), "w+");
-        if (!logfile) {
-            perror ("Error opening logfile for writing");
+        const QString logDir = "logs";
+        QDir dir;
+        if (!dir.exists(logDir) && !dir.mkpath(logDir)) {
+            fprintf(stderr, "Error creating log directory: %s\n", (const char *) logDir.toLocal8Bit());
             return -1;
         }
+
+        const QString fileName = logDir + "/" + QDateTime::currentDateTime().toString("dd.MM.yyyy-hh.mm.ss") + ".txt";
+        printf("Using the LOGFILE : %s\r\n", (const char *) fileName.toLocal8Bit() );
+
+        logfile = fopen((const char *) fileName.toLocal8Bit(), "w+");
+        if (!logfile) {
+            perror("Error opening logfile for writing");
+            return -1;
+        }
+
+        if (logFileName == nullptr)
+            logFileName = new QString();
+        *logFileName = fileName;
     }
 
     size = vsnprintf(txt, sizeof(txt), format, args);
@@ -142,7 +151,7 @@ void print_debug(unsigned int flag, const char *messg, ...)
   if (!debug_data[0].state)
     return;
 
-  if (messg == NULL)
+  if (messg == nullptr)
     return;
 
   va_start(args, messg);
@@ -180,7 +189,7 @@ int get_input_boolean(char *input)
 {
   int i;
 
-  for (i = 0; input_booleans[i].name != NULL; i++)
+  for (i = 0; input_booleans[i].name != nullptr; i++)
     if (strcmp(input, input_booleans[i].name) == 0)
       return input_booleans[i].state;
 
@@ -210,7 +219,7 @@ char *one_argument(char *argument, char *first_arg, int mode)
 
   if (!argument) {
     *first_arg = '\0';
-    return (NULL);
+    return (nullptr);
   }
 
   while (*argument && !isspace(*argument)) {
@@ -318,7 +327,7 @@ void send_to_user(const char *messg, ...)
 {
   va_list args;
 
-  if (messg == NULL)
+  if (messg == nullptr)
     return;
 
   va_start(args, messg);
@@ -336,7 +345,7 @@ void send_to_mud(const char *messg, ...)
 {
   va_list args;
 
-  if (messg == NULL)
+  if (messg == nullptr)
     return;
 
   va_start(args, messg);

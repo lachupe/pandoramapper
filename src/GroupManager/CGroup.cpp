@@ -278,7 +278,7 @@ CGroupChar* CGroup::getCharByName(QByteArray name)
 		if (chars[i]->getName() == name)
 			return chars[i];
 
-	return NULL;
+	return nullptr;
 }
 
 void CGroup::sendAllCharsData(CGroupClient *conn)
@@ -291,7 +291,7 @@ void CGroup::sendAllCharsData(CGroupClient *conn)
 void CGroup::updateChar(QDomNode blob)
 {
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
-	if (ch == NULL)
+	if (ch == nullptr)
 		return;
 
 	if (ch->updateFromXML(blob) == true)
@@ -301,7 +301,7 @@ void CGroup::updateChar(QDomNode blob)
 void CGroup::updateCharPosition(QDomNode blob)
 {
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
-	if (ch == NULL)
+	if (ch == nullptr)
 		return;
 
 	if (ch->updatePositionFromXML(blob) == true)
@@ -312,7 +312,7 @@ void CGroup::updateCharPosition(QDomNode blob)
 void CGroup::updateCharState(QDomNode blob)
 {
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
-	if (ch == NULL)
+	if (ch == nullptr)
 		return;
 
 	ch->updateStateFromXML(blob);
@@ -322,7 +322,7 @@ void CGroup::updateCharState(QDomNode blob)
 void CGroup::updateCharScore(QDomNode blob)
 {
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
-	if (ch == NULL)
+	if (ch == nullptr)
 		return;
 
 	ch->updateScoreFromXML(blob);
@@ -332,7 +332,7 @@ void CGroup::updateCharScore(QDomNode blob)
 void CGroup::updateCharPrompt(QDomNode blob)
 {
 	CGroupChar *ch = getCharByName(CGroupChar::getNameFromXML(blob));
-	if (ch == NULL)
+	if (ch == nullptr)
 		return;
 
 	ch->updatePromptFromXML(blob);
@@ -476,7 +476,7 @@ void CGroup::renameChar(QDomNode blob)
 
 	CGroupChar *ch;
     ch = getCharByName(oldname.toLocal8Bit());
-	if (ch == NULL)
+	if (ch == nullptr)
 		return;
 
     ch->setName(newname.toLocal8Bit());

@@ -45,11 +45,20 @@ void CLogDialog::run()
 {
     QUrl url;
 
-    url.fromLocalFile( *logFileName );
+    if (logFileName == nullptr || logFileName->isEmpty()) {
+        textBrowser->append("No debug log file available.");
+        textBrowser->setReadOnly(true);
+        return;
+    }
+
+    url.fromLocalFile(*logFileName);
 
     QFile file(*logFileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        textBrowser->append("Failed to open debug log file.");
+        textBrowser->setReadOnly(true);
         return;
+    }
 
     QTextStream in(&file);
     while (!in.atEnd()) {

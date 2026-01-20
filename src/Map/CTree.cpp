@@ -44,7 +44,7 @@ void CTree::calculateInfo(TTree *t, int level, int single)
   unsigned int i;
   int l;
   
-  if (t == NULL)
+  if (t == nullptr)
     return;
 
   
@@ -54,7 +54,7 @@ void CTree::calculateInfo(TTree *t, int level, int single)
   l = 0;
   
   for (i = 0; i < A_SIZE; i++)
-    if (t->leads[i] != NULL) {	
+    if (t->leads[i] != nullptr) {	
       
       l++;
       
@@ -98,11 +98,11 @@ void CTree::deleteAll(TTree *t)
 {
     int i;
   
-    if (t == NULL) 
+    if (t == nullptr) 
         return;
 
     for (i = 0; i < A_SIZE; i++)
-        if (t->leads[i] != NULL) {	
+        if (t->leads[i] != nullptr) {	
             deleteAll(t->leads[i]);
         }
 
@@ -115,7 +115,7 @@ int CTree::divingDelete(TTree * p, char *part, unsigned int id)
 
     if (part[0] == '\0') {	/* we've found our item */
 	for (i = 0; i < A_SIZE; i++)
-            if (p->leads[i] != NULL) {	/* shall not delete this item */
+            if (p->leads[i] != nullptr) {	/* shall not delete this item */
                 removeId(id, p);
                 return -1;	/* return state DID NOT DELETE - its used */
             }
@@ -139,13 +139,13 @@ int CTree::divingDelete(TTree * p, char *part, unsigned int id)
 
     /* else, we have to check this one too */
 
-    p->leads[(int) part[0]] = NULL;	/* clear this lead */
+    p->leads[(int) part[0]] = nullptr;	/* clear this lead */
 
     if (p->ids.size() != 0)
 	return -1;		/* nop, still in use */
 
     for (i = 0; i < A_SIZE; i++)
-	if (p->leads[i] != NULL)
+	if (p->leads[i] != nullptr)
 	    return -1;		/* no still in use ! */
 
     /* else ! we have to delete it ... */
@@ -160,7 +160,7 @@ void CTree::deleteItem(const char *name, unsigned int id)
 	
     genHash(name, hash);
     p = findByName(name);
-    if (p == NULL) {
+    if (p == nullptr) {
 	return;
     }
     for (int i = 0; i < p->ids.size(); i++) {
@@ -181,7 +181,7 @@ void CTree::resetTTree(TTree * t)
     int i;
 
     for (i = 0; i < A_SIZE; i++)
-	t->leads[i] = NULL;
+	t->leads[i] = nullptr;
     t->ids.clear();
 }
 
@@ -201,7 +201,7 @@ void CTree::addName(const char *name, unsigned int id)
   p = root;
 
   for (i = 0; i < strlen(hash); i++) {
-    if (p->leads[(int) hash[i]] != NULL) {
+    if (p->leads[(int) hash[i]] != nullptr) {
     /* there is similar sequence already ... we follow it */
       p = p->leads[(int) hash[i]];
     
@@ -231,8 +231,8 @@ TTree *CTree::findByName(const char *name)
     
   p = root;
   for (i = 0; i < strlen(hash); i++) {
-    if (p->leads[(int) hash[i]] == NULL)
-      return NULL;
+    if (p->leads[(int) hash[i]] == nullptr)
+      return nullptr;
   
       p = p->leads[(int) hash[i]];
   }

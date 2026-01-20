@@ -83,13 +83,13 @@ void notify_analyzer()
 CMainWindow::CMainWindow(QWidget *parent)
     : QMainWindow( parent)
 {
-    spells_dialog = NULL;
-    edit_dialog = NULL;
-    generalSettingsDialog = NULL;
-    movementDialog = NULL;
-    logdialog = NULL;
-    findDialog = NULL;
-    groupDialog = NULL;
+    spells_dialog = nullptr;
+    edit_dialog = nullptr;
+    generalSettingsDialog = nullptr;
+    movementDialog = nullptr;
+    logdialog = nullptr;
+    findDialog = nullptr;
+    groupDialog = nullptr;
 
     userland_parser = new Userland();
     actionManager = new CActionManager(this);
@@ -364,9 +364,6 @@ void CMainWindow::hide_menu()
 
 void CMainWindow::update_status_bar()
 {
-    char str[20];
-
-
     print_debug(DEBUG_INTERFACE, "Updating status bar\r\n");
 
     QString modLabel;
@@ -381,8 +378,7 @@ void CMainWindow::update_status_bar()
 
     emit newModLabel(modLabel + firstPart);
 
-    stacker.getCurrent(str);
-    emit newLocationLabel(str);
+    emit newLocationLabel(stacker.getCurrent());
     print_debug(DEBUG_INTERFACE, "Done updating interface!\r\n");
 }
 

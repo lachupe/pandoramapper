@@ -24,6 +24,7 @@
 #define STACKSMANAGER_H
 
 #include <vector>
+#include <QString>
 #include "Map/CRoom.h"
 #include "Map/CRoomManager.h"
 
@@ -60,7 +61,7 @@ public:
   /* DEBUG */
   void printStacks();
 
-  void getCurrent(char *);
+  QString getCurrent() const;
 
 };
 

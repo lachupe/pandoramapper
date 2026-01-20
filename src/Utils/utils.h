@@ -22,19 +22,63 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <cctype>
+
 class QByteArray;
 
 
-#define LOWER(c)   (((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
-#define UPPER(c)   (((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c) )
+// Modern C++ inline functions replacing legacy macros
+// These provide type safety and better debugging
 
-#define ON_OFF(flag) ( (flag) ? "ON" : "OFF" )
-#define YES_NO(flag) ( (flag) ? "YES" : "NO" )
+inline constexpr char toLower(char c) noexcept {
+    return (c >= 'A' && c <= 'Z') ? static_cast<char>(c + ('a' - 'A')) : c;
+}
 
-#define IS_SET(flag,bit)  ((flag) & (bit))
-#define SET_BIT(var,bit)  ((var) |= (bit))
-#define REMOVE_BIT(var,bit)  ((var) &= ~(bit))
-#define TOGGLE_BIT(var,bit) ((var) = (var) ^ (bit))
+inline constexpr char toUpper(char c) noexcept {
+    return (c >= 'a' && c <= 'z') ? static_cast<char>(c + ('A' - 'a')) : c;
+}
+
+inline constexpr const char* onOff(bool flag) noexcept {
+    return flag ? "ON" : "OFF";
+}
+
+inline constexpr const char* yesNo(bool flag) noexcept {
+    return flag ? "YES" : "NO";
+}
+
+// Bit manipulation functions with type safety
+template<typename T, typename U>
+inline constexpr bool isSet(T flag, U bit) noexcept {
+    return (flag & bit) != 0;
+}
+
+template<typename T, typename U>
+inline constexpr T& setBit(T& var, U bit) noexcept {
+    var |= bit;
+    return var;
+}
+
+template<typename T, typename U>
+inline constexpr T& removeBit(T& var, U bit) noexcept {
+    var &= ~bit;
+    return var;
+}
+
+template<typename T, typename U>
+inline constexpr T& toggleBit(T& var, U bit) noexcept {
+    var ^= bit;
+    return var;
+}
+
+// Legacy macro compatibility (for gradual migration)
+#define LOWER(c)   toLower(c)
+#define UPPER(c)   toUpper(c)
+#define ON_OFF(flag) onOff(flag)
+#define YES_NO(flag) yesNo(flag)
+#define IS_SET(flag,bit)  isSet(flag, bit)
+#define SET_BIT(var,bit)  setBit(var, bit)
+#define REMOVE_BIT(var,bit)  removeBit(var, bit)
+#define TOGGLE_BIT(var,bit) toggleBit(var, bit)
 
 #define MAX_INPUT_LENGTH	1024	/* Max length per *line* of input */
 

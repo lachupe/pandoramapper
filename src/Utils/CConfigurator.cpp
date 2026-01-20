@@ -40,11 +40,12 @@
 #include "GroupManager/CGroup.h"
 //#include "renderer.h"
 
-class Cconfigurator *conf;
+class Configurator *conf;
 
-Cconfigurator::Cconfigurator()
+Configurator::Configurator()
 {
     /* here we set the default configuration */
+    setLogFileEnabled(true);
     setRegionsAutoReplace( false );
     setRegionsAutoSet( false );
 
@@ -60,7 +61,7 @@ Cconfigurator::Cconfigurator()
 
 
 
-void Cconfigurator::resetCurrentConfig()
+void Configurator::resetCurrentConfig()
 {
     sectors.clear();
     spells.clear();
@@ -77,7 +78,7 @@ void Cconfigurator::resetCurrentConfig()
 }
 
 
-int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
+int Configurator::saveConfigAs(QByteArray path, QByteArray filename)
 {
   unsigned int i;
 
@@ -217,7 +218,7 @@ int Cconfigurator::saveConfigAs(QByteArray path, QByteArray filename)
 
 
 
-int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
+int Configurator::loadConfig(QByteArray path, QByteArray filename)
 {
 	int size;
 	QSettings conf(path + filename, QSettings::IniFormat);
@@ -227,7 +228,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 	setWindowRect( conf.value("windowRect").toRect() );
 	setAlwaysOnTop( conf.value("alwaysOnTop", true ).toBool() );
 	setStartupMode( conf.value("startupMode", 1).toInt() );
-    setLogFileEnabled( conf.value("isLogFileEnabled", false).toBool() );
+    setLogFileEnabled( conf.value("isLogFileEnabled", true).toBool() );
 	conf.endGroup();
 
 	conf.beginGroup("Networking");
@@ -342,12 +343,12 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
       QString s = conf.value("name").toString();
 
 	  unsigned int z = 0;
-      while (debug_data[z].name != NULL) {
+      while (debug_data[z].name != nullptr) {
           if (debug_data[z].name == s)
               break;
           z++;
       }
-      if (debug_data[z].name == NULL) {
+      if (debug_data[z].name == nullptr) {
           print_debug(DEBUG_CONFIG, "Warning, %s is a wrong debug descriptor/name!", qPrintable(s));
           continue;
       }
@@ -364,7 +365,7 @@ int Cconfigurator::loadConfig(QByteArray path, QByteArray filename)
 }
 
 /* ---------------- PATTERNS and REGEXPS GENERATION --------------- */
-void Cconfigurator::setExitsPattern(QByteArray str)
+void Configurator::setExitsPattern(QByteArray str)
 {
     exitsPattern = str;
     exitsExpr = QRegularExpression(QRegularExpression::escape(str));
@@ -373,7 +374,7 @@ void Cconfigurator::setExitsPattern(QByteArray str)
 }
 
 /* --------------------------------------- spells ----------------------------------------- */
-void Cconfigurator::addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon)
+void Configurator::addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon)
 {
     TSpell spell;
 
@@ -389,13 +390,13 @@ void Cconfigurator::addSpell(QByteArray spellname, QByteArray up, QByteArray dow
     setConfigModified(true);
 }
 
-void Cconfigurator::addSpell(const TSpell &spell)
+void Configurator::addSpell(const TSpell &spell)
 {
     spells.push_back(spell);
     setConfigModified(true);
 }
 
-QString Cconfigurator::spellUpFor(unsigned int p)
+QString Configurator::spellUpFor(unsigned int p)
 {
     if (p > spells.size())
         return "";
@@ -418,7 +419,7 @@ QString Cconfigurator::spellUpFor(unsigned int p)
     return s;
 }
 
-void Cconfigurator::resetSpells()
+void Configurator::resetSpells()
 {
     for (unsigned int p = 0; p < conf->spells.size(); p++) {
     	conf->spells[p].up = false;
@@ -431,12 +432,12 @@ void Cconfigurator::resetSpells()
 
 /* ----------------- REGULAR EXPRESSIONS SECTION ---------------- */
 /* ------------------- DATA ------------------- */
-char Cconfigurator::getPatternByRoom(CRoom *r)
+char Configurator::getPatternByRoom(CRoom *r)
 {
     return sectors.at(r->getTerrain()).pattern;
 }
 
-int Cconfigurator::getSectorByDesc(QByteArray desc)
+int Configurator::getSectorByDesc(QByteArray desc)
 {
     unsigned int i;
     for (i = 0; i < sectors.size(); ++i) {
@@ -446,7 +447,7 @@ int Cconfigurator::getSectorByDesc(QByteArray desc)
     return 0;
 }
 
-GLuint Cconfigurator::getTextureByDesc(QByteArray desc)
+GLuint Configurator::getTextureByDesc(QByteArray desc)
 {
     int i;
     i = getSectorByDesc(desc);
@@ -456,7 +457,7 @@ GLuint Cconfigurator::getTextureByDesc(QByteArray desc)
 }
 
 
-void Cconfigurator::addTexture(QByteArray desc, QByteArray filename, char pattern)
+void Configurator::addTexture(QByteArray desc, QByteArray filename, char pattern)
 {
     struct roomSectorsData s;
 
@@ -467,7 +468,7 @@ void Cconfigurator::addTexture(QByteArray desc, QByteArray filename, char patter
     sectors.push_back(s);
 }
 
-int Cconfigurator::getSectorByPattern(char pattern)
+int Configurator::getSectorByPattern(char pattern)
 {
     unsigned int i;
     for (i = 0; i < sectors.size(); ++i) {
@@ -478,56 +479,56 @@ int Cconfigurator::getSectorByPattern(char pattern)
 }
 
 
-void Cconfigurator::setBaseFile(QByteArray str)
+void Configurator::setBaseFile(QByteArray str)
 {
     baseFile = str;
     setConfigModified(true);
 }
 
-void Cconfigurator::setDisplayRegionsRenderer(bool b)
+void Configurator::setDisplayRegionsRenderer(bool b)
 {
     displayRegionsRenderer = b;
     setConfigModified(true);
 }
 
-void Cconfigurator::setShowRegionsInfo(bool b)
+void Configurator::setShowRegionsInfo(bool b)
 {
     showRegionsInfo = b;
     setConfigModified(true);
 }
 
-bool Cconfigurator::getDisplayRegionsRenderer()
+bool Configurator::getDisplayRegionsRenderer()
 {
     return displayRegionsRenderer;
 }
 
-bool Cconfigurator::getShowRegionsInfo()
+bool Configurator::getShowRegionsInfo()
 {
     return showRegionsInfo;
 }
 
-bool Cconfigurator::getRegionsAutoSet()
+bool Configurator::getRegionsAutoSet()
 {
     return regionsAutoSet;
 }
 
-bool Cconfigurator::getRegionsAutoReplace()
+bool Configurator::getRegionsAutoReplace()
 {
     return regionsAutoReplace;
 }
 
-void Cconfigurator::setRegionsAutoSet(bool b)
+void Configurator::setRegionsAutoSet(bool b)
 {
     regionsAutoSet = b;
 }
 
-void Cconfigurator::setRegionsAutoReplace(bool b)
+void Configurator::setRegionsAutoReplace(bool b)
 {
     regionsAutoReplace = b;
     setConfigModified(true);
 }
 
-void Cconfigurator::setShowNotesRenderer(bool b)
+void Configurator::setShowNotesRenderer(bool b)
 {
     showNotesRenderer = b;
     setConfigModified(true);
@@ -535,134 +536,134 @@ void Cconfigurator::setShowNotesRenderer(bool b)
 
 
 
-void Cconfigurator::setRemoteHost(QByteArray str)
+void Configurator::setRemoteHost(QByteArray str)
 {
     remoteHost = str;
     setConfigModified(true);
 }
 
-void Cconfigurator::setRemotePort(int i)
+void Configurator::setRemotePort(int i)
 {
     remotePort = i;
     setConfigModified(true);
 }
 
-void Cconfigurator::setLocalPort(int i)
+void Configurator::setLocalPort(int i)
 {
     localPort = i;
     setConfigModified(true);
 }
 
-void Cconfigurator::setAutorefresh(bool b)
+void Configurator::setAutorefresh(bool b)
 {
     autorefresh = b;
     setConfigModified(true);
 }
 
-void Cconfigurator::setAutomerge(bool b)
+void Configurator::setAutomerge(bool b)
 {
     automerge = b;
     setConfigModified(true);
 }
 
-void Cconfigurator::setDuallinker(bool b)
+void Configurator::setDuallinker(bool b)
 {
     duallinker = b;
     setConfigModified(true);
 }
 
-bool Cconfigurator::getDuallinker()
+bool Configurator::getDuallinker()
 {
     return duallinker;
 }
 
 
-void Cconfigurator::setAngrylinker(bool b)
+void Configurator::setAngrylinker(bool b)
 {
     angrylinker = b;
     setConfigModified(true);
 }
 
-void Cconfigurator::setExitsCheck(bool b)
+void Configurator::setExitsCheck(bool b)
 {
     exitsCheck = b;
 //    set_conf_mod(true);       /* this option changes repeatedly when you turn */
                                 /* mapping on and off */
 }
 
-void Cconfigurator::setTerrainCheck(bool b)
+void Configurator::setTerrainCheck(bool b)
 {
     terrainCheck = b;
     setConfigModified(true);
 }
 
-void Cconfigurator::setDetailsVisibility(int i)
+void Configurator::setDetailsVisibility(int i)
 {
     detailsVisibilityRange = i;
     setConfigModified(true);
 }
 
-void Cconfigurator::setTextureVisibility(int i)
+void Configurator::setTextureVisibility(int i)
 {
     textureVisibilityRange = i;
     setConfigModified(true);
 }
 
-void Cconfigurator::setBriefMode(bool b)
+void Configurator::setBriefMode(bool b)
 {
     briefMode = b;
     setConfigModified(true);
 }
 
-void Cconfigurator::setAlwaysOnTop(bool b)
+void Configurator::setAlwaysOnTop(bool b)
 {
     alwaysOnTop = b;
     setConfigModified(true);
 }
 
-void Cconfigurator::setLogFileEnabled(bool b)
+void Configurator::setLogFileEnabled(bool b)
 {
     isLogFileEnabled = b;
     setConfigModified(true);
 }
 
 
-void Cconfigurator::setNameQuote(int i)
+void Configurator::setNameQuote(int i)
 {
     nameQuote = i;
     setConfigModified(true);
 }
 
-void Cconfigurator::setDescQuote(int i)
+void Configurator::setDescQuote(int i)
 {
     descQuote = i;
     setConfigModified(true);
 }
 
-void Cconfigurator::setStartupMode(int i)
+void Configurator::setStartupMode(int i)
 {
     startupMode = i;
     setConfigModified(true);
 }
 
-int Cconfigurator::getStartupMode()
+int Configurator::getStartupMode()
 {
     return startupMode;
 }
 
 // default color
-void Cconfigurator::setNoteColor(QByteArray c)
+void Configurator::setNoteColor(QByteArray c)
 {
     noteColor = c;
     setConfigModified(true);
 }
 
-QByteArray Cconfigurator::getNoteColor()
+QByteArray Configurator::getNoteColor()
 {
     return noteColor;
 }
 
-int Cconfigurator::loadNormalTexture(QByteArray filename, GLuint *texture)
+int Configurator::loadNormalTexture(QByteArray filename, GLuint *texture)
 {
     QImage tex1, buf1;
 
@@ -686,7 +687,7 @@ int Cconfigurator::loadNormalTexture(QByteArray filename, GLuint *texture)
     return 1;
 }
 
-int Cconfigurator::loadSectorTexture(struct roomSectorsData *p)
+int Configurator::loadSectorTexture(struct roomSectorsData *p)
 {
 	loadNormalTexture(p->filename, &p->texture);
 

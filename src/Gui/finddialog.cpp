@@ -85,7 +85,7 @@ void FindDialog::itemDoubleClicked(QTreeWidgetItem *item)
 {
     unsigned int id;
 
-    if (item == NULL)
+    if (item == nullptr)
         return;
 
     id = item->text(0).toInt();

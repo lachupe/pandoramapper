@@ -75,7 +75,7 @@ void CEngine::resync()
 
   print_debug(DEBUG_ANALYZER, "FULL RESYNC");
   n = NameMap.findByName(last_name);
-  if (n != NULL)
+  if (n != nullptr)
     for (j = 0; j < n->ids.size(); j++) {
       if (last_name == Map.getName( n->ids[j] )) {
 //        print_debug(DEBUG_ANALYZER, "Adding matches");
@@ -371,6 +371,9 @@ void CEngine::exec()
 
     print_debug(DEBUG_ANALYZER, "trying to dequeue the pipe ...");
     event = eventPipe.getEvent();
+    print_debug(DEBUG_ANALYZER, "event received: name_len=%i desc_len=%i exits_len=%i movement=%i dir=%s prompt_len=%i",
+                event.name.length(), event.desc.length(), event.exits.length(),
+                event.movement, (const char *) event.dir, event.prompt.length());
     print_debug(DEBUG_ANALYZER, "preparing to call the event parser...");
     parseEvent();
 
@@ -395,7 +398,7 @@ void CEngine::updateRegions()
 
         last_region = r->getRegion();
         // If this room was JUST added, it has no region set.
-        if (last_region == NULL) {
+        if (last_region == nullptr) {
         	return; // probably it needs some heavier work ...region settings might not work correctly
         }
 
@@ -520,8 +523,8 @@ void CEngine::angryLinker(CRoom *r)
 
   print_debug(DEBUG_ROOMS && DEBUG_ANALYZER, "in AngryLinker");
 
-  if (r == NULL) {
-    print_debug(DEBUG_ROOMS, "given room is NULL");
+  if (r == nullptr) {
+    print_debug(DEBUG_ROOMS, "given room is nullptr");
     return;
   }
 
@@ -639,7 +642,7 @@ void CEngine::angryLinker(CRoom *r)
 
   /* ok, now we have candidates for linking - lets check directions and connections*/
   for (i=0; i <= 5; i++) {
-    if (r->isExitUndefined(i) && candidates[i] != NULL)
+    if (r->isExitUndefined(i) && candidates[i] != nullptr)
       if (candidates[i]->isExitUndefined( reversenum(i) )  == true) {
 
         if (distances[ i ] <= 2) {
@@ -667,21 +670,23 @@ void CEngine::angryLinker(CRoom *r)
 
 void CEngine::printStacks()
 {
-    char line[2048];
-    QByteArray s;
-
     send_to_user(" -----------------------------\n");
 
-    sprintf(line,
-	    "Conf: Mapping %s, AutoChecks [Desc %s, Exits %s, Terrain %s],\r\n"
-            "      AutoRefresh settings %s (RName/Desc quotes %i/%i), \r\n"
-            "      AngryLinker %s DualLinker %s\r\n",
-            ON_OFF(mapping), ON_OFF(conf->getAutomerge()),
-            ON_OFF(conf->getExitsCheck() ), ON_OFF(conf->getTerrainCheck() ),
-            ON_OFF(conf->getAutorefresh() ), conf->getNameQuote(), conf->getDescQuote(),
-            ON_OFF(conf->getAngrylinker() ),ON_OFF(conf->getDuallinker() )              );
+    QString line = QString(
+            "Conf: Mapping %1, AutoChecks [Desc %2, Exits %3, Terrain %4],\r\n"
+            "      AutoRefresh settings %5 (RName/Desc quotes %6/%7), \r\n"
+            "      AngryLinker %8 DualLinker %9\r\n")
+            .arg(ON_OFF(mapping))
+            .arg(ON_OFF(conf->getAutomerge()))
+            .arg(ON_OFF(conf->getExitsCheck()))
+            .arg(ON_OFF(conf->getTerrainCheck()))
+            .arg(ON_OFF(conf->getAutorefresh()))
+            .arg(conf->getNameQuote())
+            .arg(conf->getDescQuote())
+            .arg(ON_OFF(conf->getAngrylinker()))
+            .arg(ON_OFF(conf->getDuallinker()));
 
-    send_to_user(line);
+    send_to_user(qPrintable(line));
     stacker.printStacks();
 }
 
@@ -738,10 +743,10 @@ CRegion *CEngine::get_last_region()
 }
 
 // this method ensures that we are in sync!
-QVector<unsigned int> *CEngine::getPrespammedDirs()
+std::unique_ptr<QVector<unsigned int>> CEngine::getPrespammedDirs()
 {
     if ( commandQueue.isEmpty() || stacker.amount() != 1 )
-		return NULL; // return an empty list
+		return nullptr; // return an empty list
 
     return commandQueue.getPrespam( stacker.get(0) );
 }
@@ -755,7 +760,7 @@ void CEngine::do_exits(const char *exits_line)
     parse_exits(exits_line, exits);
 
     r = engine->addedroom;
-    if (r == NULL)
+    if (r == nullptr)
         return;
 
     print_debug(DEBUG_ANALYZER /*& DEBUG_TOUSER*/,
@@ -809,7 +814,7 @@ int CEngine::compare_exits(CRoom *p, int exits[])
     for (i = 0; i <= 5; i++) {
         localExit = p->exits[i];
         localDoor = p->getDoor(i);
-        if ((exits[i] == 3) && (localExit != NULL) && (localDoor != ""))
+        if ((exits[i] == 3) && (localExit != nullptr) && (localDoor != ""))
             if (localDoor != "exit")
                 break;		/* situation 0) */
 
@@ -818,22 +823,22 @@ int CEngine::compare_exits(CRoom *p, int exits[])
 	    	continue;
             }
 
-            if ((exits[i] == 2) && (localExit != NULL) && (localDoor != ""))
+            if ((exits[i] == 2) && (localExit != nullptr) && (localDoor != ""))
 	    	break;		/* situation 1) */
 
 
-            if ((exits[i] > 0) && (localExit != NULL)) {
+            if ((exits[i] > 0) && (localExit != nullptr)) {
 	    	counter++;
 	    	continue;
             }
 
-            if ((exits[i] == 0) && (localExit != NULL) && (localDoor != ""))
+            if ((exits[i] == 0) && (localExit != nullptr) && (localDoor != ""))
 	    	if (localDoor != "exit") {
                     counter++;
                     continue;
 	    	}
 
-            if ((exits[i] == 0) && (localExit != NULL)) {
+            if ((exits[i] == 0) && (localExit != nullptr)) {
                 counter++;
                 continue;
             }

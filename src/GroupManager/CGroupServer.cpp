@@ -71,7 +71,7 @@ void CGroupServer::connectionClosed(CGroupClient *connection)
 
 void CGroupServer::sendToAll(QByteArray message)
 {
-	sendToAllExceptOne(NULL, message);
+	sendToAllExceptOne(nullptr, message);
 }
 
 

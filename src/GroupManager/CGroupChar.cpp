@@ -340,7 +340,7 @@ void CGroupChar::updateLabels()
 		  setField(1, "The position of this users is unknown");
 	  } else {
 			CRoom *r = Map.getRoom(pos);
-			if (r == NULL)
+			if (r == nullptr)
 				setField(1, "The position of this users is unknown");
 			else
 				setField(1,  r->getName());

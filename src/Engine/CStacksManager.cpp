@@ -38,30 +38,28 @@ class CStacksManager stacker;
 CRoom * CStacksManager::first()  
 { 
     if (sa->size() == 0)
-        return NULL;
+        return nullptr;
     return (*sa)[0]; 
 }
 
 CRoom * CStacksManager::nextFirst()  
 { 
     if (sb->size() == 0)
-        return NULL;
+        return nullptr;
     return (*sb)[0]; 
 }
 
-void CStacksManager::getCurrent(char *str)
+QString CStacksManager::getCurrent() const
 {
   if (sa->size() == 0) {
-    sprintf(str, "NO_SYNC");
-    return;
+    return QStringLiteral("NO_SYNC");
   }
-  
+
   if (sa->size() > 1) {
-    sprintf(str, " MULT ");
-    return;
+    return QStringLiteral(" MULT ");
   }
-  
-  sprintf(str, "%i", ((*sa)[0])->id );
+
+  return QString::number((*sa)[0]->id);
 }
 
 

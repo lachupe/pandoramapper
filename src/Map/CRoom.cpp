@@ -60,22 +60,22 @@ CRoom::CRoom()
     int i;
     
     id = 0;
-    name = NULL;
-    note = NULL;
-    desc = NULL;
+    name = nullptr;
+    note = nullptr;
+    desc = nullptr;
     x = 0;
     y = 0;
     z = 0;
     sector = 0;
-    region = NULL;
+    region = nullptr;
     flags = 0;
   
     for (i = 0; i <= 5; i++) {
-        exits[i] = NULL;
+        exits[i] = nullptr;
         exitFlags[i] = 0;
         doors[i].clear();
     }
-    square = NULL;
+    square = nullptr;
 }
 
 
@@ -121,7 +121,7 @@ bool CRoom::isConnected(int dir)
 {
     if (isExitUndefined(dir)  || isExitDeath(dir) )
         return false;
-    if (exits[dir] != NULL)
+    if (exits[dir] != nullptr)
         return true;
 
     return false;
@@ -131,7 +131,7 @@ bool CRoom::isConnected(int dir)
 /* is there anything at all in this direction ? */
 bool CRoom::isExitPresent(int dir)
 {
-    if (exits[dir] != NULL)
+    if (exits[dir] != nullptr)
         return true;
     if (isExitUndefined(dir)  || isExitDeath(dir) )
         return true;
@@ -140,7 +140,7 @@ bool CRoom::isExitPresent(int dir)
 
 bool CRoom::isExitLeadingTo(int dir, CRoom *room)
 {
-    if (exits[dir] == NULL)
+    if (exits[dir] == nullptr)
         return false;
     if (exits[dir]->id == room->id)
         return true;
@@ -154,7 +154,7 @@ int CRoom::setDoor(int dir, QByteArray d)
     if (d == "")
 	return 0;
 
-    if (exits[dir] == NULL) {
+    if (exits[dir] == nullptr) {
         exitFlags[dir] = EXIT_UNDEFINED;
     }
     
@@ -376,7 +376,7 @@ bool CRoom::isExitUndefined(int dir)
 
 void CRoom::setExitUndefined(int dir)
 {
-    exits[dir] = NULL;
+    exits[dir] = nullptr;
     exitFlags[dir] = EXIT_UNDEFINED;  
     rebuildDisplayList();
 }
@@ -413,7 +413,7 @@ void CRoom::setExitFlags(int dir, unsigned char flag)
 void CRoom::setExitDeath(int dir) 
 {
     exitFlags[dir] = EXIT_DEATH;
-    exits[dir] = NULL;
+    exits[dir] = nullptr;
     rebuildDisplayList();
     setModified(true);
 }
@@ -477,7 +477,7 @@ void CRoom::setRegion(QByteArray name)
 
 void CRoom::setRegion(CRegion *reg)
 {
-    if (reg != NULL)
+    if (reg != nullptr)
         region = reg;
 
     rebuildDisplayList();
@@ -491,14 +491,14 @@ CRegion *CRoom::getRegion()
 void CRoom::disconnectExit(int dir)
 {
     exitFlags[dir] = EXIT_NONE;
-    exits[dir] = NULL;
+    exits[dir] = nullptr;
     rebuildDisplayList();
 }
 
 void CRoom::removeExit(int dir)
 {
     exitFlags[dir] = EXIT_NONE;
-    exits[dir] = NULL;
+    exits[dir] = nullptr;
     doors[dir].clear();
     rebuildDisplayList();
 }
@@ -526,97 +526,76 @@ QString CRoom::toolTip()
 /* ------------------------------ prints the given room --------------------*/
 void CRoom::sendRoom()
 {
-    unsigned int i, pos;
-    char line[MAX_STR_LEN];
-    
     send_to_user(" Id: %i, Flags: %s, Region: %s, Coord: %i,%i,%i\r\n", id,
-	    (const char *) conf->sectors[sector].desc, 
-	    (const char *) region->getName(),
-	    x, y, z);
-    send_to_user(" [32m%s[0m\n", (const char *) name);
+            conf->sectors[sector].desc.constData(),
+            region->getName().constData(),
+            x, y, z);
+    send_to_user(" [32m%s[0m\n", name.constData());
 
-    line[0] = 0;
-    pos = 0;
-    if (!(proxy->isMudEmulation() && conf->getBriefMode() ) ) {
-      for (i = 0; i <= strlen(desc); i++)
-		if (desc[i] == '|') {
-		    line[pos] = 0;
-		    send_to_user("%s\r\n", line);
-		    line[0] = 0;
-		    pos = 0;
-		} else {
-		    line[pos++] = desc[i];
-		}
+    if (!(proxy->isMudEmulation() && conf->getBriefMode())) {
+        // Split description by '|' and send each line
+        QList<QByteArray> descLines = desc.split('|');
+        for (const QByteArray &descLine : descLines) {
+            send_to_user("%s\r\n", descLine.constData());
+        }
     }
-    send_to_user(" note: %s\n", (const char *) note);
+    send_to_user(" note: %s\n", note.constData());
 
-    
-    sprintf(line, "Doors:");
-    for (i = 0; i <= 5; i++) {
-      if (doors[i].isEmpty() != true) {
-        sprintf(line + strlen(line), " %c: %s", dirbynum(i), (const char *) doors[i]);
-      }
-    
+    // Build doors line
+    QString doorsLine = QStringLiteral("Doors:");
+    for (int i = 0; i <= 5; i++) {
+        if (!doors[i].isEmpty()) {
+            doorsLine += QString(" %1: %2").arg(QChar(dirbynum(i))).arg(QString::fromUtf8(doors[i]));
+        }
     }
-    send_to_user("%s\r\n", line);
+    send_to_user("%s\r\n", qPrintable(doorsLine));
 
-    
+    // Build exits line
+    QString exitsLine;
     if (conf->getBriefMode() && proxy->isMudEmulation()) {
-      sprintf(line, "Exits: ");
-      for (i = 0; i <= 5; i++)
-          if (isExitPresent(i) == true) {
-              if ( isExitUndefined(i) ) {
-                  sprintf(line + strlen(line), " #%s#", exitnames[i]);
-                  continue;
-              }
-              if ( isExitDeath(i) ) {
-                  sprintf(line + strlen(line), " !%s!", exitnames[i]);
-                  continue;
-              }
-              if (doors[i].isEmpty() != true) {
-                  if (doors[i] == "exit")  {
-                      sprintf(line + strlen(line), " (%s)", exitnames[i]);
-                  } else {
-                      sprintf(line + strlen(line), " +%s+", exitnames[i]);
-                  }
-              } else {
-                  sprintf(line + strlen(line), " %s", exitnames[i]);
-              }
-          }
-    
-      
-      
+        exitsLine = QStringLiteral("Exits: ");
+        for (int i = 0; i <= 5; i++) {
+            if (isExitPresent(i)) {
+                if (isExitUndefined(i)) {
+                    exitsLine += QString(" #%1#").arg(exitnames[i]);
+                } else if (isExitDeath(i)) {
+                    exitsLine += QString(" !%1!").arg(exitnames[i]);
+                } else if (!doors[i].isEmpty()) {
+                    if (doors[i] == "exit") {
+                        exitsLine += QString(" (%1)").arg(exitnames[i]);
+                    } else {
+                        exitsLine += QString(" +%1+").arg(exitnames[i]);
+                    }
+                } else {
+                    exitsLine += QString(" %1").arg(exitnames[i]);
+                }
+            }
+        }
     } else {
-      
-      line[0] = 0;
-      sprintf(line, " exits:");
-  
-      for (i = 0; i <= 5; i++)
-          if (isExitPresent(i) == true) {
-              if (isExitUndefined(i) ) {
-                  sprintf(line + strlen(line), " #%s#", exitnames[i]);
-                  continue;
-              }
-              if (isExitDeath(i)) {
-                  sprintf(line + strlen(line), " !%s!", exitnames[i]);
-                  continue;
-              }
-              if (doors[i].isEmpty() == false) {
-                  if (strcmp("exit", doors[i]) == 0) {
-                      sprintf(line + strlen(line), " (%s)", exitnames[i]);
-                  } else {
-                      sprintf(line + strlen(line), " +%s+", exitnames[i]);
-                  }
-              } else {
-                  sprintf(line + strlen(line), " %s", exitnames[i]);
-              }
-              sprintf(line + strlen(line), " -[to %i]-", exits[i]->id );
-          }
-      
-      
+        exitsLine = QStringLiteral(" exits:");
+        for (int i = 0; i <= 5; i++) {
+            if (isExitPresent(i)) {
+                if (isExitUndefined(i)) {
+                    exitsLine += QString(" #%1#").arg(exitnames[i]);
+                } else if (isExitDeath(i)) {
+                    exitsLine += QString(" !%1!").arg(exitnames[i]);
+                } else {
+                    if (!doors[i].isEmpty()) {
+                        if (doors[i] == "exit") {
+                            exitsLine += QString(" (%1)").arg(exitnames[i]);
+                        } else {
+                            exitsLine += QString(" +%1+").arg(exitnames[i]);
+                        }
+                    } else {
+                        exitsLine += QString(" %1").arg(exitnames[i]);
+                    }
+                    exitsLine += QString(" -[to %1]-").arg(exits[i]->id);
+                }
+            }
+        }
     }
 
-    send_to_user("%s\r\n", line);
+    send_to_user("%s\r\n", qPrintable(exitsLine));
 }
 
 

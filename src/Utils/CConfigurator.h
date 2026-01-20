@@ -54,7 +54,7 @@ typedef struct {
 								/* this option is required for better GroupManager functioning */
 } TSpell;
 
-class Cconfigurator : public QObject {
+class Configurator : public QObject {
     Q_OBJECT
 
     /* general */
@@ -216,7 +216,7 @@ public:
 
     int loadEngineConfig(QByteArray path, QByteArray filename);
 
-    Cconfigurator();
+    Configurator();
 
 
     int loadConfig(QByteArray path, QByteArray filename);
@@ -333,6 +333,6 @@ signals:
     void configurationChanged();
 };
 
-extern class Cconfigurator *conf;
+extern class Configurator *conf;
 
 #endif

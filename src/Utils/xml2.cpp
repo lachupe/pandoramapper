@@ -100,7 +100,7 @@ void CRoomManager::loadMap( QString filename)
 	
 		  	CRoom *r = rooms[i];
 	        for (int exit = 0; exit <= 5; exit++)
-	            if (r->exits[ exit ] != NULL) {
+	            if (r->exits[ exit ] != nullptr) {
 	                r->exits[exit] = getRoom( (unsigned long) r->exits[exit] );
 	            }
 	  }
@@ -165,7 +165,7 @@ bool StructureParser::endElement(const QString& qName)
   }
   if (qName == "region" && readingRegion)  {
       parent->addRegion( region );
-      region = NULL;      
+      region = nullptr;      
       readingRegion = false;
   }        
   flag = 0;    
@@ -312,13 +312,13 @@ void CRoomManager::saveMap(QString filename)
   FILE *f;
   CRoom *p;
   int i;
-  char tmp[4028];
+  QString tmp;
   unsigned int z;
     
   print_debug(DEBUG_XML, "in xml_writebase()");
     
   f = fopen(qPrintable(filename), "w");
-  if (f == NULL) {
+  if (f == nullptr) {
     printf("XML: Error - can not open the file: %s.\r\n", qPrintable(filename));
     return;
   }
@@ -391,20 +391,20 @@ void CRoomManager::saveMap(QString filename)
             
         for (i = 0; i <= 5; i++) {
             if (p->isExitPresent(i) == true) {
-    
+
                 if (p->isExitNormal(i) == true) {
-                    sprintf(tmp, "%d", p->exits[i]->id);
+                    tmp = QString::number(p->exits[i]->id);
                 } else {
                     if (p->isExitUndefined(i) == true)
-                        sprintf(tmp, "%s", "UNDEFINED");
+                        tmp = QStringLiteral("UNDEFINED");
                     else if (p->isExitDeath(i) == true)
-                        sprintf(tmp, "%s", "DEATH");
+                        tmp = QStringLiteral("DEATH");
                 }
-                                    
+
                 fprintf(f, "      <exit dir=\"%c\" to=\"%s\" door=\"%s\"/>\n",
-                        exitnames[i][0], tmp, (const char *) p->getDoor(i) ); 
-            }   
-    
+                        exitnames[i][0], qPrintable(tmp), p->getDoor(i).constData());
+            }
+
         }
             
         fprintf(f, "    </exits>\n");

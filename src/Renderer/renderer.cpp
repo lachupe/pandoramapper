@@ -74,9 +74,9 @@ GLfloat marker_colour[4] =  {1.0, 0.1, 0.1, 1.0};
 
 RendererWidget::RendererWidget( QWidget *parent )
      : QOpenGLWidget( parent ),
-       mapProgram(NULL),
+       mapProgram(nullptr),
        mapVbo(QOpenGLBuffer::VertexBuffer),
-       selectionFbo(NULL)
+       selectionFbo(nullptr)
 {
   print_debug(DEBUG_RENDERER , "in renderer constructor");
 
@@ -274,7 +274,7 @@ void RendererWidget::glDrawMarkers()
         
         p = stacker.get(k);
     
-        if (p == NULL) {
+        if (p == nullptr) {
             print_debug(DEBUG_RENDERER, "RENDERER ERROR: Stuck upon corrupted room while drawing red pointers.\r\n");
             continue;
         }
@@ -322,7 +322,7 @@ void RendererWidget::glDrawMarkers()
     if (last_drawn_trail) {
         glColor4f(marker_colour[0] / 1.1, marker_colour[1] / 1.3, marker_colour[2] / 1.3, marker_colour[3] / 1.3);
         p = Map.getRoom(last_drawn_trail);
-        if (p != NULL) {
+        if (p != nullptr) {
             dx = p->getX() - curx;
             dy = p->getY() - cury;
             dz = (p->getZ() - curz) ;
@@ -336,15 +336,15 @@ void RendererWidget::glDrawPrespamLine()
 {
 	if (!conf->getDrawPrespam())
 		return;
-	QVector<unsigned int> *line = engine->getPrespammedDirs();
+	auto line = engine->getPrespammedDirs();
     int prevx, prevy, prevz, dx, dy, dz;
 
-	if (line == NULL)
+	if (!line)
 		return;
 
     CRoom *p = Map.getRoom( line->at(0) );
 
-    if (p == NULL) {
+    if (p == nullptr) {
         return;
     }
 
@@ -360,7 +360,7 @@ void RendererWidget::glDrawPrespamLine()
 
         CRoom *p = Map.getRoom(id);
 
-        if (p == NULL)
+        if (p == nullptr)
             continue;
 
         dx = p->getX() - curx;
@@ -382,8 +382,7 @@ void RendererWidget::glDrawPrespamLine()
 	// and draw a cone in the last room
     appendConeGeometry(prevx, prevy, prevz + 0.2f, 0.0f, 0.0f, lineColor);
 
-	// dispose
-	delete line;
+	// unique_ptr automatically handles cleanup
 }
 
 
@@ -420,7 +419,7 @@ void RendererWidget::glDrawGroupMarkers()
                                   static_cast<GLfloat>(blue), static_cast<GLfloat>(alpha)};
         p = Map.getRoom(pos);
 
-        if (p == NULL) {
+        if (p == nullptr) {
             continue;
         }
 
@@ -1122,8 +1121,8 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
 // this sets curx, cury, curz based on hrm internal rules
 void RendererWidget::setupNewBaseCoordinates()
 {
-    CRoom *p = NULL;
-    CRoom *newRoom = NULL;
+    CRoom *p = nullptr;
+    CRoom *newRoom = nullptr;
     unsigned long long bestDistance, dist;
     int newX, newY, newZ;
     unsigned int i;
@@ -1148,7 +1147,7 @@ void RendererWidget::setupNewBaseCoordinates()
         }
     }
 
-    if (newRoom != NULL) {
+    if (newRoom != nullptr) {
 		curx = newRoom->getX();
 		cury = newRoom->getY();
 		curz = newRoom->getZ() + userLayerShift;

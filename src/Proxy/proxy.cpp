@@ -76,16 +76,16 @@ class Proxy *proxy;
 FILE *debug_file;
 #endif
 
-Proxy::Proxy() {
-	mud = new ProxySocket(this, true);
-	user = new ProxySocket(this, false);
+Proxy::Proxy()
+    : mud(std::make_unique<ProxySocket>(this, true))
+    , user(std::make_unique<ProxySocket>(this, false))
+{
 }
 
 Proxy::~Proxy() {
-	mud->close();
-	user->close();
-	delete mud;
-	delete user;
+	if (mud) mud->close();
+	if (user) user->close();
+	// unique_ptr handles deletion automatically
 }
 
 int Proxy::init() {
@@ -166,7 +166,7 @@ int Proxy::loop(void) {
 
 		FD_SET(proxy_hangsock, &input);
 
-		n = select(FD_SETSIZE, &input, NULL, &exc, NULL);
+		n = select(FD_SETSIZE, &input, nullptr, &exc, nullptr);
 		if (n < 0) {
 			/* .... */
 			print_debug(DEBUG_PROXY,
@@ -238,7 +238,7 @@ void Proxy::run() {
 
 	mud->clear();
 	user->clear();
-	dispatcher = new Cdispatcher();
+	dispatcher = std::make_unique<Cdispatcher>();
 
 	// well, otherwise we cannot start listening
 	if (inited != -1)
@@ -264,7 +264,7 @@ void Proxy::sendMudEmulationGreeting() {
 	else
 		r = stacker.first();
 
-	if (r != NULL)
+	if (r != nullptr)
 		r->sendRoom();
 	else
 		user->send_line("Your database has no room with ID 1!");
@@ -283,6 +283,7 @@ bool Proxy::connectToMud() {
 	} else {
 		// turn XML on! enable withoit the <xml> message from the mud->
 		mud->send_line("~$#EX1\n1\n");
+		mud->setXmlMode(true);
 		print_debug(DEBUG_PROXY, "Connected!\r\n");
 		emit log("MUD Proxy", "Connected to MUD!");
 		return true;
@@ -362,9 +363,8 @@ void Proxy::setMudEmulation(bool b) {
 
 // ----------------------------------  ProxySocket ------------------------------------------
 void ProxySocket::send_line(const char *line) {
-	mutex.lock();
+	QMutexLocker locker(&mutex);
 	send(sock, line, strlen(line), 0);
-	mutex.unlock();
 }
 
 void ProxySocket::clear() {
@@ -469,22 +469,19 @@ bool ProxySocket::openConnection(QByteArray name, int port) {
 }
 
 int ProxySocket::read(char * buffer, int len) {
-	int rd;
-
-	mutex.lock();
-	rd = recv(sock, buffer, len, 0);
+	QMutexLocker locker(&mutex);
+	int rd = recv(sock, buffer, len, 0);
 #ifdef DEBUG
 	buffer[rd] = 0;
 	fprintf(debug_file, "<-Received(len %i)", rd);
 	fwrite(buffer, rd, 1, debug_file);
 	fflush(debug_file);
 #endif
-	mutex.unlock();
 	return rd;
 }
 
 void ProxySocket::write(char *buffer, int len) {
-	mutex.lock();
+	QMutexLocker locker(&mutex);
 #ifdef DEBUG
 	buffer[len] = 0;
 	fprintf(debug_file, "<-Written(len %i)", len);
@@ -492,7 +489,6 @@ void ProxySocket::write(char *buffer, int len) {
 	fflush(debug_file);
 #endif
 	send(sock, buffer, len, 0);
-	mutex.unlock();
 }
 
 int ProxySocket::read() {
@@ -505,4 +501,3 @@ void ProxySocket::nonblock() {
 
 	ioctlsocket(sock, FIONBIO, &on);
 }
-

@@ -22,7 +22,9 @@
 #define FORWARDER_H
 
 #include <QMutex>
+#include <QMutexLocker>
 #include <QThread>
+#include <memory>
 
 #if defined Q_OS_LINUX || defined Q_OS_MACX || defined Q_OS_FREEBSD
 #define SOCKET int
@@ -121,11 +123,11 @@ public:
 class Proxy: public QThread {
 Q_OBJECT
 
-	ProxySocket *mud;
-	ProxySocket *user;
+	std::unique_ptr<ProxySocket> mud;
+	std::unique_ptr<ProxySocket> user;
 	SOCKET proxy_hangsock;
 
-	Cdispatcher *dispatcher;
+	std::unique_ptr<Cdispatcher> dispatcher;
 
 	int loop();
 	bool mudEmulation;

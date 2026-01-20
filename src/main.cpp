@@ -30,6 +30,9 @@
 #include <QGuiApplication>
 #include <QSurfaceFormat>
 #include <QScreen>
+#include <QString>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
 
 #include "defines.h"
 
@@ -57,33 +60,17 @@
 
 QString *logFileName;
 
-void print_usage()
-{
-  printf("Usage: pandora <options>\r\n");
-  printf("Options:\r\n\r\n");
-  printf("  --help / -h                   - this helpfile.\r\n");
-  printf("  --base / -b  <filename>       - override the database file.\r\n");
-  printf("  --localport / -lp  <port>     - override the local port number.\r\n");
-  printf("  --hostname / -hn  <host>      - override the remote (game) host name.\r\n");
-  printf("  --remoteport / -rp  <port>    - override the remote (game) port number.\r\n");
-  printf("  --emulate / -e  <port>        - emulate mud environment (disabled).\r\n");
-  printf("  --config / -c  <configfile>   - load config file.\r\n");
-
-  printf("\r\n");
-}
-
 int main(int argc, char *argv[])
 {
-    int i;
-    const char *resPath = 0;
-    char    override_base_file[MAX_STR_LEN] = "";
+    QString resPath;
+    QString override_base_file;
     int     override_local_port = 0;
-    char    override_remote_host[MAX_STR_LEN] = "";
+    QString override_remote_host;
     int     override_remote_port = 0;
-    char    configfile[MAX_STR_LEN] = "mume.ini";
-    int     default_local_port = 3000;
-    int     default_remote_port = 4242;
-    int     mud_emulation = 0;
+    QString configfile = "mume.ini";
+    const int default_local_port = 3000;
+    const int default_remote_port = 4242;
+    bool    mud_emulation = false;
 
 #ifdef Q_OS_MACX
     CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
@@ -91,23 +78,71 @@ int main(int argc, char *argv[])
 						  kCFURLPOSIXPathStyle);
     const char *appPath = CFStringGetCStringPtr(macPath,
 						CFStringGetSystemEncoding());
-    resPath = (char *)malloc(strlen(appPath)+25);
-    strcpy(resPath, appPath);
-    strcat(resPath, "/Contents/Resources/");
+    resPath = QString(appPath) + "/Contents/Resources/";
 
-    char    default_base_file[MAX_STR_LEN] = "mume.xml";
-    char    default_remote_host[MAX_STR_LEN] = "";
-    strcpy(configfile, "configs/default.conf");
+    QString default_base_file = "mume.xml";
+    QString default_remote_host;
+    configfile = "configs/default.conf";
 
     CFRelease(pluginRef);
     CFRelease(macPath);
 
 #else
     resPath = "";
-    char    default_base_file[MAX_STR_LEN] = "mume.xml";
-    char    default_remote_host[MAX_STR_LEN] = "129.241.210.221";
+    QString default_base_file = "mume.xml";
+    QString default_remote_host = "129.241.210.221";
 #endif
     QApplication app( argc, argv );
+    app.setApplicationName("PandoraMapper");
+    app.setApplicationVersion(QString::number(SVN_REVISION));
+
+    // Set up command line parser
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Pandora MUME mapper");
+    parser.addHelpOption();
+
+    QCommandLineOption configOption(QStringList() << "c" << "config",
+        "Load config file.", "configfile");
+    QCommandLineOption baseOption(QStringList() << "b" << "base",
+        "Override the database file.", "filename");
+    QCommandLineOption localPortOption(QStringList() << "lp" << "localport",
+        "Override the local port number.", "port");
+    QCommandLineOption hostOption(QStringList() << "hn" << "hostname",
+        "Override the remote (game) host name.", "host");
+    QCommandLineOption remotePortOption(QStringList() << "rp" << "remoteport",
+        "Override the remote (game) port number.", "port");
+    QCommandLineOption emulateOption(QStringList() << "e" << "emulate",
+        "Emulate MUD environment.");
+
+    parser.addOption(configOption);
+    parser.addOption(baseOption);
+    parser.addOption(localPortOption);
+    parser.addOption(hostOption);
+    parser.addOption(remotePortOption);
+    parser.addOption(emulateOption);
+
+    parser.process(app);
+
+    if (parser.isSet(configOption)) {
+        configfile = parser.value(configOption);
+        resPath = ""; // user has own config file - including the path
+    }
+    if (parser.isSet(emulateOption)) {
+        printf("Pandora: Starting in MUD emulation mode.\r\n");
+        mud_emulation = true;
+    }
+    if (parser.isSet(baseOption)) {
+        override_base_file = parser.value(baseOption);
+    }
+    if (parser.isSet(hostOption)) {
+        override_remote_host = parser.value(hostOption);
+    }
+    if (parser.isSet(localPortOption)) {
+        override_local_port = parser.value(localPortOption).toInt();
+    }
+    if (parser.isSet(remotePortOption)) {
+        override_remote_port = parser.value(remotePortOption).toInt();
+    }
 
     QPixmap pixmap("images/logo.png");
     QSplashScreen *splash = new QSplashScreen(pixmap);
@@ -115,102 +150,28 @@ int main(int argc, char *argv[])
 
     splash->showMessage("Loading configuration and database...");
 
-    for (i=1; i < argc; i++) {
-
-      if ((strcmp(argv[i], "--config") == 0) || ( strcmp(argv[i], "-c") == 0))
-      {
-        if (i == argc) {
-          printf("Too few arguments. Missing config file name.\r\n");
-          print_usage();
-          exit(1);
-        }
-        i++;
-
-        strcpy(configfile, argv[i]);
-	resPath = ""; // obviously the user has an own config file - including the path
-      }
-
-      if ((strcmp(argv[i], "--emulate") == 0) || ( strcmp(argv[i], "-e") == 0))
-      {
-        printf("Pandora: Starting in MUD emulation mode.\r\n");
-        mud_emulation = 1;
-      }
-
-      if ((strcmp(argv[i], "--base") == 0) || ( strcmp(argv[i], "-b") == 0))
-      {
-        if (i == argc) {
-          printf("Too few arguments. Missing database.\r\n");
-          print_usage();
-          exit(1);
-        }
-        i++;
-        strcpy(override_base_file, argv[i]); // overriding the database file is possible even with default config file
-      }
-
-      if ((strcmp(argv[i], "--hostname") == 0) || ( strcmp(argv[i], "-hn") == 0))
-      {
-        if (i == argc) {
-          printf("Too few arguments. Wrong hostname given.\r\n");
-          print_usage();
-          exit(1);
-        }
-        i++;
-        strcpy(override_remote_host, argv[i]);
-      }
-
-      if ((strcmp(argv[i], "--localport") == 0) || ( strcmp(argv[i], "-lp") == 0))
-      {
-        if (i == argc) {
-          printf("Too few arguments. Missing localport.\r\n");
-          print_usage();
-          exit(1);
-        }
-        i++;
-        override_local_port = atoi(argv[i]);
-      }
-
-      if ((strcmp(argv[i], "--remoteport") == 0) || ( strcmp(argv[i], "-rp") == 0))
-      {
-        if (i == argc) {
-          printf("Too few arguments. Missing targetport.\r\n");
-          print_usage();
-          exit(1);
-        }
-        i++;
-        override_remote_port = atoi(argv[i]);
-      }
-
-
-      if ((strcmp(argv[i], "--help") == 0) || ( strcmp(argv[i], "-h") == 0))
-      {
-        print_usage();
-        exit(1);
-      }
-
-    }
-
 
     /* set analyzer engine defaults */
     //engine_init();
     splash->showMessage(QString("Loading the configuration ") + configfile);
-    conf = new Cconfigurator();
-    conf->loadConfig(resPath, configfile);
+    conf = new Configurator();
+    conf->loadConfig(resPath.toUtf8(), configfile.toUtf8());
     print_debug(DEBUG_SYSTEM, "starting up...");
 
 
-    if (override_base_file[0] != 0) {
-      conf->setBaseFile(override_base_file);
-    } else if ( conf->getBaseFile() == "") {
-      conf->setBaseFile(default_base_file);
+    if (!override_base_file.isEmpty()) {
+      conf->setBaseFile(override_base_file.toUtf8());
+    } else if ( conf->getBaseFile().isEmpty()) {
+      conf->setBaseFile(default_base_file.toUtf8());
     }
-    print_debug(DEBUG_SYSTEM, "Using database file : %s.", (const char*) conf->getBaseFile() );
+    print_debug(DEBUG_SYSTEM, "Using database file : %s.", conf->getBaseFile().constData());
 
-    if (override_remote_host[0] != 0) {
-      conf->setRemoteHost(override_remote_host);
+    if (!override_remote_host.isEmpty()) {
+      conf->setRemoteHost(override_remote_host.toUtf8());
     } else if ( conf->getRemoteHost().isEmpty() ) {
-      conf->setRemoteHost(default_remote_host);
+      conf->setRemoteHost(default_remote_host.toUtf8());
     }
-    print_debug(DEBUG_SYSTEM, "Using target hostname : %s.", (const char*) conf->getRemoteHost() );
+    print_debug(DEBUG_SYSTEM, "Using target hostname : %s.", conf->getRemoteHost().constData());
 
     if (override_local_port != 0) {
       conf->setLocalPort(override_local_port);

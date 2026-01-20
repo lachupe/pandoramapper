@@ -19,6 +19,7 @@
  */
 
 #include <QMutex>
+#include <QMutexLocker>
 
 #include "defines.h"
 #include "utils.h"
@@ -188,14 +189,14 @@ const struct user_command_type user_commands[] = {
    "    Examples: minfo / minfo 120\r\n\r\n"
    "    This command displays everything know about current room. Roomname, id, flags,\r\n"
    "room description, exits, connections and last update date.\r\n"},
-  {"north",         usercmd_move,         NORTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"east",          usercmd_move,         EAST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"south",         usercmd_move,         SOUTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"west",          usercmd_move,         WEST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"up",            usercmd_move,         UP,             USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"down",          usercmd_move,         DOWN,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   NULL, NULL},
-  {"look",          usercmd_move,         USER_MOVE_LOOK, USERCMD_FLAG_INSTANT,   NULL, NULL},
-  {"examine",       usercmd_move,         USER_MOVE_EXAMINE, USERCMD_FLAG_INSTANT,   NULL, NULL},
+  {"north",         usercmd_move,         NORTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   nullptr, nullptr},
+  {"east",          usercmd_move,         EAST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   nullptr, nullptr},
+  {"south",         usercmd_move,         SOUTH,          USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   nullptr, nullptr},
+  {"west",          usercmd_move,         WEST,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   nullptr, nullptr},
+  {"up",            usercmd_move,         UP,             USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   nullptr, nullptr},
+  {"down",          usercmd_move,         DOWN,           USERCMD_FLAG_INSTANT | USERCMD_FLAG_REDRAW,   nullptr, nullptr},
+  {"look",          usercmd_move,         USER_MOVE_LOOK, USERCMD_FLAG_INSTANT,   nullptr, nullptr},
+  {"examine",       usercmd_move,         USER_MOVE_EXAMINE, USERCMD_FLAG_INSTANT,   nullptr, nullptr},
   {"mmerge",        usercmd_mmerge,       0,    USERCMD_FLAG_SYNC | USERCMD_FLAG_REDRAW,
     "Merge twin rooms - manual launch.",
    "    Usage: mmerge [id] [force]\r\n"
@@ -348,21 +349,22 @@ const struct user_command_type user_commands[] = {
         "\r\n"},
 
 
-  {NULL, NULL, 0, 0, NULL, NULL}
+  {nullptr, nullptr, 0, 0, nullptr, nullptr}
 };
 
-void Userland::add_command(int id, char *arg)
+void Userland::add_command(int id, const char *arg)
 {
     struct queued_command_type t;
 
     print_debug(DEBUG_USERFUNC, "in addCommand");
 
     t.id = id;
-    strcpy(t.arg, arg);
+    t.arg = arg;
 
-    queue_mutex.lock();
-    commands_queue.push_back(t);
-    queue_mutex.unlock();
+    {
+        QMutexLocker locker(&queue_mutex);
+        commands_queue.push_back(t);
+    }
     notify_analyzer();
 
     print_debug(DEBUG_USERFUNC, "leaving addCommand");
@@ -376,12 +378,15 @@ void Userland::parse_command()
 
   print_debug(DEBUG_USERFUNC, "in parseCommand");
 
-  queue_mutex.lock();
-  t = commands_queue.front();
-  commands_queue.pop_front();
-  queue_mutex.unlock();
+  {
+    QMutexLocker locker(&queue_mutex);
+    t = commands_queue.front();
+    commands_queue.pop_front();
+  }
 
-  ((*user_commands[t.id].command_pointer) (t.id, user_commands[t.id].subcmd, t.arg, t.arg));
+  // Use data() for mutable access to the QByteArray data
+  char *argData = t.arg.data();
+  ((*user_commands[t.id].command_pointer) (t.id, user_commands[t.id].subcmd, argData, argData));
 
   if (IS_SET(user_commands[t.id].flags, USERCMD_FLAG_REDRAW)) {
     toggle_renderer_reaction();
@@ -411,7 +416,7 @@ int Userland::parse_user_input_line(const char *line)
   p = one_argument(p, arg, 0);
 //  printf("One argument : line ..%s..,  arg ...%s...\r\n", p, arg);
 
-  for (i=0; user_commands[i].name != NULL; i++)
+  for (i=0; user_commands[i].name != nullptr; i++)
     if (strcmp(user_commands[i].name, arg) == 0) {
       /* call the appropriate command handler */
 
@@ -669,15 +674,15 @@ USERCMD(usercmd_maction)
 
   if (dir != -1 && conf->getMactionUsesPrespam() && !Map.isBlocked()) {
 	  /* for the case of prespam and sync, try to follow */
-	  QVector<unsigned int> *prespam = engine->getPrespammedDirs();
-	  if (prespam != NULL && dir != -1) {
+	  auto prespam = engine->getPrespammedDirs();
+	  if (prespam && dir != -1) {
 		  // follow-up all dirs and use the last one for maction
 
 		  // get the last room
 	      CRoom *p = Map.getRoom( prespam->at( prespam->size() - 1 ) );
-	      delete prespam;
+	      // unique_ptr automatically handles cleanup
 
-	      if (p != NULL) {
+	      if (p != nullptr) {
 			  if (p->isDoorSecret(dir) == true) {
 				  MACTION_SEND_DOOR(p->getDoor(dir), dir);
 			  } else {
@@ -700,7 +705,7 @@ USERCMD(usercmd_maction)
 		  break;
 	  r = stacker.get(i);
 
-		if (r != NULL) {
+		if (r != nullptr) {
 			if (dir == -1) {
 			  int z;
 
@@ -768,7 +773,7 @@ USERCMD(usercmd_mdelete)
 
     for (int i = 0; i < ids.size(); ++i) {
         r = Map.getRoom( ids.at(i) );
-        if ( r == NULL )
+        if ( r == nullptr )
             continue;
         if (r->id == 1) {
             send_to_user("--[ Sorry, you can not delete the base (id == 1) room!\r\n");
@@ -889,7 +894,7 @@ USERCMD(usercmd_mgoto)
         p = one_argument(p, arg, 0);
         if (is_integer(arg)) {
             id = atoi(arg);
-            if (Map.getRoom(id) == NULL) {
+            if (Map.getRoom(id) == nullptr) {
                 send_to_user("--[ There is no room with id %s.\r\n", arg);
                 send_prompt();
                 return USER_PARSE_SKIP;
@@ -968,7 +973,7 @@ USERCMD(usercmd_mdetach)
     return USER_PARSE_SKIP;
   }
 
-  if (!oneway && s != NULL) {
+  if (!oneway && s != nullptr) {
     for (i = 0; i<= 5; i++)
       if (s->isExitLeadingTo(i, r) == true) {
         if (del) {
@@ -1014,7 +1019,7 @@ USERCMD(usercmd_mlink)
 
   second = Map.getRoom(id);
 
-  if (second == NULL) {
+  if (second == nullptr) {
     send_to_user("--[ There is no room with id %i.\r\n", id);
     send_prompt();
     return USER_PARSE_SKIP;
@@ -1274,7 +1279,7 @@ USERCMD(usercmd_mhelp)
     /* argument is given */
     p = one_argument(p, arg, 0);
 
-    for (int i=0; user_commands[i].name != NULL; i++)
+    for (int i=0; user_commands[i].name != nullptr; i++)
       if ((strcmp(user_commands[i].name, arg) == 0) && user_commands[i].help)
       {
         send_to_user("---[Help file : %s.\r\n", user_commands[i].name);
@@ -1292,7 +1297,7 @@ USERCMD(usercmd_mhelp)
   /* else we print all brief help files */
 
   send_to_user("----[ Brief help files/commands overview.\r\n\r\n");
-  for (int i=0; user_commands[i].name != NULL; i++)
+  for (int i=0; user_commands[i].name != nullptr; i++)
     if (user_commands[i].desc)
       send_to_user("  %-15s  %-65s\r\n", user_commands[i].name, user_commands[i].desc);
 
@@ -1522,14 +1527,14 @@ USERCMD(usercmd_mmerge)
   char *p;
   char arg[MAX_STR_LEN];
   int force = 0;
-  CRoom *t = NULL;
+  CRoom *t = nullptr;
   int j = -1;
   unsigned int i;
   unsigned int id;
 
   userfunc_print_debug;
 
-  if (engine->addedroom == NULL) {
+  if (engine->addedroom == nullptr) {
     send_to_user("--[There is new added room to merge.\r\n");
     send_prompt();
     return USER_PARSE_SKIP;
@@ -1549,7 +1554,7 @@ USERCMD(usercmd_mmerge)
 
     // yet again, sensitive!
     t = Map.findDuplicateRoom(engine->addedroom);
-    if (t == NULL) {
+    if (t == nullptr) {
       send_to_user("--[ No matching room found.\r\n");
       send_prompt();
       return USER_PARSE_SKIP;
@@ -1567,7 +1572,7 @@ USERCMD(usercmd_mmerge)
     }
 
     t = Map.getRoom(id);
-    if (t == NULL) {
+    if (t == nullptr) {
       send_to_user("--[ There is no room with this id %i.\r\n", id);
       send_prompt();
       return USER_PARSE_SKIP;
@@ -1643,7 +1648,7 @@ USERCMD(usercmd_minfo)
     }
 
     t = Map.getRoom(id);
-    if (t == NULL) {
+    if (t == nullptr) {
       send_to_user("--[ There is no room with this id %i.\r\n", id);
       send_prompt();
       return USER_PARSE_SKIP;
@@ -1839,7 +1844,7 @@ USERCMD(usercmd_mregion)
 
             // try to rebuild at least current square with rooms
             CRoom *r = stacker.first();
-            if (r != NULL) {
+            if (r != nullptr) {
             	r->rebuildDisplayList();
             }
 
@@ -1922,7 +1927,7 @@ USERCMD(usercmd_mregion)
         CRegion *reg;
 
         reg = Map.getRegionByName( arg );
-        if (reg != NULL) {
+        if (reg != nullptr) {
             engine->set_users_region( reg );
         } else {
             send_to_user( "Failed. No such region!\r\n");
@@ -1963,7 +1968,7 @@ USERCMD(usercmd_mregion)
         CRegion *reg;
 
         reg = Map.getRegionByName( arg );
-        if (reg != NULL) {
+        if (reg != nullptr) {
 
 
             send_to_user( "Ok. Setting current room's region to %s.\r\n", (const char *) reg->getName() );

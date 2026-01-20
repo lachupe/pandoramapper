@@ -23,6 +23,7 @@
 
 #include <QQueue>
 #include <QMutex>
+#include <QMutexLocker>
 
 class Event   {
     public:
@@ -88,34 +89,33 @@ class Event   {
 };
 
 class PipeManager {
-    QMutex pipeMutex;
+    mutable QMutex pipeMutex;
     QQueue<Event> Pipe;
 
 public:
     void addEvent(const Event &e)
     {
-    	pipeMutex.lock();
-    	Pipe.enqueue(e);
-    	pipeMutex.unlock();
+        QMutexLocker locker(&pipeMutex);
+        Pipe.enqueue(e);
     }
 
     void clear()
     {
-    	pipeMutex.lock();
-    	Pipe.clear();
-    	pipeMutex.unlock();
+        QMutexLocker locker(&pipeMutex);
+        Pipe.clear();
     }
 
-    bool isEmpty() { return Pipe.empty(); }    
+    bool isEmpty() const
+    {
+        QMutexLocker locker(&pipeMutex);
+        return Pipe.empty();
+    }
 
     Event getEvent()
     {
-        Event event;
-        pipeMutex.lock(); 
-        event = Pipe.dequeue(); 
-        pipeMutex.unlock(); 
-        return event;
-    }; 
+        QMutexLocker locker(&pipeMutex);
+        return Pipe.dequeue();
+    }
 };
 
 

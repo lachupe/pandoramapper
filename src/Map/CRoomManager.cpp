@@ -47,7 +47,7 @@ CRoomManager::~CRoomManager()
 
 void CRoomManager::rebuildRegion(CRegion *reg)
 {
-	if (reg == NULL)
+	if (reg == nullptr)
 		return;
 
     QVector<CRoom *> rooms = getRooms();
@@ -98,7 +98,7 @@ void CRoomManager::clearAllSecrets()
     for (i = 0; i < MAX_ROOMS; i++) {
         progress.setValue(i);
         r = getRoom( i );
-        if (r == NULL)
+        if (r == nullptr)
             continue;
         if (r) {
             if (mark[r->id] == false) {
@@ -141,7 +141,7 @@ bool CRoomManager::isDuplicate(CRoom *addedroom)
 
     j = -1;
 
-    if (addedroom == NULL) {
+    if (addedroom == nullptr) {
         print_debug(DEBUG_ANALYZER, "Failure in check_desc function!\n");
         return false;
     }
@@ -215,7 +215,7 @@ CRoom* CRoomManager::findDuplicateRoom(CRoom *orig)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -264,7 +264,7 @@ void CRoomManager::fixFreeRooms()
     unsigned int i;
 
     for (i = 1; i < MAX_ROOMS; i++)
-	if (ids[i] == NULL) {
+	if (ids[i] == nullptr) {
 	    next_free = i;
 	    return;
 	}
@@ -275,7 +275,7 @@ void CRoomManager::fixFreeRooms()
 
 void CRoomManager::addRoom(CRoom *room)
 {
-	if (ids[room->id] != NULL) {
+	if (ids[room->id] != nullptr) {
         print_debug(DEBUG_ROOMS, "Error while adding new element to database! This id already exists!\n");
     	// Whaaaat?
         //exit(1);
@@ -321,8 +321,8 @@ void CRoomManager::init()
     regions.push_back(region);
 
 
-    ids[0] = NULL;
-    planes = NULL;
+    ids[0] = nullptr;
+    planes = nullptr;
 }
 
 /*------------- Constructor of the room manager ENDS  ---------------*/
@@ -337,7 +337,7 @@ CRegion *CRoomManager::getRegionByName(QByteArray name)
         if (region->getName() == name)
             return region;
     }
-    return NULL;
+    return nullptr;
 }
 
 bool CRoomManager::addRegion(QByteArray name)
@@ -345,7 +345,7 @@ bool CRoomManager::addRegion(QByteArray name)
     CRegion    *region;
     // TODO: threadsafety the class regions QMutexLocker locker(mapLock);
 
-    if (getRegionByName(name) == NULL) {
+    if (getRegionByName(name) == nullptr) {
         region = new CRegion();
         region->setName( name );
         regions.push_back(region);
@@ -360,7 +360,7 @@ void CRoomManager::addRegion(CRegion *reg)
 {
 	// TODO: threadsafety the class regions QMutexLocker locker(mapLock);
 
-    if (reg != NULL && getRegionByName(reg->getName()) == NULL)
+    if (reg != nullptr && getRegionByName(reg->getName()) == nullptr)
         regions.push_back(reg);
 }
 
@@ -405,7 +405,7 @@ void CRoomManager::reinit()
             delete p;
             p = next;
         }
-        planes = NULL;
+        planes = nullptr;
     }
 
     memset(ids, 0, MAX_ROOMS * sizeof (CRoom *) );
@@ -461,7 +461,7 @@ void CRoomManager::smallDeleteRoom(CRoom *r)
     renderer_window->renderer->deletedRoom = r->id;
 
     int i;
-    ids[ r->id ] = NULL;
+    ids[ r->id ] = nullptr;
 
     for (i = 0; i < rooms.size(); i++)
         if (rooms[i]->id == r->id ) {
@@ -486,7 +486,7 @@ void CRoomManager::removeFromPlane(CRoom *room)
 {
     CPlane *p;
 
-    if (planes == NULL)
+    if (planes == nullptr)
     	return;
 
     p = planes;
@@ -503,7 +503,7 @@ void CRoomManager::removeFromPlane(CRoom *room)
 
 void CRoomManager::expandPlane(CPlane *plane, CRoom *room)
 {
-    CSquare *p, *new_root = NULL;
+    CSquare *p, *new_root = nullptr;
     int size;
 
     p = plane->squares;
@@ -550,13 +550,13 @@ void  CRoomManager::addToPlane(CRoom *room)
     // is protected by CRoomManager locker
     //	QMutexLocker locker(mapLock);
 
-    if (planes == NULL) {
+    if (planes == nullptr) {
         planes = new CPlane(room);
         return;
     }
 
     p = planes;
-    prev = NULL;
+    prev = nullptr;
     while (p) {
         if (room->getZ() < p->z) {
             tmp = new CPlane(room);

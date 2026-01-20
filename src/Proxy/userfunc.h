@@ -25,6 +25,7 @@
 #define USERCMD(name)  int name(int cmd, int subcmd, char *line, char *original)
 #include <deque>
 #include <QMutex>
+#include <QByteArray>
 using namespace std;
 
 #define USER_DEC_X      1
@@ -81,7 +82,7 @@ extern const struct user_command_type user_commands[];
 
 struct queued_command_type {
   int  id;
-  char arg[MAX_STR_LEN];  
+  QByteArray arg;
 };
 
 class Userland {
@@ -90,7 +91,7 @@ class Userland {
 public:
     
   void parse_command();
-  void add_command(int id, char *arg);
+  void add_command(int id, const char *arg);
   int is_empty() { return commands_queue.empty(); }
   int parse_user_input_line(const char *line); 
  

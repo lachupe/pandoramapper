@@ -21,6 +21,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <memory>
 #include <QObject>
 
 #include "Map/CRoom.h"
@@ -80,7 +81,7 @@ public:
     void addEvent(Event e) { eventPipe.addEvent(e); }
 
     void addMovementCommand(int dir) { commandQueue.addCommand(CCommand::MOVEMENT, dir); }
-    QVector<unsigned int> *getPrespammedDirs();
+    std::unique_ptr<QVector<unsigned int>> getPrespammedDirs();
 
 
 
@@ -122,7 +123,7 @@ public:
 
     void updateRegions();
 
-    void resetAddedRoomVar() { addedroom = NULL; }
+    void resetAddedRoomVar() { addedroom = nullptr; }
 public slots:
     void slotRunEngine();
     void setPrompt(QByteArray s) { last_prompt = s; }

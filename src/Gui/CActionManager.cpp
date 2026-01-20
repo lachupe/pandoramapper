@@ -602,13 +602,12 @@ void CActionManager::open()
                     "Choose a database",
                     "database/",
                     "XML files (*.xml)");
-  char data[MAX_STR_LEN];
 
   print_debug(DEBUG_XML, "User wants to load the database from the file: %s", qPrintable(s));
-  strcpy(data, qPrintable(s));
 
   if (!s.isEmpty()) {
-    usercmd_mload(0, 0,  data, data);
+    QByteArray data = s.toUtf8();
+    usercmd_mload(0, 0, data.data(), data.data());
   }
 }
 
@@ -625,18 +624,15 @@ void CActionManager::save()
 
 void CActionManager::saveAs()
 {
-  char data[MAX_STR_LEN];
-
   QString s = QFileDialog::getSaveFileName(
                     parent,
                     "Choose a filename to save under",
                     "database/",
                     "XML database files (*.xml)");
 
-  strcpy(data, qPrintable(s));
-
   if (!s.isEmpty()) {
-    usercmd_msave(0, 0,  data, data);
+    QByteArray data = s.toUtf8();
+    usercmd_msave(0, 0, data.data(), data.data());
     QMessageBox::information(parent, "Saving...", "Saved!\n", QMessageBox::Ok);
   }
 }
