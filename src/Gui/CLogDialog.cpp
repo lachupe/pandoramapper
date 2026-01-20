@@ -19,7 +19,10 @@
  */
 
 
+#include <QFile>
 #include <QMessageBox>
+#include <QTextStream>
+#include <QUrl>
 
 #include "utils.h"
 #include "defines.h"

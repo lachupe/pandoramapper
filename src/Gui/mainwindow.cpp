@@ -100,7 +100,7 @@ CMainWindow::CMainWindow(QWidget *parent)
     renderer =  new RendererWidget( this );
     setCentralWidget( renderer );
 
-    if (!renderer->format().sampleBuffers()) {
+    if (renderer->format().samples() <= 0) {
     	print_debug(DEBUG_SYSTEM, "This system does not have sample buffer support.\r\n");
     	printf("This system does not have sample buffer support.\r\n");
      }
@@ -117,7 +117,9 @@ CMainWindow::CMainWindow(QWidget *parent)
     m_dockDialogLog = new DockWidget(tr("Log View"), this);
     m_dockDialogLog->setObjectName("DockWidgetLog");
     m_dockDialogLog->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-    m_dockDialogLog->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    m_dockDialogLog->setFeatures(QDockWidget::DockWidgetClosable |
+                                 QDockWidget::DockWidgetMovable |
+                                 QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::BottomDockWidgetArea, m_dockDialogLog);
 
     logWindow = new QTextBrowser(m_dockDialogLog);
@@ -678,9 +680,7 @@ void CMainWindow::mouseMoveEvent( QMouseEvent *e)
 
 void CMainWindow::wheelEvent(QWheelEvent *e)
 {
-    int delta;
-
-    delta = e->delta();
+    int delta = e->angleDelta().y();
 
     renderer->setUserZ( renderer->getUserZ() + (delta / 120));
 
@@ -772,4 +772,3 @@ void CMainWindow::closeEvent(QCloseEvent *event)
     event->accept();
     QApplication::quit();
 }
-

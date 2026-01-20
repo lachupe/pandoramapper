@@ -45,7 +45,7 @@ public:
     int size() {return selection.size(); }
     void exclusiveSelection(unsigned int id); 
 
-    QList<int>  getList() { return selection.toList(); }
+    QList<int>  getList() { return selection.values(); }
     bool isEmpty() { return selection.empty(); }
 
 signals:

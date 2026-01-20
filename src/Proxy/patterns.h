@@ -28,10 +28,11 @@
 
 #include <QtGui>
 #include <QtCore>
+#include <QRegularExpression>
 
 class Patterns {
 	
-    static QRegExp m_rx;
+    static QRegularExpression m_rx;
     
 public:
 	static bool matchMoveCancelPatterns(QString&);

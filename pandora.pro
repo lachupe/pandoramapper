@@ -15,9 +15,11 @@ CONFIG += qt \
 
 
 CONFIG += debug_and_release
+CONFIG += c++17
     
 QT += xml \
     opengl \
+    openglwidgets \
     gui \
     network \
     core \
@@ -118,11 +120,13 @@ SOURCES += src/Proxy/CDispatcher.cpp \
 ################################################ 	Renderer	######################################################
 HEADERS += src/Renderer/CFrustum.h \
     src/Renderer/CSquare.h \
-    src/Renderer/renderer.h 
+    src/Renderer/GLPrimitives.h \
+    src/Renderer/renderer.h
 
 
 SOURCES += src/Renderer/CFrustum.cpp \
     src/Renderer/CSquare.cpp \
+    src/Renderer/GLPrimitives.cpp \
     src/Renderer/renderer.cpp 
 
 	

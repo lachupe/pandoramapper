@@ -9,7 +9,7 @@
 #define CTIMERS_H_
 
 #include <QByteArray>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QList>
 #include <QMutex>
 #include <QObject>
@@ -19,7 +19,7 @@ struct TTimer {
 	QByteArray name;
 	QByteArray desc;
 	int 	   duration;
-	QTime	   timer;
+	QElapsedTimer	   timer;
 
 };
 

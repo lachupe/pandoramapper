@@ -12,7 +12,7 @@
 
 #include <QQueue>
 #include <QMutex>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QVector>
 
 #include "utils.h"
@@ -22,7 +22,7 @@
 class CCommand
 {
 public:
-	QTime timer;
+	QElapsedTimer timer;
 	int type;
 	int dir;
 

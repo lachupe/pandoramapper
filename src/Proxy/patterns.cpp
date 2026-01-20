@@ -27,7 +27,7 @@
 
 #include "Proxy/patterns.h"
 
-QRegExp Patterns::m_rx;
+QRegularExpression Patterns::m_rx;
 
 bool Patterns::matchPattern(QString pattern, QString& str)
 {
@@ -38,8 +38,8 @@ bool Patterns::matchPattern(QString pattern, QString& str)
     switch ((int) pattern.at(1).toLatin1())
 	{
 	case 33:  // !
-		m_rx.setPattern(pattern.remove(0,2));
-		if (m_rx.exactMatch(str)) 
+        m_rx = QRegularExpression(QRegularExpression::anchoredPattern(pattern.remove(0,2)));
+		if (m_rx.match(str).hasMatch())
 			return true;
 		break;
     case 60:  // <

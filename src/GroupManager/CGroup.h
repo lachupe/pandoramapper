@@ -22,6 +22,7 @@
 #define CGROUP_H_
 
 #include <QDialog>
+#include <QElapsedTimer>
 #include <QString>
 #include <QDomNode>
 #include <QVector>
@@ -37,7 +38,7 @@ class CGroup : public QDialog
 {
 	Q_OBJECT
 
-	QTime deadTimer;
+	QElapsedTimer deadTimer;
 	int ignoredState;
 
 	void resetAllChars();

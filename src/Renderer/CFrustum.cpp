@@ -19,7 +19,6 @@
  */
 
 
-#include <QGLWidget>
 #include <cmath>
 
 #include "Renderer/CFrustum.h"

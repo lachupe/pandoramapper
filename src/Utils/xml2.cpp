@@ -24,7 +24,7 @@
 */
 #include <QApplication>
 #include <QFile>
-#include <QXmlDefaultHandler>
+#include <QXmlStreamReader>
 #include <QString>
 #include <QProgressDialog>
 #include <QMessageBox>
@@ -46,13 +46,13 @@
 void CRoomManager::loadMap( QString filename)
 {
   QFile xmlFile( filename);
-  QXmlInputSource source( &xmlFile );
-
-  QXmlSimpleReader reader;
-
 
   if (xmlFile.exists() == false) {
       print_debug(DEBUG_XML, "ERROR: The database file %s does NOT exist!\r\n", qPrintable(filename) );
+      return;
+  }
+  if (!xmlFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      print_debug(DEBUG_XML, "ERROR: Unable to open the database file %s.\r\n", qPrintable(filename) );
       return;
   }
 
@@ -71,14 +71,14 @@ void CRoomManager::loadMap( QString filename)
   progress.show();
 
 
+  QXmlStreamReader reader(&xmlFile);
   StructureParser * handler = new StructureParser(&progress, currentMaximum, this);
-  reader.setContentHandler( handler );
     
   print_debug(DEBUG_XML, "reading xml ...");
   fflush(stdout);
 
 //  lockForWrite();
-  reader.parse( source );
+  handler->parse(reader);
 
   
  
@@ -118,15 +118,40 @@ void CRoomManager::loadMap( QString filename)
 
 
 
-StructureParser::StructureParser(QProgressDialog *progress, unsigned int& currentMaximum, CRoomManager *parent): 
-	QXmlDefaultHandler(), parent(parent), progress(progress),  currentMaximum(currentMaximum)
+StructureParser::StructureParser(QProgressDialog *progress, unsigned int& currentMaximum, CRoomManager *parent):
+	parent(parent), progress(progress),  currentMaximum(currentMaximum)
 {
     readingRegion = false;
     abortLoading = false;
 }
 
+bool StructureParser::parse(QXmlStreamReader &reader)
+{
+    while (!reader.atEnd()) {
+        reader.readNext();
+        if (reader.isStartElement()) {
+            startElement(reader.name().toString(), reader.attributes());
+        } else if (reader.isEndElement()) {
+            endElement(reader.name().toString());
+        } else if (reader.isCharacters() && !reader.isWhitespace()) {
+            characters(reader.text().toString());
+        }
 
-bool StructureParser::endElement( const QString& , const QString& , const QString& qName)
+        if (abortLoading) {
+            break;
+        }
+    }
+
+    if (reader.hasError()) {
+        print_debug(DEBUG_XML, "XML parse error: %s", qPrintable(reader.errorString()));
+        return false;
+    }
+
+    return !abortLoading;
+}
+
+
+bool StructureParser::endElement(const QString& qName)
 {
   if (qName == "room") {
       parent->addRoom(r);	/* tada! */
@@ -152,12 +177,12 @@ bool StructureParser::endElement( const QString& , const QString& , const QStrin
   return true;
 }
 
-bool StructureParser::characters( const QString& ch)
+bool StructureParser::characters(const QString& ch)
 {
 	if (abortLoading)
 		return true;
 	
-    if (ch == NULL || ch == "")
+    if (ch.isEmpty())
     	return true;
     
     if (flag == XML_ROOMNAME) {
@@ -171,9 +196,8 @@ bool StructureParser::characters( const QString& ch)
 } 
 
 
-bool StructureParser::startElement( const QString& , const QString& , 
-                                    const QString& qName, 
-                                    const QXmlAttributes& attributes)
+bool StructureParser::startElement(const QString& qName,
+                                   const QXmlStreamAttributes& attributes)
 {
 	if (abortLoading)
 		return true;
@@ -182,10 +206,10 @@ bool StructureParser::startElement( const QString& , const QString& ,
         if (qName == "alias") {
             QByteArray alias, door;
             
-            s = attributes.value("name");
+            s = attributes.value("name").toString();
             alias = s.toLocal8Bit();
             
-            s = attributes.value("door");
+            s = attributes.value("door").toString();
             door = s.toLocal8Bit();
             
             if (door != "" && alias != "")
@@ -199,15 +223,15 @@ bool StructureParser::startElement( const QString& , const QString& ,
     unsigned int to;
         
     /* special */
-    if (attributes.length() < 3) {
+    if (attributes.size() < 3) {
       print_debug(DEBUG_XML, "Not enough exit attributes in XML file!");
       exit(1);
     }        
       
-    s = attributes.value("dir");
+    s = attributes.value("dir").toString();
     dir = numbydir(s.toLocal8Bit().at(0));
       
-    s = attributes.value("to");
+    s = attributes.value("to").toString();
     if (s == "DEATH") {
 	r->setExitDeath( dir );
     } else if (s == "UNDEFINED") {
@@ -219,7 +243,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
     	r->exits[dir] = (CRoom *) to;        
     }
 
-    s = attributes.value("door");
+    s = attributes.value("door").toString();
     r->setDoor(dir, s.toLocal8Bit());
     
   } else if (qName == "roomname") {
@@ -230,7 +254,7 @@ bool StructureParser::startElement( const QString& , const QString& ,
     return true;
   } else if (qName == "note") {
       if(attributes.count() > 0) {
-          r->setNoteColor(attributes.value("color").toLocal8Bit());
+          r->setNoteColor(attributes.value("color").toString().toLocal8Bit());
       } else {
           //QColor color = QColor(242, 128, 3, 255);
           //printf("color: %s\n\r",(const char*)color.name().toLocal8Bit());
@@ -242,31 +266,31 @@ bool StructureParser::startElement( const QString& , const QString& ,
   } else if (qName == "room") {
       r = new CRoom;
 
-      s = attributes.value("id");
+      s = attributes.value("id").toString();
       r->id = s.toInt();
       
-      s = attributes.value("x");
+      s = attributes.value("x").toString();
       r->setX( s.toInt() );
 
-      s = attributes.value("y");
+      s = attributes.value("y").toString();
       r->setY( s.toInt() );
 
-      s = attributes.value("z");
+      s = attributes.value("z").toString();
       r->simpleSetZ( s.toInt() );
 
-      s = attributes.value("terrain");
+      s = attributes.value("terrain").toString();
       r->setSector( conf->getSectorByDesc(s.toLocal8Bit()) );
       
-      s = attributes.value("region");
+      s = attributes.value("region").toString();
       r->setRegion(s.toLocal8Bit());
   } else if (qName == "region") {
      region = new CRegion;
             
      readingRegion = true;
-     s = attributes.value("name");
+     s = attributes.value("name").toString();
      region->setName(s.toLocal8Bit());
   } else if (qName == "map") {
-	  s = attributes.value("rooms");
+	  s = attributes.value("rooms").toString();
 	  if (s.isEmpty()) {
 		  progress->setMaximum( currentMaximum );
 	  } else {
@@ -275,6 +299,11 @@ bool StructureParser::startElement( const QString& , const QString& ,
   }
   
   return true;
+}
+
+bool StructureParser::isAborted() const
+{
+    return abortLoading;
 }
 
 /* plain text file alike writing */

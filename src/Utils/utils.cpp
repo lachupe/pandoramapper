@@ -19,6 +19,8 @@
  */
 
 /* utilities, string functions and stuff */
+#include <QDateTime>
+#include <QElapsedTimer>
 #include "defines.h"
 #include "CConfigurator.h"
 
@@ -81,7 +83,7 @@ const boolean_struct input_booleans[] = {
   {NULL, false}
 };
 
-QTime debug_timer;
+QElapsedTimer debug_timer;
 
 int write_to_channel(int mode, const char *format, va_list args);
 

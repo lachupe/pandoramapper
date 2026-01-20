@@ -22,7 +22,7 @@
 #define MPILEN		4	/* strlen(MPI) */
 
 
-#include <qregexp.h>
+#include <QRegularExpression>
 
 //#include <arpa/telnet.h>
 //#define IAC 255
@@ -50,6 +50,16 @@
 #include "Gui/mainwindow.h"
 
 
+static QRegularExpression makeWildcardRegex(const QByteArray &pattern, Qt::CaseSensitivity sensitivity)
+{
+    QRegularExpression::PatternOptions options = QRegularExpression::NoPatternOption;
+    if (sensitivity == Qt::CaseInsensitive) {
+        options |= QRegularExpression::CaseInsensitiveOption;
+    }
+    QString regex = QRegularExpression::wildcardToRegularExpression(QString::fromLatin1(pattern));
+    return QRegularExpression(QRegularExpression::anchoredPattern(regex), options);
+}
+
 Cdispatcher::Cdispatcher()
 {
     xmlState = STATE_NORMAL;
@@ -58,10 +68,8 @@ Cdispatcher::Cdispatcher()
     scouting = false;
     event.clear();
 
-    scoreExp.setPattern(conf->getScorePattern() );
-    scoreTrollExp.setPattern(conf->getShortScorePattern() );
-    scoreExp.setPatternSyntax(QRegExp::Wildcard);
-    scoreTrollExp.setPatternSyntax(QRegExp::Wildcard);
+    scoreExp = makeWildcardRegex(conf->getScorePattern(), Qt::CaseSensitive);
+    scoreTrollExp = makeWildcardRegex(conf->getShortScorePattern(), Qt::CaseSensitive);
 }
 
 /**
@@ -644,7 +652,8 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
             }
 
             // inform groupManager
-            if (scoreExp.exactMatch(a_line) == true || scoreTrollExp.exactMatch(a_line)) {
+            QString lineText = QString::fromLatin1(a_line);
+            if (scoreExp.match(lineText).hasMatch() || scoreTrollExp.match(lineText).hasMatch()) {
             	proxy->sendScoreLineEvent(a_line);
             }
 
@@ -662,9 +671,9 @@ int Cdispatcher::analyzeMudStream(ProxySocket &c)
 //            if (conf->spells_pattern == a_line) {
 //            }
 
-            static QRegExp statExp("Needed: * Alert: *.", Qt::CaseSensitive, QRegExp::Wildcard);
-            static QRegExp lvl100statExp("Gold: *. Alert: *.", Qt::CaseSensitive, QRegExp::Wildcard);
-            if (statExp.exactMatch(a_line) || lvl100statExp.exactMatch(a_line)) {
+            static QRegularExpression statExp = makeWildcardRegex("Needed: * Alert: *.", Qt::CaseSensitive);
+            static QRegularExpression lvl100statExp = makeWildcardRegex("Gold: *. Alert: *.", Qt::CaseSensitive);
+            if (statExp.match(lineText).hasMatch() || lvl100statExp.match(lineText).hasMatch()) {
                 spells_print_mode = true;   // print the spells data
             	c.append( buffer[i].line );
             	c.append( checkTimersLine() );
@@ -767,8 +776,8 @@ void Cdispatcher::checkStateChange(QByteArray line)
 	}
 
 	// BASHED STATE
-	static QRegExp bashed("* sends you sprawling with a powerful bash.", Qt::CaseSensitive, QRegExp::Wildcard);
-	if (bashed.exactMatch(line)) {
+	static QRegularExpression bashed = makeWildcardRegex("* sends you sprawling with a powerful bash.", Qt::CaseSensitive);
+	if (bashed.match(QString::fromLatin1(line)).hasMatch()) {
 		printf("bash matches!\r\n");
 		proxy->sendCharStateUpdatedEvent(CGroupChar::BASHED);
 		return;
@@ -907,5 +916,3 @@ QByteArray Cdispatcher::checkTimersLine()
 //    	s+= "Normal spells:\r\n";
     return qPrintable(s);
 }
-
-
