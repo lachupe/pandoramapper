@@ -28,29 +28,28 @@
 
 class CGroupCommunicator;
 
-class CGroupServer: public QTcpServer
+class CGroupServer : public QTcpServer
 {
-	Q_OBJECT
-	
-	QList<CGroupClient *> connections;
-public:
-	CGroupServer(int localPort, QObject *parent);
-	virtual ~CGroupServer();
-	void addClient(CGroupClient *client);
-	void sendToAll(QByteArray);
-	void sendToAllExceptOne(CGroupClient *conn, QByteArray);
-	void closeAll();
-	
-protected:
+    Q_OBJECT
+
+    QList<CGroupClient *> connections;
+
+  public:
+    CGroupServer(int localPort, QObject *parent);
+    virtual ~CGroupServer();
+    void addClient(CGroupClient *client);
+    void sendToAll(QByteArray);
+    void sendToAllExceptOne(CGroupClient *conn, QByteArray);
+    void closeAll();
+
+  protected:
     void incomingConnection(qintptr socketDescriptor);
-    
-public slots:
-	void connectionClosed(CGroupClient *connection);
 
-signals:
-	void failedToStart();
+  public slots:
+    void connectionClosed(CGroupClient *connection);
 
-
+  signals:
+    void failedToStart();
 };
 
 #endif /*CGROUPSERVER_H_*/

@@ -52,8 +52,6 @@
 #include "Engine/CStacksManager.h"
 #include "Engine/CEngine.h"
 
-
-
 #ifdef Q_OS_MACX
 #include <CoreFoundation/CoreFoundation.h>
 #endif
@@ -64,20 +62,18 @@ int main(int argc, char *argv[])
 {
     QString resPath;
     QString override_base_file;
-    int     override_local_port = 0;
+    int override_local_port = 0;
     QString override_remote_host;
-    int     override_remote_port = 0;
+    int override_remote_port = 0;
     QString configfile = "mume.ini";
     const int default_local_port = 3000;
     const int default_remote_port = 4242;
-    bool    mud_emulation = false;
+    bool mud_emulation = false;
 
 #ifdef Q_OS_MACX
     CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef,
-						  kCFURLPOSIXPathStyle);
-    const char *appPath = CFStringGetCStringPtr(macPath,
-						CFStringGetSystemEncoding());
+    CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+    const char *appPath = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
     resPath = QString(appPath) + "/Contents/Resources/";
 
     QString default_base_file = "mume.xml";
@@ -92,7 +88,7 @@ int main(int argc, char *argv[])
     QString default_base_file = "mume.xml";
     QString default_remote_host = "129.241.210.221";
 #endif
-    QApplication app( argc, argv );
+    QApplication app(argc, argv);
     app.setApplicationName("PandoraMapper");
     app.setApplicationVersion(QString::number(SVN_REVISION));
 
@@ -101,18 +97,13 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription("Pandora MUME mapper");
     parser.addHelpOption();
 
-    QCommandLineOption configOption(QStringList() << "c" << "config",
-        "Load config file.", "configfile");
-    QCommandLineOption baseOption(QStringList() << "b" << "base",
-        "Override the database file.", "filename");
-    QCommandLineOption localPortOption(QStringList() << "lp" << "localport",
-        "Override the local port number.", "port");
-    QCommandLineOption hostOption(QStringList() << "hn" << "hostname",
-        "Override the remote (game) host name.", "host");
+    QCommandLineOption configOption(QStringList() << "c" << "config", "Load config file.", "configfile");
+    QCommandLineOption baseOption(QStringList() << "b" << "base", "Override the database file.", "filename");
+    QCommandLineOption localPortOption(QStringList() << "lp" << "localport", "Override the local port number.", "port");
+    QCommandLineOption hostOption(QStringList() << "hn" << "hostname", "Override the remote (game) host name.", "host");
     QCommandLineOption remotePortOption(QStringList() << "rp" << "remoteport",
-        "Override the remote (game) port number.", "port");
-    QCommandLineOption emulateOption(QStringList() << "e" << "emulate",
-        "Emulate MUD environment.");
+                                        "Override the remote (game) port number.", "port");
+    QCommandLineOption emulateOption(QStringList() << "e" << "emulate", "Emulate MUD environment.");
 
     parser.addOption(configOption);
     parser.addOption(baseOption);
@@ -125,7 +116,7 @@ int main(int argc, char *argv[])
 
     if (parser.isSet(configOption)) {
         configfile = parser.value(configOption);
-        resPath = ""; // user has own config file - including the path
+        resPath = "";  // user has own config file - including the path
     }
     if (parser.isSet(emulateOption)) {
         printf("Pandora: Starting in MUD emulation mode.\r\n");
@@ -150,65 +141,62 @@ int main(int argc, char *argv[])
 
     splash->showMessage("Loading configuration and database...");
 
-
     /* set analyzer engine defaults */
-    //engine_init();
+    // engine_init();
     splash->showMessage(QString("Loading the configuration ") + configfile);
     conf = new Configurator();
     conf->loadConfig(resPath.toUtf8(), configfile.toUtf8());
     print_debug(DEBUG_SYSTEM, "starting up...");
 
-
     if (!override_base_file.isEmpty()) {
-      conf->setBaseFile(override_base_file.toUtf8());
-    } else if ( conf->getBaseFile().isEmpty()) {
-      conf->setBaseFile(default_base_file.toUtf8());
+        conf->setBaseFile(override_base_file.toUtf8());
+    } else if (conf->getBaseFile().isEmpty()) {
+        conf->setBaseFile(default_base_file.toUtf8());
     }
     print_debug(DEBUG_SYSTEM, "Using database file : %s.", conf->getBaseFile().constData());
 
     if (!override_remote_host.isEmpty()) {
-      conf->setRemoteHost(override_remote_host.toUtf8());
-    } else if ( conf->getRemoteHost().isEmpty() ) {
-      conf->setRemoteHost(default_remote_host.toUtf8());
+        conf->setRemoteHost(override_remote_host.toUtf8());
+    } else if (conf->getRemoteHost().isEmpty()) {
+        conf->setRemoteHost(default_remote_host.toUtf8());
     }
     print_debug(DEBUG_SYSTEM, "Using target hostname : %s.", conf->getRemoteHost().constData());
 
     if (override_local_port != 0) {
-      conf->setLocalPort(override_local_port);
-    } else if ( conf->getLocalPort() == 0) {
-      conf->setLocalPort(default_local_port);
+        conf->setLocalPort(override_local_port);
+    } else if (conf->getLocalPort() == 0) {
+        conf->setLocalPort(default_local_port);
     }
     print_debug(DEBUG_SYSTEM, "Using local port : %i.", conf->getLocalPort());
 
     if (override_remote_port != 0) {
-      conf->setRemotePort(override_remote_port);
+        conf->setRemotePort(override_remote_port);
     } else if (conf->getRemotePort() == 0) {
-      conf->setRemotePort(default_remote_port);
+        conf->setRemotePort(default_remote_port);
     }
     print_debug(DEBUG_SYSTEM, "Using target port : %i.", conf->getRemotePort());
 
-    conf->setConfigModified( false );
+    conf->setConfigModified(false);
 
     splash->showMessage("Starting Analyzer and Proxy...");
     engine = new CEngine();
     proxy = new Proxy();
 
-    //splash->showMessage("Loading the database, please wait...");
-    //print_debug(DEBUG_SYSTEM, "Loading the database ... ");
-    //xml_readbase( conf->get_base_file() );
-    //print_debug(DEBUG_SYSTEM, "Successfuly loaded %i rooms!", Map.size());
+    // splash->showMessage("Loading the database, please wait...");
+    // print_debug(DEBUG_SYSTEM, "Loading the database ... ");
+    // xml_readbase( conf->get_base_file() );
+    // print_debug(DEBUG_SYSTEM, "Successfuly loaded %i rooms!", Map.size());
 
     /* special init for the mud emulation */
     if (mud_emulation) {
-      print_debug(DEBUG_SYSTEM, "Starting in MUD emulation mode...");
+        print_debug(DEBUG_SYSTEM, "Starting in MUD emulation mode...");
 
-      engine->setPrompt("-->");
-      stacker.put(1);
-      stacker.swap();
+        engine->setPrompt("-->");
+        stacker.put(1);
+        stacker.swap();
     }
 
-    proxy->setMudEmulation( mud_emulation );
-
+    proxy->setMudEmulation(mud_emulation);
 
     print_debug(DEBUG_SYSTEM, "Starting renderer ...\n");
 
@@ -229,7 +217,7 @@ int main(int argc, char *argv[])
 
     QRect rect = QGuiApplication::primaryScreen()->availableGeometry();
     if (conf->getWindowRect().x() == 0 || conf->getWindowRect().x() >= rect.width() ||
-        conf->getWindowRect().y() >= rect.height() ) {
+        conf->getWindowRect().y() >= rect.height()) {
         print_debug(DEBUG_SYSTEM && DEBUG_INTERFACE, "Autosettings for window size and position");
         int x, y, height, width;
 
@@ -238,7 +226,7 @@ int main(int argc, char *argv[])
         height = rect.height() / 3;
         width = rect.width() - x;
 
-        conf->setWindowRect( x, y, width, height);
+        conf->setWindowRect(x, y, width, height);
     }
 
     renderer_window = new CMainWindow;
@@ -249,7 +237,7 @@ int main(int argc, char *argv[])
     delete splash;
 
     proxy->start();
-    QObject::connect(proxy, SIGNAL(startEngine()), engine, SLOT(slotRunEngine()), Qt::QueuedConnection );
+    QObject::connect(proxy, SIGNAL(startEngine()), engine, SLOT(slotRunEngine()), Qt::QueuedConnection);
     QObject::connect(proxy, SIGNAL(startRenderer()), renderer_window->renderer, SLOT(display()), Qt::QueuedConnection);
 
     userland_parser->parse_user_input_line("mload");

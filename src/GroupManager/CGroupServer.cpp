@@ -24,71 +24,65 @@
 
 #include "GroupManager/CGroupServer.h"
 
-CGroupServer::CGroupServer(int localPort, QObject *parent) : 
-	QTcpServer(parent)
+CGroupServer::CGroupServer(int localPort, QObject *parent) : QTcpServer(parent)
 {
-	if (listen(QHostAddress::Any, localPort) != true) {
-		print_debug(DEBUG_GROUP, "Failed to start a group Manager server!");
-		emit failedToStart();
-	} else {
-        printf( "Loaded %s\r\n,", serverAddress().toString().toLatin1().data() );
+    if (listen(QHostAddress::Any, localPort) != true) {
+        print_debug(DEBUG_GROUP, "Failed to start a group Manager server!");
+        emit failedToStart();
+    } else {
+        printf("Loaded %s\r\n,", serverAddress().toString().toLatin1().data());
         print_debug(DEBUG_GROUP, "Listening on port %i!", localPort);
-	}
+    }
 }
 
-CGroupServer::~CGroupServer()
-{
-	
-}
+CGroupServer::~CGroupServer() {}
 
 void CGroupServer::incomingConnection(qintptr socketDescriptor)
 {
-	print_debug(DEBUG_GROUP, "Incoming connection");
-	// connect the client straight to the Communicator, as he handles all the state changes 
-	// data transfers and similar.
-	CGroupClient *client = new CGroupClient(parent());
-	addClient(client);
-	
-	client->setSocket(socketDescriptor);
+    print_debug(DEBUG_GROUP, "Incoming connection");
+    // connect the client straight to the Communicator, as he handles all the state changes
+    // data transfers and similar.
+    CGroupClient *client = new CGroupClient(parent());
+    addClient(client);
+
+    client->setSocket(socketDescriptor);
 }
 
 void CGroupServer::addClient(CGroupClient *client)
 {
-	print_debug(DEBUG_GROUP, "Adding a client to the connections list.");
-	connections.append(client);
+    print_debug(DEBUG_GROUP, "Adding a client to the connections list.");
+    connections.append(client);
 }
 
 void CGroupServer::connectionClosed(CGroupClient *connection)
 {
-	print_debug(DEBUG_GROUP, "Removing and deleting the connection completely.");
-	connection->disconnect();
-	connections.removeAll(connection);
-	print_debug(DEBUG_GROUP, "Deleting the connection");
-	// flush whatever is waiting to be written
-	connection->flush();
-	connection->deleteLater();
+    print_debug(DEBUG_GROUP, "Removing and deleting the connection completely.");
+    connection->disconnect();
+    connections.removeAll(connection);
+    print_debug(DEBUG_GROUP, "Deleting the connection");
+    // flush whatever is waiting to be written
+    connection->flush();
+    connection->deleteLater();
 }
 
 void CGroupServer::sendToAll(QByteArray message)
 {
-	sendToAllExceptOne(nullptr, message);
+    sendToAllExceptOne(nullptr, message);
 }
-
 
 void CGroupServer::sendToAllExceptOne(CGroupClient *conn, QByteArray message)
 {
-	for (int i = 0; i < connections.size(); i++) 
-		if ( connections[i] != conn && connections[i]->isLogged() )
-			connections[i]->sendData(message);
+    for (int i = 0; i < connections.size(); i++)
+        if (connections[i] != conn && connections[i]->isLogged())
+            connections[i]->sendData(message);
 }
 
 void CGroupServer::closeAll()
 {
-	print_debug(DEBUG_GROUP, "Deleting all client connections");
-	for (int i = 0; i < connections.size(); i++) {
-		print_debug(DEBUG_GROUP, "Flushing deleting one ... ");
-		connections[i]->flush();
-		connections[i]->deleteLater();
-	}
+    print_debug(DEBUG_GROUP, "Deleting all client connections");
+    for (int i = 0; i < connections.size(); i++) {
+        print_debug(DEBUG_GROUP, "Flushing deleting one ... ");
+        connections[i]->flush();
+        connections[i]->deleteLater();
+    }
 }
-

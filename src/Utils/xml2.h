@@ -18,15 +18,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef XML2_H                                                                                                                                              
-#define XML2_H  
+#ifndef XML2_H
+#define XML2_H
 /* buffered reading from file */
 
-
-//void xmlWriteMap(QString filename);
+// void xmlWriteMap(QString filename);
 
 /* Loads a char, returns char struct or nullptr */
-//void xmlReadMap(QString filename);
+// void xmlReadMap(QString filename);
 
 #include <QString>
 #include <QXmlStreamReader>
@@ -38,32 +37,30 @@ class CRegion;
 
 class StructureParser
 {
-public:
-  StructureParser(QProgressDialog *progress, unsigned int& currentMaximum, CRoomManager *parent);
-  bool parse(QXmlStreamReader &reader);
-  bool characters(const QString& ch);
-    
-  bool startElement(const QString& qName, const QXmlStreamAttributes& attributes);
-  bool endElement(const QString& qName);
-  bool isAborted() const;
+  public:
+    StructureParser(QProgressDialog *progress, unsigned int &currentMaximum, CRoomManager *parent);
+    bool parse(QXmlStreamReader &reader);
+    bool characters(const QString &ch);
 
-private:
-  /* some flags */
-  int flag;
-  bool readingRegion;
-  bool abortLoading;
-  CRoomManager *parent;
-  
-  QProgressDialog *progress;
-  unsigned int currentMaximum;
+    bool startElement(const QString &qName, const QXmlStreamAttributes &attributes);
+    bool endElement(const QString &qName);
+    bool isAborted() const;
 
-  QString s;
+  private:
+    /* some flags */
+    int flag;
+    bool readingRegion;
+    bool abortLoading;
+    CRoomManager *parent;
 
+    QProgressDialog *progress;
+    unsigned int currentMaximum;
 
-  int i;
-  CRoom *r;
-  CRegion *region;
-    
+    QString s;
+
+    int i;
+    CRoom *r;
+    CRegion *region;
 };
 
 #endif

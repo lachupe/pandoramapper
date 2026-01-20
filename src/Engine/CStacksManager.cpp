@@ -18,7 +18,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #include "defines.h"
 #include "utils.h"
 #include "CStacksManager.h"
@@ -34,34 +33,32 @@
 
 class CStacksManager stacker;
 
-
-CRoom * CStacksManager::first()  
-{ 
+CRoom *CStacksManager::first()
+{
     if (sa->size() == 0)
         return nullptr;
-    return (*sa)[0]; 
+    return (*sa)[0];
 }
 
-CRoom * CStacksManager::nextFirst()  
-{ 
+CRoom *CStacksManager::nextFirst()
+{
     if (sb->size() == 0)
         return nullptr;
-    return (*sb)[0]; 
+    return (*sb)[0];
 }
 
 QString CStacksManager::getCurrent() const
 {
-  if (sa->size() == 0) {
-    return QStringLiteral("NO_SYNC");
-  }
+    if (sa->size() == 0) {
+        return QStringLiteral("NO_SYNC");
+    }
 
-  if (sa->size() > 1) {
-    return QStringLiteral(" MULT ");
-  }
+    if (sa->size() > 1) {
+        return QStringLiteral(" MULT ");
+    }
 
-  return QString::number((*sa)[0]->id);
+    return QString::number((*sa)[0]->id);
 }
-
 
 void CStacksManager::printStacks()
 {
@@ -69,36 +66,34 @@ void CStacksManager::printStacks()
 
     send_to_user(" Possible positions : \n");
     if (sa->size() == 0)
-    	send_to_user(" Current position is unknown!\n");
+        send_to_user(" Current position is unknown!\n");
     for (i = 0; i < sa->size(); i++) {
-    	send_to_user(" %i\n", (*sa)[i]->id);
+        send_to_user(" %i\n", (*sa)[i]->id);
     }
 }
 
 void CStacksManager::removeRoom(unsigned int id)
 {
-  unsigned int i;
+    unsigned int i;
 
-  for (i = 0; i < sa->size(); i++) 
-    if (stacker.get(i)->id != id) 
-      stacker.put( stacker.get(i) );
-  stacker.swap();
+    for (i = 0; i < sa->size(); i++)
+        if (stacker.get(i)->id != id)
+            stacker.put(stacker.get(i));
+    stacker.swap();
 }
 
 void CStacksManager::put(CRoom *r)
 {
     if (mark[r->id] == turn)
-    	return;
+        return;
     sb->push_back(r);
     mark[r->id] = turn;
 }
-
 
 void CStacksManager::put(unsigned int id)
 {
     put(Map.getRoom(id));
 }
-
 
 CRoom *CStacksManager::get(unsigned int i)
 {
@@ -109,7 +104,6 @@ CRoom *CStacksManager::getNext(unsigned int i)
 {
     return (*sb)[i];
 }
-
 
 CStacksManager::CStacksManager()
 {
@@ -122,7 +116,7 @@ void CStacksManager::reset()
     sb = &stackb;
     sa->clear();
     sb->clear();
-    memset(mark, 0, MAX_ROOMS * sizeof(mark[0]) );
+    memset(mark, 0, MAX_ROOMS * sizeof(mark[0]));
     turn = 1;
     swap();
 }
@@ -133,15 +127,15 @@ void CStacksManager::swap()
 
     turn++;
     if (turn == 0) {
-        memset(mark, 0, MAX_ROOMS * sizeof(mark[0]) );
+        memset(mark, 0, MAX_ROOMS * sizeof(mark[0]));
         turn = 1;
     }
-    
+
     t = sa;
     sa = sb;
     sb = t;
     sb->clear();
-  
+
     if (renderer_window)
-      renderer_window->update_status_bar();
+        renderer_window->update_status_bar();
 }

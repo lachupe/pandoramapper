@@ -20,7 +20,6 @@
 
 #include <QSet>
 
-
 #include "CSelectionManager.h"
 #include "utils.h"
 
@@ -35,7 +34,7 @@ void CSelectionManager::select(unsigned int id)
     if (isSelected(id) == false) {
         selection.insert(id);
         print_debug(DEBUG_INTERFACE, "selecting %i", id);
-        emit roomSelected( id );
+        emit roomSelected(id);
     }
 
     toggle_renderer_reaction();
@@ -49,7 +48,6 @@ void CSelectionManager::unselect(unsigned int id)
     renderer_window->update_status_bar();
 }
 
-
 void CSelectionManager::resetSelection()
 {
     selection.clear();
@@ -57,7 +55,7 @@ void CSelectionManager::resetSelection()
     renderer_window->update_status_bar();
 }
 
-CSelectionManager::CSelectionManager() 
+CSelectionManager::CSelectionManager()
 {
     selection.clear();
 }
@@ -67,21 +65,19 @@ CSelectionManager::~CSelectionManager()
     selection.clear();
 }
 
-
-void CSelectionManager::exclusiveSelection(unsigned int id) 
+void CSelectionManager::exclusiveSelection(unsigned int id)
 {
-    if (selection.contains(id)) 
+    if (selection.contains(id))
         return;
     else {
         resetSelection();
         select(id);
-    }   
+    }
 }
 
+// ########################### CMouseState ########################
 
-//########################### CMouseState ########################
-
-CMouseState::CMouseState() 
+CMouseState::CMouseState()
 {
     LeftButtonPressed = false;
     RightButtonPressed = false;
@@ -93,11 +89,10 @@ CMouseState::CMouseState()
     origPos.setY(0);
 }
 
-
 int CMouseState::delta(QPoint pos)
 {
-    int x = origPos.x()-pos.x();
-    int y = origPos.y()-pos.y();
+    int x = origPos.x() - pos.x();
+    int y = origPos.y() - pos.y();
 
-    return x*x + y*y;
+    return x * x + y * y;
 }

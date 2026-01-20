@@ -28,70 +28,70 @@
 #include <QReadLocker>
 #include <QWriteLocker>
 
-
 #include "defines.h"
 
 #include "Map/CRoom.h"
 #include "Map/CRegion.h"
 #include "Gui/CSelectionManager.h"
 
-
 class CPlane;
 class CSquare;
 
-class CRoomManager : public QObject {
-	Q_OBJECT
+class CRoomManager : public QObject
+{
+    Q_OBJECT
 
-	QList<CRegion *>    regions;
-    QVector<CRoom* > 	rooms;   		/* rooms */
-    CRoom* 				ids[MAX_ROOMS];	/* array of pointers */
+    QList<CRegion *> regions;
+    QVector<CRoom *> rooms; /* rooms */
+    CRoom *ids[MAX_ROOMS];  /* array of pointers */
 
-    CPlane        		*planes;        /* planes/levels of the map, sorted by the Z coordinate, lower at first */
+    CPlane *planes; /* planes/levels of the map, sorted by the Z coordinate, lower at first */
 
-    bool	blocked;
-public:
+    bool blocked;
+
+  public:
     CRoomManager();
     virtual ~CRoomManager();
     void init();
-    void reinit();			/* reinitializer/utilizer */
+    void reinit(); /* reinitializer/utilizer */
 
-    QVector<CRoom* > getRooms() { return rooms; }
-    CPlane* getPlanes() { return planes; }
+    QVector<CRoom *> getRooms() { return rooms; }
+    CPlane *getPlanes() { return planes; }
 
-    unsigned int next_free; 	/* next free id */
+    unsigned int next_free; /* next free id */
     unsigned int oneway_room_id;
 
-    unsigned int size()  { return rooms.size(); }
+    unsigned int size() { return rooms.size(); }
 
-
-    CSelectionManager   selections;
+    CSelectionManager selections;
 
     /* plane support */
-    void          addToPlane(CRoom* room);
-    void          removeFromPlane(CRoom* room);
-    void          expandPlane(CPlane *plane, CRoom* room);
+    void addToPlane(CRoom *room);
+    void removeFromPlane(CRoom *room);
+    void expandPlane(CPlane *plane, CRoom *room);
 
+    void addRoom(CRoom *room);
 
-    void addRoom(CRoom* room);
-
-
-
-    inline CRoom* getRoom(unsigned int id)        {
-		if (id < MAX_ROOMS)
-			return ids[id];
-		else
-			return nullptr;
+    inline CRoom *getRoom(unsigned int id)
+    {
+        if (id < MAX_ROOMS)
+            return ids[id];
+        else
+            return nullptr;
     }
 
-    inline QByteArray getName(unsigned int id)  {
-    	if (ids[id]) return (*(ids[id])).getName(); return "";
+    inline QByteArray getName(unsigned int id)
+    {
+        if (ids[id])
+            return (*(ids[id])).getName();
+        return "";
     }
 
-    int tryMergeRooms(CRoom* room, CRoom* copy, int j);
-    bool isDuplicate(CRoom* addedroom);
+    int tryMergeRooms(CRoom *room, CRoom *copy, int j);
+    bool isDuplicate(CRoom *addedroom);
 
     void fixFreeRooms();
-    CRegion* getRegionByName(QByteArray name);
+    CRegion *getRegionByName(QByteArray name);
     bool addRegion(QByteArray name);
     void addRegion(CRegion *reg);
     void rebuildRegion(CRegion *reg);
@@ -100,16 +100,15 @@ public:
 
     QList<CRegion *> getAllRegions();
 
-    void deleteRoom(CRoom* r, int mode);
-    void smallDeleteRoom(CRoom* r);
+    void deleteRoom(CRoom *r, int mode);
+    void smallDeleteRoom(CRoom *r);
 
     QList<int> searchNames(QString s, Qt::CaseSensitivity cs);
     QList<int> searchDescs(QString s, Qt::CaseSensitivity cs);
     QList<int> searchNotes(QString s, Qt::CaseSensitivity cs);
     QList<int> searchExits(QString s, Qt::CaseSensitivity cs);
 
-
-    CRoom* findDuplicateRoom(CRoom *orig);
+    CRoom *findDuplicateRoom(CRoom *orig);
 
     void loadMap(QString filename);
     void saveMap(QString filename);
@@ -119,7 +118,6 @@ public:
     bool isBlocked() { return blocked; }
 };
 
-extern class CRoomManager Map;/* room manager */
+extern class CRoomManager Map; /* room manager */
 
 #endif
-

@@ -23,48 +23,52 @@
 
 class CCommand
 {
-public:
-	QElapsedTimer timer;
-	int type;
-	int dir;
+  public:
+    QElapsedTimer timer;
+    int type;
+    int dir;
 
-	enum TYPES { NONE = 0, MOVEMENT = 1, SCOUTING };
+    enum TYPES
+    {
+        NONE = 0,
+        MOVEMENT = 1,
+        SCOUTING
+    };
 
     CCommand() {}
-	CCommand(int _type, int _dir) : type(_type), dir(_dir) { timer.start(); }
+    CCommand(int _type, int _dir) : type(_type), dir(_dir) { timer.start(); }
 
-	CCommand(const CCommand &other)
+    CCommand(const CCommand &other)
     {
         dir = other.dir;
         type = other.type;
         timer = other.timer;
     }
 
-	CCommand &operator=(const CCommand &other)
+    CCommand &operator=(const CCommand &other)
     {
         if (this != &other) {  // make sure not same object
             dir = other.dir;
             type = other.type;
             timer = other.timer;
         }
-        return *this;    // Return ref for multiple assignment
+        return *this;  // Return ref for multiple assignment
     }
 
-    void clear()    {
-    	timer.restart();
-    	type = NONE;
-    	dir = -1;
+    void clear()
+    {
+        timer.restart();
+        type = NONE;
+        dir = -1;
     }
 };
 
-
-
-class CCommandQueue {
+class CCommandQueue
+{
     mutable QMutex pipeMutex;
     QQueue<CCommand> pipe;
 
-public:
-
+  public:
     void addCommand(int type, int dir)
     {
         CCommand command;
@@ -134,14 +138,12 @@ public:
                 if (r->isConnected(cmd.dir)) {
                     list->append(r->exits[cmd.dir]->id);
                     r = r->exits[cmd.dir];
-                }
-                else if (r->isExitUndefined(cmd.dir))
+                } else if (r->isExitUndefined(cmd.dir))
                     break;
             }
         }
         return list;
     }
 };
-
 
 #endif /* CCOMMANDQUEUE_H_ */

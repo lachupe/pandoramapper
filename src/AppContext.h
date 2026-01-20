@@ -52,55 +52,56 @@ class Userland;
  * For compatibility with existing code, the old extern variables
  * are still available but point to objects owned by this context.
  */
-class AppContext {
-public:
-    static AppContext& instance();
+class AppContext
+{
+  public:
+    static AppContext &instance();
 
     // Non-copyable
-    AppContext(const AppContext&) = delete;
-    AppContext& operator=(const AppContext&) = delete;
+    AppContext(const AppContext &) = delete;
+    AppContext &operator=(const AppContext &) = delete;
 
     // Component accessors
-    CEngine* engine() const { return m_engine; }
-    Proxy* proxy() const { return m_proxy; }
-    CRoomManager& roomManager() { return *m_roomManager; }
-    CStacksManager& stacker() { return *m_stacker; }
-    CTree& nameMap() { return *m_nameMap; }
-    Configurator* configurator() const { return m_configurator; }
-    CMainWindow* mainWindow() const { return m_mainWindow; }
-    Userland* userland() const { return m_userland; }
-    QString* logFileName() const { return m_logFileName; }
+    CEngine *engine() const { return m_engine; }
+    Proxy *proxy() const { return m_proxy; }
+    CRoomManager &roomManager() { return *m_roomManager; }
+    CStacksManager &stacker() { return *m_stacker; }
+    CTree &nameMap() { return *m_nameMap; }
+    Configurator *configurator() const { return m_configurator; }
+    CMainWindow *mainWindow() const { return m_mainWindow; }
+    Userland *userland() const { return m_userland; }
+    QString *logFileName() const { return m_logFileName; }
 
     // Component setters (for initialization in main.cpp)
-    void setEngine(CEngine* engine) { m_engine = engine; }
-    void setProxy(Proxy* proxy) { m_proxy = proxy; }
-    void setConfigurator(Configurator* conf) { m_configurator = conf; }
-    void setMainWindow(CMainWindow* window) { m_mainWindow = window; }
-    void setUserland(Userland* userland) { m_userland = userland; }
-    void setLogFileName(QString* fileName) { m_logFileName = fileName; }
+    void setEngine(CEngine *engine) { m_engine = engine; }
+    void setProxy(Proxy *proxy) { m_proxy = proxy; }
+    void setConfigurator(Configurator *conf) { m_configurator = conf; }
+    void setMainWindow(CMainWindow *window) { m_mainWindow = window; }
+    void setUserland(Userland *userland) { m_userland = userland; }
+    void setLogFileName(QString *fileName) { m_logFileName = fileName; }
 
     // Initialize heap-allocated singletons
     void initRoomManager();
     void initStacker();
     void initNameMap();
 
-private:
+  private:
     AppContext();
     ~AppContext();
 
     // Owned components
-    CEngine* m_engine = nullptr;
-    Proxy* m_proxy = nullptr;
-    CRoomManager* m_roomManager = nullptr;
-    CStacksManager* m_stacker = nullptr;
-    CTree* m_nameMap = nullptr;
-    Configurator* m_configurator = nullptr;
-    CMainWindow* m_mainWindow = nullptr;
-    Userland* m_userland = nullptr;
-    QString* m_logFileName = nullptr;
+    CEngine *m_engine = nullptr;
+    Proxy *m_proxy = nullptr;
+    CRoomManager *m_roomManager = nullptr;
+    CStacksManager *m_stacker = nullptr;
+    CTree *m_nameMap = nullptr;
+    Configurator *m_configurator = nullptr;
+    CMainWindow *m_mainWindow = nullptr;
+    Userland *m_userland = nullptr;
+    QString *m_logFileName = nullptr;
 };
 
 // Convenience macro for accessing context
 #define APP AppContext::instance()
 
-#endif // APPCONTEXT_H
+#endif  // APPCONTEXT_H

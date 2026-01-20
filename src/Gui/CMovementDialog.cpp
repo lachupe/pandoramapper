@@ -18,7 +18,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #include <QMessageBox>
 #include <QIntValidator>
 
@@ -32,7 +31,7 @@
 
 CMovementDialog::CMovementDialog(QWidget *parent) : QDialog(parent)
 {
-    setupUi(this);                        
+    setupUi(this);
     setWindowTitle(tr("Room's Movement Dialog"));
     lineEdit_x->setValidator(new QIntValidator(this));
     lineEdit_y->setValidator(new QIntValidator(this));
@@ -51,18 +50,16 @@ void CMovementDialog::accept()
     QList<int> ids;
     CRoom *r;
 
-
     x = lineEdit_x->text().toInt();
     y = lineEdit_y->text().toInt();
     z = lineEdit_z->text().toInt();
-
 
     // now proceed if needed to the actuall operation
     print_debug(DEBUG_INTERFACE, "movement dialog accepted");
     if (x != 0 || y != 0 || z != 0) {
         print_debug(DEBUG_INTERFACE, "moving rooms by shift : x %i, y %i, z %i", x, y, z);
 
-        // collect the room for the movement            
+        // collect the room for the movement
         if (Map.selections.isEmpty() == false) {
             ids = Map.selections.getList();
         } else {
@@ -70,16 +67,16 @@ void CMovementDialog::accept()
                 QMessageBox::critical(this, "Movement Dialog", QString("You are not in sync!"));
                 done(Accepted);
                 return;
-            } 
+            }
             ids.append(stacker.first()->id);
         }
 
         for (int i = 0; i < ids.size(); ++i) {
-            r = Map.getRoom( ids.at(i) );
-            r->setX( r->getX() + x);
-            r->setY( r->getY() + y);
-            if (z != 0) 
-                r->setZ( r->getZ() + z);
+            r = Map.getRoom(ids.at(i));
+            r->setX(r->getX() + x);
+            r->setY(r->getY() + y);
+            if (z != 0)
+                r->setZ(r->getZ() + z);
         }
         toggle_renderer_reaction();
     }

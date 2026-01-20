@@ -20,28 +20,25 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
-
-#define SVN_REVISION	220
+#define SVN_REVISION 220
 
 class QString;
 
-#define MAX_ROOMS       35000		/* maximal amount of rooms */
+#define MAX_ROOMS 35000 /* maximal amount of rooms */
 
+#define MAX_STR_LEN 400
+#define MAX_LINES_DESC 20
 
-#define MAX_STR_LEN     400
-#define MAX_LINES_DESC  20
-
-#define NORTH           0
-#define EAST            1
-#define SOUTH           2
-#define WEST            3
-#define UP              4
-#define DOWN            5
+#define NORTH 0
+#define EAST 1
+#define SOUTH 2
+#define WEST 3
+#define UP 4
+#define DOWN 5
 
 /* coordinate's cap */
-#define MAX_X           32000
-#define MIN_X           -32000
-
+#define MAX_X 32000
+#define MIN_X -32000
 
 /* global flags */
 extern QString *logFileName;
@@ -49,6 +46,4 @@ extern QString *logFileName;
 void toggle_renderer_reaction();
 void notify_analyzer();
 
-
 #endif
-

@@ -29,36 +29,42 @@
 #include "Engine/CEvent.h"
 #include "Engine/CCommandQueue.h"
 
+class CEngine : public QObject
+{
+    Q_OBJECT
 
+    enum ExitFlags
+    {
+        E_NOEXIT = 0,
+        E_NORMAL,
+        E_OPENDOOR,
+        E_CLOSEDDOOR,
+        E_PORTAL,
+        E_CLIMBUP,
+        E_CLIMBDOWN
+    };
 
-class CEngine : public QObject {
-Q_OBJECT
-
-
-	enum ExitFlags { E_NOEXIT = 0, E_NORMAL, E_OPENDOOR, E_CLOSEDDOOR, E_PORTAL, E_CLIMBUP, E_CLIMBDOWN };
-
-  /* flags */
-    bool mapping;                 /* mapping is On/OFF */
+    /* flags */
+    bool mapping; /* mapping is On/OFF */
     bool mgoto;
-    int   nameMatch;
-    int   descMatch;
+    int nameMatch;
+    int descMatch;
 
-    CRegion  *users_region;
-    CRegion  *last_region;
-    CRegion	 *last_warning_region;
+    CRegion *users_region;
+    CRegion *last_region;
+    CRegion *last_warning_region;
 
     QByteArray last_name;
     QByteArray last_desc;
     QByteArray last_exits;
     QByteArray last_prompt;
-    char 	   last_terrain;
+    char last_terrain;
     QByteArray last_movement;
 
-    PipeManager  eventPipe;
-    Event        event;
+    PipeManager eventPipe;
+    Event event;
 
     CCommandQueue commandQueue;
-
 
     void parseEvent();
     void tryAllDirs();
@@ -72,19 +78,16 @@ Q_OBJECT
 
     void mapCurrentRoom(CRoom *room, int dir);
 
-public:
+  public:
     CEngine();
     ~CEngine();
 
-    CRoom *addedroom;	/* fresh added room */
+    CRoom *addedroom; /* fresh added room */
 
     void addEvent(Event e) { eventPipe.addEvent(e); }
 
     void addMovementCommand(int dir) { commandQueue.addCommand(CCommand::MOVEMENT, dir); }
     std::unique_ptr<QVector<unsigned int>> getPrespammedDirs();
-
-
-
 
     void exec();
 
@@ -107,14 +110,13 @@ public:
     void parse_exits(const char *exits_line, int exits[]);
     void do_exits(const char *exits_line);
 
-
     bool isMapping() { return mapping; }
     void setMapping(bool b) { mapping = b; }
 
     void setMgoto(bool b) { mgoto = b; }
     bool isMgoto() { return mgoto; }
-    bool empty() { return eventPipe.isEmpty(); };                      /* are pipes empty? */
-    void clear();                      /* clears events pipes */
+    bool empty() { return eventPipe.isEmpty(); }; /* are pipes empty? */
+    void clear();                                 /* clears events pipes */
 
     void set_users_region(CRegion *reg);
     void set_last_region(CRegion *reg);
@@ -124,7 +126,7 @@ public:
     void updateRegions();
 
     void resetAddedRoomVar() { addedroom = nullptr; }
-public slots:
+  public slots:
     void slotRunEngine();
     void setPrompt(QByteArray s) { last_prompt = s; }
 };
@@ -132,4 +134,3 @@ public slots:
 extern class CEngine *engine;
 
 #endif
-

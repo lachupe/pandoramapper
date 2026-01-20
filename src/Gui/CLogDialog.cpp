@@ -18,7 +18,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #include <QFile>
 #include <QMessageBox>
 #include <QTextStream>
@@ -37,7 +36,7 @@
 
 CLogDialog::CLogDialog(QWidget *parent) : QDialog(parent)
 {
-    setupUi(this);                        
+    setupUi(this);
     setWindowTitle(tr("Pandora's Log File"));
 }
 
@@ -71,6 +70,5 @@ void CLogDialog::run()
 
 void CLogDialog::accept()
 {
-
     done(Accepted);
 }

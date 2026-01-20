@@ -26,30 +26,27 @@
 #include "Gui/ConfigWidget.h"
 
 /* ----------------------- AnalyserConfigWidget -----------------------------*/
- 
-ConfigWidget::ConfigWidget (QWidget *parent) : QDialog(parent)
+
+ConfigWidget::ConfigWidget(QWidget *parent) : QDialog(parent)
 {
-    setupUi(this);                        
+    setupUi(this);
     setWindowTitle(tr("General Settings"));
-    
-    connect(checkBox_autorefresh, SIGNAL(toggled(bool)), this, SLOT(autorefreshUpdated(bool)) );
+
+    connect(checkBox_autorefresh, SIGNAL(toggled(bool)), this, SLOT(autorefreshUpdated(bool)));
     connect(misc_noteColorButton, &QPushButton::clicked, this, &ConfigWidget::selectNoteColor);
 }
 
-
 void ConfigWidget::run()
 {
-
-    if (conf->getBriefMode()) 
+    if (conf->getBriefMode())
         checkBox_brief->setChecked(true);
-    else 
+    else
         checkBox_brief->setChecked(false);
-              
-       
-    lineEdit_remoteport->setText(QString("%1").arg(conf->getRemotePort()) );
+
+    lineEdit_remoteport->setText(QString("%1").arg(conf->getRemotePort()));
     lineEdit_remotehost->setText(conf->getRemoteHost());
-    
-    lineEdit_localport->setText(QString("%1").arg(conf->getLocalPort()) );
+
+    lineEdit_localport->setText(QString("%1").arg(conf->getLocalPort()));
 
     spinBox_namequote->setValue(conf->getNameQuote());
     spinBox_descquote->setValue(conf->getDescQuote());
@@ -62,42 +59,41 @@ void ConfigWidget::run()
         spinBox_namequote->setEnabled(false);
         spinBox_descquote->setEnabled(false);
     }
-    
-    if (conf->getAutomerge()) 
+
+    if (conf->getAutomerge())
         checkBox_automerge->setChecked(true);
     else
         checkBox_automerge->setChecked(false);
-    
-    if (conf->getAngrylinker()) 
+
+    if (conf->getAngrylinker())
         checkBox_angrylinker->setChecked(true);
     else
         checkBox_angrylinker->setChecked(false);
 
-    if (conf->getDuallinker()) 
+    if (conf->getDuallinker())
         checkBox_duallinker->setChecked(true);
     else
         checkBox_duallinker->setChecked(false);
 
+    if (conf->getShowNotesRenderer())
+        checkShowNotes->setChecked(true);
+    else
+        checkShowNotes->setChecked(false);
 
-    if (conf->getShowNotesRenderer()) 
-        checkShowNotes->setChecked(true);    
-    else 
-        checkShowNotes->setChecked(false);    
+    if (conf->getDisplayRegionsRenderer())
+        checkShowRegions->setChecked(true);
+    else
+        checkShowRegions->setChecked(false);
 
-    if (conf->getDisplayRegionsRenderer()) 
-        checkShowRegions->setChecked(true);    
-    else 
-        checkShowRegions->setChecked(false);    
+    if (conf->getShowRegionsInfo())
+        checkShowSecrets->setChecked(true);
+    else
+        checkShowSecrets->setChecked(false);
 
-    if (conf->getShowRegionsInfo()) 
-        checkShowSecrets->setChecked(true);    
-    else 
-        checkShowSecrets->setChecked(false);    
+    lineEdit_visrange->setText(QString("%1").arg(conf->getTextureVisibility()));
+    lineEdit_detrange->setText(QString("%1").arg(conf->getDetailsVisibility()));
+    lineEdit_layers->setText(QString("%1").arg(conf->getVisibleLayers()));
 
-    lineEdit_visrange->setText(QString("%1").arg(conf->getTextureVisibility()) );
-    lineEdit_detrange->setText(QString("%1").arg(conf->getDetailsVisibility()) );
-    lineEdit_layers->setText(QString("%1").arg(conf->getVisibleLayers()) );
-    
     misc_startupMode->setCurrentIndex(conf->getStartupMode());
 }
 
@@ -115,101 +111,91 @@ void ConfigWidget::autorefreshUpdated(bool state)
 void ConfigWidget::accept()
 {
     int i;
-    
-    if (conf->getBriefMode() !=  checkBox_brief->isChecked() ) 
-        conf->setBriefMode( checkBox_brief->isChecked() );
-       
-    if (conf->getRemoteHost() != lineEdit_remotehost->text().toLocal8Bit() ) 
+
+    if (conf->getBriefMode() != checkBox_brief->isChecked())
+        conf->setBriefMode(checkBox_brief->isChecked());
+
+    if (conf->getRemoteHost() != lineEdit_remotehost->text().toLocal8Bit())
         conf->setRemoteHost(lineEdit_remotehost->text().toLocal8Bit());
-    
+
     i = lineEdit_remoteport->text().toInt();
     if (i == 0) {
-            QMessageBox::critical(this, "Cofiguration",
-                              QString("Bad remote port!"));
-            return;    
+        QMessageBox::critical(this, "Cofiguration", QString("Bad remote port!"));
+        return;
     }
     if (conf->getRemotePort() != i)
         conf->setRemotePort(i);
-        
-    
+
     i = lineEdit_localport->text().toInt();
     if (i == 0) {
-            QMessageBox::critical(this, "Cofiguration",
-                              QString("Bad local port!"));
-            return;    
+        QMessageBox::critical(this, "Cofiguration", QString("Bad local port!"));
+        return;
     }
     if (conf->getLocalPort() != i)
         conf->setLocalPort(i);
 
-
     if (conf->getNameQuote() != spinBox_namequote->value())
-        conf->setNameQuote( spinBox_namequote->value() ); 
-    if (conf->getDescQuote() != spinBox_descquote->value() )        
-        conf->setDescQuote( spinBox_descquote->value() ); 
-    
+        conf->setNameQuote(spinBox_namequote->value());
+    if (conf->getDescQuote() != spinBox_descquote->value())
+        conf->setDescQuote(spinBox_descquote->value());
+
     if (conf->getAutorefresh() != checkBox_autorefresh->isChecked())
-        conf->setAutorefresh( checkBox_autorefresh->isChecked() );
-    
-    
-    if (conf->getAutomerge() != checkBox_automerge->isChecked()) 
+        conf->setAutorefresh(checkBox_autorefresh->isChecked());
+
+    if (conf->getAutomerge() != checkBox_automerge->isChecked())
         conf->setAutomerge(checkBox_automerge->isChecked());
-    
-    if (conf->getAngrylinker() != checkBox_angrylinker->isChecked() )
-        conf->setAngrylinker(checkBox_angrylinker->isChecked() );
 
-    if (conf->getDuallinker() != checkBox_duallinker->isChecked() )
-        conf->setDuallinker(checkBox_duallinker->isChecked() );
+    if (conf->getAngrylinker() != checkBox_angrylinker->isChecked())
+        conf->setAngrylinker(checkBox_angrylinker->isChecked());
 
- 
-    if (conf->getShowRegionsInfo() != checkShowSecrets->isChecked() )
-        conf->setShowRegionsInfo( checkShowSecrets->isChecked() );
-        
-        
-    if (conf->getShowNotesRenderer() != checkShowNotes->isChecked() )
-        conf->setShowNotesRenderer( checkShowNotes->isChecked() );
-        
-    if (conf->getDisplayRegionsRenderer() != checkShowRegions->isChecked() )
-        conf->setDisplayRegionsRenderer( checkShowRegions->isChecked() );
-        
+    if (conf->getDuallinker() != checkBox_duallinker->isChecked())
+        conf->setDuallinker(checkBox_duallinker->isChecked());
+
+    if (conf->getShowRegionsInfo() != checkShowSecrets->isChecked())
+        conf->setShowRegionsInfo(checkShowSecrets->isChecked());
+
+    if (conf->getShowNotesRenderer() != checkShowNotes->isChecked())
+        conf->setShowNotesRenderer(checkShowNotes->isChecked());
+
+    if (conf->getDisplayRegionsRenderer() != checkShowRegions->isChecked())
+        conf->setDisplayRegionsRenderer(checkShowRegions->isChecked());
+
     i = lineEdit_visrange->text().toInt();
     if (i == 0) {
-            QMessageBox::critical(this, "Cofiguration",
-                              QString("Bad textures visibility range port!"));
-            return;    
+        QMessageBox::critical(this, "Cofiguration", QString("Bad textures visibility range port!"));
+        return;
     }
     if (conf->getTextureVisibility() != i)
         conf->setTextureVisibility(i);
 
-
     i = lineEdit_detrange->text().toInt();
     if (i == 0) {
-            QMessageBox::critical(this, "Cofiguration",
-                              QString("Bad details visibility range!"));
-            return;    
+        QMessageBox::critical(this, "Cofiguration", QString("Bad details visibility range!"));
+        return;
     }
     if (conf->getDetailsVisibility() != i)
         conf->setDetailsVisibility(i);
 
     i = lineEdit_layers->text().toInt();
     if (i == 0) {
-            QMessageBox::critical(this, "Cofiguration",
-                              QString("Bad visible Layers settings!"));
-            return;    
+        QMessageBox::critical(this, "Cofiguration", QString("Bad visible Layers settings!"));
+        return;
     }
     if (conf->getVisibleLayers() != i)
         conf->setVisibleLayers(i);
-    
-    if (conf->getStartupMode() != misc_startupMode->currentIndex() )
-        conf->setStartupMode( misc_startupMode->currentIndex() );
+
+    if (conf->getStartupMode() != misc_startupMode->currentIndex())
+        conf->setStartupMode(misc_startupMode->currentIndex());
 
     done(Accepted);
 }
 
-void ConfigWidget::selectNoteColor() {
-    QColor color = QColorDialog::getColor(conf->getNoteColor()==""?
-        QColor("#F28003"):QColor((const char*)conf->getNoteColor()), this);
+void ConfigWidget::selectNoteColor()
+{
+    QColor color = QColorDialog::getColor(
+        conf->getNoteColor() == "" ? QColor("#F28003") : QColor((const char *)conf->getNoteColor()), this);
     if (color.isValid()) {
-        conf->setNoteColor((const char*)color.name().toLocal8Bit());
+        conf->setNoteColor((const char *)color.name().toLocal8Bit());
         /*
         colorLabel->setText(color.name());
         colorLabel->setPalette(QPalette(color));

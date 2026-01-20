@@ -3,7 +3,7 @@
 ** Authors:   Ulf Hermann <ulfonk_mennhar@gmx.de> (Alve),
 **            Marek Krejza <krejza@gmail.com> (Caligor)
 **
-** This file is part of the MMapper project. 
+** This file is part of the MMapper project.
 ** Maintained by Nils Schimmelmann <nschimme@gmail.com>
 **
 ** This program is free software; you can redistribute it and/or
@@ -29,85 +29,79 @@
 
 QRegularExpression Patterns::m_rx;
 
-bool Patterns::matchPattern(QString pattern, QString& str)
+bool Patterns::matchPattern(QString pattern, QString &str)
 {
-	if (pattern.at(0) != '#')
-		return false;
-	
+    if (pattern.at(0) != '#')
+        return false;
 
-    switch ((int) pattern.at(1).toLatin1())
-	{
-	case 33:  // !
-        m_rx = QRegularExpression(QRegularExpression::anchoredPattern(pattern.remove(0,2)));
-		if (m_rx.match(str).hasMatch())
-			return true;
-		break;
+    switch ((int)pattern.at(1).toLatin1()) {
+    case 33:  // !
+        m_rx = QRegularExpression(QRegularExpression::anchoredPattern(pattern.remove(0, 2)));
+        if (m_rx.match(str).hasMatch())
+            return true;
+        break;
     case 60:  // <
-		if (str.startsWith(pattern.remove(0,2))) 
-			return true;
-		break;
+        if (str.startsWith(pattern.remove(0, 2)))
+            return true;
+        break;
     case 61:  // =
-		if ( str==(pattern.remove(0,2)) ) 
-			return true;
-		break;
+        if (str == (pattern.remove(0, 2)))
+            return true;
+        break;
     case 62:  // >
-		if (str.endsWith(pattern.remove(0,2))) 
-			return true;
-		break;
+        if (str.endsWith(pattern.remove(0, 2)))
+            return true;
+        break;
     case 63:  // ?
-		if (str.contains(pattern.remove(0,2))) 
-			return true;
-		break;
-    default:
-        ;
-	}
-	return false;	
+        if (str.contains(pattern.remove(0, 2)))
+            return true;
+        break;
+    default:;
+    }
+    return false;
 }
 
-bool Patterns::matchPattern(QByteArray pattern, QByteArray& str)
+bool Patterns::matchPattern(QByteArray pattern, QByteArray &str)
 {
-	if (pattern.at(0) != '#')
-		return false;
-	
-    switch ((int) pattern.at(1) )
-	{
-	case 33:  // !
-		break;
-	case 60:;  // <
-		if (str.startsWith(pattern.remove(0,2))) 
-			return true;
-		break;
+    if (pattern.at(0) != '#')
+        return false;
+
+    switch ((int)pattern.at(1)) {
+    case 33:  // !
+        break;
+    case 60:;  // <
+        if (str.startsWith(pattern.remove(0, 2)))
+            return true;
+        break;
     case 61:  // =
-		if ( str==(pattern.remove(0,2)) ) 
-			return true;
-		break;
+        if (str == (pattern.remove(0, 2)))
+            return true;
+        break;
     case 62:  // >
-		if (str.endsWith(pattern.remove(0,2))) 
-			return true;
-		break;
+        if (str.endsWith(pattern.remove(0, 2)))
+            return true;
+        break;
     case 63:  // ?
-		if (str.contains(pattern.remove(0,2))) 
-			return true;
-		break;
-    default:
-        ;
-	}
-	return false;	
+        if (str.contains(pattern.remove(0, 2)))
+            return true;
+        break;
+    default:;
+    }
+    return false;
 }
 
-
-bool Patterns::matchMoveCancelPatterns(QByteArray& str)
+bool Patterns::matchMoveCancelPatterns(QByteArray &str)
 {
-	for ( QList<QByteArray>::iterator it = conf->moveCancelPatterns.begin();
-		it != conf->moveCancelPatterns.end(); ++it )
-		if (matchPattern(*it, str)) return true;
-	return false;
+    for (QList<QByteArray>::iterator it = conf->moveCancelPatterns.begin(); it != conf->moveCancelPatterns.end(); ++it)
+        if (matchPattern(*it, str))
+            return true;
+    return false;
 }
 
-bool Patterns::matchMoveForcePatterns(QByteArray& str)
+bool Patterns::matchMoveForcePatterns(QByteArray &str)
 {
-	for ( QList<QByteArray>::iterator it = conf->moveForcePatterns.begin();
-		it != conf->moveForcePatterns.end(); ++it )
-		if (matchPattern(*it, str)) return true;
-	return false;
+    for (QList<QByteArray>::iterator it = conf->moveForcePatterns.begin(); it != conf->moveForcePatterns.end(); ++it)
+        if (matchPattern(*it, str))
+            return true;
+    return false;
 }

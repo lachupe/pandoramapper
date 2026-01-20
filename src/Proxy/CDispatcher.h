@@ -21,7 +21,6 @@
 #ifndef CDISPATCHER_H
 #define CDISPATCHER_H
 
-
 #include <QRegularExpression>
 
 #include "Proxy/proxy.h"
@@ -29,44 +28,50 @@
 
 using namespace std;
 
-struct Tincoming_line {
-    QByteArray           line;
-    unsigned short int   type;
-    unsigned short int   xmlType;
+struct Tincoming_line
+{
+    QByteArray line;
+    unsigned short int type;
+    unsigned short int xmlType;
 };
-
 
 class Cdispatcher
 {
     struct Tincoming_line buffer[4096];
-    int     amount;
+    int amount;
     QByteArray commandBuffer;
-    
-    int       xmlState;          /* desc shall be incoming - just got roomname */
-    int       mbrief_state;
-    bool      awaitingData;
-    bool      scouting;
-    Event     event;
+
+    int xmlState; /* desc shall be incoming - just got roomname */
+    int mbrief_state;
+    bool awaitingData;
+    bool scouting;
+    Event event;
 
     QByteArray lastPrompt;
 
-    enum dispatcherStates { STATE_NORMAL = 0,
-                            STATE_ROOM,
-                            STATE_DESC,
-                            STATE_NAME,
-                            STATE_PROMPT,
-                            STATE_EXITS };
-    
+    enum dispatcherStates
+    {
+        STATE_NORMAL = 0,
+        STATE_ROOM,
+        STATE_DESC,
+        STATE_NAME,
+        STATE_PROMPT,
+        STATE_EXITS
+    };
+
     bool spells_print_mode; /* After "Affected by:" until next prompt */
 
-    enum LineTypes {IS_NORMAL    = 0,
-                    IS_XML,
-                    IS_SKIP,
-                    IS_DATA,
-                    IS_PROMPT,
-                   };
+    enum LineTypes
+    {
+        IS_NORMAL = 0,
+        IS_XML,
+        IS_SKIP,
+        IS_DATA,
+        IS_PROMPT,
+    };
 
-    enum XmlTypes {
+    enum XmlTypes
+    {
         XML_START_ROOM = 1,
         XML_START_NAME = 2,
         XML_START_DESC = 3,
@@ -83,21 +88,22 @@ class Cdispatcher
         XML_END_TERRAIN = 17
     };
 
-    enum MainStates {
+    enum MainStates
+    {
         NORMAL = 0,
         XML,
         TELNET,
         STUFFING
     };
-    
-    
-    
-    enum SubStatesNormal {
+
+    enum SubStatesNormal
+    {
         CR,
         LF,
     };
-    
-    enum StuffingStates {
+
+    enum StuffingStates
+    {
         AMP,
         G,
         L,
@@ -109,8 +115,8 @@ class Cdispatcher
         LASTCHAR
     };
 
-
-    enum SubStatesTelnet {
+    enum SubStatesTelnet
+    {
         T_NORMAL,
         T_GOTIAC,
         T_GOTWILL,
@@ -125,7 +131,6 @@ class Cdispatcher
     QRegularExpression scoreExp;
     QRegularExpression scoreTrollExp;
 
-
     char parseTerrain(QByteArray prompt);
 
     bool parseXml(QByteArray tag);
@@ -137,14 +142,13 @@ class Cdispatcher
     QByteArray checkAffectedByLine(QByteArray line);
     QByteArray checkTimersLine();
 
-public:
-    
-    int  analyzeMudStream(ProxySocket &c);
-    int  analyzeUserStream(ProxySocket &c);
-    
+  public:
+    int analyzeMudStream(ProxySocket &c);
+    int analyzeUserStream(ProxySocket &c);
+
     Cdispatcher();
 };
 
-//extern class Cdispatcher *dispatcher;
+// extern class Cdispatcher *dispatcher;
 
 #endif

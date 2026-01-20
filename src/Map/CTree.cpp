@@ -28,60 +28,54 @@
 
 class CTree NameMap;
 
-
 void CTree::removeId(unsigned int id, TTree *p)
 {
-  for (int i = 0; i < p->ids.size(); ++i)
-      if (p->ids[i] == id) {
-          p->ids.remove(i);
-          return;
-      }
+    for (int i = 0; i < p->ids.size(); ++i)
+        if (p->ids[i] == id) {
+            p->ids.remove(i);
+            return;
+        }
 }
-
 
 void CTree::calculateInfo(TTree *t, int level, int single)
 {
-  unsigned int i;
-  int l;
-  
-  if (t == nullptr)
-    return;
+    unsigned int i;
+    int l;
 
-  
-  
-  levels_data[level].nodes++;
-  levels_data[level].items += t->ids.size();
-  l = 0;
-  
-  for (i = 0; i < A_SIZE; i++)
-    if (t->leads[i] != nullptr) {	
-      
-      l++;
-      
-      levels_data[level].leads++;
-      
-      calculateInfo(t->leads[i], level+1, t->ids.size() ? single + 1 : 0);
-    }
-    
-  if (l == 0 && single > 0) 
-    debugSingles += (single+1);
-  
+    if (t == nullptr)
+        return;
+
+    levels_data[level].nodes++;
+    levels_data[level].items += t->ids.size();
+    l = 0;
+
+    for (i = 0; i < A_SIZE; i++)
+        if (t->leads[i] != nullptr) {
+            l++;
+
+            levels_data[level].leads++;
+
+            calculateInfo(t->leads[i], level + 1, t->ids.size() ? single + 1 : 0);
+        }
+
+    if (l == 0 && single > 0)
+        debugSingles += (single + 1);
 }
 
 void CTree::printTreeStats()
 {
-  unsigned int i;
+    unsigned int i;
 
-  memset(levels_data, 0, sizeof(struct levels_data_type) * MAX_HASH_LEN );
-  debugSingles = 0;
-  
-  calculateInfo(root, 0, 0);  
-  
-  print_debug(DEBUG_TREE, "Single rooms: %i", debugSingles);
-  
-  for (i = 0; levels_data[i].nodes; i++) 
-    print_debug(DEBUG_TREE, "Level %-3li, nodes %-5li, leads %-5li, items %-5li.", 
-          i, levels_data[i].nodes, levels_data[i].leads, levels_data[i].items);
+    memset(levels_data, 0, sizeof(struct levels_data_type) * MAX_HASH_LEN);
+    debugSingles = 0;
+
+    calculateInfo(root, 0, 0);
+
+    print_debug(DEBUG_TREE, "Single rooms: %i", debugSingles);
+
+    for (i = 0; levels_data[i].nodes; i++)
+        print_debug(DEBUG_TREE, "Level %-3li, nodes %-5li, leads %-5li, items %-5li.", i, levels_data[i].nodes,
+                    levels_data[i].leads, levels_data[i].items);
 }
 
 void CTree::reinit()
@@ -94,94 +88,92 @@ void CTree::reinit()
 }
 
 /* recursive deletion of this element and all elements below */
-void CTree::deleteAll(TTree *t) 
+void CTree::deleteAll(TTree *t)
 {
     int i;
-  
-    if (t == nullptr) 
+
+    if (t == nullptr)
         return;
 
     for (i = 0; i < A_SIZE; i++)
-        if (t->leads[i] != nullptr) {	
+        if (t->leads[i] != nullptr) {
             deleteAll(t->leads[i]);
         }
 
     delete t;
 }
 
-int CTree::divingDelete(TTree * p, char *part, unsigned int id)
+int CTree::divingDelete(TTree *p, char *part, unsigned int id)
 {
     int i;
 
-    if (part[0] == '\0') {	/* we've found our item */
-	for (i = 0; i < A_SIZE; i++)
-            if (p->leads[i] != nullptr) {	/* shall not delete this item */
+    if (part[0] == '\0') { /* we've found our item */
+        for (i = 0; i < A_SIZE; i++)
+            if (p->leads[i] != nullptr) { /* shall not delete this item */
                 removeId(id, p);
-                return -1;	/* return state DID NOT DELETE - its used */
+                return -1; /* return state DID NOT DELETE - its used */
             }
 
-            removeId(id, p);
-            if (p->ids.empty()) {
-                delete p;
-                return 1;
-            }
-            
-            return -1;		/* did NOT delete, item is in use */
+        removeId(id, p);
+        if (p->ids.empty()) {
+            delete p;
+            return 1;
+        }
+
+        return -1; /* did NOT delete, item is in use */
     }
-
 
     /* ending part of recursion is over */
     /* diving-cycling part */
     /* given the path exist (see delete_room func.) call is easier */
-    i = divingDelete(p->leads[(int) part[0]], &part[1], id);
-    if (i == -1)		/* did NOT delete the lower item */
-	return -1;		/* so we do not delete this one also ! */
+    i = divingDelete(p->leads[(int)part[0]], &part[1], id);
+    if (i == -1)   /* did NOT delete the lower item */
+        return -1; /* so we do not delete this one also ! */
 
     /* else, we have to check this one too */
 
-    p->leads[(int) part[0]] = nullptr;	/* clear this lead */
+    p->leads[(int)part[0]] = nullptr; /* clear this lead */
 
     if (p->ids.size() != 0)
-	return -1;		/* nop, still in use */
+        return -1; /* nop, still in use */
 
     for (i = 0; i < A_SIZE; i++)
-	if (p->leads[i] != nullptr)
-	    return -1;		/* no still in use ! */
+        if (p->leads[i] != nullptr)
+            return -1; /* no still in use ! */
 
     /* else ! we have to delete it ... */
     delete p;
-    return 1;			/* deleted ! so ... */
+    return 1; /* deleted ! so ... */
 }
 
 void CTree::deleteItem(const char *name, unsigned int id)
 {
     TTree *p;
-    char hash[MAX_HASH_LEN];	
-	
+    char hash[MAX_HASH_LEN];
+
     genHash(name, hash);
     p = findByName(name);
     if (p == nullptr) {
-	return;
+        return;
     }
     for (int i = 0; i < p->ids.size(); i++) {
         if (p->ids[i] == id) {
             if (divingDelete(root, hash, id) == 1) {
                 /* meaning - occasioanly freed our ROOT element */
-                CTree();	/* reinit */
+                CTree(); /* reinit */
                 return;
-            } else 
+            } else
                 break;
         }
     }
-
 }
 
-void CTree::resetTTree(TTree * t)
+void CTree::resetTTree(TTree *t)
 {
     int i;
 
     for (i = 0; i < A_SIZE; i++)
-	t->leads[i] = nullptr;
+        t->leads[i] = nullptr;
     t->ids.clear();
 }
 
@@ -193,73 +185,71 @@ CTree::CTree()
 
 void CTree::addName(const char *name, unsigned int id)
 {
-  TTree *p, *n;
-  unsigned int i;
-  char hash[MAX_HASH_LEN];
-      
-  genHash(name, hash);
-  p = root;
+    TTree *p, *n;
+    unsigned int i;
+    char hash[MAX_HASH_LEN];
 
-  for (i = 0; i < strlen(hash); i++) {
-    if (p->leads[(int) hash[i]] != nullptr) {
-    /* there is similar sequence already ... we follow it */
-      p = p->leads[(int) hash[i]];
-    
-    } else {
-      /* there is no line like this in tree yet - we have to create new lead */
-      n = new TTree;
-      resetTTree(n);
-    
-      p->leads[(int) hash[i]] = n;
-      p = n;
+    genHash(name, hash);
+    p = root;
+
+    for (i = 0; i < strlen(hash); i++) {
+        if (p->leads[(int)hash[i]] != nullptr) {
+            /* there is similar sequence already ... we follow it */
+            p = p->leads[(int)hash[i]];
+
+        } else {
+            /* there is no line like this in tree yet - we have to create new lead */
+            n = new TTree;
+            resetTTree(n);
+
+            p->leads[(int)hash[i]] = n;
+            p = n;
+        }
     }
-  }
 
-  /* ok, we found totaly similar or created new entry, add id to it */
-  if (p->ids.contains(id) == false)
-    p->ids.push_back(id);
+    /* ok, we found totaly similar or created new entry, add id to it */
+    if (p->ids.contains(id) == false)
+        p->ids.push_back(id);
 }
 
 TTree *CTree::findByName(const char *name)
 {
-  unsigned int i;
-  TTree *p;
-  char hash[MAX_HASH_LEN];
-    
-  genHash(name, hash);
-    
-    
-  p = root;
-  for (i = 0; i < strlen(hash); i++) {
-    if (p->leads[(int) hash[i]] == nullptr)
-      return nullptr;
-  
-      p = p->leads[(int) hash[i]];
-  }
-  
-  return p;
+    unsigned int i;
+    TTree *p;
+    char hash[MAX_HASH_LEN];
+
+    genHash(name, hash);
+
+    p = root;
+    for (i = 0; i < strlen(hash); i++) {
+        if (p->leads[(int)hash[i]] == nullptr)
+            return nullptr;
+
+        p = p->leads[(int)hash[i]];
+    }
+
+    return p;
 }
 
 void CTree::genHash(const char *name, char *hash)
 {
-  unsigned int i;
-  unsigned int z;
-  
-  z=0;
-  for (i=0; i<strlen(name); i++) {
-    if ( (name[i]>='A') && (name[i]<='Z') ) {
-      hash[z++] = LOWER(name[i]);
-      continue;						
-    }
-    /* not lower case letters gets cut out */
-    if ( (name[i]>='a') && (name[i]<='z') ) {
-      hash[z++]=name[i];
-      continue;
-    }
-  }
-  hash[z] = 0;
-  
-  for (i=0; i<strlen(hash); i++)
-    hash[i]=hash[i]-'a'+1;
-}
+    unsigned int i;
+    unsigned int z;
 
+    z = 0;
+    for (i = 0; i < strlen(name); i++) {
+        if ((name[i] >= 'A') && (name[i] <= 'Z')) {
+            hash[z++] = LOWER(name[i]);
+            continue;
+        }
+        /* not lower case letters gets cut out */
+        if ((name[i] >= 'a') && (name[i] <= 'z')) {
+            hash[z++] = name[i];
+            continue;
+        }
+    }
+    hash[z] = 0;
+
+    for (i = 0; i < strlen(hash); i++)
+        hash[i] = hash[i] - 'a' + 1;
+}

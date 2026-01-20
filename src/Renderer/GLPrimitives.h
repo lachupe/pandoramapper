@@ -25,7 +25,7 @@
 
 // Constants used by primitive drawing functions
 #define ROOM_SIZE 0.47f
-#define MARKER_SIZE (ROOM_SIZE/1.85)
+#define MARKER_SIZE (ROOM_SIZE / 1.85)
 
 // Draw a marker around a room position
 // mode 1 = full marker with border, mode 2 = partial marker (triangles only)
@@ -34,4 +34,4 @@ void glDrawMarkerPrimitive(int dx, int dy, int dz, int mode);
 // Draw a 3D cone primitive (directional indicator)
 void glDrawConePrimitive();
 
-#endif // GLPRIMITIVES_H
+#endif  // GLPRIMITIVES_H

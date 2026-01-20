@@ -33,57 +33,59 @@
 
 using namespace std;
 
-struct roomSectorsData {
-  QByteArray desc;             /* name of this flag */
-  QByteArray filename;         /* appropriate texture's filename */
-  char   pattern;           /* appropriate pattern */
-  GLuint texture;          /* and texture handler for renderer */
-  GLuint gllist;            /* OpenGL display list */
+struct roomSectorsData
+{
+    QByteArray desc;     /* name of this flag */
+    QByteArray filename; /* appropriate texture's filename */
+    char pattern;        /* appropriate pattern */
+    GLuint texture;      /* and texture handler for renderer */
+    GLuint gllist;       /* OpenGL display list */
 };
 
-
-typedef struct {
-    QByteArray  name;           /* spells name */
-    QByteArray  up_mes;         /* up message/pattern */
-    QByteArray  down_mes;       /* down message */
-    QByteArray  refresh_mes;    /* refresh message */
-    QElapsedTimer       timer;          /* timer */
-    bool        addon;          /* if this spell has to be added after the "Affected by:" line */
-    bool        up;             /* is this spell currently up ? */
-    bool		silently_up;	/* this spell is up, but time wasn't set for ome reason (reconnect) */
-								/* this option is required for better GroupManager functioning */
+typedef struct
+{
+    QByteArray name;        /* spells name */
+    QByteArray up_mes;      /* up message/pattern */
+    QByteArray down_mes;    /* down message */
+    QByteArray refresh_mes; /* refresh message */
+    QElapsedTimer timer;    /* timer */
+    bool addon;             /* if this spell has to be added after the "Affected by:" line */
+    bool up;                /* is this spell currently up ? */
+    bool silently_up;       /* this spell is up, but time wasn't set for ome reason (reconnect) */
+                            /* this option is required for better GroupManager functioning */
 } TSpell;
 
-class Configurator : public QObject {
+class Configurator : public QObject
+{
     Q_OBJECT
 
     /* general */
-    bool        configModified;       /* if the config was modified */
-    QByteArray  configFile;
-    QByteArray  configPath;
-    bool        isLogFileEnabled;
+    bool configModified; /* if the config was modified */
+    QByteArray configFile;
+    QByteArray configPath;
+    bool isLogFileEnabled;
 
     /* patterns/regexps */
     QByteArray exitsPattern;
-    QRegularExpression     exitsExpr;
+    QRegularExpression exitsExpr;
 
     /* data */
-    QByteArray  databasePath;
-    QByteArray  baseFile;
-    int         localPort;
-    QByteArray  remoteHost;
-    int         remotePort;
-    bool        databaseModified;
+    QByteArray databasePath;
+    QByteArray baseFile;
+    int localPort;
+    QByteArray remoteHost;
+    int remotePort;
+    bool databaseModified;
 
-    bool autorefresh;             /* automatic room desc refresh */
-    bool automerge;               /* automatic twins merging based on roomdesc */
-    bool angrylinker;             /* automatic linking based on coordinates */
-    bool duallinker;              /* auto-link to the room you came from */
+    bool autorefresh; /* automatic room desc refresh */
+    bool automerge;   /* automatic twins merging based on roomdesc */
+    bool angrylinker; /* automatic linking based on coordinates */
+    bool duallinker;  /* auto-link to the room you came from */
 
-    bool exitsCheck;             /* apply exits check to stacks */
-    bool terrainCheck;           /* apply terrain check to stacks */
+    bool exitsCheck;   /* apply exits check to stacks */
+    bool terrainCheck; /* apply terrain check to stacks */
     bool briefMode;
-    bool alwaysOnTop;           /* keep Pandora window on top of others */
+    bool alwaysOnTop; /* keep Pandora window on top of others */
 
     bool regionsAutoSet;
     bool regionsAutoReplace;
@@ -98,11 +100,10 @@ class Configurator : public QObject {
     int textureVisibilityRange;
     int detailsVisibilityRange;
 
+    int descQuote; /* quote for description - in percents */
+    int nameQuote; /* quote for roomname - in percents */
 
-    int descQuote;        /* quote for description - in percents */
-    int nameQuote;        /* quote for roomname - in percents */
-
-//    void parse_line(char *line);
+    //    void parse_line(char *line);
 
     void resetCurrentConfig();
 
@@ -118,51 +119,59 @@ class Configurator : public QObject {
     bool selectOAnyLayer;
 
     // groupManager settings
-    int  groupManagerState;
-    int	 groupManagerLocalPort;
-    int	 groupManagerRemotePort;
+    int groupManagerState;
+    int groupManagerLocalPort;
+    int groupManagerRemotePort;
     QByteArray groupManagerHost;
     QByteArray groupManagerCharName;
     bool groupManagerShowManager;
     bool groupManagerShowSelf;
     QRect groupManagerRect;
     QColor groupManagerColor;
-    bool 	groupManagerNotifyArmour;
-    bool 	groupManagerNotifySanc;
-    bool	groupManagerNotifyBash;
+    bool groupManagerNotifyArmour;
+    bool groupManagerNotifySanc;
+    bool groupManagerNotifyBash;
 
     QByteArray scorePattern;
     QByteArray scorePatternShort;
 
-
-    bool	drawPrespam;
-    bool	mactionUsesPrespam;
-    int		prespamTTL; /* in ms */
-public:
+    bool drawPrespam;
+    bool mactionUsesPrespam;
+    int prespamTTL; /* in ms */
+  public:
     /* prespam config */
     bool getDrawPrespam() { return drawPrespam; }
     bool getMactionUsesPrespam() { return mactionUsesPrespam; }
     int getPrespamTTL() { return prespamTTL; }
 
-    void setDrawPrespam( bool b) { drawPrespam = b; setConfigModified(true); }
-    void setMactionUsesPrespam( bool b) { mactionUsesPrespam = b; setConfigModified(true); }
-    void setPrespamTTL( int ms ) { prespamTTL = ms; setConfigModified(true); }
+    void setDrawPrespam(bool b)
+    {
+        drawPrespam = b;
+        setConfigModified(true);
+    }
+    void setMactionUsesPrespam(bool b)
+    {
+        mactionUsesPrespam = b;
+        setConfigModified(true);
+    }
+    void setPrespamTTL(int ms)
+    {
+        prespamTTL = ms;
+        setConfigModified(true);
+    }
 
     /* movement patterns */
     QList<QByteArray> moveForcePatterns;
     QList<QByteArray> moveCancelPatterns;
 
-
     /* spells */
-    std::vector<TSpell>  spells;
-    CTimers				 timers;
-    QByteArray      spells_pattern;
+    std::vector<TSpell> spells;
+    CTimers timers;
+    QByteArray spells_pattern;
     void addSpell(QByteArray spellname, QByteArray up, QByteArray down, QByteArray refresh, bool addon);
     void addSpell(const TSpell &s);
     QString spellUpFor(unsigned int p);
     void resetSpells();
-
-
 
     // group Manager
     int getGroupManagerState() { return groupManagerState; }
@@ -181,20 +190,62 @@ public:
     bool getLogFileEnabled() { return isLogFileEnabled; }
     void setLogFileEnabled(bool b);
 
-
-
-    void setGroupManagerState(int val) { groupManagerState = val; setConfigModified(true); }
-    void setGroupManagerLocalPort(int val) { groupManagerLocalPort = val; setConfigModified(true); }
-    void setGroupManagerRemotePort(int val) { groupManagerRemotePort = val; setConfigModified(true); }
-    void setGroupManagerHost(QByteArray val) { groupManagerHost = val; setConfigModified(true); }
-    void setGroupManagerCharName(QByteArray val) { groupManagerCharName = val; setConfigModified(true); }
+    void setGroupManagerState(int val)
+    {
+        groupManagerState = val;
+        setConfigModified(true);
+    }
+    void setGroupManagerLocalPort(int val)
+    {
+        groupManagerLocalPort = val;
+        setConfigModified(true);
+    }
+    void setGroupManagerRemotePort(int val)
+    {
+        groupManagerRemotePort = val;
+        setConfigModified(true);
+    }
+    void setGroupManagerHost(QByteArray val)
+    {
+        groupManagerHost = val;
+        setConfigModified(true);
+    }
+    void setGroupManagerCharName(QByteArray val)
+    {
+        groupManagerCharName = val;
+        setConfigModified(true);
+    }
     void setGroupManagerShowManager(bool b) { groupManagerShowManager = b; }
-    void setGroupManagerShowSelf(bool b) { groupManagerShowSelf = b; setConfigModified(true); }
-    void setGroupManagerRect(QRect r) { groupManagerRect = r; setConfigModified(true); }
-    void setGroupManagerColor(QColor c) { groupManagerColor = c; setConfigModified(true); }
-    void setGroupManagerNotifySanc(bool b) { groupManagerNotifySanc = b; setConfigModified(true); }
-    void setGroupManagerNotifyArmour(bool b) { groupManagerNotifyArmour = b; setConfigModified(true); }
-    void setGroupManagerNotifyBash(bool b) { groupManagerNotifyBash = b; setConfigModified(true); }
+    void setGroupManagerShowSelf(bool b)
+    {
+        groupManagerShowSelf = b;
+        setConfigModified(true);
+    }
+    void setGroupManagerRect(QRect r)
+    {
+        groupManagerRect = r;
+        setConfigModified(true);
+    }
+    void setGroupManagerColor(QColor c)
+    {
+        groupManagerColor = c;
+        setConfigModified(true);
+    }
+    void setGroupManagerNotifySanc(bool b)
+    {
+        groupManagerNotifySanc = b;
+        setConfigModified(true);
+    }
+    void setGroupManagerNotifyArmour(bool b)
+    {
+        groupManagerNotifyArmour = b;
+        setConfigModified(true);
+    }
+    void setGroupManagerNotifyBash(bool b)
+    {
+        groupManagerNotifyBash = b;
+        setConfigModified(true);
+    }
 
     /* texture and sectors stuff */
     vector<struct roomSectorsData> sectors;
@@ -207,10 +258,10 @@ public:
     GLuint getTextureByDesc(QByteArray desc);
     void addTexture(QByteArray desc, QByteArray filename, char pattern);
 
-    GLuint	exit_normal_texture;
-    GLuint	exit_door_texture;
-    GLuint	exit_secret_texture;
-    GLuint	exit_undef_texture;
+    GLuint exit_normal_texture;
+    GLuint exit_door_texture;
+    GLuint exit_secret_texture;
+    GLuint exit_undef_texture;
 
     /* */
 
@@ -218,11 +269,9 @@ public:
 
     Configurator();
 
-
     int loadConfig(QByteArray path, QByteArray filename);
     int saveConfigAs(QByteArray path, QByteArray filename);
     int saveConfig() { return saveConfigAs(configPath, configFile); }
-
 
     void setEndCol(QByteArray str);
     /* patterns */
@@ -230,8 +279,16 @@ public:
     void setExitsPattern(QByteArray str);
     QByteArray getScorePattern() { return scorePattern; }
     QByteArray getShortScorePattern() { return scorePatternShort; }
-    void setScorePattern(QByteArray str) { scorePattern = str; setConfigModified(true); }
-    void setShortScorePattern(QByteArray str) { scorePatternShort = str; setConfigModified(true); }
+    void setScorePattern(QByteArray str)
+    {
+        scorePattern = str;
+        setConfigModified(true);
+    }
+    void setShortScorePattern(QByteArray str)
+    {
+        scorePatternShort = str;
+        setConfigModified(true);
+    }
 
     QRegularExpression getExitsExpr() { return exitsExpr; }
 
@@ -241,9 +298,17 @@ public:
     void setRemoteHost(QByteArray str);
     void setRemotePort(int i);
     void setLocalPort(int i);
-    void setConfigModified(bool b) { configModified = b; emit configurationChanged(); }
+    void setConfigModified(bool b)
+    {
+        configModified = b;
+        emit configurationChanged();
+    }
 
-    void setConfigFile(QByteArray p, QByteArray f) { configFile = f; configPath = p; }
+    void setConfigFile(QByteArray p, QByteArray f)
+    {
+        configFile = f;
+        configPath = p;
+    }
 
     void setAutorefresh(bool b);
     void setAutomerge(bool b);
@@ -261,8 +326,11 @@ public:
     void setRegionsAutoReplace(bool b);
     void setDisplayRegionsRenderer(bool b);
     void setShowRegionsInfo(bool b);
-    void setMultisampling(bool b) { multisampling = b; setConfigModified(true); }
-
+    void setMultisampling(bool b)
+    {
+        multisampling = b;
+        setConfigModified(true);
+    }
 
     void setStartupMode(int i);
     int getStartupMode();
@@ -273,18 +341,18 @@ public:
     /*--*/
     bool isDatabaseModified() { return databaseModified; }
     QByteArray getBaseFile() { return baseFile; }
-    QByteArray getRemoteHost() { return remoteHost;}
-    int getRemotePort() {return remotePort;}
-    int getLocalPort() {return localPort;}
+    QByteArray getRemoteHost() { return remoteHost; }
+    int getRemotePort() { return remotePort; }
+    int getLocalPort() { return localPort; }
     bool isConfigModified() { return configModified; }
 
     bool getAutorefresh() { return autorefresh; }
-    bool getAutomerge()  { return automerge; }
+    bool getAutomerge() { return automerge; }
     bool getAngrylinker() { return angrylinker; }
     bool getExitsCheck() { return exitsCheck; }
     bool getTerrainCheck() { return terrainCheck; }
-    bool getBriefMode()     {return briefMode;}
-    bool getAlwaysOnTop()     {return alwaysOnTop;}
+    bool getBriefMode() { return briefMode; }
+    bool getAlwaysOnTop() { return alwaysOnTop; }
 
     int getDetailsVisibility() { return detailsVisibilityRange; }
     int getTextureVisibility() { return textureVisibilityRange; }
@@ -299,37 +367,53 @@ public:
 
     // App Window size
     void setWindowRect(QRect rect) { userWindowRect = rect; }
-    void setWindowRect(int x, int y, int width, int height)
-        { userWindowRect.setRect(x, y, width, height); }
-    QRect getWindowRect() {return userWindowRect; }
+    void setWindowRect(int x, int y, int width, int height) { userWindowRect.setRect(x, y, width, height); }
+    QRect getWindowRect() { return userWindowRect; }
 
     // renderer settings
     void setRendererAngles(float x, float y, float z)
-       { angleX = x; angleY = y; angleZ = z; setConfigModified(true);  }
+    {
+        angleX = x;
+        angleY = y;
+        angleZ = z;
+        setConfigModified(true);
+    }
     void setRendererPosition(float x, float y, float z)
-       { userX = x; userY = y; userZ = z; setConfigModified(true);  }
-    float getRendererAngleX() {return angleX;}   // this is ONLY what was read from CONFIG
-    float getRendererAngleY() {return angleY;}
-    float getRendererAngleZ() {return angleZ;}
+    {
+        userX = x;
+        userY = y;
+        userZ = z;
+        setConfigModified(true);
+    }
+    float getRendererAngleX() { return angleX; }  // this is ONLY what was read from CONFIG
+    float getRendererAngleY() { return angleY; }
+    float getRendererAngleZ() { return angleZ; }
 
-    float getRendererPositionX() {return userX; }
-    float getRendererPositionY() {return userY; }
-    float getRendererPositionZ() {return userZ; }
+    float getRendererPositionX() { return userX; }
+    float getRendererPositionY() { return userY; }
+    float getRendererPositionZ() { return userZ; }
 
     void setDuallinker(bool b);
     bool getDuallinker();
 
-    void setSelectOAnyLayer(bool b) { selectOAnyLayer=b; setConfigModified(true); }
+    void setSelectOAnyLayer(bool b)
+    {
+        selectOAnyLayer = b;
+        setConfigModified(true);
+    }
     bool getSelectOAnyLayer() { return selectOAnyLayer; }
 
-    void setVisibleLayers(int i) { visibleLayers = i; setConfigModified(true); }
+    void setVisibleLayers(int i)
+    {
+        visibleLayers = i;
+        setConfigModified(true);
+    }
     int getVisibleLayers() { return visibleLayers; }
-
 
     int getDescQuote() { return descQuote; }
     int getNameQuote() { return nameQuote; }
 
-signals:
+  signals:
     void configurationChanged();
 };
 

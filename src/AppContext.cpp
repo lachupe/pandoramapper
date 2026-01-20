@@ -29,7 +29,7 @@
 #include "Gui/mainwindow.h"
 #include "Proxy/userfunc.h"
 
-AppContext& AppContext::instance()
+AppContext &AppContext::instance()
 {
     static AppContext context;
     return context;

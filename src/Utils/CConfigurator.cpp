@@ -18,8 +18,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
-
 /* configuration reader/saver and handler */
 #include <QFile>
 #include <QImage>
@@ -38,7 +36,7 @@
 
 #include "Engine/CEngine.h"
 #include "GroupManager/CGroup.h"
-//#include "renderer.h"
+// #include "renderer.h"
 
 class Configurator *conf;
 
@@ -46,20 +44,17 @@ Configurator::Configurator()
 {
     /* here we set the default configuration */
     setLogFileEnabled(true);
-    setRegionsAutoReplace( false );
-    setRegionsAutoSet( false );
+    setRegionsAutoReplace(false);
+    setRegionsAutoSet(false);
 
     /* data */
     databaseModified = false;
 
     groupManagerState = CGroupCommunicator::Off;
 
-
     resetCurrentConfig();
     setConfigModified(false);
 }
-
-
 
 void Configurator::resetCurrentConfig()
 {
@@ -77,291 +72,280 @@ void Configurator::resetCurrentConfig()
     sectors.push_back(first);
 }
 
-
 int Configurator::saveConfigAs(QByteArray path, QByteArray filename)
 {
-  unsigned int i;
+    unsigned int i;
 
-  // try QSettings
-  QSettings conf(path + filename, QSettings::IniFormat);
+    // try QSettings
+    QSettings conf(path + filename, QSettings::IniFormat);
 
-  conf.beginGroup("General");
-  conf.setValue("mapFile", getBaseFile());
-  conf.setValue("windowRect", renderer_window->geometry() );
-  conf.setValue("alwaysOnTop", getAlwaysOnTop() );
-  conf.setValue("startupMode", getStartupMode() );
-  conf.endGroup();
+    conf.beginGroup("General");
+    conf.setValue("mapFile", getBaseFile());
+    conf.setValue("windowRect", renderer_window->geometry());
+    conf.setValue("alwaysOnTop", getAlwaysOnTop());
+    conf.setValue("startupMode", getStartupMode());
+    conf.endGroup();
 
-  conf.beginGroup("Networking");
-  conf.setValue("localPort", getLocalPort() );
-  conf.setValue("remoteHost", getRemoteHost() );
-  conf.setValue("remotePort", getRemotePort() );
-  conf.endGroup();
+    conf.beginGroup("Networking");
+    conf.setValue("localPort", getLocalPort());
+    conf.setValue("remoteHost", getRemoteHost());
+    conf.setValue("remotePort", getRemotePort());
+    conf.endGroup();
 
-  conf.beginGroup("OpenGL");
-  conf.setValue("texturesVisibility", getTextureVisibility() );
-  conf.setValue("detailsVisibility", getDetailsVisibility() );
-  conf.setValue("visibleLayers", getVisibleLayers() );
-  conf.setValue("showNotes", getShowNotesRenderer() );
-  conf.setValue("showRegions", getShowRegionsInfo() );
-  conf.setValue("displayRegions", getDisplayRegionsRenderer() );
-  conf.setValue("multisampling", getMultisampling() );
-  conf.setValue("selectOnAnyLayer", getSelectOAnyLayer());
-  conf.setValue("angleX", (double) angleX );
-  conf.setValue("angleY", (double) angleY );
-  conf.setValue("angleZ", (double) angleZ );
-  conf.setValue("userX", (double) userX );
-  conf.setValue("userY", (double) userY );
-  conf.setValue("userZ", (double) userZ );
-  conf.setValue("noteColor", getNoteColor() );
-  conf.setValue("drawPrespam", getDrawPrespam());
+    conf.beginGroup("OpenGL");
+    conf.setValue("texturesVisibility", getTextureVisibility());
+    conf.setValue("detailsVisibility", getDetailsVisibility());
+    conf.setValue("visibleLayers", getVisibleLayers());
+    conf.setValue("showNotes", getShowNotesRenderer());
+    conf.setValue("showRegions", getShowRegionsInfo());
+    conf.setValue("displayRegions", getDisplayRegionsRenderer());
+    conf.setValue("multisampling", getMultisampling());
+    conf.setValue("selectOnAnyLayer", getSelectOAnyLayer());
+    conf.setValue("angleX", (double)angleX);
+    conf.setValue("angleY", (double)angleY);
+    conf.setValue("angleZ", (double)angleZ);
+    conf.setValue("userX", (double)userX);
+    conf.setValue("userY", (double)userY);
+    conf.setValue("userZ", (double)userZ);
+    conf.setValue("noteColor", getNoteColor());
+    conf.setValue("drawPrespam", getDrawPrespam());
 
-  conf.beginWriteArray("Textures");
-  for (unsigned int i = 0; i < sectors.size(); ++i) {
-	  if (sectors[i].desc == "NONE")
-		  continue; // do not save the default handle
-	  conf.setArrayIndex(i);
-	  conf.setValue("handle", sectors[i].desc);
-	  conf.setValue("file", sectors[i].filename);
-	  conf.setValue("pattern", sectors[i].pattern);
+    conf.beginWriteArray("Textures");
+    for (unsigned int i = 0; i < sectors.size(); ++i) {
+        if (sectors[i].desc == "NONE")
+            continue;  // do not save the default handle
+        conf.setArrayIndex(i);
+        conf.setValue("handle", sectors[i].desc);
+        conf.setValue("file", sectors[i].filename);
+        conf.setValue("pattern", sectors[i].pattern);
+    }
+    conf.endArray();
+    conf.endGroup();
 
-  }
-  conf.endArray();
-  conf.endGroup();
+    conf.beginGroup("Engine");
+    conf.setValue("checkExits", getExitsCheck());
+    conf.setValue("checkTerrain", getTerrainCheck());
+    conf.setValue("briefmode", getBriefMode());
+    conf.setValue("autoMerge", getAutomerge());
+    conf.setValue("angryLinker", getAngrylinker());
+    conf.setValue("dualLinker", getDuallinker());
+    conf.setValue("autoRefresh", getAutorefresh());
+    conf.setValue("roomNameQuote", getNameQuote());
+    conf.setValue("descQuote", getDescQuote());
+    conf.setValue("mactionUsesPrespam", getMactionUsesPrespam());
+    conf.setValue("prespamTTL", getPrespamTTL());
+    conf.endGroup();
 
-  conf.beginGroup("Engine");
-  conf.setValue("checkExits", getExitsCheck() );
-  conf.setValue("checkTerrain", getTerrainCheck() );
-  conf.setValue("briefmode", getBriefMode() );
-  conf.setValue("autoMerge", getAutomerge() );
-  conf.setValue("angryLinker", getAngrylinker() );
-  conf.setValue("dualLinker", getDuallinker() );
-  conf.setValue("autoRefresh", getAutorefresh() );
-  conf.setValue("roomNameQuote", getNameQuote() );
-  conf.setValue("descQuote", getDescQuote() );
-  conf.setValue("mactionUsesPrespam", getMactionUsesPrespam());
-  conf.setValue("prespamTTL", getPrespamTTL());
-  conf.endGroup();
+    conf.beginGroup("Patterns");
+    conf.setValue("exitsPattern", getExitsPattern());
+    conf.setValue("spellsEffectPattern", spells_pattern);
+    conf.setValue("scorePattern", getScorePattern());
+    conf.setValue("scorePatternShort", getShortScorePattern());
+    conf.endGroup();
 
-  conf.beginGroup("Patterns");
-  conf.setValue("exitsPattern", getExitsPattern());
-  conf.setValue("spellsEffectPattern", spells_pattern);
-  conf.setValue( "scorePattern", getScorePattern() );
-  conf.setValue( "scorePatternShort", getShortScorePattern() );
-  conf.endGroup();
+    conf.beginGroup("GroupManager");
+    conf.setValue("remoteHost", getGroupManagerHost());
+    conf.setValue("remotePort", getGroupManagerRemotePort());
+    conf.setValue("localServerPort", getGroupManagerLocalPort());
+    conf.setValue("charName", getGroupManagerCharName());
+    conf.setValue("charColor", getGroupManagerColor().name());
+    conf.setValue("showSelf", getGroupManagerShowSelf());
+    conf.setValue("notifyArm", getGroupManagerNotifyArmour());
+    conf.setValue("notifySanc", getGroupManagerNotifySanc());
+    conf.setValue("notifyBash", getGroupManagerNotifyBash());
+    conf.setValue("showGroupManager", getGroupManagerShowManager());
 
+    conf.setValue("windowRect", renderer_window->getGroupManagerRect());
 
+    conf.endGroup();
 
-  conf.beginGroup("GroupManager");
-  conf.setValue("remoteHost", getGroupManagerHost() );
-  conf.setValue("remotePort", getGroupManagerRemotePort() );
-  conf.setValue("localServerPort", getGroupManagerLocalPort() );
-  conf.setValue("charName", getGroupManagerCharName() );
-  conf.setValue("charColor", getGroupManagerColor().name() );
-  conf.setValue("showSelf", getGroupManagerShowSelf() );
-  conf.setValue("notifyArm", getGroupManagerNotifyArmour() );
-  conf.setValue("notifySanc", getGroupManagerNotifySanc() );
-  conf.setValue("notifyBash", getGroupManagerNotifyBash() );
-  conf.setValue("showGroupManager", getGroupManagerShowManager() );
+    conf.beginWriteArray("Spells");
+    for (unsigned int i = 0; i < spells.size(); ++i) {
+        conf.setArrayIndex(i);
+        conf.setValue("addon", spells[i].addon);
+        conf.setValue("name", spells[i].name);
+        conf.setValue("upMessage", spells[i].up_mes);
+        conf.setValue("refreshMessage", spells[i].refresh_mes);
+        conf.setValue("downMessage", spells[i].down_mes);
+    }
+    conf.endArray();
 
-  conf.setValue("windowRect", renderer_window->getGroupManagerRect() );
+    conf.beginGroup("Movement tracking");
+    conf.beginWriteArray("Cancel Patterns");
+    for (int i = 0; i < moveCancelPatterns.size(); ++i) {
+        conf.setArrayIndex(i);
+        conf.setValue("pattern", moveCancelPatterns.at(i));
+    }
+    conf.endArray();
+    conf.beginWriteArray("Force Patterns");
+    for (int i = 0; i < moveForcePatterns.size(); ++i) {
+        conf.setArrayIndex(i);
+        conf.setValue("pattern", moveForcePatterns.at(i));
+    }
+    conf.endArray();
+    conf.endGroup();
 
-  conf.endGroup();
+    conf.beginWriteArray("Debug Settings");
+    i = 0;
+    while (debug_data[i].name) {
+        conf.setArrayIndex(i);
+        conf.setValue("name", debug_data[i].name);
+        conf.setValue("state", debug_data[i].state);
 
+        i++;
+    }
+    conf.endArray();
 
-  conf.beginWriteArray("Spells");
-  for (unsigned int i = 0; i < spells.size(); ++i) {
-	  conf.setArrayIndex(i);
-	  conf.setValue("addon", spells[i].addon);
-	  conf.setValue("name", spells[i].name);
-	  conf.setValue("upMessage", spells[i].up_mes);
-	  conf.setValue("refreshMessage", spells[i].refresh_mes);
-	  conf.setValue("downMessage", spells[i].down_mes);
-  }
-  conf.endArray();
+    configFile = filename;
+    configPath = path;
 
-
-
-  conf.beginGroup("Movement tracking");
-  conf.beginWriteArray("Cancel Patterns");
-  for (int i = 0; i < moveCancelPatterns.size(); ++i) {
-	  conf.setArrayIndex(i);
-	  conf.setValue("pattern", moveCancelPatterns.at(i));
-  }
-  conf.endArray();
-  conf.beginWriteArray("Force Patterns");
-  for (int i = 0; i < moveForcePatterns.size(); ++i) {
-	  conf.setArrayIndex(i);
-	  conf.setValue("pattern", moveForcePatterns.at(i));
-  }
-  conf.endArray();
-  conf.endGroup();
-
-
-  conf.beginWriteArray("Debug Settings");
-  i = 0;
-  while (debug_data[i].name) {
-	  conf.setArrayIndex(i);
-	  conf.setValue("name", debug_data[i].name);
-	  conf.setValue("state", debug_data[i].state);
-
-      i++;
-  }
-  conf.endArray();
-
-  configFile = filename;
-  configPath = path;
-
-  setConfigModified(false);
-  return true;
+    setConfigModified(false);
+    return true;
 }
-
-
 
 int Configurator::loadConfig(QByteArray path, QByteArray filename)
 {
-	int size;
-	QSettings conf(path + filename, QSettings::IniFormat);
+    int size;
+    QSettings conf(path + filename, QSettings::IniFormat);
 
-	conf.beginGroup("General");
-	setBaseFile( conf.value("mapFile", "database/mume.xml").toByteArray() );
-	setWindowRect( conf.value("windowRect").toRect() );
-	setAlwaysOnTop( conf.value("alwaysOnTop", true ).toBool() );
-	setStartupMode( conf.value("startupMode", 1).toInt() );
-    setLogFileEnabled( conf.value("isLogFileEnabled", true).toBool() );
-	conf.endGroup();
+    conf.beginGroup("General");
+    setBaseFile(conf.value("mapFile", "database/mume.xml").toByteArray());
+    setWindowRect(conf.value("windowRect").toRect());
+    setAlwaysOnTop(conf.value("alwaysOnTop", true).toBool());
+    setStartupMode(conf.value("startupMode", 1).toInt());
+    setLogFileEnabled(conf.value("isLogFileEnabled", true).toBool());
+    conf.endGroup();
 
-	conf.beginGroup("Networking");
-	setLocalPort( conf.value("localPort", 4242).toInt() );
-	setRemoteHost( conf.value("remoteHost", "193.134.218.111").toByteArray() );
-	setRemotePort( conf.value("remotePort", 443).toInt() );
-	conf.endGroup();
+    conf.beginGroup("Networking");
+    setLocalPort(conf.value("localPort", 4242).toInt());
+    setRemoteHost(conf.value("remoteHost", "193.134.218.111").toByteArray());
+    setRemotePort(conf.value("remotePort", 443).toInt());
+    conf.endGroup();
 
-	conf.beginGroup("OpenGL");
-	setTextureVisibility( conf.value("texturesVisibility", 500).toInt() );
-	setDetailsVisibility( conf.value("detailsVisibility", 300).toInt() );
-	setVisibleLayers( conf.value("visibleLayers", 5).toInt() );
-	setShowNotesRenderer( conf.value("showNotes", true).toBool() );
-	setShowRegionsInfo( conf.value("showRegions", false). toBool() );
-	setDisplayRegionsRenderer( conf.value("displayRegions", false).toBool() );
-	setMultisampling( conf.value("multisampling", true).toBool() );
-	setSelectOAnyLayer( conf.value("selectOnAnyLayer", true).toBool() );
-    setRendererAngles(conf.value("angleX", 0).toFloat(), conf.value("angleY", 0).toFloat(), conf.value("angleZ", 0).toFloat());
-    setRendererPosition(conf.value("userX", 0).toFloat(), conf.value("userY", 0).toFloat(), conf.value("userZ", 0).toFloat());
-    setNoteColor( conf.value("noteColor", "#F28003").toByteArray() );
-    setDrawPrespam(  conf.value("drawPrespam", true).toBool() );
+    conf.beginGroup("OpenGL");
+    setTextureVisibility(conf.value("texturesVisibility", 500).toInt());
+    setDetailsVisibility(conf.value("detailsVisibility", 300).toInt());
+    setVisibleLayers(conf.value("visibleLayers", 5).toInt());
+    setShowNotesRenderer(conf.value("showNotes", true).toBool());
+    setShowRegionsInfo(conf.value("showRegions", false).toBool());
+    setDisplayRegionsRenderer(conf.value("displayRegions", false).toBool());
+    setMultisampling(conf.value("multisampling", true).toBool());
+    setSelectOAnyLayer(conf.value("selectOnAnyLayer", true).toBool());
+    setRendererAngles(conf.value("angleX", 0).toFloat(), conf.value("angleY", 0).toFloat(),
+                      conf.value("angleZ", 0).toFloat());
+    setRendererPosition(conf.value("userX", 0).toFloat(), conf.value("userY", 0).toFloat(),
+                        conf.value("userZ", 0).toFloat());
+    setNoteColor(conf.value("noteColor", "#F28003").toByteArray());
+    setDrawPrespam(conf.value("drawPrespam", true).toBool());
 
     size = conf.beginReadArray("Textures");
-	for (int i = 0; i < size; ++i) {
-	  conf.setArrayIndex(i);
-	  QByteArray handle = conf.value("handle").toByteArray();
-	  // ignore "NONE" handle, it's always added by constructors
-	  if (handle == "NONE")
-		  continue;
-      addTexture(handle,  conf.value("file").toByteArray(),  (char) conf.value("pattern").toInt());
-	}
-	conf.endArray();
-	conf.endGroup();
+    for (int i = 0; i < size; ++i) {
+        conf.setArrayIndex(i);
+        QByteArray handle = conf.value("handle").toByteArray();
+        // ignore "NONE" handle, it's always added by constructors
+        if (handle == "NONE")
+            continue;
+        addTexture(handle, conf.value("file").toByteArray(), (char)conf.value("pattern").toInt());
+    }
+    conf.endArray();
+    conf.endGroup();
 
-	conf.beginGroup("Engine");
-	setExitsCheck( conf.value("checkExits", false).toBool() );
-	setTerrainCheck( conf.value("checkTerrain", true).toBool() );
-	setBriefMode( conf.value("briefmode", true ).toBool() );
-	setAutomerge( conf.value("autoMerge", true ).toBool() );
-	setAngrylinker( conf.value("angryLinker", true ).toBool() );
-	setDuallinker( conf.value("dualLinker", false ).toBool() );
-	setAutorefresh( conf.value("autoRefresh", true ).toBool() );
-	setNameQuote( conf.value("roomNameQuote", 10 ).toInt() );
-	setDescQuote( conf.value("descQuote", 10 ).toInt() );
-	setRegionsAutoReplace( conf.value("regionsAutoReplace", false ).toBool() );
-	setRegionsAutoSet( conf.value("regionsAutoSet", false ).toBool() );
-	setMactionUsesPrespam( conf.value("mactionUsesPrespam", true).toBool() );
-	setPrespamTTL( conf.value("prespamTTL", 5000).toInt() );
+    conf.beginGroup("Engine");
+    setExitsCheck(conf.value("checkExits", false).toBool());
+    setTerrainCheck(conf.value("checkTerrain", true).toBool());
+    setBriefMode(conf.value("briefmode", true).toBool());
+    setAutomerge(conf.value("autoMerge", true).toBool());
+    setAngrylinker(conf.value("angryLinker", true).toBool());
+    setDuallinker(conf.value("dualLinker", false).toBool());
+    setAutorefresh(conf.value("autoRefresh", true).toBool());
+    setNameQuote(conf.value("roomNameQuote", 10).toInt());
+    setDescQuote(conf.value("descQuote", 10).toInt());
+    setRegionsAutoReplace(conf.value("regionsAutoReplace", false).toBool());
+    setRegionsAutoSet(conf.value("regionsAutoSet", false).toBool());
+    setMactionUsesPrespam(conf.value("mactionUsesPrespam", true).toBool());
+    setPrespamTTL(conf.value("prespamTTL", 5000).toInt());
 
-	conf.endGroup();
+    conf.endGroup();
 
     conf.beginGroup("Patterns");
-    setExitsPattern( conf.value("exitsPattern", "Exits: ").toByteArray() );
+    setExitsPattern(conf.value("exitsPattern", "Exits: ").toByteArray());
     spells_pattern = conf.value("spellsEffectPattern", "Affected by:").toByteArray();
-    setScorePattern( conf.value("scorePattern", "[0-9]*/* hits, */* mana, and */* moves.").toByteArray()  );
-    setShortScorePattern( conf.value("scorePatternShort", "[0-9]*/* hits and */* moves.").toByteArray() );
-	conf.endGroup();
+    setScorePattern(conf.value("scorePattern", "[0-9]*/* hits, */* mana, and */* moves.").toByteArray());
+    setShortScorePattern(conf.value("scorePatternShort", "[0-9]*/* hits and */* moves.").toByteArray());
+    conf.endGroup();
 
+    conf.beginGroup("GroupManager");
+    setGroupManagerHost(conf.value("remoteHost", "localhost").toByteArray());
+    setGroupManagerRemotePort(conf.value("remotePort", 4243).toInt());
+    setGroupManagerLocalPort(conf.value("localServerPort", 4243).toInt());
+    setGroupManagerCharName(conf.value("charName", "Charname").toByteArray());
+    setGroupManagerColor(QColor(conf.value("charColor", "#F28003").toString()));
+    setGroupManagerShowSelf(conf.value("showSelf", false).toBool());
+    setGroupManagerNotifyArmour(conf.value("notifyArm", true).toBool());
+    setGroupManagerNotifySanc(conf.value("notifySanc", true).toBool());
+    setGroupManagerNotifyBash(conf.value("notifyBash", true).toBool());
+    setGroupManagerShowManager(conf.value("showGroupManager", true).toBool());
+    setGroupManagerRect(conf.value("windowRect").toRect());
+    conf.endGroup();
 
-	conf.beginGroup("GroupManager");
-	setGroupManagerHost( conf.value("remoteHost", "localhost").toByteArray() );
-	setGroupManagerRemotePort( conf.value("remotePort", 4243 ).toInt() );
-	setGroupManagerLocalPort( conf.value("localServerPort", 4243 ).toInt() );
-	setGroupManagerCharName( conf.value("charName", "Charname" ).toByteArray() );
-	setGroupManagerColor( QColor( conf.value("charColor", "#F28003").toString() ) );
-	setGroupManagerShowSelf( conf.value("showSelf", false ).toBool() );
-	setGroupManagerNotifyArmour( conf.value("notifyArm", true ).toBool() );
-	setGroupManagerNotifySanc( conf.value("notifySanc", true ).toBool() );
-	setGroupManagerNotifyBash( conf.value("notifyBash", true ).toBool() );
-	setGroupManagerShowManager( conf.value("showGroupManager", true ).toBool() );
-	setGroupManagerRect( conf.value("windowRect").toRect() );
-	conf.endGroup();
+    size = conf.beginReadArray("Spells");
+    for (int i = 0; i < size; ++i) {
+        conf.setArrayIndex(i);
+        TSpell spell;
 
+        spell.up = false;
+        spell.silently_up = false;
+        spell.addon = conf.value("addon", 0).toBool();
+        spell.name = conf.value("name").toByteArray();
+        spell.up_mes = conf.value("upMessage").toByteArray();
+        spell.refresh_mes = conf.value("refreshMessage").toByteArray();
+        spell.down_mes = conf.value("downMessage").toByteArray();
 
-	size = conf.beginReadArray("Spells");
-	for (int i = 0; i < size; ++i) {
-	  conf.setArrayIndex(i);
-	  TSpell spell;
+        addSpell(spell);
+    }
+    conf.endArray();
 
-      spell.up = false;
-      spell.silently_up = false;
-	  spell.addon = conf.value("addon", 0).toBool();
-	  spell.name = conf.value("name").toByteArray();
-	  spell.up_mes = conf.value("upMessage").toByteArray();
-	  spell.refresh_mes = conf.value("refreshMessage").toByteArray();
-	  spell.down_mes = conf.value("downMessage").toByteArray();
+    conf.beginGroup("Movement tracking");
+    size = conf.beginReadArray("Cancel Patterns");
+    for (int i = 0; i < size; ++i) {
+        conf.setArrayIndex(i);
+        moveCancelPatterns.append(conf.value("pattern").toByteArray());
+    }
+    conf.endArray();
+    size = conf.beginReadArray("Force Patterns");
+    for (int i = 0; i < size; ++i) {
+        conf.setArrayIndex(i);
+        moveForcePatterns.append(conf.value("pattern").toByteArray());
+    }
+    conf.endArray();
+    conf.endGroup();
 
-      addSpell(spell);
-	}
-	conf.endArray();
+    size = conf.beginReadArray("Debug Settings");
+    for (int i = 0; i < size; ++i) {
+        conf.setArrayIndex(i);
 
+        QString s = conf.value("name").toString();
 
-	conf.beginGroup("Movement tracking");
-	size = conf.beginReadArray("Cancel Patterns");
-	for (int i = 0; i < size; ++i) {
-	  conf.setArrayIndex(i);
-	  moveCancelPatterns.append( conf.value("pattern").toByteArray() );
-	}
-	conf.endArray();
-	size = conf.beginReadArray("Force Patterns");
-	for (int i = 0; i < size; ++i) {
-	  conf.setArrayIndex(i);
-	  moveForcePatterns.append( conf.value("pattern").toByteArray() );
-	}
-	conf.endArray();
-	conf.endGroup();
+        unsigned int z = 0;
+        while (debug_data[z].name != nullptr) {
+            if (debug_data[z].name == s)
+                break;
+            z++;
+        }
+        if (debug_data[z].name == nullptr) {
+            print_debug(DEBUG_CONFIG, "Warning, %s is a wrong debug descriptor/name!", qPrintable(s));
+            continue;
+        }
 
-	size = conf.beginReadArray("Debug Settings");
-	for (int i = 0; i < size; ++i) {
-	  conf.setArrayIndex(i);
+        debug_data[i].state = conf.value("state", 0).toInt();
+    }
+    conf.endArray();
 
-      QString s = conf.value("name").toString();
+    configFile = filename;
+    configPath = path;
 
-	  unsigned int z = 0;
-      while (debug_data[z].name != nullptr) {
-          if (debug_data[z].name == s)
-              break;
-          z++;
-      }
-      if (debug_data[z].name == nullptr) {
-          print_debug(DEBUG_CONFIG, "Warning, %s is a wrong debug descriptor/name!", qPrintable(s));
-          continue;
-      }
-
-      debug_data[i].state = conf.value("state", 0 ).toInt();
-	}
-	conf.endArray();
-
-	configFile = filename;
-	configPath = path;
-
-	setConfigModified(false);
-	return true;
+    setConfigModified(false);
+    return true;
 }
 
 /* ---------------- PATTERNS and REGEXPS GENERATION --------------- */
@@ -401,7 +385,6 @@ QString Configurator::spellUpFor(unsigned int p)
     if (p > spells.size())
         return "";
 
-
     QString s;
     int min;
     int sec;
@@ -410,11 +393,7 @@ QString Configurator::spellUpFor(unsigned int p)
     min = sec / 60;
     sec = sec % 60;
 
-    s = QString("- %1%2:%3%4")
-            .arg( min / 10 )
-            .arg( min % 10 )
-            .arg( sec / 10 )
-            .arg( sec % 10 );
+    s = QString("- %1%2:%3%4").arg(min / 10).arg(min % 10).arg(sec / 10).arg(sec % 10);
 
     return s;
 }
@@ -422,13 +401,10 @@ QString Configurator::spellUpFor(unsigned int p)
 void Configurator::resetSpells()
 {
     for (unsigned int p = 0; p < conf->spells.size(); p++) {
-    	conf->spells[p].up = false;
-    	conf->spells[p].silently_up = false;
+        conf->spells[p].up = false;
+        conf->spells[p].silently_up = false;
     }
-
 }
-
-
 
 /* ----------------- REGULAR EXPRESSIONS SECTION ---------------- */
 /* ------------------- DATA ------------------- */
@@ -456,7 +432,6 @@ GLuint Configurator::getTextureByDesc(QByteArray desc)
     return sectors[i].texture;
 }
 
-
 void Configurator::addTexture(QByteArray desc, QByteArray filename, char pattern)
 {
     struct roomSectorsData s;
@@ -477,7 +452,6 @@ int Configurator::getSectorByPattern(char pattern)
     }
     return 0;
 }
-
 
 void Configurator::setBaseFile(QByteArray str)
 {
@@ -534,8 +508,6 @@ void Configurator::setShowNotesRenderer(bool b)
     setConfigModified(true);
 }
 
-
-
 void Configurator::setRemoteHost(QByteArray str)
 {
     remoteHost = str;
@@ -577,7 +549,6 @@ bool Configurator::getDuallinker()
     return duallinker;
 }
 
-
 void Configurator::setAngrylinker(bool b)
 {
     angrylinker = b;
@@ -587,8 +558,8 @@ void Configurator::setAngrylinker(bool b)
 void Configurator::setExitsCheck(bool b)
 {
     exitsCheck = b;
-//    set_conf_mod(true);       /* this option changes repeatedly when you turn */
-                                /* mapping on and off */
+    //    set_conf_mod(true);       /* this option changes repeatedly when you turn */
+    /* mapping on and off */
 }
 
 void Configurator::setTerrainCheck(bool b)
@@ -626,7 +597,6 @@ void Configurator::setLogFileEnabled(bool b)
     isLogFileEnabled = b;
     setConfigModified(true);
 }
-
 
 void Configurator::setNameQuote(int i)
 {
@@ -667,29 +637,29 @@ int Configurator::loadNormalTexture(QByteArray filename, GLuint *texture)
 {
     QImage tex1, buf1;
 
-    print_debug(DEBUG_RENDERER, "loading texture %s", (const char *) filename);
+    print_debug(DEBUG_RENDERER, "loading texture %s", (const char *)filename);
     if (filename == "")
         return -1;
-    if (!buf1.load( filename )) {
-        print_debug(DEBUG_CONFIG, "Failed to load the %s!", (const char *) filename);
+    if (!buf1.load(filename)) {
+        print_debug(DEBUG_CONFIG, "Failed to load the %s!", (const char *)filename);
         return -1;
     }
     tex1 = buf1.convertToFormat(QImage::Format_RGBA8888).mirrored();
-    glGenTextures(1, texture );
+    glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex1.width(), tex1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex1.bits() );
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex1.width(), tex1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex1.bits());
 
     return 1;
 }
 
 int Configurator::loadSectorTexture(struct roomSectorsData *p)
 {
-	loadNormalTexture(p->filename, &p->texture);
+    loadNormalTexture(p->filename, &p->texture);
 
     p->gllist = glGenLists(1);
     if (p->gllist != 0) {
@@ -700,19 +670,17 @@ int Configurator::loadSectorTexture(struct roomSectorsData *p)
         glBindTexture(GL_TEXTURE_2D, p->texture);
 
         glBegin(GL_QUADS);
-            glTexCoord2f(0.0, 1.0);
-            glVertex3f(-ROOM_SIZE,  ROOM_SIZE, 0.0f);
-            glTexCoord2f(0.0, 0.0);
-            glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
-            glTexCoord2f(1.0, 0.0);
-            glVertex3f( ROOM_SIZE, -ROOM_SIZE, 0.0f);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3f( ROOM_SIZE,  ROOM_SIZE, 0.0f);
+        glTexCoord2f(0.0, 1.0);
+        glVertex3f(-ROOM_SIZE, ROOM_SIZE, 0.0f);
+        glTexCoord2f(0.0, 0.0);
+        glVertex3f(-ROOM_SIZE, -ROOM_SIZE, 0.0f);
+        glTexCoord2f(1.0, 0.0);
+        glVertex3f(ROOM_SIZE, -ROOM_SIZE, 0.0f);
+        glTexCoord2f(1.0, 1.0);
+        glVertex3f(ROOM_SIZE, ROOM_SIZE, 0.0f);
 
         glEnd();
         glDisable(GL_TEXTURE_2D);
-
-
 
         glEndList();
     }

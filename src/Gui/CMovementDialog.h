@@ -18,25 +18,24 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CMOVEMENTDIALOG_H 
+#ifndef CMOVEMENTDIALOG_H
 #define CMOVEMENTDIALOG_H
 
 #include <QDialog>
 #include "ui_movementdialog.h"
 
-
-class CMovementDialog : public QDialog, public Ui::MovementDialog {
-Q_OBJECT
-public:
+class CMovementDialog : public QDialog, public Ui::MovementDialog
+{
+    Q_OBJECT
+  public:
     CMovementDialog(QWidget *parent = 0);
     int x;
     int y;
     int z;
-    
+
     void run();
-public slots:
+  public slots:
     virtual void accept();
 };
-
 
 #endif
