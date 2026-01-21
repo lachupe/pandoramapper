@@ -40,8 +40,12 @@
 #include "Engine/CStacksManager.h"
 #include "Engine/CEngine.h"
 
+#include "Map/CRoomManager.h"
+
 #include "Proxy/userfunc.h"
 #include "Proxy/proxy.h"
+
+#include "Utils/MMapperImport.h"
 
 CActionManager::CActionManager(CMainWindow *parentWindow)
 {
@@ -57,6 +61,10 @@ CActionManager::CActionManager(CMainWindow *parentWindow)
     openAct->setShortcut(tr("Ctrl+L"));
     openAct->setStatusTip(tr("Open an existing map"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+    importMMapperAct = new QAction(tr("&Import MMapper..."), this);
+    importMMapperAct->setStatusTip(tr("Import an MMapper .mm2 map file"));
+    connect(importMMapperAct, SIGNAL(triggered()), this, SLOT(importMMapper()));
 
     reloadAct = new QAction(tr("&Reload..."), this);
     reloadAct->setShortcut(tr("Ctrl+R"));
@@ -558,6 +566,64 @@ void CActionManager::open()
     if (!s.isEmpty()) {
         QByteArray data = s.toUtf8();
         usercmd_mload(0, 0, data.data(), data.data());
+    }
+}
+
+void CActionManager::importMMapper()
+{
+    QString s = QFileDialog::getOpenFileName(parent, "Choose an MMapper database", "database/",
+                                             "MMapper files (*.mm2);;All files (*)");
+
+    if (s.isEmpty()) {
+        return;
+    }
+
+    print_debug(DEBUG_XML, "User wants to import MMapper database from: %s", qPrintable(s));
+
+    // Check file version first
+    uint32_t version = MMapperImport::checkFile(s);
+    if (version == 0) {
+        QMessageBox::critical(parent, "Import Error", MMapperImport::lastError());
+        return;
+    }
+
+    // Confirm import (will clear existing map)
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        parent, "Import MMapper Map",
+        QString("This will clear the current map and import from:\n%1\n\nMMapper file version: %2\n\nContinue?")
+            .arg(s)
+            .arg(version),
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (reply != QMessageBox::Yes) {
+        return;
+    }
+
+    // Clear current map
+    Map.reinit();
+    stacker.reset();
+    engine->clear();
+    engine->setMapping(false);
+
+    // Import the file
+    if (MMapperImport::importFile(s, &Map, parent)) {
+        QMessageBox::information(parent, "Import Complete",
+                                 QString("Successfully imported %1 rooms from MMapper file.").arg(Map.size()));
+        conf->setDatabaseModified(true);
+        if (Map.size() > 0 && renderer_window && renderer_window->renderer) {
+            CRoom *firstRoom = Map.getRoom(1);
+            if (firstRoom != nullptr) {
+                stacker.reset();
+                stacker.put(firstRoom);
+                stacker.swap();
+                renderer_window->renderer->setUserX(0, true);
+                renderer_window->renderer->setUserY(0, true);
+                engine->setMgoto(true);
+                toggle_renderer_reaction();
+            }
+        }
+    } else {
+        QMessageBox::critical(parent, "Import Error", MMapperImport::lastError());
     }
 }
 

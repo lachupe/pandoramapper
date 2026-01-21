@@ -24,7 +24,7 @@
 
 class QString;
 
-#define MAX_ROOMS 35000 /* maximal amount of rooms */
+#define MAX_ROOMS 70000 /* maximal amount of rooms */
 
 #define MAX_STR_LEN 400
 #define MAX_LINES_DESC 20

@@ -125,6 +125,7 @@ CMainWindow::CMainWindow(QWidget *parent) : QMainWindow(parent)
     fileMenu->addAction(actionManager->newAct);
     fileMenu->addSeparator();
     fileMenu->addAction(actionManager->openAct);
+    fileMenu->addAction(actionManager->importMMapperAct);
     fileMenu->addAction(actionManager->reloadAct);
     fileMenu->addSeparator();
     fileMenu->addAction(actionManager->saveAct);

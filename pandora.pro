@@ -136,12 +136,14 @@ SOURCES += src/Renderer/CFrustum.cpp \
 HEADERS += src/Utils/CTimers.h \
     src/Utils/CConfigurator.h \
     src/Utils/utils.h \
-    src/Utils/xml2.h
+    src/Utils/xml2.h \
+    src/Utils/MMapperImport.h
 
 SOURCES += src/Utils/CTimers.cpp \
     src/Utils/CConfigurator.cpp \
     src/Utils/utils.cpp \
-    src/Utils/xml2.cpp
+    src/Utils/xml2.cpp \
+    src/Utils/MMapperImport.cpp
 	
 	
 TARGET = pandoramapper
