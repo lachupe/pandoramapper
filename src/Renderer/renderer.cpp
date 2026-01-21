@@ -67,6 +67,150 @@ GLfloat marker_colour[4] = {1.0, 0.1, 0.1, 1.0};
 #define CONNECTION_THICKNESS_DIVIDOR 5
 #define PICK_TOL 50
 
+static QByteArray pixmapPath(const char *base)
+{
+    return QByteArray(":/pixmaps/") + base + ".png";
+}
+
+struct IconMapping
+{
+    uint32_t flag;
+    const char *name;
+};
+
+static const IconMapping mobIconMap[] = {
+    {MM_MOB_RENT, "mob-rent"},
+    {MM_MOB_SHOP, "mob-shop"},
+    {MM_MOB_WEAPON_SHOP, "mob-weaponshop"},
+    {MM_MOB_ARMOUR_SHOP, "mob-armourshop"},
+    {MM_MOB_FOOD_SHOP, "mob-foodshop"},
+    {MM_MOB_PET_SHOP, "mob-petshop"},
+    {MM_MOB_GUILD, "mob-guild"},
+    {MM_MOB_SCOUT_GUILD, "mob-scoutguild"},
+    {MM_MOB_MAGE_GUILD, "mob-mageguild"},
+    {MM_MOB_CLERIC_GUILD, "mob-clericguild"},
+    {MM_MOB_WARRIOR_GUILD, "mob-warriorguild"},
+    {MM_MOB_RANGER_GUILD, "mob-rangerguild"},
+    {MM_MOB_AGGRESSIVE_MOB, "mob-aggmob"},
+    {MM_MOB_QUEST_MOB, "mob-questmob"},
+    {MM_MOB_PASSIVE_MOB, "mob-passivemob"},
+    {MM_MOB_ELITE_MOB, "mob-elitemob"},
+    {MM_MOB_SUPER_MOB, "mob-smob"},
+    {MM_MOB_MILKABLE, "mob-milkable"},
+    {MM_MOB_RATTLESNAKE, "mob-rattlesnake"},
+};
+
+static const IconMapping loadIconMap[] = {
+    {MM_LOAD_TREASURE, "load-treasure"},
+    {MM_LOAD_ARMOUR, "load-armour"},
+    {MM_LOAD_WEAPON, "load-weapon"},
+    {MM_LOAD_WATER, "load-water"},
+    {MM_LOAD_FOOD, "load-food"},
+    {MM_LOAD_HERB, "load-herb"},
+    {MM_LOAD_KEY, "load-key"},
+    {MM_LOAD_MULE, "load-mule"},
+    {MM_LOAD_HORSE, "load-horse"},
+    {MM_LOAD_PACK_HORSE, "load-pack"},
+    {MM_LOAD_TRAINED_HORSE, "load-trained"},
+    {MM_LOAD_ROHIRRIM, "load-rohirrim"},
+    {MM_LOAD_WARG, "load-warg"},
+    {MM_LOAD_BOAT, "load-boat"},
+    {MM_LOAD_ATTENTION, "load-attention"},
+    {MM_LOAD_TOWER, "load-watch"},
+    {MM_LOAD_CLOCK, "load-clock"},
+    {MM_LOAD_MAIL, "load-mail"},
+    {MM_LOAD_STABLE, "load-stable"},
+    {MM_LOAD_WHITE_WORD, "load-whiteword"},
+    {MM_LOAD_DARK_WORD, "load-darkword"},
+    {MM_LOAD_EQUIPMENT, "load-equipment"},
+    {MM_LOAD_COACH, "load-coach"},
+    {MM_LOAD_FERRY, "load-ferry"},
+    {MM_LOAD_DEATHTRAP, "load-deathtrap"},
+};
+
+static const int mobIconCount = sizeof(mobIconMap) / sizeof(mobIconMap[0]);
+static const int loadIconCount = sizeof(loadIconMap) / sizeof(loadIconMap[0]);
+
+static const char *roadMaskToName(int mask)
+{
+    switch (mask) {
+    case 0:
+        return "road-none";
+    case 1:
+        return "road-n";
+    case 2:
+        return "road-e";
+    case 4:
+        return "road-s";
+    case 8:
+        return "road-w";
+    case 3:
+        return "road-ne";
+    case 5:
+        return "road-ns";
+    case 9:
+        return "road-nw";
+    case 6:
+        return "road-es";
+    case 10:
+        return "road-ew";
+    case 12:
+        return "road-sw";
+    case 7:
+        return "road-nes";
+    case 11:
+        return "road-new";
+    case 13:
+        return "road-nsw";
+    case 14:
+        return "road-esw";
+    case 15:
+        return "road-all";
+    default:
+        return "road-none";
+    }
+}
+
+static const char *trailMaskToName(int mask)
+{
+    switch (mask) {
+    case 0:
+        return "trail-none";
+    case 1:
+        return "trail-n";
+    case 2:
+        return "trail-e";
+    case 4:
+        return "trail-s";
+    case 8:
+        return "trail-w";
+    case 3:
+        return "trail-ne";
+    case 5:
+        return "trail-ns";
+    case 9:
+        return "trail-nw";
+    case 6:
+        return "trail-es";
+    case 10:
+        return "trail-ew";
+    case 12:
+        return "trail-sw";
+    case 7:
+        return "trail-nes";
+    case 11:
+        return "trail-new";
+    case 13:
+        return "trail-nsw";
+    case 14:
+        return "trail-esw";
+    case 15:
+        return "trail-all";
+    default:
+        return "trail-none";
+    }
+}
+
 RendererWidget::RendererWidget(QWidget *parent)
     : QOpenGLWidget(parent), mapProgram(nullptr), mapVbo(QOpenGLBuffer::VertexBuffer), selectionFbo(nullptr)
 {
@@ -95,6 +239,22 @@ RendererWidget::RendererWidget(QWidget *parent)
 
     last_drawn_marker = 0;
     last_drawn_trail = 0;
+
+    for (int i = 0; i < 4; ++i) {
+        wall_textures[i] = 0;
+        door_textures[i] = 0;
+    }
+    for (int i = 0; i < 16; ++i) {
+        road_textures[i] = 0;
+        trail_textures[i] = 0;
+    }
+    for (int i = 0; i < MOB_FLAG_COUNT; ++i) {
+        mob_textures[i] = 0;
+    }
+    for (int i = 0; i < LOAD_FLAG_COUNT; ++i) {
+        load_textures[i] = 0;
+    }
+    no_ride_texture = 0;
 
     redraw = true;
 
@@ -129,8 +289,8 @@ void RendererWidget::initializeGL()
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_POLYGON_SMOOTH);
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POLYGON_SMOOTH);
 
     glEnable(GL_MULTISAMPLE);
 
@@ -196,10 +356,22 @@ void RendererWidget::initializeGL()
     }
 
     // load the exits texture
-    conf->loadNormalTexture("images/exit_normal.png", &conf->exit_normal_texture);
-    conf->loadNormalTexture("images/exit_door.png", &conf->exit_door_texture);
-    conf->loadNormalTexture("images/exit_secret.png", &conf->exit_secret_texture);
-    conf->loadNormalTexture("images/exit_undef.png", &conf->exit_undef_texture);
+    conf->loadNormalTexture(":/images/exit_normal.png", &conf->exit_normal_texture);
+    conf->loadNormalTexture(":/images/exit_door.png", &conf->exit_door_texture);
+    conf->loadNormalTexture(":/images/exit_secret.png", &conf->exit_secret_texture);
+    conf->loadNormalTexture(":/images/exit_undef.png", &conf->exit_undef_texture);
+    for (int mask = 0; mask < 16; ++mask) {
+        conf->loadNormalTexture(pixmapPath(roadMaskToName(mask)), &road_textures[mask]);
+        conf->loadNormalTexture(pixmapPath(trailMaskToName(mask)), &trail_textures[mask]);
+    }
+
+    for (int i = 0; i < mobIconCount && i < MOB_FLAG_COUNT; ++i) {
+        conf->loadNormalTexture(pixmapPath(mobIconMap[i].name), &mob_textures[i]);
+    }
+    for (int i = 0; i < loadIconCount && i < LOAD_FLAG_COUNT; ++i) {
+        conf->loadNormalTexture(pixmapPath(loadIconMap[i].name), &load_textures[i]);
+    }
+    conf->loadNormalTexture(pixmapPath("no-ride"), &no_ride_texture);
 }
 
 void RendererWidget::setupViewingModel(int width, int height)
@@ -540,6 +712,34 @@ void RendererWidget::appendQuadStrip6(const QVector3D &v0, const QVector3D &v1, 
     appendCommand(GL_TRIANGLES, true, texture, first, 12);
 }
 
+void RendererWidget::appendWallPrism(float x0, float x1, float y0, float y1, float z0, float z1,
+                                     const GLfloat *color, GLuint texture)
+{
+    QVector3D v000(x0, y0, z0);
+    QVector3D v001(x0, y0, z1);
+    QVector3D v010(x0, y1, z0);
+    QVector3D v011(x0, y1, z1);
+    QVector3D v100(x1, y0, z0);
+    QVector3D v101(x1, y0, z1);
+    QVector3D v110(x1, y1, z0);
+    QVector3D v111(x1, y1, z1);
+
+    auto addFace = [&](const QVector3D &a, const QVector3D &b, const QVector3D &c, const QVector3D &d) {
+        if (texture != 0) {
+            appendTexturedQuad(a, b, c, d, QVector2D(0.0f, 1.0f), QVector2D(0.0f, 0.0f),
+                               QVector2D(1.0f, 0.0f), QVector2D(1.0f, 1.0f), color, texture);
+        } else {
+            appendQuad(a, b, c, d, color);
+        }
+    };
+
+    addFace(v011, v111, v110, v010); /* north */
+    addFace(v001, v000, v100, v101); /* south */
+    addFace(v001, v011, v010, v000); /* west */
+    addFace(v101, v100, v110, v111); /* east */
+    addFace(v001, v101, v111, v011); /* top */
+}
+
 void RendererWidget::appendLine(const QVector3D &a, const QVector3D &b, const GLfloat *color)
 {
     RenderVertex v0 = {{a.x(), a.y(), a.z()}, {0.0f, 0.0f}, {color[0], color[1], color[2], color[3]}};
@@ -654,7 +854,7 @@ void RendererWidget::appendConeGeometry(float dx, float dy, float dz, float rotX
     if (rotY != 0.0f)
         transform.rotate(rotY, 0.0f, 1.0f, 0.0f);
 
-    QVector3D tip = transform * QVector3D(0.0f, 0.0f, height);
+    QVector3D tip = transform.map(QVector3D(0.0f, 0.0f, height));
 
     for (int i = 0; i < segments; i++) {
         float a0 = (static_cast<float>(i) / segments) * twoPi;
@@ -662,8 +862,8 @@ void RendererWidget::appendConeGeometry(float dx, float dy, float dz, float rotX
 
         QVector3D base0(radius * std::cos(a0), radius * std::sin(a0), 0.0f);
         QVector3D base1(radius * std::cos(a1), radius * std::sin(a1), 0.0f);
-        base0 = transform * base0;
-        base1 = transform * base1;
+        base0 = transform.map(base0);
+        base1 = transform.map(base1);
 
         appendCommand(GL_TRIANGLES, false, 0, renderVertices.size(), 3);
         pushVertex(tip);
@@ -714,10 +914,6 @@ void RendererWidget::drawTextOverlay()
     if (textBillboards.isEmpty() || !textFont)
         return;
 
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::TextAntialiasing, true);
-    painter.setFont(*textFont);
-
     QMatrix4x4 viewMatrix;
     viewMatrix.setToIdentity();
     viewMatrix.translate(0.0f, 0.0f, userZ);
@@ -727,16 +923,33 @@ void RendererWidget::drawTextOverlay()
     viewMatrix.translate(userX, userY, 0.0f);
 
     QMatrix4x4 mvp = projectionMatrix * viewMatrix;
+    const float maxDistance = conf->getNotesVisibilityRange();
+    const float fadeStart = maxDistance * 0.7f;
+    const float depthEpsilon = 0.002f;
+
+    struct DrawText {
+        QPointF screen;
+        QString text;
+        QColor color;
+    };
+    QVector<DrawText> drawList;
+    drawList.reserve(textBillboards.size());
 
     for (int i = 0; i < textBillboards.size(); i++) {
         const TextBillboard &entry = textBillboards[i];
-        QVector4D clip = mvp * QVector4D(entry.position, 1.0f);
+        QVector4D view = viewMatrix * QVector4D(entry.position, 1.0f);
+        float dist = view.toVector3D().length();
+        if (dist > maxDistance)
+            continue;
+
+        QVector4D clip = projectionMatrix * view;
         if (clip.w() <= 0.0f)
             continue;
 
         float invW = 1.0f / clip.w();
         float ndcX = clip.x() * invW;
         float ndcY = clip.y() * invW;
+        float ndcZ = clip.z() * invW;
 
         if (ndcX < -1.0f || ndcX > 1.0f || ndcY < -1.0f || ndcY > 1.0f)
             continue;
@@ -744,8 +957,35 @@ void RendererWidget::drawTextOverlay()
         float screenX = (ndcX * 0.5f + 0.5f) * static_cast<float>(width());
         float screenY = (1.0f - (ndcY * 0.5f + 0.5f)) * static_cast<float>(height());
 
+        float depth = ndcZ * 0.5f + 0.5f;
+        int px = std::clamp(static_cast<int>(screenX), 0, width() - 1);
+        int py = std::clamp(static_cast<int>(screenY), 0, height() - 1);
+        float depthBuffer = 1.0f;
+        glReadPixels(px, height() - 1 - py, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depthBuffer);
+        if (depth > depthBuffer + depthEpsilon)
+            continue;
+
+        float fade = 1.0f;
+        if (dist > fadeStart && maxDistance > fadeStart) {
+            fade = 1.0f - (dist - fadeStart) / (maxDistance - fadeStart);
+            fade = std::clamp(fade, 0.0f, 1.0f);
+        }
+
+        QColor color = entry.color;
+        color.setAlphaF(color.alphaF() * fade);
+        drawList.append({QPointF(screenX, screenY), entry.text, color});
+    }
+
+    if (drawList.isEmpty())
+        return;
+
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::TextAntialiasing, true);
+    painter.setFont(*textFont);
+
+    for (const DrawText &entry : drawList) {
         painter.setPen(entry.color);
-        painter.drawText(QPointF(screenX, screenY), entry.text);
+        painter.drawText(entry.screen, entry.text);
     }
 }
 
@@ -832,6 +1072,13 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
     float dx = p->getX() - curx;
     float dy = p->getY() - cury;
     float dz = p->getZ() - curz;
+    float xMin = dx - ROOM_SIZE;
+    float xMax = dx + ROOM_SIZE;
+    float yMin = dy - ROOM_SIZE;
+    float yMax = dy + ROOM_SIZE;
+    float z0 = dz;
+    float z1 = dz + WALL_HEIGHT;
+    float doorHalf = DOOR_WIDTH / 2.0f;
 
     if (p->getTerrain()) {
         GLuint texture = conf->sectors[p->getTerrain()].texture;
@@ -839,14 +1086,156 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
         QVector3D b(dx - ROOM_SIZE, dy - ROOM_SIZE, dz);
         QVector3D c(dx + ROOM_SIZE, dy - ROOM_SIZE, dz);
         QVector3D d(dx + ROOM_SIZE, dy + ROOM_SIZE, dz);
-        appendTexturedQuad(a, b, c, d, QVector2D(0.0f, 1.0f), QVector2D(0.0f, 0.0f), QVector2D(1.0f, 0.0f),
-                           QVector2D(1.0f, 1.0f), colour, texture);
+        if (texture != 0) {
+            appendTexturedQuad(a, b, c, d, QVector2D(0.0f, 1.0f), QVector2D(0.0f, 0.0f), QVector2D(1.0f, 0.0f),
+                               QVector2D(1.0f, 1.0f), colour, texture);
+        } else {
+            GLfloat floorColor[4] = {0.35f, 0.35f, 0.35f, colour[3]};
+            appendQuad(a, b, c, d, floorColor);
+        }
     } else {
+        GLfloat floorColor[4] = {0.35f, 0.35f, 0.35f, colour[3]};
         QVector3D a(dx - ROOM_SIZE, dy - ROOM_SIZE, dz);
         QVector3D b(dx + ROOM_SIZE, dy - ROOM_SIZE, dz);
         QVector3D c(dx + ROOM_SIZE, dy + ROOM_SIZE, dz);
         QVector3D d(dx - ROOM_SIZE, dy + ROOM_SIZE, dz);
-        appendQuad(a, b, c, d, colour);
+        appendQuad(a, b, c, d, floorColor);
+    }
+
+    int roadMask = 0;
+    if (p->getMMExitFlags(NORTH) & MM_EXIT_ROAD)
+        roadMask |= 1;
+    if (p->getMMExitFlags(EAST) & MM_EXIT_ROAD)
+        roadMask |= 2;
+    if (p->getMMExitFlags(SOUTH) & MM_EXIT_ROAD)
+        roadMask |= 4;
+    if (p->getMMExitFlags(WEST) & MM_EXIT_ROAD)
+        roadMask |= 8;
+
+    bool isRoadTerrain = false;
+    int terrainIndex = p->getTerrain();
+    if (terrainIndex >= 0 && terrainIndex < conf->sectors.size()) {
+        QByteArray terrainDesc = conf->sectors[terrainIndex].desc;
+        isRoadTerrain = (terrainDesc.toUpper() == "ROAD");
+    }
+
+    GLuint overlayTexture = 0;
+    if (isRoadTerrain) {
+        overlayTexture = road_textures[roadMask];
+    } else if (roadMask != 0) {
+        overlayTexture = trail_textures[roadMask];
+    }
+
+    if (overlayTexture != 0) {
+        GLfloat overlayColor[4] = {1.0f, 1.0f, 1.0f, colour[3]};
+        float overlayZ = dz + 0.02f;
+        QVector3D a(dx - ROOM_SIZE, dy + ROOM_SIZE, overlayZ);
+        QVector3D b(dx - ROOM_SIZE, dy - ROOM_SIZE, overlayZ);
+        QVector3D c(dx + ROOM_SIZE, dy - ROOM_SIZE, overlayZ);
+        QVector3D d(dx + ROOM_SIZE, dy + ROOM_SIZE, overlayZ);
+        appendTexturedQuad(a, b, c, d, QVector2D(0.0f, 1.0f), QVector2D(0.0f, 0.0f),
+                           QVector2D(1.0f, 0.0f), QVector2D(1.0f, 1.0f), overlayColor, overlayTexture);
+    }
+
+    QVector<GLuint> iconTextures;
+    uint32_t mobFlags = p->getMobFlags();
+    for (int i = 0; i < mobIconCount && i < MOB_FLAG_COUNT; ++i) {
+        if (mobFlags & mobIconMap[i].flag) {
+            GLuint tex = mob_textures[i];
+            if (tex != 0)
+                iconTextures.append(tex);
+        }
+    }
+    uint32_t loadFlags = p->getLoadFlags();
+    for (int i = 0; i < loadIconCount && i < LOAD_FLAG_COUNT; ++i) {
+        if (loadFlags & loadIconMap[i].flag) {
+            GLuint tex = load_textures[i];
+            if (tex != 0)
+                iconTextures.append(tex);
+        }
+    }
+    if (p->getRidableType() == MM_RIDABLE_NOT_RIDABLE && no_ride_texture != 0) {
+        iconTextures.append(no_ride_texture);
+    }
+
+    if (!iconTextures.isEmpty()) {
+        GLfloat iconColor[4] = {1.0f, 1.0f, 1.0f, colour[3]};
+        float iconZ = dz + 0.03f;
+        float inset = ROOM_SIZE * 0.15f;
+        float available = (ROOM_SIZE * 2.0f) - (inset * 2.0f);
+        int count = iconTextures.size();
+        int cols = static_cast<int>(std::ceil(std::sqrt(static_cast<float>(count))));
+        int rows = (count + cols - 1) / cols;
+        float cellW = available / cols;
+        float cellH = available / rows;
+        float iconSize = std::min(cellW, cellH);
+        float startX = dx - ROOM_SIZE + inset;
+        float startY = dy + ROOM_SIZE - inset;
+        for (int i = 0; i < count; ++i) {
+            int row = i / cols;
+            int col = i % cols;
+            float x0 = startX + col * cellW + (cellW - iconSize) * 0.5f;
+            float y1 = startY - row * cellH - (cellH - iconSize) * 0.5f;
+            float x1 = x0 + iconSize;
+            float y0 = y1 - iconSize;
+            QVector3D a(x0, y1, iconZ);
+            QVector3D b(x0, y0, iconZ);
+            QVector3D c(x1, y0, iconZ);
+            QVector3D d(x1, y1, iconZ);
+            appendTexturedQuad(a, b, c, d, QVector2D(0.0f, 1.0f), QVector2D(0.0f, 0.0f),
+                               QVector2D(1.0f, 0.0f), QVector2D(1.0f, 1.0f), iconColor, iconTextures[i]);
+        }
+    }
+
+    const GLfloat wallColor[4] = {0.45f, 0.45f, 0.45f, colour[3]};
+    const GLfloat doorColor[4] = {0.70f, 0.55f, 0.35f, colour[3]};
+
+    for (int dir = NORTH; dir <= WEST; ++dir) {
+        bool hasExit = p->isExitPresent(dir);
+        bool hasDoor = !p->getDoor(dir).isEmpty() || (p->getMMExitFlags(dir) & MM_EXIT_DOOR) ||
+                       (p->getMMDoorFlags(dir) != 0);
+
+        if (dir == NORTH) {
+            float wy0 = yMax - WALL_THICKNESS;
+            float wy1 = yMax;
+            if (!hasExit) {
+                appendWallPrism(xMin, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
+            } else if (hasDoor) {
+                appendWallPrism(xMin, dx - doorHalf, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(dx + doorHalf, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(dx - doorHalf, dx + doorHalf, wy0, wy1, z0, z1, doorColor, door_textures[dir]);
+            }
+        } else if (dir == SOUTH) {
+            float wy0 = yMin;
+            float wy1 = yMin + WALL_THICKNESS;
+            if (!hasExit) {
+                appendWallPrism(xMin, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
+            } else if (hasDoor) {
+                appendWallPrism(xMin, dx - doorHalf, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(dx + doorHalf, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(dx - doorHalf, dx + doorHalf, wy0, wy1, z0, z1, doorColor, door_textures[dir]);
+            }
+        } else if (dir == EAST) {
+            float wx0 = xMax - WALL_THICKNESS;
+            float wx1 = xMax;
+            if (!hasExit) {
+                appendWallPrism(wx0, wx1, yMin, yMax, z0, z1, wallColor, wall_textures[dir]);
+            } else if (hasDoor) {
+                appendWallPrism(wx0, wx1, yMin, dy - doorHalf, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(wx0, wx1, dy + doorHalf, yMax, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(wx0, wx1, dy - doorHalf, dy + doorHalf, z0, z1, doorColor, door_textures[dir]);
+            }
+        } else if (dir == WEST) {
+            float wx0 = xMin;
+            float wx1 = xMin + WALL_THICKNESS;
+            if (!hasExit) {
+                appendWallPrism(wx0, wx1, yMin, yMax, z0, z1, wallColor, wall_textures[dir]);
+            } else if (hasDoor) {
+                appendWallPrism(wx0, wx1, yMin, dy - doorHalf, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(wx0, wx1, dy + doorHalf, yMax, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(wx0, wx1, dy - doorHalf, dy + doorHalf, z0, z1, doorColor, door_textures[dir]);
+            }
+        }
     }
 
     for (int k = 0; k <= 5; k++) {
@@ -903,6 +1292,16 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
             CRoom *r = p->exits[k];
             if (!r)
                 continue;
+
+            if (k <= WEST) {
+                float rx = r->getX() - p->getX();
+                float ry = r->getY() - p->getY();
+                float rz = r->getZ() - p->getZ();
+                float dist = std::sqrt(rx * rx + ry * ry + rz * rz);
+                if (dist <= (ROOM_SIZE * 2.0f + 0.01f)) {
+                    continue;
+                }
+            }
 
             float dx2 = r->getX() - curx;
             float dy2 = r->getY() - cury;

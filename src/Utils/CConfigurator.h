@@ -99,6 +99,7 @@ class Configurator : public QObject
 
     int textureVisibilityRange;
     int detailsVisibilityRange;
+    int notesVisibilityRange;
 
     int descQuote; /* quote for description - in percents */
     int nameQuote; /* quote for roomname - in percents */
@@ -317,6 +318,7 @@ class Configurator : public QObject
     void setTerrainCheck(bool b);
     void setDetailsVisibility(int i);
     void setTextureVisibility(int i);
+    void setNotesVisibilityRange(int i);
     void setBriefMode(bool b);
     void setAlwaysOnTop(bool b);
     void setDescQuote(int i);
@@ -356,6 +358,7 @@ class Configurator : public QObject
 
     int getDetailsVisibility() { return detailsVisibilityRange; }
     int getTextureVisibility() { return textureVisibilityRange; }
+    int getNotesVisibilityRange() { return notesVisibilityRange; }
 
     bool getRegionsAutoSet();
     bool getRegionsAutoReplace();

@@ -21,11 +21,14 @@
 #ifndef GLPRIMITIVES_H
 #define GLPRIMITIVES_H
 
-#include <GL/gl.h>
-
-// Constants used by primitive drawing functions
-#define ROOM_SIZE 0.47f
-#define MARKER_SIZE (ROOM_SIZE / 1.85)
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcpp"
+#endif
+#include <QtGui/qopengl.h>
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 // Draw a marker around a room position
 // mode 1 = full marker with border, mode 2 = partial marker (triangles only)

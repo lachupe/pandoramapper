@@ -19,68 +19,71 @@
  */
 
 #include "GLPrimitives.h"
+#include "Renderer/renderer.h"
+
+static const float markerSize = ROOM_SIZE / 1.85f;
 
 void glDrawMarkerPrimitive(int dx, int dy, int dz, int mode)
 {
     /* upper */
     glBegin(GL_TRIANGLES);
-    glVertex3f(dx, MARKER_SIZE + dy + ROOM_SIZE, 0.0f + dz);
-    glVertex3f(-MARKER_SIZE + dx, dy + ROOM_SIZE, 0.0f + dz);
-    glVertex3f(+MARKER_SIZE + dx, dy + ROOM_SIZE, 0.0f + dz);
+    glVertex3f(dx, markerSize + dy + ROOM_SIZE, 0.0f + dz);
+    glVertex3f(-markerSize + dx, dy + ROOM_SIZE, 0.0f + dz);
+    glVertex3f(+markerSize + dx, dy + ROOM_SIZE, 0.0f + dz);
     glEnd();
 
     /* lower */
     glBegin(GL_TRIANGLES);
-    glVertex3f(dx, -MARKER_SIZE + dy - ROOM_SIZE, 0.0f + dz);
-    glVertex3f(-MARKER_SIZE + dx, dy - ROOM_SIZE, 0.0f + dz);
-    glVertex3f(+MARKER_SIZE + dx, dy - ROOM_SIZE, 0.0f + dz);
+    glVertex3f(dx, -markerSize + dy - ROOM_SIZE, 0.0f + dz);
+    glVertex3f(-markerSize + dx, dy - ROOM_SIZE, 0.0f + dz);
+    glVertex3f(+markerSize + dx, dy - ROOM_SIZE, 0.0f + dz);
     glEnd();
 
     /* right */
     glBegin(GL_TRIANGLES);
-    glVertex3f(dx + ROOM_SIZE, +MARKER_SIZE + dy, 0.0f + dz);
-    glVertex3f(MARKER_SIZE + dx + ROOM_SIZE, dy, 0.0f + dz);
-    glVertex3f(dx + ROOM_SIZE, -MARKER_SIZE + dy, 0.0f + dz);
+    glVertex3f(dx + ROOM_SIZE, +markerSize + dy, 0.0f + dz);
+    glVertex3f(markerSize + dx + ROOM_SIZE, dy, 0.0f + dz);
+    glVertex3f(dx + ROOM_SIZE, -markerSize + dy, 0.0f + dz);
     glEnd();
 
     /* left */
     glBegin(GL_TRIANGLES);
-    glVertex3f(dx - ROOM_SIZE, +MARKER_SIZE + dy, 0.0f + dz);
-    glVertex3f(-MARKER_SIZE + dx - ROOM_SIZE, dy, 0.0f + dz);
-    glVertex3f(dx - ROOM_SIZE, -MARKER_SIZE + dy, 0.0f + dz);
+    glVertex3f(dx - ROOM_SIZE, +markerSize + dy, 0.0f + dz);
+    glVertex3f(-markerSize + dx - ROOM_SIZE, dy, 0.0f + dz);
+    glVertex3f(dx - ROOM_SIZE, -markerSize + dy, 0.0f + dz);
     glEnd();
 
     if (mode == 1) {
         /* left */
         glBegin(GL_QUADS);
-        glVertex3f(dx - ROOM_SIZE - (MARKER_SIZE / 3.5), dy + ROOM_SIZE + (MARKER_SIZE / 3.5), 0.0f + dz);
-        glVertex3f(dx - ROOM_SIZE - (MARKER_SIZE / 3.5), dy - ROOM_SIZE, 0.0f + dz);
+        glVertex3f(dx - ROOM_SIZE - (markerSize / 3.5f), dy + ROOM_SIZE + (markerSize / 3.5f), 0.0f + dz);
+        glVertex3f(dx - ROOM_SIZE - (markerSize / 3.5f), dy - ROOM_SIZE, 0.0f + dz);
         glVertex3f(dx - ROOM_SIZE, dy - ROOM_SIZE, 0.0f + dz);
-        glVertex3f(dx - ROOM_SIZE, dy + ROOM_SIZE + (MARKER_SIZE / 3.5), 0.0f + dz);
+        glVertex3f(dx - ROOM_SIZE, dy + ROOM_SIZE + (markerSize / 3.5f), 0.0f + dz);
         glEnd();
 
         /* right */
         glBegin(GL_QUADS);
-        glVertex3f(dx + ROOM_SIZE, dy + ROOM_SIZE + (MARKER_SIZE / 3.5), 0.0f + dz);
+        glVertex3f(dx + ROOM_SIZE, dy + ROOM_SIZE + (markerSize / 3.5f), 0.0f + dz);
         glVertex3f(dx + ROOM_SIZE, dy - ROOM_SIZE, 0.0f + dz);
-        glVertex3f(dx + ROOM_SIZE + (MARKER_SIZE / 3.5), dy - ROOM_SIZE, 0.0f + dz);
-        glVertex3f(dx + ROOM_SIZE + (MARKER_SIZE / 3.5), dy + ROOM_SIZE + (MARKER_SIZE / 3.5), 0.0f + dz);
+        glVertex3f(dx + ROOM_SIZE + (markerSize / 3.5f), dy - ROOM_SIZE, 0.0f + dz);
+        glVertex3f(dx + ROOM_SIZE + (markerSize / 3.5f), dy + ROOM_SIZE + (markerSize / 3.5f), 0.0f + dz);
         glEnd();
 
         /* upper */
         glBegin(GL_QUADS);
-        glVertex3f(dx - ROOM_SIZE - (MARKER_SIZE / 3.5), dy + ROOM_SIZE + (MARKER_SIZE / 3.5), 0.0f + dz);
-        glVertex3f(dx - ROOM_SIZE - (MARKER_SIZE / 3.5), dy + ROOM_SIZE, 0.0f + dz);
-        glVertex3f(dx + ROOM_SIZE + (MARKER_SIZE / 3.5), dy + ROOM_SIZE, 0.0f + dz);
-        glVertex3f(dx + ROOM_SIZE + (MARKER_SIZE / 3.5), dy + ROOM_SIZE + (MARKER_SIZE / 3.5), 0.0f + dz);
+        glVertex3f(dx - ROOM_SIZE - (markerSize / 3.5f), dy + ROOM_SIZE + (markerSize / 3.5f), 0.0f + dz);
+        glVertex3f(dx - ROOM_SIZE - (markerSize / 3.5f), dy + ROOM_SIZE, 0.0f + dz);
+        glVertex3f(dx + ROOM_SIZE + (markerSize / 3.5f), dy + ROOM_SIZE, 0.0f + dz);
+        glVertex3f(dx + ROOM_SIZE + (markerSize / 3.5f), dy + ROOM_SIZE + (markerSize / 3.5f), 0.0f + dz);
         glEnd();
 
         /* lower */
         glBegin(GL_QUADS);
-        glVertex3f(dx - ROOM_SIZE - (MARKER_SIZE / 3.5), dy - ROOM_SIZE, 0.0f + dz);
-        glVertex3f(dx - ROOM_SIZE - (MARKER_SIZE / 3.5), dy - ROOM_SIZE + (MARKER_SIZE / 3.5), 0.0f + dz);
-        glVertex3f(dx + ROOM_SIZE + (MARKER_SIZE / 3.5), dy - ROOM_SIZE + (MARKER_SIZE / 3.5), 0.0f + dz);
-        glVertex3f(dx + ROOM_SIZE + (MARKER_SIZE / 3.5), dy - ROOM_SIZE, 0.0f + dz);
+        glVertex3f(dx - ROOM_SIZE - (markerSize / 3.5f), dy - ROOM_SIZE, 0.0f + dz);
+        glVertex3f(dx - ROOM_SIZE - (markerSize / 3.5f), dy - ROOM_SIZE + (markerSize / 3.5f), 0.0f + dz);
+        glVertex3f(dx + ROOM_SIZE + (markerSize / 3.5f), dy - ROOM_SIZE + (markerSize / 3.5f), 0.0f + dz);
+        glVertex3f(dx + ROOM_SIZE + (markerSize / 3.5f), dy - ROOM_SIZE, 0.0f + dz);
         glEnd();
     }
 }

@@ -42,7 +42,12 @@ class QFont;
 
 // #define DIST_Z    2    /* the distance between 2 rooms */
 #define BASE_Z -12      /* the distance to the "camera" */
-#define ROOM_SIZE 0.47f /* the size of the rooms walls */
+#define ROOM_SIZE 1.0f /* the size of the rooms walls */
+#define WALL_HEIGHT (ROOM_SIZE * 0.8f)
+#define WALL_THICKNESS (ROOM_SIZE * 0.15f)
+#define DOOR_WIDTH (ROOM_SIZE * 0.7f)
+#define MOB_FLAG_COUNT 19
+#define LOAD_FLAG_COUNT 25
 
 #define MAXHITS 200
 
@@ -129,6 +134,8 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
                           const QVector3D &v4, const QVector3D &v5, const QVector2D &t0, const QVector2D &t1,
                           const QVector2D &t2, const QVector2D &t3, const QVector2D &t4, const QVector2D &t5,
                           const GLfloat *color, GLuint texture);
+    void appendWallPrism(float x0, float x1, float y0, float y1, float z0, float z1,
+                         const GLfloat *color, GLuint texture);
     void appendLine(const QVector3D &a, const QVector3D &b, const GLfloat *color);
     void appendMarkerGeometry(float dx, float dy, float dz, int mode, const GLfloat *color);
     void appendConeGeometry(float dx, float dy, float dz, float rotX, float rotY, const GLfloat *color);
@@ -141,6 +148,13 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     GLuint basic_gllist;
     bool redraw;
     unsigned int deletedRoom;
+    GLuint wall_textures[4];
+    GLuint door_textures[4];
+    GLuint road_textures[16];
+    GLuint trail_textures[16];
+    GLuint mob_textures[MOB_FLAG_COUNT];
+    GLuint load_textures[LOAD_FLAG_COUNT];
+    GLuint no_ride_texture;
     RendererWidget(QWidget *parent = 0);
     void initializeGL() override;
     void resizeGL(int width, int height) override;

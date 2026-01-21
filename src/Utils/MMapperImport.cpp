@@ -91,9 +91,9 @@ char MMapperImport::convertTerrain(uint8_t mmapperTerrain)
 {
     // Map MMapper terrain enum to PandoraMapper sector description
     // These descriptions should match the sector names in the config
-    const char *terrainNames[] = {"UNDEFINED", "INDOORS", "CITY",   "FIELD",      "FOREST",
-                                  "HILLS",     "MOUNT",   "SHALLW", "WATER",      "RAPID",
-                                  "UNDERWAT",  "ROAD",    "BRUSH",  "TUNNEL",     "CAVERN"};
+    const char *terrainNames[] = {"NONE",       "INDOORS", "CITY",        "FIELD",     "FOREST",
+                                  "HILLS",      "MOUNTAINS", "SHALLOWWATER", "WATER",     "RAPIDS",
+                                  "UNDERWATER", "ROAD",    "BRUSH",       "TUNNEL",    "CAVERN"};
 
     if (mmapperTerrain >= 15) {
         mmapperTerrain = 0;  // Default to UNDEFINED
@@ -115,6 +115,8 @@ char MMapperImport::convertTerrain(uint8_t mmapperTerrain)
         break;
     case TERRAIN_SHALLOW:
         sectorIndex = conf->getSectorByDesc("SHALLOW");
+        if (sectorIndex <= 0)
+            sectorIndex = conf->getSectorByDesc("SHALLOWWATER");
         break;
     case TERRAIN_RAPIDS:
         sectorIndex = conf->getSectorByDesc("RAPIDS");
