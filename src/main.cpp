@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
         override_remote_port = parser.value(remotePortOption).toInt();
     }
 
-    QPixmap pixmap("images/logo.png");
+    QPixmap pixmap(":/images/logo.png");
     QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
 

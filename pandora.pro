@@ -144,6 +144,8 @@ SOURCES += src/Utils/CTimers.cpp \
     src/Utils/utils.cpp \
     src/Utils/xml2.cpp \
     src/Utils/MMapperImport.cpp
+
+RESOURCES += resources/pandora.qrc
 	
 	
 TARGET = pandoramapper

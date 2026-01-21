@@ -95,6 +95,7 @@ int Configurator::saveConfigAs(QByteArray path, QByteArray filename)
     conf.beginGroup("OpenGL");
     conf.setValue("texturesVisibility", getTextureVisibility());
     conf.setValue("detailsVisibility", getDetailsVisibility());
+    conf.setValue("notesVisibility", getNotesVisibilityRange());
     conf.setValue("visibleLayers", getVisibleLayers());
     conf.setValue("showNotes", getShowNotesRenderer());
     conf.setValue("showRegions", getShowRegionsInfo());
@@ -225,6 +226,7 @@ int Configurator::loadConfig(QByteArray path, QByteArray filename)
     conf.beginGroup("OpenGL");
     setTextureVisibility(conf.value("texturesVisibility", 500).toInt());
     setDetailsVisibility(conf.value("detailsVisibility", 300).toInt());
+    setNotesVisibilityRange(conf.value("notesVisibility", getDetailsVisibility()).toInt());
     setVisibleLayers(conf.value("visibleLayers", 5).toInt());
     setShowNotesRenderer(conf.value("showNotes", true).toBool());
     setShowRegionsInfo(conf.value("showRegions", false).toBool());
@@ -580,6 +582,12 @@ void Configurator::setTextureVisibility(int i)
     setConfigModified(true);
 }
 
+void Configurator::setNotesVisibilityRange(int i)
+{
+    notesVisibilityRange = i;
+    setConfigModified(true);
+}
+
 void Configurator::setBriefMode(bool b)
 {
     briefMode = b;
@@ -636,19 +644,57 @@ QByteArray Configurator::getNoteColor()
 int Configurator::loadNormalTexture(QByteArray filename, GLuint *texture)
 {
     QImage tex1, buf1;
+    QByteArray resolved = filename;
+    const struct
+    {
+        const char *from;
+        const char *to;
+    } terrainMap[] = {
+        {"images/indoors.png", ":/pixmaps/terrain-indoors.png"},
+        {"images/city.png", ":/pixmaps/terrain-city.png"},
+        {"images/field.png", ":/pixmaps/terrain-field.png"},
+        {"images/forest.png", ":/pixmaps/terrain-forest.png"},
+        {"images/hills.png", ":/pixmaps/terrain-hills.png"},
+        {"images/shwater.png", ":/pixmaps/terrain-shallow.png"},
+        {"images/river.png", ":/pixmaps/terrain-water.png"},
+        {"images/rapids.png", ":/pixmaps/terrain-rapids.png"},
+        {"images/unwater.png", ":/pixmaps/terrain-underwater.png"},
+        {"images/road.png", ":/pixmaps/terrain-road.png"},
+        {"images/brush.png", ":/pixmaps/terrain-brush.png"},
+        {"images/tunnel.png", ":/pixmaps/terrain-tunnel.png"},
+        {"images/cavern.png", ":/pixmaps/terrain-cavern.png"},
+        {"images/mountain.png", ":/pixmaps/terrain-mountains.png"},
+        {"images/death.png", ":/images/death.png"},
+    };
 
-    print_debug(DEBUG_RENDERER, "loading texture %s", (const char *)filename);
-    if (filename == "")
+    for (const auto &entry : terrainMap) {
+        if (resolved == entry.from) {
+            resolved = entry.to;
+            break;
+        }
+    }
+    if (!resolved.startsWith(":/")) {
+        if (resolved.startsWith("images/")) {
+            resolved = QByteArray(":/images/") + resolved.mid(strlen("images/"));
+        } else if (resolved.startsWith("resources/pixmaps/")) {
+            resolved = QByteArray(":/pixmaps/") + resolved.mid(strlen("resources/pixmaps/"));
+        } else if (resolved.startsWith(":/resources/pixmaps/")) {
+            resolved = QByteArray(":/pixmaps/") + resolved.mid(strlen(":/resources/pixmaps/"));
+        }
+    }
+
+    print_debug(DEBUG_RENDERER, "loading texture %s", (const char *)resolved);
+    if (resolved == "")
         return -1;
-    if (!buf1.load(filename)) {
-        print_debug(DEBUG_CONFIG, "Failed to load the %s!", (const char *)filename);
+    if (!buf1.load(resolved)) {
+        print_debug(DEBUG_CONFIG, "Failed to load the %s!", (const char *)resolved);
         return -1;
     }
     tex1 = buf1.convertToFormat(QImage::Format_RGBA8888).mirrored();
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
