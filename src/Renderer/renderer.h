@@ -84,6 +84,8 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     float cury;
     float curz;
     CRoom *baseRoom;
+    float effectiveScale;
+    float targetEffectiveScale;
     CFrustum frustum;
     int lowerZ;
     int upperZ;
@@ -123,6 +125,7 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     void renderPickupObjects();
     void renderPickupRoom(CRoom *p);
     RenderTransform getRenderTransform(CRoom *room);
+    void updateEffectiveScale();
     void setupNewBaseCoordinates();
     void draw();
     void rebuildSquareBillboards(CSquare *square);
@@ -202,6 +205,7 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     float getUserY() const { return userY; }
 
     float getUserZ() const { return userZ; }
+    float getEffectiveScale() const { return effectiveScale; }
 
     void setAngleX(GLfloat angleX, bool dontsave = false)
     {

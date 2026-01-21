@@ -372,6 +372,7 @@ int CRoomManager::addLocalSpaceWithId(QByteArray name, int id)
     space.name = name;
     space.portalX = 0.0f;
     space.portalY = 0.0f;
+    space.portalZ = 0.0f;
     space.portalW = 0.0f;
     space.portalH = 0.0f;
     space.hasPortal = false;
@@ -415,13 +416,14 @@ bool CRoomManager::setRegionLocalSpace(CRegion *region, int localSpaceId)
     return true;
 }
 
-bool CRoomManager::setLocalSpacePortal(int id, float x, float y, float w, float h)
+bool CRoomManager::setLocalSpacePortal(int id, float x, float y, float z, float w, float h)
 {
     LocalSpace *space = getLocalSpace(id);
     if (!space)
         return false;
     space->portalX = x;
     space->portalY = y;
+    space->portalZ = z;
     space->portalW = w;
     space->portalH = h;
     space->hasPortal = true;

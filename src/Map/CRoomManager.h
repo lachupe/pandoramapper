@@ -43,6 +43,7 @@ struct LocalSpace
     QByteArray name;
     float portalX;
     float portalY;
+    float portalZ;
     float portalW;
     float portalH;
     bool hasPortal;
@@ -122,7 +123,7 @@ class CRoomManager : public QObject
     LocalSpace *getLocalSpace(int id);
     QVector<LocalSpace *> getLocalSpaces();
     bool setRegionLocalSpace(CRegion *region, int localSpaceId);
-    bool setLocalSpacePortal(int id, float x, float y, float w, float h);
+    bool setLocalSpacePortal(int id, float x, float y, float z, float w, float h);
     void updateLocalSpaceBounds();
 
     QList<CRegion *> getAllRegions();

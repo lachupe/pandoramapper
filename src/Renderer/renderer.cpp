@@ -31,6 +31,7 @@
 #include <QVector4D>
 #include <cstddef>
 #include <algorithm>
+#include <limits>
 #include <cmath>
 #include <GL/glu.h>
 
@@ -235,6 +236,8 @@ RendererWidget::RendererWidget(QWidget *parent)
     cury = 0;
     curz = 0; /* current rooms position */
     baseRoom = nullptr;
+    effectiveScale = 1.0f;
+    targetEffectiveScale = 1.0f;
 
     userLayerShift = 0;
 
@@ -264,6 +267,117 @@ RendererWidget::RendererWidget(QWidget *parent)
     QTimer *updateTimer = new QTimer(this);
     connect(updateTimer, &QTimer::timeout, this, QOverload<>::of(&QOpenGLWidget::update));
     updateTimer->start(33);  // ~30 FPS
+}
+
+static float computePortalScale(const LocalSpace *space)
+{
+    if (!space || !space->hasPortal || !space->hasBounds)
+        return 0.0f;
+
+    float localW = space->maxX - space->minX;
+    float localH = space->maxY - space->minY;
+    bool hasW = localW > 0.0f;
+    bool hasH = localH > 0.0f;
+    bool hasPortalW = space->portalW > 0.0f;
+    bool hasPortalH = space->portalH > 0.0f;
+
+    if (hasW && hasH && hasPortalW && hasPortalH) {
+        return std::min(space->portalW / localW, space->portalH / localH);
+    }
+    if (hasW && hasPortalW) {
+        return space->portalW / localW;
+    }
+    if (hasH && hasPortalH) {
+        return space->portalH / localH;
+    }
+    return 0.0f;
+}
+
+static bool squareHasLocalspaceRooms(CSquare *square)
+{
+    if (!square)
+        return false;
+
+    for (int i = 0; i < square->rooms.size(); i++) {
+        CRoom *room = square->rooms[i];
+        if (room && room->getRegion() && room->getRegion()->getLocalSpaceId() > 0) {
+            return true;
+        }
+    }
+
+    if (square->subsquares[CSquare::Left_Upper] && squareHasLocalspaceRooms(square->subsquares[CSquare::Left_Upper]))
+        return true;
+    if (square->subsquares[CSquare::Right_Upper] && squareHasLocalspaceRooms(square->subsquares[CSquare::Right_Upper]))
+        return true;
+    if (square->subsquares[CSquare::Left_Lower] && squareHasLocalspaceRooms(square->subsquares[CSquare::Left_Lower]))
+        return true;
+    if (square->subsquares[CSquare::Right_Lower] && squareHasLocalspaceRooms(square->subsquares[CSquare::Right_Lower]))
+        return true;
+
+    return false;
+}
+
+void RendererWidget::updateEffectiveScale()
+{
+    float target = 1.0f;
+    const float maxZoom = 3.0f;
+    const float innerRadius = 0.0f;
+    const float outerRadius = 8.0f;
+
+    if (stacker.amount() > 0) {
+        CRoom *current = stacker.first();
+        if (current) {
+            CRegion *region = current->getRegion();
+            if (region) {
+                int localSpaceId = region->getLocalSpaceId();
+                if (localSpaceId > 0) {
+                    LocalSpace *space = Map.getLocalSpace(localSpaceId);
+                    float portalScale = computePortalScale(space);
+                    if (portalScale > 0.0f) {
+                        target = 1.0f / portalScale;
+                    }
+                } else if (outerRadius > 0.0f) {
+                    QVector<LocalSpace *> spaces = Map.getLocalSpaces();
+                    float bestDist = std::numeric_limits<float>::max();
+                    float bestPortalScale = 0.0f;
+                    for (int i = 0; i < spaces.size(); i++) {
+                        LocalSpace *space = spaces[i];
+                        float portalScale = computePortalScale(space);
+                        if (portalScale <= 0.0f)
+                            continue;
+                        float dx = static_cast<float>(current->getX()) - space->portalX;
+                        float dy = static_cast<float>(current->getY()) - space->portalY;
+                        float dist = std::sqrt(dx * dx + dy * dy);
+                        if (dist < bestDist) {
+                            bestDist = dist;
+                            bestPortalScale = portalScale;
+                        }
+                    }
+
+                    if (bestPortalScale > 0.0f) {
+                        float zoomIn = std::max(1.0f, std::min(maxZoom, 1.0f / bestPortalScale));
+                        float t = 1.0f;
+                        if (outerRadius > innerRadius) {
+                            t = 1.0f - (bestDist - innerRadius) / (outerRadius - innerRadius);
+                        } else if (outerRadius > 0.0f) {
+                            t = 1.0f - bestDist / outerRadius;
+                        }
+                        t = std::clamp(t, 0.0f, 1.0f);
+                        target = 1.0f + (zoomIn - 1.0f) * t;
+                    }
+                }
+            }
+        }
+    }
+
+    target = std::clamp(target, 0.05f, 50.0f);
+    targetEffectiveScale = target;
+    float alpha = 0.2f;
+    if (effectiveScale <= 0.0f) {
+        effectiveScale = target;
+    } else {
+        effectiveScale += (target - effectiveScale) * alpha;
+    }
 }
 
 void RendererWidget::initializeGL()
@@ -1017,9 +1131,7 @@ void RendererWidget::rebuildSquareBillboards(CSquare *square)
             else
                 color = QColor((QString)p->getNoteColor());
 
-            RenderTransform t = getRenderTransform(p);
-            square->notesBillboards.append(
-                new Billboard(t.pos.x(), t.pos.y(), t.pos.z() + (ROOM_SIZE * 0.5f * t.scale), p->getNote(), color));
+            square->notesBillboards.append(new Billboard(p, 0.0, 0.0, ROOM_SIZE * 0.5f, p->getNote(), color));
         }
 
         for (int k = 0; k <= 5; k++) {
@@ -1047,12 +1159,10 @@ void RendererWidget::rebuildSquareBillboards(CSquare *square)
                     info += "]";
                 }
 
-                RenderTransform tp = getRenderTransform(p);
-                RenderTransform tr = getRenderTransform(r);
-                double deltaX = (tr.pos.x() - tp.pos.x()) / 3.0;
-                double deltaY = (tr.pos.y() - tp.pos.y()) / 3.0;
-                double deltaZ = (tr.pos.z() - tp.pos.z()) / 3.0;
-                double roomSize = ROOM_SIZE * tp.scale;
+                double deltaX = (r->getX() - p->getX()) / 3.0;
+                double deltaY = (r->getY() - p->getY()) / 3.0;
+                double deltaZ = (r->getZ() - p->getZ()) / 3.0;
+                double roomSize = ROOM_SIZE;
 
                 double shiftX = 0;
                 double shiftY = 0;
@@ -1072,11 +1182,12 @@ void RendererWidget::rebuildSquareBillboards(CSquare *square)
                     shiftZ *= -1;
                 }
 
-                double x = tp.pos.x() + deltaX + shiftX;
-                double y = tp.pos.y() + deltaY + shiftY;
-                double z = tp.pos.z() + deltaZ + shiftZ;
+                double x = p->getX() + deltaX + shiftX;
+                double y = p->getY() + deltaY + shiftY;
+                double z = p->getZ() + deltaZ + shiftZ;
 
-                square->doorsBillboards.append(new Billboard(x, y, z, info, QColor(255, 255, 255, 255)));
+                square->doorsBillboards.append(
+                    new Billboard(p, x - p->getX(), y - p->getY(), z - p->getZ(), info, QColor(255, 255, 255, 255)));
             }
         }
     }
@@ -1326,6 +1437,13 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
                 if (dist <= (size + size2 + 0.01f)) {
                     continue;
                 }
+                CRegion *r1 = p->getRegion();
+                CRegion *r2 = r->getRegion();
+                int ls1 = r1 ? r1->getLocalSpaceId() : 0;
+                int ls2 = r2 ? r2->getLocalSpaceId() : 0;
+                if (ls1 != ls2 || ls1 > 0 || ls2 > 0) {
+                    dz2 = dz;
+                }
             }
 
             dx2 = (dx + dx2) / 2.0f;
@@ -1417,8 +1535,10 @@ void RendererWidget::appendSquareGeometry(CSquare *square)
         float dx = t.pos.x() - curx;
         float dy = t.pos.y() - cury;
         float dz = t.pos.z() - curz;
-        if (!frustum.isPointInFrustum(dx, dy, dz))
-            continue;
+        if (std::abs(effectiveScale - 1.0f) < 0.001f) {
+            if (!frustum.isPointInFrustum(dx, dy, dz))
+                continue;
+        }
         appendRoomGeometry(room);
 
         if (!Map.selections.isEmpty() && Map.selections.isSelected(room->id) == true) {
@@ -1480,11 +1600,16 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
                 for (int n = 0; n < p->notesBillboards.size(); n++) {
                     Billboard *billboard = p->notesBillboards[n];
 
-                    TextBillboard entry;
-                    entry.position = QVector3D(billboard->x - curx, billboard->y - cury, billboard->z - curz);
-                    entry.text = billboard->text;
-                    entry.color = billboard->color;
-                    textBillboards.append(entry);
+                    if (billboard->room) {
+                        RenderTransform t = getRenderTransform(billboard->room);
+                        TextBillboard entry;
+                        entry.position = QVector3D(t.pos.x() + billboard->offsetX * t.scale - curx,
+                                                   t.pos.y() + billboard->offsetY * t.scale - cury,
+                                                   t.pos.z() + billboard->offsetZ * t.scale - curz);
+                        entry.text = billboard->text;
+                        entry.color = billboard->color;
+                        textBillboards.append(entry);
+                    }
                 }
             }
 
@@ -1492,11 +1617,16 @@ void RendererWidget::glDrawCSquare(CSquare *p, int renderingMode)
             if (conf->getShowRegionsInfo() == true && p->doorsBillboards.isEmpty() != true) {
                 for (int n = 0; n < p->doorsBillboards.size(); n++) {
                     Billboard *billboard = p->doorsBillboards[n];
-                    TextBillboard entry;
-                    entry.position = QVector3D(billboard->x - curx, billboard->y - cury, billboard->z - curz);
-                    entry.text = billboard->text;
-                    entry.color = billboard->color;
-                    textBillboards.append(entry);
+                    if (billboard->room) {
+                        RenderTransform t = getRenderTransform(billboard->room);
+                        TextBillboard entry;
+                        entry.position = QVector3D(t.pos.x() + billboard->offsetX * t.scale - curx,
+                                                   t.pos.y() + billboard->offsetY * t.scale - cury,
+                                                   t.pos.z() + billboard->offsetZ * t.scale - curz);
+                        entry.text = billboard->text;
+                        entry.color = billboard->color;
+                        textBillboards.append(entry);
+                    }
                 }
             }
 
@@ -1621,7 +1751,7 @@ void RendererWidget::draw(void)
     glTranslatef(userX, userY, 0);
 
     Map.updateLocalSpaceBounds();
-    Map.updateLocalSpaceBounds();
+    updateEffectiveScale();
     setupNewBaseCoordinates();
     textBillboards.clear();
 
@@ -1646,6 +1776,13 @@ void RendererWidget::draw(void)
     plane = Map.getPlanes();
     resetRenderBatch();
     while (plane) {
+        if (plane->z < lowerZ || plane->z > upperZ) {
+            if (!squareHasLocalspaceRooms(plane->squares)) {
+                plane = plane->next;
+                continue;
+            }
+        }
+
         if (plane->z < lowerZ || plane->z > upperZ) {
             plane = plane->next;
             continue;
@@ -1716,6 +1853,7 @@ void RendererWidget::renderPickupObjects()
     glColor4f(0.1, 0.8, 0.8, 0.4);
 
     Map.updateLocalSpaceBounds();
+    updateEffectiveScale();
     setupNewBaseCoordinates();
 
     frustum.calculateFrustum(curx, cury, curz);
@@ -1734,6 +1872,12 @@ void RendererWidget::renderPickupObjects()
     //    Map.lockForRead();
     plane = Map.getPlanes();
     while (plane) {
+        if (plane->z < lowerZ || plane->z > upperZ) {
+            if (!squareHasLocalspaceRooms(plane->squares)) {
+                plane = plane->next;
+                continue;
+            }
+        }
         if (plane->z < lowerZ || plane->z > upperZ) {
             plane = plane->next;
             continue;
@@ -1777,6 +1921,8 @@ RendererWidget::RenderTransform RendererWidget::getRenderTransform(CRoom *room)
     RenderTransform t;
     t.pos = QVector3D(room->getX(), room->getY(), room->getZ());
     t.scale = 1.0f;
+    t.pos *= effectiveScale;
+    t.scale *= effectiveScale;
 
     CRegion *region = room->getRegion();
     if (!region)
@@ -1785,15 +1931,7 @@ RendererWidget::RenderTransform RendererWidget::getRenderTransform(CRoom *room)
     if (localSpaceId <= 0)
         return t;
     LocalSpace *space = Map.getLocalSpace(localSpaceId);
-    if (!space || !space->hasPortal || !space->hasBounds)
-        return t;
-
-    float localW = space->maxX - space->minX;
-    float localH = space->maxY - space->minY;
-    if (localW <= 0.0f || localH <= 0.0f)
-        return t;
-
-    float scale = std::min(space->portalW / localW, space->portalH / localH);
+    float scale = computePortalScale(space);
     if (scale <= 0.0f)
         return t;
 
@@ -1802,10 +1940,13 @@ RendererWidget::RenderTransform RendererWidget::getRenderTransform(CRoom *room)
     float localCz = (space->minZ + space->maxZ) * 0.5f;
     float portalCx = space->portalX;
     float portalCy = space->portalY;
+    float portalCz = space->portalZ;
 
     t.pos = QVector3D(portalCx + (room->getX() - localCx) * scale,
-                      portalCy + (room->getY() - localCy) * scale, (room->getZ() - localCz) * scale);
+                      portalCy + (room->getY() - localCy) * scale, portalCz + (room->getZ() - localCz) * scale);
     t.scale = scale;
+    t.pos *= effectiveScale;
+    t.scale *= effectiveScale;
     return t;
 }
 
@@ -1834,6 +1975,8 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    Map.updateLocalSpaceBounds();
+    updateEffectiveScale();
     setupNewBaseCoordinates();
     frustum.calculateFrustum(curx, cury, curz);
 
@@ -1892,6 +2035,12 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
 
     CPlane *plane = Map.getPlanes();
     while (plane) {
+        if (plane->z < lowerZ || plane->z > upperZ) {
+            if (!squareHasLocalspaceRooms(plane->squares)) {
+                plane = plane->next;
+                continue;
+            }
+        }
         if (plane->z < lowerZ || plane->z > upperZ) {
             plane = plane->next;
             continue;

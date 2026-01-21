@@ -342,6 +342,8 @@ bool StructureParser::startElement(const QString &qName, const QXmlStreamAttribu
             space->portalX = s.toFloat();
             s = attributes.value("y").toString();
             space->portalY = s.toFloat();
+            s = attributes.value("z").toString();
+            space->portalZ = s.toFloat();
             s = attributes.value("w").toString();
             space->portalW = s.toFloat();
             s = attributes.value("h").toString();
@@ -390,8 +392,9 @@ void CRoomManager::saveMap(QString filename)
             LocalSpace *space = spaces[i];
             if (!space)
                 continue;
-            fprintf(f, "    <localspace id=\"%d\" name=\"%s\" x=\"%f\" y=\"%f\" w=\"%f\" h=\"%f\"/>\n", space->id,
-                    (const char *)space->name, space->portalX, space->portalY, space->portalW, space->portalH);
+            fprintf(f, "    <localspace id=\"%d\" name=\"%s\" x=\"%f\" y=\"%f\" z=\"%f\" w=\"%f\" h=\"%f\"/>\n", space->id,
+                    (const char *)space->name, space->portalX, space->portalY, space->portalZ, space->portalW,
+                    space->portalH);
         }
         fprintf(f, "  </localspaces>\n");
     }

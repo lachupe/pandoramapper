@@ -148,6 +148,11 @@ bool CFrustum::isSquareInFrustum(CSquare *p)
 {
     float x, y, z, size;
 
+    if (renderer_window && renderer_window->renderer &&
+        renderer_window->renderer->getEffectiveScale() != 1.0f) {
+        return true;
+    }
+
     for (int i = 0; i < p->rooms.size(); i++) {
         CRoom *room = p->rooms[i];
         if (room && room->getRegion() && room->getRegion()->getLocalSpaceId() > 0) {
