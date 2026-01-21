@@ -64,10 +64,22 @@ CRoom::CRoom()
     region = nullptr;
     flags = 0;
 
+    // Initialize MMapper properties
+    lightType = MM_LIGHT_UNDEFINED;
+    alignType = MM_ALIGN_UNDEFINED;
+    portableType = MM_PORTABLE_UNDEFINED;
+    ridableType = MM_RIDABLE_UNDEFINED;
+    sundeathType = MM_SUNDEATH_UNDEFINED;
+    mobFlags = 0;
+    loadFlags = 0;
+    contents.clear();
+
     for (i = 0; i <= 5; i++) {
         exits[i] = nullptr;
         exitFlags[i] = 0;
         doors[i].clear();
+        mmExitFlags[i] = 0;
+        mmDoorFlags[i] = 0;
     }
     square = nullptr;
 }
@@ -500,7 +512,7 @@ void CRoom::sendRoom()
 {
     send_to_user(" Id: %i, Flags: %s, Region: %s, Coord: %i,%i,%i\r\n", id, conf->sectors[sector].desc.constData(),
                  region->getName().constData(), x, y, z);
-    send_to_user(" [32m%s[0m\n", name.constData());
+    send_to_user(" \x1b[32m%s\x1b[0m\r\n", name.constData());
 
     if (!(proxy->isMudEmulation() && conf->getBriefMode())) {
         // Split description by '|' and send each line
@@ -566,6 +578,205 @@ void CRoom::sendRoom()
     }
 
     send_to_user("%s\r\n", qPrintable(exitsLine));
+
+    // Display MMapper properties if any are set
+    bool hasMMProps = (lightType != MM_LIGHT_UNDEFINED || alignType != MM_ALIGN_UNDEFINED ||
+                       portableType != MM_PORTABLE_UNDEFINED || ridableType != MM_RIDABLE_UNDEFINED ||
+                       sundeathType != MM_SUNDEATH_UNDEFINED || mobFlags != 0 || loadFlags != 0);
+
+    if (hasMMProps) {
+        QString propsLine = QStringLiteral(" MMapper: ");
+        bool first = true;
+
+        if (lightType != MM_LIGHT_UNDEFINED) {
+            propsLine += lightTypeToString(lightType);
+            first = false;
+        }
+        if (alignType != MM_ALIGN_UNDEFINED) {
+            if (!first)
+                propsLine += ", ";
+            propsLine += alignTypeToString(alignType);
+            first = false;
+        }
+        if (portableType != MM_PORTABLE_UNDEFINED) {
+            if (!first)
+                propsLine += ", ";
+            propsLine += portableTypeToString(portableType);
+            first = false;
+        }
+        if (ridableType != MM_RIDABLE_UNDEFINED) {
+            if (!first)
+                propsLine += ", ";
+            propsLine += ridableTypeToString(ridableType);
+            first = false;
+        }
+        if (sundeathType != MM_SUNDEATH_UNDEFINED) {
+            if (!first)
+                propsLine += ", ";
+            propsLine += sundeathTypeToString(sundeathType);
+            first = false;
+        }
+        send_to_user("%s\r\n", qPrintable(propsLine));
+
+        if (mobFlags != 0) {
+            send_to_user(" MobFlags: %s\r\n", mobFlagsToString(mobFlags).constData());
+        }
+        if (loadFlags != 0) {
+            send_to_user(" LoadFlags: %s\r\n", loadFlagsToString(loadFlags).constData());
+        }
+    }
+
+    // Display contents if set
+    if (!contents.isEmpty()) {
+        send_to_user(" Contents: %s\r\n", contents.constData());
+    }
+
+    // Display MMapper exit flags if any are set
+    for (int i = 0; i <= 5; i++) {
+        if (mmExitFlags[i] != 0 || mmDoorFlags[i] != 0) {
+            QString exitLine = QString(" %1 flags:").arg(QChar(dirbynum(i)));
+            if (mmExitFlags[i] != 0) {
+                exitLine += QString(" exit[%1]").arg(QString::fromLatin1(exitFlagsToString(mmExitFlags[i])));
+            }
+            if (mmDoorFlags[i] != 0) {
+                exitLine += QString(" door[%1]").arg(QString::fromLatin1(doorFlagsToString(mmDoorFlags[i])));
+            }
+            send_to_user("%s\r\n", qPrintable(exitLine));
+        }
+    }
+}
+
+const char *CRoom::lightTypeToString(uint8_t type)
+{
+    switch (type) {
+    case MM_LIGHT_DARK:
+        return "dark";
+    case MM_LIGHT_LIT:
+        return "lit";
+    default:
+        return "undefined";
+    }
+}
+
+const char *CRoom::alignTypeToString(uint8_t type)
+{
+    switch (type) {
+    case MM_ALIGN_GOOD:
+        return "good";
+    case MM_ALIGN_NEUTRAL:
+        return "neutral";
+    case MM_ALIGN_EVIL:
+        return "evil";
+    default:
+        return "undefined";
+    }
+}
+
+const char *CRoom::portableTypeToString(uint8_t type)
+{
+    switch (type) {
+    case MM_PORTABLE_PORTABLE:
+        return "portable";
+    case MM_PORTABLE_NOT_PORTABLE:
+        return "no-portable";
+    default:
+        return "undefined";
+    }
+}
+
+const char *CRoom::ridableTypeToString(uint8_t type)
+{
+    switch (type) {
+    case MM_RIDABLE_RIDABLE:
+        return "ridable";
+    case MM_RIDABLE_NOT_RIDABLE:
+        return "no-ride";
+    default:
+        return "undefined";
+    }
+}
+
+const char *CRoom::sundeathTypeToString(uint8_t type)
+{
+    switch (type) {
+    case MM_SUNDEATH_SUNDEATH:
+        return "sundeath";
+    case MM_SUNDEATH_NO_SUNDEATH:
+        return "no-sundeath";
+    default:
+        return "undefined";
+    }
+}
+
+QByteArray CRoom::mobFlagsToString(uint32_t flags)
+{
+    static const char *names[] = {"RENT",         "SHOP",       "WEAPON_SHOP", "ARMOUR_SHOP",
+                                  "FOOD_SHOP",    "PET_SHOP",   "GUILD",       "SCOUT_GUILD",
+                                  "MAGE_GUILD",   "CLERIC_GUILD", "WARRIOR_GUILD", "RANGER_GUILD",
+                                  "AGGRESSIVE",   "QUEST_MOB",  "PASSIVE_MOB", "ELITE_MOB",
+                                  "SUPER_MOB",    "MILKABLE",   "RATTLESNAKE"};
+    QByteArray result;
+    for (int i = 0; i < 19; i++) {
+        if (flags & (1 << i)) {
+            if (!result.isEmpty())
+                result += "|";
+            result += names[i];
+        }
+    }
+    return result.isEmpty() ? QByteArray("none") : result;
+}
+
+QByteArray CRoom::loadFlagsToString(uint32_t flags)
+{
+    static const char *names[] = {"TREASURE", "ARMOUR",       "WEAPON",     "WATER",
+                                  "FOOD",     "HERB",         "KEY",        "MULE",
+                                  "HORSE",    "PACK_HORSE",   "TRAINED_HORSE", "ROHIRRIM",
+                                  "WARG",     "BOAT",         "ATTENTION",  "TOWER",
+                                  "CLOCK",    "MAIL",         "STABLE",     "WHITE_WORD",
+                                  "DARK_WORD", "EQUIPMENT",   "COACH",      "FERRY",
+                                  "DEATHTRAP"};
+    QByteArray result;
+    for (int i = 0; i < 25; i++) {
+        if (flags & (1 << i)) {
+            if (!result.isEmpty())
+                result += "|";
+            result += names[i];
+        }
+    }
+    return result.isEmpty() ? QByteArray("none") : result;
+}
+
+QByteArray CRoom::exitFlagsToString(uint16_t flags)
+{
+    static const char *names[] = {"EXIT",  "DOOR",   "ROAD",    "CLIMB",
+                                  "RANDOM", "SPECIAL", "NO_MATCH", "FLOW",
+                                  "NO_FLEE", "DAMAGE", "FALL",    "GUARDED",
+                                  "STUB"};
+    QByteArray result;
+    for (int i = 0; i < 13; i++) {
+        if (flags & (1 << i)) {
+            if (!result.isEmpty())
+                result += "|";
+            result += names[i];
+        }
+    }
+    return result.isEmpty() ? QByteArray("none") : result;
+}
+
+QByteArray CRoom::doorFlagsToString(uint16_t flags)
+{
+    static const char *names[] = {"HIDDEN",   "NEED_KEY", "NO_BLOCK", "NO_BREAK",
+                                  "NO_PICK",  "DELAYED",  "CALLABLE", "KNOCKABLE",
+                                  "MAGIC",    "ACTION",   "NO_BASH"};
+    QByteArray result;
+    for (int i = 0; i < 11; i++) {
+        if (flags & (1 << i)) {
+            if (!result.isEmpty())
+                result += "|";
+            result += names[i];
+        }
+    }
+    return result.isEmpty() ? QByteArray("none") : result;
 }
 
 /* Returns Levenshtein distance between two strings. */

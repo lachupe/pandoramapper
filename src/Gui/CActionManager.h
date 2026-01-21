@@ -39,6 +39,7 @@ class CActionManager : public QObject
 
     QAction *newAct;
     QAction *openAct;
+    QAction *importMMapperAct;
     QAction *reloadAct;
     QAction *saveAct;
     QAction *saveAsAct;
@@ -99,6 +100,7 @@ class CActionManager : public QObject
     void alwaysOnTop(bool);
     void newFile();
     void open();
+    void importMMapper();
     void reload();
     void save();
     void saveAs();

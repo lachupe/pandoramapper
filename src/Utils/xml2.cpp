@@ -40,6 +40,7 @@
 #define XML_ROOMNAME (1 << 0)
 #define XML_DESC (1 << 1)
 #define XML_NOTE (1 << 2)
+#define XML_CONTENTS (1 << 3)
 
 void CRoomManager::loadMap(QString filename)
 {
@@ -181,6 +182,8 @@ bool StructureParser::characters(const QString &ch)
         r->setDesc(ch.toLocal8Bit());
     } else if (flag == XML_NOTE) {
         r->setNote(ch.toLocal8Bit());
+    } else if (flag == XML_CONTENTS) {
+        r->setContents(ch.toLocal8Bit());
     }
     return true;
 }
@@ -234,6 +237,15 @@ bool StructureParser::startElement(const QString &qName, const QXmlStreamAttribu
         s = attributes.value("door").toString();
         r->setDoor(dir, s.toLocal8Bit());
 
+        // Load MMapper exit flags (backward compatible - defaults to 0 if missing)
+        s = attributes.value("exitflags").toString();
+        if (!s.isEmpty())
+            r->setMMExitFlags(dir, s.toUInt());
+
+        s = attributes.value("doorflags").toString();
+        if (!s.isEmpty())
+            r->setMMDoorFlags(dir, s.toUInt());
+
     } else if (qName == "roomname") {
         flag = XML_ROOMNAME;
         return true;
@@ -250,6 +262,9 @@ bool StructureParser::startElement(const QString &qName, const QXmlStreamAttribu
             r->setNoteColor("");
         }
         flag = XML_NOTE;
+        return true;
+    } else if (qName == "contents") {
+        flag = XML_CONTENTS;
         return true;
     } else if (qName == "room") {
         r = new CRoom;
@@ -271,6 +286,35 @@ bool StructureParser::startElement(const QString &qName, const QXmlStreamAttribu
 
         s = attributes.value("region").toString();
         r->setRegion(s.toLocal8Bit());
+
+        // Load MMapper properties (backward compatible - defaults to 0/UNDEFINED if missing)
+        s = attributes.value("light").toString();
+        if (!s.isEmpty())
+            r->setLightType(s.toUInt());
+
+        s = attributes.value("align").toString();
+        if (!s.isEmpty())
+            r->setAlignType(s.toUInt());
+
+        s = attributes.value("portable").toString();
+        if (!s.isEmpty())
+            r->setPortableType(s.toUInt());
+
+        s = attributes.value("ridable").toString();
+        if (!s.isEmpty())
+            r->setRidableType(s.toUInt());
+
+        s = attributes.value("sundeath").toString();
+        if (!s.isEmpty())
+            r->setSundeathType(s.toUInt());
+
+        s = attributes.value("mobflags").toString();
+        if (!s.isEmpty())
+            r->setMobFlags(s.toUInt());
+
+        s = attributes.value("loadflags").toString();
+        if (!s.isEmpty())
+            r->setLoadFlags(s.toUInt());
     } else if (qName == "region") {
         region = new CRegion;
 
@@ -353,15 +397,43 @@ void CRoomManager::saveMap(QString filename)
 
         p = rooms[z];
 
-        fprintf(f,
-                "  <room id=\"%i\" x=\"%i\" y=\"%i\" z=\"%i\" "
-                "terrain=\"%s\" region=\"%s\">\n",
-                p->id, p->getX(), p->getY(), p->getZ(), (const char *)conf->sectors[p->getTerrain()].desc,
-                (const char *)p->getRegionName());
+        // Build room attributes including MMapper properties (only if non-default)
+        QString roomAttrs = QString("  <room id=\"%1\" x=\"%2\" y=\"%3\" z=\"%4\" "
+                                    "terrain=\"%5\" region=\"%6\"")
+                                .arg(p->id)
+                                .arg(p->getX())
+                                .arg(p->getY())
+                                .arg(p->getZ())
+                                .arg((const char *)conf->sectors[p->getTerrain()].desc)
+                                .arg((const char *)p->getRegionName());
+
+        // Add MMapper properties only if they have non-default values
+        if (p->getLightType() != 0)
+            roomAttrs += QString(" light=\"%1\"").arg(p->getLightType());
+        if (p->getAlignType() != 0)
+            roomAttrs += QString(" align=\"%1\"").arg(p->getAlignType());
+        if (p->getPortableType() != 0)
+            roomAttrs += QString(" portable=\"%1\"").arg(p->getPortableType());
+        if (p->getRidableType() != 0)
+            roomAttrs += QString(" ridable=\"%1\"").arg(p->getRidableType());
+        if (p->getSundeathType() != 0)
+            roomAttrs += QString(" sundeath=\"%1\"").arg(p->getSundeathType());
+        if (p->getMobFlags() != 0)
+            roomAttrs += QString(" mobflags=\"%1\"").arg(p->getMobFlags());
+        if (p->getLoadFlags() != 0)
+            roomAttrs += QString(" loadflags=\"%1\"").arg(p->getLoadFlags());
+
+        roomAttrs += ">\n";
+        fprintf(f, "%s", qPrintable(roomAttrs));
 
         fprintf(f, "    <roomname>%s</roomname>\n", (const char *)p->getName());
         fprintf(f, "    <desc>%s</desc>\n", (const char *)p->getDesc());
         fprintf(f, "    <note color=\"%s\">%s</note>\n", (const char *)p->getNoteColor(), (const char *)p->getNote());
+
+        // Save contents if present
+        if (!p->getContents().isEmpty()) {
+            fprintf(f, "    <contents>%s</contents>\n", (const char *)p->getContents());
+        }
 
         fprintf(f, "    <exits>\n");
 
@@ -376,8 +448,20 @@ void CRoomManager::saveMap(QString filename)
                         tmp = QStringLiteral("DEATH");
                 }
 
-                fprintf(f, "      <exit dir=\"%c\" to=\"%s\" door=\"%s\"/>\n", exitnames[i][0], qPrintable(tmp),
-                        p->getDoor(i).constData());
+                // Build exit element with optional MMapper flags
+                QString exitLine = QString("      <exit dir=\"%1\" to=\"%2\" door=\"%3\"")
+                                       .arg(QChar(exitnames[i][0]))
+                                       .arg(tmp)
+                                       .arg((const char *)p->getDoor(i));
+
+                // Add MMapper exit flags only if non-zero
+                if (p->getMMExitFlags(i) != 0)
+                    exitLine += QString(" exitflags=\"%1\"").arg(p->getMMExitFlags(i));
+                if (p->getMMDoorFlags(i) != 0)
+                    exitLine += QString(" doorflags=\"%1\"").arg(p->getMMDoorFlags(i));
+
+                exitLine += "/>\n";
+                fprintf(f, "%s", qPrintable(exitLine));
             }
         }
 
