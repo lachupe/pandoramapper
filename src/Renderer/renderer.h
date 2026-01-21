@@ -80,9 +80,10 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
 
     GLfloat colour[4];
     GLuint global_list;
-    int curx;
-    int cury;
-    int curz;
+    float curx;
+    float cury;
+    float curz;
+    CRoom *baseRoom;
     CFrustum frustum;
     int lowerZ;
     int upperZ;
@@ -108,6 +109,12 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     QVector<RenderCommand> renderCommands;
     QVector<TextBillboard> textBillboards;
 
+    struct RenderTransform
+    {
+        QVector3D pos;
+        float scale;
+    };
+
     void glDrawGroupMarkers();
     void glDrawPrespamLine();
     void glDrawMarkers();
@@ -115,6 +122,7 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     void setupViewingModel(int width, int height);
     void renderPickupObjects();
     void renderPickupRoom(CRoom *p);
+    RenderTransform getRenderTransform(CRoom *room);
     void setupNewBaseCoordinates();
     void draw();
     void rebuildSquareBillboards(CSquare *square);
@@ -137,8 +145,9 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     void appendWallPrism(float x0, float x1, float y0, float y1, float z0, float z1,
                          const GLfloat *color, GLuint texture);
     void appendLine(const QVector3D &a, const QVector3D &b, const GLfloat *color);
-    void appendMarkerGeometry(float dx, float dy, float dz, int mode, const GLfloat *color);
-    void appendConeGeometry(float dx, float dy, float dz, float rotX, float rotY, const GLfloat *color);
+    void appendMarkerGeometry(float dx, float dy, float dz, int mode, const GLfloat *color, float scaleFactor);
+    void appendConeGeometry(float dx, float dy, float dz, float rotX, float rotY, const GLfloat *color,
+                            float scaleFactor);
     void renderBatch(const QVector<RenderVertex> &vertices, const QVector<RenderCommand> &commands,
                      const QMatrix4x4 &mvp);
     void drawTextOverlay();

@@ -28,6 +28,8 @@ class CRegion
 {
     QByteArray name;
     QMap<QByteArray, QByteArray> doors;
+    int localSpaceId;
+    QByteArray localSpaceName;
 
   public:
     CRegion();
@@ -45,6 +47,11 @@ class CRegion
     QByteArray getAliasByDoor(QByteArray door, int dir);
 
     void showRegion();
+
+    void setLocalSpaceId(int id) { localSpaceId = id; }
+    int getLocalSpaceId() const { return localSpaceId; }
+    void setLocalSpaceName(const QByteArray &name) { localSpaceName = name; }
+    QByteArray getLocalSpaceName() const { return localSpaceName; }
 };
 
 #endif

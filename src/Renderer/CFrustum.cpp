@@ -49,7 +49,7 @@ void CFrustum::normalizePlane(float frustum[6][4], int side)
     frustum[side][D] /= magnitude;
 }
 
-void CFrustum::calculateFrustum(int cx, int cy, int cz)
+void CFrustum::calculateFrustum(float cx, float cy, float cz)
 {
     float proj[16];  // This will hold our projection matrix
     float modl[16];  // This will hold our modelview matrix
@@ -147,6 +147,13 @@ bool CFrustum::isPointInFrustum(float x, float y, float z)
 bool CFrustum::isSquareInFrustum(CSquare *p)
 {
     float x, y, z, size;
+
+    for (int i = 0; i < p->rooms.size(); i++) {
+        CRoom *room = p->rooms[i];
+        if (room && room->getRegion() && room->getRegion()->getLocalSpaceId() > 0) {
+            return true;
+        }
+    }
 
     square_frustum_checks++;
 

@@ -296,7 +296,15 @@ const struct user_command_type user_commands[] = {
      "    mregion set <name>                                   set current users region\r\n"
      "    mregion list                                         list all regions\r\n"
      "    mregion replace                                      replace current rooms region with users region\r\n"
+     "    mregion localspace <region> <id>                     assign region to local space\r\n"
      "    mregion config <autoreplace|render|info>             configuration\r\n\r\n"},
+
+    {"mlocalspace", usercmd_mlocalspace, 0, 0, "Create a local space.",
+     "    Usage: mlocalspace <name>\r\n"
+     "    Example: mlocalspace Moria\r\n\r\n"},
+    {"mportal", usercmd_mportal, 0, USERCMD_FLAG_REDRAW, "Set portal box for a local space.",
+     "    Usage: mportal <localspaceId> <x> <y> <w> <h>\r\n"
+     "    Example: mportal 1 100 200 6 6\r\n\r\n"},
 
     {"mtimer", usercmd_mtimer, 0, 0, "Setup and addon timer, additional simple timers and countdown timers",
      "    Usage: mtimer addon <start|stop> <timers-name>\r\n\r\n"
@@ -1677,6 +1685,39 @@ USERCMD(usercmd_mregion)
         return USER_PARSE_SKIP;
     }
 
+    if (is_abbrev(arg, "localspace")) {
+        p = skip_spaces(p);
+        if (!*p) {
+            send_to_user("Missing arguments. Usage: mregion localspace <region> <id>\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        p = one_argument(p, arg, 0);
+        CRegion *reg = Map.getRegionByName(arg);
+        if (!reg) {
+            send_to_user("Failed. No such region!\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        p = skip_spaces(p);
+        if (!*p) {
+            send_to_user("Missing arguments. Usage: mregion localspace <region> <id>\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        p = one_argument(p, arg, 0);
+        int id = 0;
+        if (strcmp(arg, "none") != 0)
+            GET_INT_ARGUMENT(arg, id);
+        if (!Map.setRegionLocalSpace(reg, id)) {
+            send_to_user("Failed. Unknown local space id.\r\n");
+        } else {
+            send_to_user("Ok. Region %s local space set to %d.\r\n", (const char *)reg->getName(), id);
+        }
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
     // -------------------------------------------- DOORS IN REGION
     // ----------------------------------------------------------------------
     if (is_abbrev(arg, "door")) {
@@ -1923,6 +1964,103 @@ USERCMD(usercmd_mregion)
         return USER_PARSE_SKIP;
     }
 
+    send_prompt();
+    return USER_PARSE_SKIP;
+}
+
+USERCMD(usercmd_mlocalspace)
+{
+    userfunc_print_debug;
+
+    char arg[MAX_STR_LEN];
+    char *p = skip_spaces(line);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mlocalspace <name>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    int id = Map.addLocalSpace(arg);
+    send_to_user("Ok. Local space %s created with id %d.\r\n", arg, id);
+    send_prompt();
+    return USER_PARSE_SKIP;
+}
+
+USERCMD(usercmd_mportal)
+{
+    userfunc_print_debug;
+
+    char arg[MAX_STR_LEN];
+    char *p = skip_spaces(line);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
+    p = one_argument(p, arg, 0);
+    int id = 0;
+    GET_INT_ARGUMENT(arg, id);
+
+    p = skip_spaces(p);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    bool ok = false;
+    float x = QString(arg).toFloat(&ok);
+    if (!ok) {
+        send_to_user("Bad x value.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = skip_spaces(p);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    float y = QString(arg).toFloat(&ok);
+    if (!ok) {
+        send_to_user("Bad y value.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = skip_spaces(p);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    float w = QString(arg).toFloat(&ok);
+    if (!ok) {
+        send_to_user("Bad w value.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = skip_spaces(p);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    float h = QString(arg).toFloat(&ok);
+    if (!ok) {
+        send_to_user("Bad h value.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
+    if (!Map.setLocalSpacePortal(id, x, y, w, h)) {
+        send_to_user("Failed. Unknown local space id.\r\n");
+    } else {
+        send_to_user("Ok. Portal set for local space %d.\r\n", id);
+    }
     send_prompt();
     return USER_PARSE_SKIP;
 }

@@ -60,6 +60,8 @@ USERCMD(usercmd_maddroom);
 USERCMD(usercmd_mnote);
 USERCMD(usercmd_mnotecolor);
 USERCMD(usercmd_mregion);
+USERCMD(usercmd_mlocalspace);
+USERCMD(usercmd_mportal);
 USERCMD(usercmd_mtimer);
 
 struct user_command_type

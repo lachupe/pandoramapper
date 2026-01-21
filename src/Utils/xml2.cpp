@@ -321,12 +321,32 @@ bool StructureParser::startElement(const QString &qName, const QXmlStreamAttribu
         readingRegion = true;
         s = attributes.value("name").toString();
         region->setName(s.toLocal8Bit());
+        s = attributes.value("localspace").toString();
+        if (!s.isEmpty())
+            region->setLocalSpaceId(s.toInt());
     } else if (qName == "map") {
         s = attributes.value("rooms").toString();
         if (s.isEmpty()) {
             progress->setMaximum(currentMaximum);
         } else {
             progress->setMaximum(s.toInt());
+        }
+    } else if (qName == "localspace") {
+        int parsedId = attributes.value("id").toInt();
+        s = attributes.value("name").toString();
+        int id = (parsedId > 0) ? parent->addLocalSpaceWithId(s.toLocal8Bit(), parsedId)
+                                : parent->addLocalSpace(s.toLocal8Bit());
+        LocalSpace *space = parent->getLocalSpace(id);
+        if (space) {
+            s = attributes.value("x").toString();
+            space->portalX = s.toFloat();
+            s = attributes.value("y").toString();
+            space->portalY = s.toFloat();
+            s = attributes.value("w").toString();
+            space->portalW = s.toFloat();
+            s = attributes.value("h").toString();
+            space->portalH = s.toFloat();
+            space->hasPortal = true;
         }
     }
 
@@ -364,6 +384,19 @@ void CRoomManager::saveMap(QString filename)
     fprintf(f, "<map rooms=\"%i\">\n", size());
 
     {
+        QVector<LocalSpace *> spaces = getLocalSpaces();
+        fprintf(f, "  <localspaces>\n");
+        for (int i = 0; i < spaces.size(); i++) {
+            LocalSpace *space = spaces[i];
+            if (!space)
+                continue;
+            fprintf(f, "    <localspace id=\"%d\" name=\"%s\" x=\"%f\" y=\"%f\" w=\"%f\" h=\"%f\"/>\n", space->id,
+                    (const char *)space->name, space->portalX, space->portalY, space->portalW, space->portalH);
+        }
+        fprintf(f, "  </localspaces>\n");
+    }
+
+    {
         // SAVE REGIONS DATA
         CRegion *region;
         QList<CRegion *> regions;
@@ -375,7 +408,11 @@ void CRoomManager::saveMap(QString filename)
             region = regions[i];
             if (region->getName() == "default")
                 continue;  // skip the default region -> its always in memory as the first one anyway!
-            fprintf(f, "    <region name=\"%s\">\n", (const char *)region->getName());
+            if (region->getLocalSpaceId() > 0)
+                fprintf(f, "    <region name=\"%s\" localspace=\"%d\">\n", (const char *)region->getName(),
+                        region->getLocalSpaceId());
+            else
+                fprintf(f, "    <region name=\"%s\">\n", (const char *)region->getName());
 
             doors = region->getAllDoors();
             QMapIterator<QByteArray, QByteArray> iter(doors);

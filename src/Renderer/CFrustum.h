@@ -49,11 +49,11 @@ class CFrustum
         D = 3   // The distance the plane is from the origin
     };
 
-    int curx, cury, curz;
+    float curx, cury, curz;
     int current_plane_z;
 
   public:
-    void calculateFrustum(int cx, int cy, int cz);
+    void calculateFrustum(float cx, float cy, float cz);
     bool isPointInFrustum(float x, float y, float z);
     bool isSquareInFrustum(CSquare *p);
     float distance(float x, float y, float z);

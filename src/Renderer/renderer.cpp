@@ -234,6 +234,7 @@ RendererWidget::RendererWidget(QWidget *parent)
     curx = 0;
     cury = 0;
     curz = 0; /* current rooms position */
+    baseRoom = nullptr;
 
     userLayerShift = 0;
 
@@ -418,7 +419,7 @@ void RendererWidget::glDrawMarkers()
     CRoom *p;
     unsigned int k;
     QByteArray lastMovement;
-    int dx, dy, dz;
+    float dx, dy, dz;
 
     if (stacker.amount() == 0)
         return;
@@ -432,11 +433,12 @@ void RendererWidget::glDrawMarkers()
             continue;
         }
 
-        dx = p->getX() - curx;
-        dy = p->getY() - cury;
-        dz = (p->getZ() - curz) /* * DIST_Z */;
+        RenderTransform t = getRenderTransform(p);
+        dx = t.pos.x() - curx;
+        dy = t.pos.y() - cury;
+        dz = t.pos.z() - curz;
 
-        appendMarkerGeometry(dx, dy, dz, 2, markerColor);
+        appendMarkerGeometry(dx, dy, dz, 2, markerColor, t.scale);
 
         lastMovement = engine->getLastMovement();
         if (lastMovement.isEmpty() == false) {
@@ -455,9 +457,9 @@ void RendererWidget::glDrawMarkers()
                 rotX = 180.0;
             }
 
-            appendConeGeometry(dx, dy, dz + 0.2f, rotX, rotY, markerColor);
+            appendConeGeometry(dx, dy, dz + 0.2f * t.scale, rotX, rotY, markerColor, t.scale);
         } else {
-            appendConeGeometry(dx, dy, dz + 0.2f, 0.0f, 0.0f, markerColor);
+            appendConeGeometry(dx, dy, dz + 0.2f * t.scale, 0.0f, 0.0f, markerColor, t.scale);
         }
     }
 
@@ -487,7 +489,7 @@ void RendererWidget::glDrawPrespamLine()
     if (!conf->getDrawPrespam())
         return;
     auto line = engine->getPrespammedDirs();
-    int prevx, prevy, prevz, dx, dy, dz;
+    float prevx, prevy, prevz, dx, dy, dz;
 
     if (!line)
         return;
@@ -498,9 +500,11 @@ void RendererWidget::glDrawPrespamLine()
         return;
     }
 
-    prevx = p->getX() - curx;
-    prevy = p->getY() - cury;
-    prevz = (p->getZ() - curz) /* * DIST_Z */;
+    RenderTransform first = getRenderTransform(p);
+    prevx = first.pos.x() - curx;
+    prevy = first.pos.y() - cury;
+    prevz = first.pos.z() - curz;
+    float prevScale = first.scale;
 
     GLfloat lineColor[4] = {1.0f, 0.0f, 1.0f, 1.0f};
 
@@ -513,9 +517,11 @@ void RendererWidget::glDrawPrespamLine()
         if (p == nullptr)
             continue;
 
-        dx = p->getX() - curx;
-        dy = p->getY() - cury;
-        dz = (p->getZ() - curz) /* * DIST_Z */;
+        RenderTransform t = getRenderTransform(p);
+        dx = t.pos.x() - curx;
+        dy = t.pos.y() - cury;
+        dz = t.pos.z() - curz;
+        prevScale = t.scale;
 
         // glDrawMarkerPrimitive(dx, dy, dz, 2);
 
@@ -529,7 +535,7 @@ void RendererWidget::glDrawPrespamLine()
     }
 
     // and draw a cone in the last room
-    appendConeGeometry(prevx, prevy, prevz + 0.2f, 0.0f, 0.0f, lineColor);
+    appendConeGeometry(prevx, prevy, prevz + 0.2f * prevScale, 0.0f, 0.0f, lineColor, prevScale);
 
     // unique_ptr automatically handles cleanup
 }
@@ -571,11 +577,12 @@ void RendererWidget::glDrawGroupMarkers()
             continue;
         }
 
-        dx = p->getX() - curx;
-        dy = p->getY() - cury;
-        dz = (p->getZ() - curz) /* * DIST_Z */;
+        RenderTransform t = getRenderTransform(p);
+        dx = t.pos.x() - curx;
+        dy = t.pos.y() - cury;
+        dz = t.pos.z() - curz;
 
-        appendMarkerGeometry(dx, dy, dz, 2, markerColor);
+        appendMarkerGeometry(dx, dy, dz, 2, markerColor, t.scale);
 
         lastMovement = ch->getLastMovement();
         if (lastMovement.isEmpty() == false) {
@@ -594,9 +601,9 @@ void RendererWidget::glDrawGroupMarkers()
                 rotX = 180.0;
             }
 
-            appendConeGeometry(dx, dy, dz + 0.2f, rotX, rotY, markerColor);
+            appendConeGeometry(dx, dy, dz + 0.2f * t.scale, rotX, rotY, markerColor, t.scale);
         } else {
-            appendConeGeometry(dx, dy, dz + 0.2f, 0.0f, 0.0f, markerColor);
+            appendConeGeometry(dx, dy, dz + 0.2f * t.scale, 0.0f, 0.0f, markerColor, t.scale);
         }
     }
 }
@@ -751,8 +758,12 @@ void RendererWidget::appendLine(const QVector3D &a, const QVector3D &b, const GL
     appendCommand(GL_LINES, false, 0, first, 2);
 }
 
-void RendererWidget::appendMarkerGeometry(float dx, float dy, float dz, int mode, const GLfloat *color)
+void RendererWidget::appendMarkerGeometry(float dx, float dy, float dz, int mode, const GLfloat *color,
+                                          float scaleFactor)
 {
+    float markerSize = MARKER_SIZE * scaleFactor;
+    float roomSize = ROOM_SIZE * scaleFactor;
+
     auto pushVertex = [&](const QVector3D &pos) {
         RenderVertex v;
         v.position[0] = pos.x();
@@ -767,69 +778,71 @@ void RendererWidget::appendMarkerGeometry(float dx, float dy, float dz, int mode
         renderVertices.append(v);
     };
 
-    QVector3D upperA(dx, MARKER_SIZE + dy + ROOM_SIZE, dz);
-    QVector3D upperB(-MARKER_SIZE + dx, dy + ROOM_SIZE, dz);
-    QVector3D upperC(MARKER_SIZE + dx, dy + ROOM_SIZE, dz);
+    QVector3D upperA(dx, markerSize + dy + roomSize, dz);
+    QVector3D upperB(-markerSize + dx, dy + roomSize, dz);
+    QVector3D upperC(markerSize + dx, dy + roomSize, dz);
     appendCommand(GL_TRIANGLES, false, 0, renderVertices.size(), 3);
     pushVertex(upperA);
     pushVertex(upperB);
     pushVertex(upperC);
 
-    QVector3D lowerA(dx, -MARKER_SIZE + dy - ROOM_SIZE, dz);
-    QVector3D lowerB(-MARKER_SIZE + dx, dy - ROOM_SIZE, dz);
-    QVector3D lowerC(MARKER_SIZE + dx, dy - ROOM_SIZE, dz);
+    QVector3D lowerA(dx, -markerSize + dy - roomSize, dz);
+    QVector3D lowerB(-markerSize + dx, dy - roomSize, dz);
+    QVector3D lowerC(markerSize + dx, dy - roomSize, dz);
     appendCommand(GL_TRIANGLES, false, 0, renderVertices.size(), 3);
     pushVertex(lowerA);
     pushVertex(lowerB);
     pushVertex(lowerC);
 
-    QVector3D rightA(dx + ROOM_SIZE, MARKER_SIZE + dy, dz);
-    QVector3D rightB(MARKER_SIZE + dx + ROOM_SIZE, dy, dz);
-    QVector3D rightC(dx + ROOM_SIZE, -MARKER_SIZE + dy, dz);
+    QVector3D rightA(dx + roomSize, markerSize + dy, dz);
+    QVector3D rightB(markerSize + dx + roomSize, dy, dz);
+    QVector3D rightC(dx + roomSize, -markerSize + dy, dz);
     appendCommand(GL_TRIANGLES, false, 0, renderVertices.size(), 3);
     pushVertex(rightA);
     pushVertex(rightB);
     pushVertex(rightC);
 
-    QVector3D leftA(dx - ROOM_SIZE, MARKER_SIZE + dy, dz);
-    QVector3D leftB(-MARKER_SIZE + dx - ROOM_SIZE, dy, dz);
-    QVector3D leftC(dx - ROOM_SIZE, -MARKER_SIZE + dy, dz);
+    QVector3D leftA(dx - roomSize, markerSize + dy, dz);
+    QVector3D leftB(-markerSize + dx - roomSize, dy, dz);
+    QVector3D leftC(dx - roomSize, -markerSize + dy, dz);
     appendCommand(GL_TRIANGLES, false, 0, renderVertices.size(), 3);
     pushVertex(leftA);
     pushVertex(leftB);
     pushVertex(leftC);
 
     if (mode == 1) {
-        QVector3D l0(dx - ROOM_SIZE - (MARKER_SIZE / 3.5f), dy + ROOM_SIZE + (MARKER_SIZE / 3.5f), dz);
-        QVector3D l1(dx - ROOM_SIZE - (MARKER_SIZE / 3.5f), dy - ROOM_SIZE, dz);
-        QVector3D l2(dx - ROOM_SIZE, dy - ROOM_SIZE, dz);
-        QVector3D l3(dx - ROOM_SIZE, dy + ROOM_SIZE + (MARKER_SIZE / 3.5f), dz);
+        float inset = markerSize / 3.5f;
+        QVector3D l0(dx - roomSize - inset, dy + roomSize + inset, dz);
+        QVector3D l1(dx - roomSize - inset, dy - roomSize, dz);
+        QVector3D l2(dx - roomSize, dy - roomSize, dz);
+        QVector3D l3(dx - roomSize, dy + roomSize + inset, dz);
         appendQuad(l0, l1, l2, l3, color);
 
-        QVector3D r0(dx + ROOM_SIZE, dy + ROOM_SIZE + (MARKER_SIZE / 3.5f), dz);
-        QVector3D r1(dx + ROOM_SIZE, dy - ROOM_SIZE, dz);
-        QVector3D r2(dx + ROOM_SIZE + (MARKER_SIZE / 3.5f), dy - ROOM_SIZE, dz);
-        QVector3D r3(dx + ROOM_SIZE + (MARKER_SIZE / 3.5f), dy + ROOM_SIZE + (MARKER_SIZE / 3.5f), dz);
+        QVector3D r0(dx + roomSize, dy + roomSize + inset, dz);
+        QVector3D r1(dx + roomSize, dy - roomSize, dz);
+        QVector3D r2(dx + roomSize + inset, dy - roomSize, dz);
+        QVector3D r3(dx + roomSize + inset, dy + roomSize + inset, dz);
         appendQuad(r0, r1, r2, r3, color);
 
-        QVector3D u0(dx - ROOM_SIZE - (MARKER_SIZE / 3.5f), dy + ROOM_SIZE + (MARKER_SIZE / 3.5f), dz);
-        QVector3D u1(dx - ROOM_SIZE - (MARKER_SIZE / 3.5f), dy + ROOM_SIZE, dz);
-        QVector3D u2(dx + ROOM_SIZE + (MARKER_SIZE / 3.5f), dy + ROOM_SIZE, dz);
-        QVector3D u3(dx + ROOM_SIZE + (MARKER_SIZE / 3.5f), dy + ROOM_SIZE + (MARKER_SIZE / 3.5f), dz);
+        QVector3D u0(dx - roomSize - inset, dy + roomSize + inset, dz);
+        QVector3D u1(dx - roomSize - inset, dy + roomSize, dz);
+        QVector3D u2(dx + roomSize + inset, dy + roomSize, dz);
+        QVector3D u3(dx + roomSize + inset, dy + roomSize + inset, dz);
         appendQuad(u0, u1, u2, u3, color);
 
-        QVector3D d0(dx - ROOM_SIZE - (MARKER_SIZE / 3.5f), dy - ROOM_SIZE, dz);
-        QVector3D d1(dx - ROOM_SIZE - (MARKER_SIZE / 3.5f), dy - ROOM_SIZE + (MARKER_SIZE / 3.5f), dz);
-        QVector3D d2(dx + ROOM_SIZE + (MARKER_SIZE / 3.5f), dy - ROOM_SIZE + (MARKER_SIZE / 3.5f), dz);
-        QVector3D d3(dx + ROOM_SIZE + (MARKER_SIZE / 3.5f), dy - ROOM_SIZE, dz);
+        QVector3D d0(dx - roomSize - inset, dy - roomSize, dz);
+        QVector3D d1(dx - roomSize - inset, dy - roomSize + inset, dz);
+        QVector3D d2(dx + roomSize + inset, dy - roomSize + inset, dz);
+        QVector3D d3(dx + roomSize + inset, dy - roomSize, dz);
         appendQuad(d0, d1, d2, d3, color);
     }
 }
 
-void RendererWidget::appendConeGeometry(float dx, float dy, float dz, float rotX, float rotY, const GLfloat *color)
+void RendererWidget::appendConeGeometry(float dx, float dy, float dz, float rotX, float rotY, const GLfloat *color,
+                                        float scaleFactor)
 {
-    const float height = 0.36f;
-    const float radius = 0.08f;
+    const float height = 0.36f * scaleFactor;
+    const float radius = 0.08f * scaleFactor;
     const int segments = 16;
     const float twoPi = 6.28318530718f;
 
@@ -1004,8 +1017,9 @@ void RendererWidget::rebuildSquareBillboards(CSquare *square)
             else
                 color = QColor((QString)p->getNoteColor());
 
+            RenderTransform t = getRenderTransform(p);
             square->notesBillboards.append(
-                new Billboard(p->getX(), p->getY(), p->getZ() + ROOM_SIZE / 2, p->getNote(), color));
+                new Billboard(t.pos.x(), t.pos.y(), t.pos.z() + (ROOM_SIZE * 0.5f * t.scale), p->getNote(), color));
         }
 
         for (int k = 0; k <= 5; k++) {
@@ -1033,31 +1047,34 @@ void RendererWidget::rebuildSquareBillboards(CSquare *square)
                     info += "]";
                 }
 
-                double deltaX = (r->getX() - p->getX()) / 3.0;
-                double deltaY = (r->getY() - p->getY()) / 3.0;
-                double deltaZ = (r->getZ() - p->getZ()) / 3.0;
+                RenderTransform tp = getRenderTransform(p);
+                RenderTransform tr = getRenderTransform(r);
+                double deltaX = (tr.pos.x() - tp.pos.x()) / 3.0;
+                double deltaY = (tr.pos.y() - tp.pos.y()) / 3.0;
+                double deltaZ = (tr.pos.z() - tp.pos.z()) / 3.0;
+                double roomSize = ROOM_SIZE * tp.scale;
 
                 double shiftX = 0;
                 double shiftY = 0;
-                double shiftZ = ROOM_SIZE / 2.0;
+                double shiftZ = roomSize / 2.0;
 
                 if (deltaX < 0) {
-                    shiftY = ROOM_SIZE / 2.0;
+                    shiftY = roomSize / 2.0;
                 } else {
-                    shiftY = -ROOM_SIZE / 2.0;
+                    shiftY = -roomSize / 2.0;
                 }
 
                 if (deltaY != 0) {
-                    shiftX = -ROOM_SIZE;
+                    shiftX = -roomSize;
                 }
 
                 if (deltaZ < 0) {
                     shiftZ *= -1;
                 }
 
-                double x = p->getX() + deltaX + shiftX;
-                double y = p->getY() + deltaY + shiftY;
-                double z = p->getZ() + deltaZ + shiftZ;
+                double x = tp.pos.x() + deltaX + shiftX;
+                double y = tp.pos.y() + deltaY + shiftY;
+                double z = tp.pos.z() + deltaZ + shiftZ;
 
                 square->doorsBillboards.append(new Billboard(x, y, z, info, QColor(255, 255, 255, 255)));
             }
@@ -1069,36 +1086,39 @@ void RendererWidget::rebuildSquareBillboards(CSquare *square)
 
 void RendererWidget::appendRoomGeometry(CRoom *p)
 {
-    float dx = p->getX() - curx;
-    float dy = p->getY() - cury;
-    float dz = p->getZ() - curz;
-    float xMin = dx - ROOM_SIZE;
-    float xMax = dx + ROOM_SIZE;
-    float yMin = dy - ROOM_SIZE;
-    float yMax = dy + ROOM_SIZE;
+    RenderTransform t = getRenderTransform(p);
+    float dx = t.pos.x() - curx;
+    float dy = t.pos.y() - cury;
+    float dz = t.pos.z() - curz;
+    float size = ROOM_SIZE * t.scale;
+    float xMin = dx - size;
+    float xMax = dx + size;
+    float yMin = dy - size;
+    float yMax = dy + size;
     float z0 = dz;
-    float z1 = dz + WALL_HEIGHT;
-    float doorHalf = DOOR_WIDTH / 2.0f;
+    float z1 = dz + WALL_HEIGHT * t.scale;
+    float doorHalf = (DOOR_WIDTH * 0.5f) * t.scale;
+    float wallThickness = WALL_THICKNESS * t.scale;
 
     if (p->getTerrain()) {
         GLuint texture = conf->sectors[p->getTerrain()].texture;
-        QVector3D a(dx - ROOM_SIZE, dy + ROOM_SIZE, dz);
-        QVector3D b(dx - ROOM_SIZE, dy - ROOM_SIZE, dz);
-        QVector3D c(dx + ROOM_SIZE, dy - ROOM_SIZE, dz);
-        QVector3D d(dx + ROOM_SIZE, dy + ROOM_SIZE, dz);
+        QVector3D a(dx - size, dy + size, dz);
+        QVector3D b(dx - size, dy - size, dz);
+        QVector3D c(dx + size, dy - size, dz);
+        QVector3D d(dx + size, dy + size, dz);
         if (texture != 0) {
-            appendTexturedQuad(a, b, c, d, QVector2D(0.0f, 1.0f), QVector2D(0.0f, 0.0f), QVector2D(1.0f, 0.0f),
-                               QVector2D(1.0f, 1.0f), colour, texture);
+            appendTexturedQuad(a, b, c, d, QVector2D(0.0f, 1.0f), QVector2D(0.0f, 0.0f),
+                               QVector2D(1.0f, 0.0f), QVector2D(1.0f, 1.0f), colour, texture);
         } else {
             GLfloat floorColor[4] = {0.35f, 0.35f, 0.35f, colour[3]};
             appendQuad(a, b, c, d, floorColor);
         }
     } else {
         GLfloat floorColor[4] = {0.35f, 0.35f, 0.35f, colour[3]};
-        QVector3D a(dx - ROOM_SIZE, dy - ROOM_SIZE, dz);
-        QVector3D b(dx + ROOM_SIZE, dy - ROOM_SIZE, dz);
-        QVector3D c(dx + ROOM_SIZE, dy + ROOM_SIZE, dz);
-        QVector3D d(dx - ROOM_SIZE, dy + ROOM_SIZE, dz);
+        QVector3D a(dx - size, dy - size, dz);
+        QVector3D b(dx + size, dy - size, dz);
+        QVector3D c(dx + size, dy + size, dz);
+        QVector3D d(dx - size, dy + size, dz);
         appendQuad(a, b, c, d, floorColor);
     }
 
@@ -1128,11 +1148,11 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
 
     if (overlayTexture != 0) {
         GLfloat overlayColor[4] = {1.0f, 1.0f, 1.0f, colour[3]};
-        float overlayZ = dz + 0.02f;
-        QVector3D a(dx - ROOM_SIZE, dy + ROOM_SIZE, overlayZ);
-        QVector3D b(dx - ROOM_SIZE, dy - ROOM_SIZE, overlayZ);
-        QVector3D c(dx + ROOM_SIZE, dy - ROOM_SIZE, overlayZ);
-        QVector3D d(dx + ROOM_SIZE, dy + ROOM_SIZE, overlayZ);
+        float overlayZ = dz + 0.02f * t.scale;
+        QVector3D a(dx - size, dy + size, overlayZ);
+        QVector3D b(dx - size, dy - size, overlayZ);
+        QVector3D c(dx + size, dy - size, overlayZ);
+        QVector3D d(dx + size, dy + size, overlayZ);
         appendTexturedQuad(a, b, c, d, QVector2D(0.0f, 1.0f), QVector2D(0.0f, 0.0f),
                            QVector2D(1.0f, 0.0f), QVector2D(1.0f, 1.0f), overlayColor, overlayTexture);
     }
@@ -1160,17 +1180,17 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
 
     if (!iconTextures.isEmpty()) {
         GLfloat iconColor[4] = {1.0f, 1.0f, 1.0f, colour[3]};
-        float iconZ = dz + 0.03f;
-        float inset = ROOM_SIZE * 0.15f;
-        float available = (ROOM_SIZE * 2.0f) - (inset * 2.0f);
+        float iconZ = dz + 0.03f * t.scale;
+        float inset = size * 0.15f;
+        float available = (size * 2.0f) - (inset * 2.0f);
         int count = iconTextures.size();
         int cols = static_cast<int>(std::ceil(std::sqrt(static_cast<float>(count))));
         int rows = (count + cols - 1) / cols;
         float cellW = available / cols;
         float cellH = available / rows;
         float iconSize = std::min(cellW, cellH);
-        float startX = dx - ROOM_SIZE + inset;
-        float startY = dy + ROOM_SIZE - inset;
+        float startX = dx - size + inset;
+        float startY = dy + size - inset;
         for (int i = 0; i < count; ++i) {
             int row = i / cols;
             int col = i % cols;
@@ -1196,7 +1216,7 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
                        (p->getMMDoorFlags(dir) != 0);
 
         if (dir == NORTH) {
-            float wy0 = yMax - WALL_THICKNESS;
+            float wy0 = yMax - wallThickness;
             float wy1 = yMax;
             if (!hasExit) {
                 appendWallPrism(xMin, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
@@ -1207,7 +1227,7 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
             }
         } else if (dir == SOUTH) {
             float wy0 = yMin;
-            float wy1 = yMin + WALL_THICKNESS;
+            float wy1 = yMin + wallThickness;
             if (!hasExit) {
                 appendWallPrism(xMin, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
             } else if (hasDoor) {
@@ -1216,7 +1236,7 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
                 appendWallPrism(dx - doorHalf, dx + doorHalf, wy0, wy1, z0, z1, doorColor, door_textures[dir]);
             }
         } else if (dir == EAST) {
-            float wx0 = xMax - WALL_THICKNESS;
+            float wx0 = xMax - wallThickness;
             float wx1 = xMax;
             if (!hasExit) {
                 appendWallPrism(wx0, wx1, yMin, yMax, z0, z1, wallColor, wall_textures[dir]);
@@ -1227,7 +1247,7 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
             }
         } else if (dir == WEST) {
             float wx0 = xMin;
-            float wx1 = xMin + WALL_THICKNESS;
+            float wx1 = xMin + wallThickness;
             if (!hasExit) {
                 appendWallPrism(wx0, wx1, yMin, yMax, z0, z1, wallColor, wall_textures[dir]);
             } else if (hasDoor) {
@@ -1252,40 +1272,40 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
 
         if (k == NORTH) {
             kx = 0;
-            ky = +(ROOM_SIZE + 0.2f);
+            ky = +(size + 0.2f * t.scale);
             kz = 0;
             sx = 0;
-            sy = +ROOM_SIZE;
+            sy = +size;
         } else if (k == EAST) {
-            kx = +(ROOM_SIZE + 0.2f);
+            kx = +(size + 0.2f * t.scale);
             ky = 0;
             kz = 0;
-            sx = +ROOM_SIZE;
+            sx = +size;
             sy = 0;
         } else if (k == SOUTH) {
             kx = 0;
-            ky = -(ROOM_SIZE + 0.2f);
+            ky = -(size + 0.2f * t.scale);
             kz = 0;
             sx = 0;
-            sy = -ROOM_SIZE;
+            sy = -size;
         } else if (k == WEST) {
-            kx = -(ROOM_SIZE + 0.2f);
+            kx = -(size + 0.2f * t.scale);
             ky = 0;
             kz = 0;
-            sx = -ROOM_SIZE;
+            sx = -size;
             sy = 0;
         } else if (k == UP) {
             kx = 0;
             ky = 0;
-            kz = +(ROOM_SIZE + 0.2f);
-            sx = ROOM_SIZE / 2;
+            kz = +(size + 0.2f * t.scale);
+            sx = size / 2;
             sy = 0;
         } else {
             kx = 0;
             ky = 0;
-            kz = -(ROOM_SIZE + 0.2f);
+            kz = -(size + 0.2f * t.scale);
             sx = 0;
-            sy = ROOM_SIZE / 2;
+            sy = size / 2;
         }
 
         if (p->isExitNormal(k)) {
@@ -1293,19 +1313,20 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
             if (!r)
                 continue;
 
+            RenderTransform t2 = getRenderTransform(r);
+            float dx2 = t2.pos.x() - curx;
+            float dy2 = t2.pos.y() - cury;
+            float dz2 = t2.pos.z() - curz;
             if (k <= WEST) {
-                float rx = r->getX() - p->getX();
-                float ry = r->getY() - p->getY();
-                float rz = r->getZ() - p->getZ();
+                float rx = t2.pos.x() - t.pos.x();
+                float ry = t2.pos.y() - t.pos.y();
+                float rz = t2.pos.z() - t.pos.z();
                 float dist = std::sqrt(rx * rx + ry * ry + rz * rz);
-                if (dist <= (ROOM_SIZE * 2.0f + 0.01f)) {
+                float size2 = ROOM_SIZE * t2.scale;
+                if (dist <= (size + size2 + 0.01f)) {
                     continue;
                 }
             }
-
-            float dx2 = r->getX() - curx;
-            float dy2 = r->getY() - cury;
-            float dz2 = r->getZ() - curz;
 
             dx2 = (dx + dx2) / 2.0f;
             dy2 = (dy + dy2) / 2.0f;
@@ -1335,27 +1356,27 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
             float dz2 = dz;
 
             if (k == NORTH) {
-                dy2 = dy + 0.5f;
+                dy2 = dy + 0.5f * t.scale;
             } else if (k == EAST) {
-                dx2 = dx + 0.5f;
+                dx2 = dx + 0.5f * t.scale;
             } else if (k == SOUTH) {
-                dy2 = dy - 0.5f;
+                dy2 = dy - 0.5f * t.scale;
             } else if (k == WEST) {
-                dx2 = dx - 0.5f;
+                dx2 = dx - 0.5f * t.scale;
             } else if (k == UP) {
-                dz2 = dz + 0.5f;
+                dz2 = dz + 0.5f * t.scale;
             } else if (k == DOWN) {
-                dz2 = dz - 0.5f;
+                dz2 = dz - 0.5f * t.scale;
             }
 
             if (k == NORTH) {
-                ky = +(ROOM_SIZE);
+                ky = +(size);
             } else if (k == EAST) {
-                kx = +(ROOM_SIZE);
+                kx = +(size);
             } else if (k == SOUTH) {
-                ky = -(ROOM_SIZE);
+                ky = -(size);
             } else if (k == WEST) {
-                kx = -(ROOM_SIZE);
+                kx = -(size);
             } else if (k == UP) {
                 kz = 0;
             } else if (k == DOWN) {
@@ -1374,10 +1395,10 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
 
             GLuint death_terrain = conf->getTextureByDesc("DEATH");
             if (death_terrain && p->isExitDeath(k)) {
-                QVector3D da(dx2 + kx - ROOM_SIZE, dy2 + ky + ROOM_SIZE, dz2);
-                QVector3D db(dx2 + kx - ROOM_SIZE, dy2 + ky - ROOM_SIZE, dz2);
-                QVector3D dc(dx2 + kx + ROOM_SIZE, dy2 + ky - ROOM_SIZE, dz2);
-                QVector3D dd(dx2 + kx + ROOM_SIZE, dy2 + ky + ROOM_SIZE, dz2);
+                QVector3D da(dx2 + kx - size, dy2 + ky + size, dz2);
+                QVector3D db(dx2 + kx - size, dy2 + ky - size, dz2);
+                QVector3D dc(dx2 + kx + size, dy2 + ky - size, dz2);
+                QVector3D dd(dx2 + kx + size, dy2 + ky + size, dz2);
                 appendTexturedQuad(da, db, dc, dd, QVector2D(0.0f, 1.0f), QVector2D(0.0f, 0.0f), QVector2D(1.0f, 0.0f),
                                    QVector2D(1.0f, 1.0f), colour, death_terrain);
             }
@@ -1392,19 +1413,23 @@ void RendererWidget::appendSquareGeometry(CSquare *square)
 
     for (int ind = 0; ind < square->rooms.size(); ind++) {
         CRoom *room = square->rooms[ind];
+        RenderTransform t = getRenderTransform(room);
+        float dx = t.pos.x() - curx;
+        float dy = t.pos.y() - cury;
+        float dz = t.pos.z() - curz;
+        if (!frustum.isPointInFrustum(dx, dy, dz))
+            continue;
         appendRoomGeometry(room);
 
         if (!Map.selections.isEmpty() && Map.selections.isSelected(room->id) == true) {
             GLfloat highlight[4] = {0.20f, 0.20f, 0.80f, colour[3] - 0.1f};
             if (highlight[3] < 0.0f)
                 highlight[3] = 0.0f;
-            float dx = room->getX() - curx;
-            float dy = room->getY() - cury;
-            float dz = room->getZ() - curz;
-            QVector3D a(dx - ROOM_SIZE * 2, dy - ROOM_SIZE * 2, dz);
-            QVector3D b(dx + ROOM_SIZE * 2, dy - ROOM_SIZE * 2, dz);
-            QVector3D c(dx + ROOM_SIZE * 2, dy + ROOM_SIZE * 2, dz);
-            QVector3D d(dx - ROOM_SIZE * 2, dy + ROOM_SIZE * 2, dz);
+            float size = ROOM_SIZE * 2.0f * t.scale;
+            QVector3D a(dx - size, dy - size, dz);
+            QVector3D b(dx + size, dy - size, dz);
+            QVector3D c(dx + size, dy + size, dz);
+            QVector3D d(dx - size, dy + size, dz);
             appendQuad(a, b, c, d, highlight);
         }
 
@@ -1413,13 +1438,11 @@ void RendererWidget::appendSquareGeometry(CSquare *square)
                 GLfloat regionColor[4] = {0.50f, 0.50f, 0.50f, colour[3] - 0.2f};
                 if (regionColor[3] < 0.0f)
                     regionColor[3] = 0.0f;
-                float dx = room->getX() - curx;
-                float dy = room->getY() - cury;
-                float dz = room->getZ() - curz;
-                QVector3D a(dx - ROOM_SIZE * 1.5f, dy - ROOM_SIZE * 1.5f, dz);
-                QVector3D b(dx + ROOM_SIZE * 1.5f, dy - ROOM_SIZE * 1.5f, dz);
-                QVector3D c(dx + ROOM_SIZE * 1.5f, dy + ROOM_SIZE * 1.5f, dz);
-                QVector3D d(dx - ROOM_SIZE * 1.5f, dy + ROOM_SIZE * 1.5f, dz);
+                float size = ROOM_SIZE * 1.5f * t.scale;
+                QVector3D a(dx - size, dy - size, dz);
+                QVector3D b(dx + size, dy - size, dz);
+                QVector3D c(dx + size, dy + size, dz);
+                QVector3D d(dx - size, dy + size, dz);
                 appendQuad(a, b, c, d, regionColor);
             }
         }
@@ -1487,8 +1510,8 @@ void RendererWidget::setupNewBaseCoordinates()
 {
     CRoom *p = nullptr;
     CRoom *newRoom = nullptr;
-    unsigned long long bestDistance, dist;
-    int newX, newY, newZ;
+    float bestDistance, dist;
+    float newX, newY, newZ;
     unsigned int i;
 
     print_debug(DEBUG_RENDERER, "calculating new Base coordinates");
@@ -1498,12 +1521,13 @@ void RendererWidget::setupNewBaseCoordinates()
         return;
 
     // initial unbeatably worst value for euclidean test
-    bestDistance = (long long)32000 * 32000 * 1000;
+    bestDistance = 32000.0f * 32000.0f * 1000.0f;
     for (i = 0; i < stacker.amount(); i++) {
         p = stacker.get(i);
-        newX = curx - p->getX();
-        newY = cury - p->getY();
-        newZ = curz - p->getZ() + userLayerShift;
+        RenderTransform t = getRenderTransform(p);
+        newX = curx - t.pos.x();
+        newY = cury - t.pos.y();
+        newZ = curz - t.pos.z() + userLayerShift;
         dist = newX * newX + newY * newY + newZ * newZ;
         if (dist < bestDistance) {
             bestDistance = dist;
@@ -1512,9 +1536,11 @@ void RendererWidget::setupNewBaseCoordinates()
     }
 
     if (newRoom != nullptr) {
-        curx = newRoom->getX();
-        cury = newRoom->getY();
-        curz = newRoom->getZ() + userLayerShift;
+        RenderTransform t = getRenderTransform(newRoom);
+        curx = t.pos.x();
+        cury = t.pos.y();
+        curz = t.pos.z() + userLayerShift;
+        baseRoom = newRoom;
 
         //        printf("Base room: %i\r\n", newRoom->id);
         //        fflush(stdout);
@@ -1528,9 +1554,13 @@ void RendererWidget::centerOnRoom(unsigned int id)
 {
     CRoom *r = Map.getRoom(id);
 
-    userX = (double)(curx - r->getX());
-    userY = (double)(cury - r->getY());
-    changeUserLayerShift(0 - (curz - r->getZ()));
+    if (!r)
+        return;
+
+    RenderTransform t = getRenderTransform(r);
+    userX = (double)(curx - t.pos.x());
+    userY = (double)(cury - t.pos.y());
+    changeUserLayerShift(0 - static_cast<int>(std::lround(curz - t.pos.z())));
 
     /*
         curx = r->getX();
@@ -1590,6 +1620,8 @@ void RendererWidget::draw(void)
     glRotatef(angleZ, 0.0f, 0.0f, 1.0f);
     glTranslatef(userX, userY, 0);
 
+    Map.updateLocalSpaceBounds();
+    Map.updateLocalSpaceBounds();
     setupNewBaseCoordinates();
     textBillboards.clear();
 
@@ -1599,8 +1631,9 @@ void RendererWidget::draw(void)
     int visibleLayers = conf->getVisibleLayers();
     int side = visibleLayers >> 1;
 
-    lowerZ = curz - (side * 2);
-    upperZ = curz + (side * 2);
+    int baseZ = baseRoom ? baseRoom->getZ() + userLayerShift : static_cast<int>(std::lround(curz));
+    lowerZ = baseZ - (side * 2);
+    upperZ = baseZ + (side * 2);
     upperZ -= (1 - visibleLayers % 2) << 1;
     //    print_debug(DEBUG_RENDERER, "drawing %i rooms", Map.size());
 
@@ -1618,7 +1651,7 @@ void RendererWidget::draw(void)
             continue;
         }
 
-        z = plane->z - curz;
+        z = plane->z - baseZ;
         if (z < 0)
             z = -z;
 
@@ -1682,6 +1715,7 @@ void RendererWidget::renderPickupObjects()
 
     glColor4f(0.1, 0.8, 0.8, 0.4);
 
+    Map.updateLocalSpaceBounds();
     setupNewBaseCoordinates();
 
     frustum.calculateFrustum(curx, cury, curz);
@@ -1690,8 +1724,9 @@ void RendererWidget::renderPickupObjects()
     int visibleLayers = conf->getVisibleLayers();
     int side = visibleLayers >> 1;
 
-    lowerZ = curz - (side * 2);
-    upperZ = curz + (side * 2);
+    int baseZ = baseRoom ? baseRoom->getZ() + userLayerShift : static_cast<int>(std::lround(curz));
+    lowerZ = baseZ - (side * 2);
+    upperZ = baseZ + (side * 2);
     upperZ -= (1 - visibleLayers % 2) << 1;
     //    print_debug(DEBUG_RENDERER, "drawing %i rooms", Map.size());
 
@@ -1704,7 +1739,7 @@ void RendererWidget::renderPickupObjects()
             continue;
         }
 
-        z = plane->z - curz;
+        z = plane->z - baseZ;
 
         current_plane_z = plane->z;
 
@@ -1718,9 +1753,10 @@ void RendererWidget::renderPickupRoom(CRoom *p)
 {
     GLfloat dx, dy, dz;
 
-    dx = p->getX() - curx;
-    dy = p->getY() - cury;
-    dz = (p->getZ() - curz) /* * DIST_Z */;
+    RenderTransform t = getRenderTransform(p);
+    dx = t.pos.x() - curx;
+    dy = t.pos.y() - cury;
+    dz = (t.pos.z() - curz);
 
     // if (p->id == 20989 || p->id == 20973)
     //   printf("preparing to render the room in pickup mode! id %i\r\n", p->id);
@@ -1734,6 +1770,43 @@ void RendererWidget::renderPickupRoom(CRoom *p)
     glLoadName(p->id + 1);
     glCallList(basic_gllist);
     glTranslatef(-dx, -dy, -dz);
+}
+
+RendererWidget::RenderTransform RendererWidget::getRenderTransform(CRoom *room)
+{
+    RenderTransform t;
+    t.pos = QVector3D(room->getX(), room->getY(), room->getZ());
+    t.scale = 1.0f;
+
+    CRegion *region = room->getRegion();
+    if (!region)
+        return t;
+    int localSpaceId = region->getLocalSpaceId();
+    if (localSpaceId <= 0)
+        return t;
+    LocalSpace *space = Map.getLocalSpace(localSpaceId);
+    if (!space || !space->hasPortal || !space->hasBounds)
+        return t;
+
+    float localW = space->maxX - space->minX;
+    float localH = space->maxY - space->minY;
+    if (localW <= 0.0f || localH <= 0.0f)
+        return t;
+
+    float scale = std::min(space->portalW / localW, space->portalH / localH);
+    if (scale <= 0.0f)
+        return t;
+
+    float localCx = (space->minX + space->maxX) * 0.5f;
+    float localCy = (space->minY + space->maxY) * 0.5f;
+    float localCz = (space->minZ + space->maxZ) * 0.5f;
+    float portalCx = space->portalX;
+    float portalCy = space->portalY;
+
+    t.pos = QVector3D(portalCx + (room->getX() - localCx) * scale,
+                      portalCy + (room->getY() - localCy) * scale, (room->getZ() - localCz) * scale);
+    t.scale = scale;
+    return t;
 }
 
 bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
@@ -1766,8 +1839,9 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
 
     int visibleLayers = conf->getVisibleLayers();
     int side = visibleLayers >> 1;
-    lowerZ = curz - (side * 2);
-    upperZ = curz + (side * 2);
+    int baseZ = baseRoom ? baseRoom->getZ() + userLayerShift : static_cast<int>(std::lround(curz));
+    lowerZ = baseZ - (side * 2);
+    upperZ = baseZ + (side * 2);
     upperZ -= (1 - visibleLayers % 2) << 1;
 
     QVector<RenderVertex> pickVertices;
@@ -1850,18 +1924,20 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
                 if (!room)
                     continue;
 
-                float dx = room->getX() - curx;
-                float dy = room->getY() - cury;
-                float dz = room->getZ() - curz;
+                RenderTransform t = getRenderTransform(room);
+                float dx = t.pos.x() - curx;
+                float dy = t.pos.y() - cury;
+                float dz = t.pos.z() - curz;
                 if (frustum.isPointInFrustum(dx, dy, dz) != true)
                     continue;
 
                 GLfloat pickColor[4];
                 encodeColor(room->id + 1, pickColor);
-                QVector3D a(dx - ROOM_SIZE, dy - ROOM_SIZE, dz);
-                QVector3D b(dx + ROOM_SIZE, dy - ROOM_SIZE, dz);
-                QVector3D c(dx + ROOM_SIZE, dy + ROOM_SIZE, dz);
-                QVector3D d(dx - ROOM_SIZE, dy + ROOM_SIZE, dz);
+                float size = ROOM_SIZE * t.scale;
+                QVector3D a(dx - size, dy - size, dz);
+                QVector3D b(dx + size, dy - size, dz);
+                QVector3D c(dx + size, dy + size, dz);
+                QVector3D d(dx - size, dy + size, dz);
                 appendPickQuad(a, b, c, d, pickColor);
             }
         }
