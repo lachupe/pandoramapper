@@ -263,9 +263,13 @@ void CRoomManager::fixFreeRooms()
 void CRoomManager::addRoom(CRoom *room)
 {
     if (ids[room->id] != nullptr) {
-        print_debug(DEBUG_ROOMS, "Error while adding new element to database! This id already exists!\n");
-        // Whaaaat?
-        // exit(1);
+        print_debug(DEBUG_ROOMS, "Error: Room ID %d already exists! Skipping duplicate.\n", room->id);
+        delete room;  // Clean up the leaked room
+        return;
+    }
+    if (room->id >= MAX_ROOMS) {
+        print_debug(DEBUG_ROOMS, "Error: Room ID %d exceeds MAX_ROOMS (%d)! Skipping.\n", room->id, MAX_ROOMS);
+        delete room;  // Clean up the leaked room
         return;
     }
 
@@ -306,7 +310,8 @@ void CRoomManager::init()
 
     regions.push_back(region);
 
-    ids[0] = nullptr;
+    // Clear entire ids array to prevent garbage pointers
+    memset(ids, 0, MAX_ROOMS * sizeof(CRoom *));
     planes = nullptr;
 }
 
@@ -491,6 +496,16 @@ void CRoomManager::reinit()
     next_free = 1;
     nextLocalSpaceId = 1;
     localSpaces.clear();
+
+    // Clear regions and create fresh default region
+    for (int i = 0; i < regions.size(); i++) {
+        delete regions[i];
+    }
+    regions.clear();
+    CRegion *defaultRegion = new CRegion;
+    defaultRegion->setName("default");
+    regions.push_back(defaultRegion);
+
     {
         CPlane *p, *next;
 

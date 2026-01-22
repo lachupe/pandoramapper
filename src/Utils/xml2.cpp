@@ -22,10 +22,12 @@
   $Id: xml2.cpp,v 1.15 2006/08/06 13:50:53 porien Exp $
 */
 #include <QApplication>
+#include <QBuffer>
 #include <QFile>
 #include <QXmlStreamReader>
 #include <QString>
 #include <QProgressDialog>
+#include <QMessageBox>
 #include <QMessageBox>
 
 #include "defines.h"
@@ -35,12 +37,30 @@
 
 #include "Map/CRoomManager.h"
 #include "Proxy/CDispatcher.h"
+#include "Proxy/proxy.h"
 #include "Gui/mainwindow.h"
+#include "Engine/CStacksManager.h"
+#include "Renderer/renderer.h"
 
 #define XML_ROOMNAME (1 << 0)
 #define XML_DESC (1 << 1)
 #define XML_NOTE (1 << 2)
 #define XML_CONTENTS (1 << 3)
+
+// Helper function to escape XML special characters
+static QString xmlEscape(const QByteArray &str)
+{
+    QString s = QString::fromUtf8(str);
+    QString filtered;
+    filtered.reserve(s.size());
+    for (int i = 0; i < s.size(); i++) {
+        ushort ch = s.at(i).unicode();
+        if (ch == 0x9 || ch == 0xA || ch == 0xD || ch >= 0x20) {
+            filtered.append(s.at(i));
+        }
+    }
+    return filtered.toHtmlEscaped();
+}
 
 void CRoomManager::loadMap(QString filename)
 {
@@ -48,11 +68,36 @@ void CRoomManager::loadMap(QString filename)
 
     if (xmlFile.exists() == false) {
         print_debug(DEBUG_XML, "ERROR: The database file %s does NOT exist!\r\n", qPrintable(filename));
+        if (proxy)
+            proxy->sendLog("Map", QString("Load failed: file not found (%1)").arg(filename));
         return;
     }
     if (!xmlFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         print_debug(DEBUG_XML, "ERROR: Unable to open the database file %s.\r\n", qPrintable(filename));
+        if (proxy)
+            proxy->sendLog("Map", QString("Load failed: unable to open (%1)").arg(filename));
         return;
+    }
+
+    QByteArray rawXml = xmlFile.readAll();
+    xmlFile.close();
+
+    QByteArray filteredXml;
+    filteredXml.reserve(rawXml.size());
+    int stripped = 0;
+    for (int i = 0; i < rawXml.size(); i++) {
+        unsigned char ch = static_cast<unsigned char>(rawXml.at(i));
+        if (ch == 0x9 || ch == 0xA || ch == 0xD || ch >= 0x20) {
+            filteredXml.append(static_cast<char>(ch));
+        } else {
+            stripped++;
+        }
+    }
+    if (stripped > 0) {
+        print_debug(DEBUG_XML, "WARNING: Stripped %d invalid control characters from XML before parsing.", stripped);
+        send_to_user("XML load warning: stripped %d invalid control characters\r\n", stripped);
+        if (proxy)
+            proxy->sendLog("Map", QString("XML load warning: stripped %1 invalid control characters").arg(stripped));
     }
 
     // Most sensitive application :-)
@@ -64,28 +109,64 @@ void CRoomManager::loadMap(QString filename)
     // and we want those events to, well, fail, since there is no such thing as waiting for your own thread :-/
     Map.setBlocked(true);
 
+    send_to_user("Loading map: %s\r\n", qPrintable(filename));
+
+    // Clear existing map data before loading new map
+    // This prevents room ID conflicts when reloading a map
+    print_debug(DEBUG_XML, "Clearing existing map data before loading...");
+    reinit();
+    print_debug(DEBUG_XML, "Map cleared, starting to load from XML...");
+
     unsigned int currentMaximum = 22000;
     QProgressDialog progress("Loading the database...", "Abort Loading", 0, currentMaximum, renderer_window);
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
 
-    QXmlStreamReader reader(&xmlFile);
+    QBuffer buffer(&filteredXml);
+    buffer.open(QIODevice::ReadOnly);
+    QXmlStreamReader reader(&buffer);
     StructureParser *handler = new StructureParser(&progress, currentMaximum, this);
 
     print_debug(DEBUG_XML, "reading xml ...");
     fflush(stdout);
 
     //  lockForWrite();
-    handler->parse(reader);
+    bool parseOk = handler->parse(reader);
+
+    if (!parseOk && handler->hasError()) {
+        QString msg = QString("XML parse error: %1\nLine: %2, Column: %3\nTag: %4\nRoom id: %5")
+                          .arg(handler->errorMessage())
+                          .arg(handler->errorLine())
+                          .arg(handler->errorColumn())
+                          .arg(handler->errorTag())
+                          .arg(handler->errorRoomId());
+        print_debug(DEBUG_XML, "%s", qPrintable(msg));
+        send_to_user("XML load warning: %s\r\n", qPrintable(msg));
+        if (proxy)
+            proxy->sendLog("Map", QString("XML load error: %1 (line %2, col %3, tag %4, room %5)")
+                                     .arg(handler->errorMessage())
+                                     .arg(handler->errorLine())
+                                     .arg(handler->errorColumn())
+                                     .arg(handler->errorTag())
+                                     .arg(handler->errorRoomId()));
+        if (renderer_window) {
+            QMessageBox::warning(renderer_window, "XML Load Warning", msg);
+        }
+    }
 
     if (progress.wasCanceled()) {
         print_debug(DEBUG_XML, "Loading was canceled");
         reinit();
     } else {
+        print_debug(DEBUG_XML, "XML parsing complete, %d rooms parsed", size());
+        send_to_user("Map load: parsed %d rooms\r\n", size());
         progress.setLabelText("Preparing the loaded database");
         progress.setMaximum(size());
         progress.setValue(0);
 
+        print_debug(DEBUG_XML, "Resolving exit connections...");
+        unsigned int resolvedExits = 0;
+        unsigned int failedExits = 0;
         for (unsigned int i = 0; i < size(); i++) {
             progress.setValue(i);
 
@@ -97,12 +178,40 @@ void CRoomManager::loadMap(QString filename)
             CRoom *r = rooms[i];
             for (int exit = 0; exit <= 5; exit++)
                 if (r->exits[exit] != nullptr) {
-                    r->exits[exit] = getRoom((unsigned long)r->exits[exit]);
+                    unsigned long targetId = (unsigned long)r->exits[exit];
+                    CRoom *target = getRoom(targetId);
+                    if (target != nullptr) {
+                        r->exits[exit] = target;
+                        resolvedExits++;
+                    } else {
+                        // Target room not found - mark as undefined
+                        r->exits[exit] = nullptr;
+                        r->setExitUndefined(exit);
+                        failedExits++;
+                    }
                 }
         }
         progress.setValue(size());
 
-        print_debug(DEBUG_XML, "done.");
+        print_debug(DEBUG_XML, "Exit resolution: %d resolved, %d failed (target not found)", resolvedExits, failedExits);
+        print_debug(DEBUG_XML, "Loaded and resolved %d rooms", size());
+        send_to_user("Map load: %d rooms, exits resolved %d, failed %d\r\n", size(), resolvedExits, failedExits);
+
+        // Focus view on room 1 or first available room
+        CRoom *focusRoom = getRoom(1);
+        if (focusRoom == nullptr && size() > 0) {
+            focusRoom = rooms[0];
+        }
+        if (focusRoom != nullptr) {
+            stacker.reset();
+            stacker.put(focusRoom);
+            stacker.swap();
+            // Reset camera offset
+            if (renderer_window && renderer_window->renderer) {
+                renderer_window->renderer->setUserX(0, true);
+                renderer_window->renderer->setUserY(0, true);
+            }
+        }
     }
 
     Map.setBlocked(false);
@@ -116,6 +225,11 @@ StructureParser::StructureParser(QProgressDialog *progress, unsigned int &curren
 {
     readingRegion = false;
     abortLoading = false;
+    parseError = false;
+    currentRoomId = 0;
+    errorLineNumber = 0;
+    errorColumnNumber = 0;
+    errorRoom = 0;
 }
 
 bool StructureParser::parse(QXmlStreamReader &reader)
@@ -136,7 +250,13 @@ bool StructureParser::parse(QXmlStreamReader &reader)
     }
 
     if (reader.hasError()) {
-        print_debug(DEBUG_XML, "XML parse error: %s", qPrintable(reader.errorString()));
+        parseError = true;
+        errorMsg = reader.errorString();
+        errorLineNumber = reader.lineNumber();
+        errorColumnNumber = reader.columnNumber();
+        errorTagName = currentTag;
+        errorRoom = currentRoomId;
+        print_debug(DEBUG_XML, "XML parse error: %s", qPrintable(errorMsg));
         return false;
     }
 
@@ -145,7 +265,25 @@ bool StructureParser::parse(QXmlStreamReader &reader)
 
 bool StructureParser::endElement(const QString &qName)
 {
+    // Process accumulated text content
+    if (flag == XML_ROOMNAME) {
+        r->setName(textBuffer.toLocal8Bit());
+        textBuffer.clear();
+    } else if (flag == XML_DESC) {
+        r->setDesc(textBuffer.toLocal8Bit());
+        textBuffer.clear();
+    } else if (flag == XML_NOTE) {
+        r->setNote(textBuffer.toLocal8Bit());
+        textBuffer.clear();
+    } else if (flag == XML_CONTENTS) {
+        r->setContents(textBuffer.toLocal8Bit());
+        textBuffer.clear();
+    }
+
     if (qName == "room") {
+        if (r->id == 0) {
+            print_debug(DEBUG_XML, "WARNING: Room with ID 0 found, this may cause issues!");
+        }
         parent->addRoom(r); /* tada! */
 
         if (r->id > currentMaximum) {
@@ -154,12 +292,18 @@ bool StructureParser::endElement(const QString &qName)
         }
         unsigned int size = parent->size();
         progress->setValue(size);
+
+        // Log progress every 1000 rooms
+        if (size % 1000 == 0) {
+            print_debug(DEBUG_XML, "Loaded %d rooms so far...", size);
+        }
     }
     if (qName == "region" && readingRegion) {
         parent->addRegion(region);
         region = nullptr;
         readingRegion = false;
     }
+    currentTag = qName;
     flag = 0;
 
     if (progress->wasCanceled())
@@ -176,14 +320,9 @@ bool StructureParser::characters(const QString &ch)
     if (ch.isEmpty())
         return true;
 
-    if (flag == XML_ROOMNAME) {
-        r->setName(ch.toLocal8Bit());
-    } else if (flag == XML_DESC) {
-        r->setDesc(ch.toLocal8Bit());
-    } else if (flag == XML_NOTE) {
-        r->setNote(ch.toLocal8Bit());
-    } else if (flag == XML_CONTENTS) {
-        r->setContents(ch.toLocal8Bit());
+    // Accumulate text content - will be processed in endElement
+    if (flag != 0) {
+        textBuffer += ch;
     }
     return true;
 }
@@ -209,20 +348,25 @@ bool StructureParser::startElement(const QString &qName, const QXmlStreamAttribu
         }
     }
 
+    currentTag = qName;
     if (qName == "exit") {
         unsigned int dir;
         unsigned int to;
 
-        /* special */
-        if (attributes.size() < 3) {
-            print_debug(DEBUG_XML, "Not enough exit attributes in XML file!");
-            exit(1);
-        }
-
+        // Need at least dir and to attributes
         s = attributes.value("dir").toString();
+        if (s.isEmpty()) {
+            print_debug(DEBUG_XML, "Exit missing 'dir' attribute, skipping");
+            return true;
+        }
         dir = numbydir(s.toLocal8Bit().at(0));
 
         s = attributes.value("to").toString();
+        if (s.isEmpty()) {
+            print_debug(DEBUG_XML, "Exit missing 'to' attribute, skipping");
+            return true;
+        }
+
         if (s == "DEATH") {
             r->setExitDeath(dir);
         } else if (s == "UNDEFINED") {
@@ -248,29 +392,31 @@ bool StructureParser::startElement(const QString &qName, const QXmlStreamAttribu
 
     } else if (qName == "roomname") {
         flag = XML_ROOMNAME;
+        textBuffer.clear();
         return true;
     } else if (qName == "desc") {
         flag = XML_DESC;
+        textBuffer.clear();
         return true;
     } else if (qName == "note") {
         if (attributes.count() > 0) {
             r->setNoteColor(attributes.value("color").toString().toLocal8Bit());
         } else {
-            // QColor color = QColor(242, 128, 3, 255);
-            // printf("color: %s\n\r",(const char*)color.name().toLocal8Bit());
-            // r->setNoteColor(color);
             r->setNoteColor("");
         }
         flag = XML_NOTE;
+        textBuffer.clear();
         return true;
     } else if (qName == "contents") {
         flag = XML_CONTENTS;
+        textBuffer.clear();
         return true;
     } else if (qName == "room") {
         r = new CRoom;
 
         s = attributes.value("id").toString();
         r->id = s.toInt();
+        currentRoomId = r->id;
 
         s = attributes.value("x").toString();
         r->setX(s.toInt());
@@ -383,6 +529,7 @@ void CRoomManager::saveMap(QString filename)
     progress.setWindowModality(Qt::WindowModal);
     progress.show();
 
+    print_debug(DEBUG_XML, "Saving map: %d rooms in memory", size());
     fprintf(f, "<map rooms=\"%i\">\n", size());
 
     {
@@ -393,7 +540,7 @@ void CRoomManager::saveMap(QString filename)
             if (!space)
                 continue;
             fprintf(f, "    <localspace id=\"%d\" name=\"%s\" x=\"%f\" y=\"%f\" z=\"%f\" w=\"%f\" h=\"%f\"/>\n", space->id,
-                    (const char *)space->name, space->portalX, space->portalY, space->portalZ, space->portalW,
+                    qPrintable(xmlEscape(space->name)), space->portalX, space->portalY, space->portalZ, space->portalW,
                     space->portalH);
         }
         fprintf(f, "  </localspaces>\n");
@@ -412,17 +559,17 @@ void CRoomManager::saveMap(QString filename)
             if (region->getName() == "default")
                 continue;  // skip the default region -> its always in memory as the first one anyway!
             if (region->getLocalSpaceId() > 0)
-                fprintf(f, "    <region name=\"%s\" localspace=\"%d\">\n", (const char *)region->getName(),
+                fprintf(f, "    <region name=\"%s\" localspace=\"%d\">\n", qPrintable(xmlEscape(region->getName())),
                         region->getLocalSpaceId());
             else
-                fprintf(f, "    <region name=\"%s\">\n", (const char *)region->getName());
+                fprintf(f, "    <region name=\"%s\">\n", qPrintable(xmlEscape(region->getName())));
 
             doors = region->getAllDoors();
             QMapIterator<QByteArray, QByteArray> iter(doors);
             while (iter.hasNext()) {
                 iter.next();
-                fprintf(f, "      <alias name=\"%s\" door=\"%s\"/>\n", (const char *)iter.key(),
-                        (const char *)iter.value());
+                fprintf(f, "      <alias name=\"%s\" door=\"%s\"/>\n", qPrintable(xmlEscape(iter.key())),
+                        qPrintable(xmlEscape(iter.value())));
             }
             fprintf(f, "    </region>\n");
         }
@@ -444,8 +591,8 @@ void CRoomManager::saveMap(QString filename)
                                 .arg(p->getX())
                                 .arg(p->getY())
                                 .arg(p->getZ())
-                                .arg((const char *)conf->sectors[p->getTerrain()].desc)
-                                .arg((const char *)p->getRegionName());
+                                .arg(xmlEscape(conf->sectors[p->getTerrain()].desc))
+                                .arg(xmlEscape(p->getRegionName()));
 
         // Add MMapper properties only if they have non-default values
         if (p->getLightType() != 0)
@@ -466,13 +613,14 @@ void CRoomManager::saveMap(QString filename)
         roomAttrs += ">\n";
         fprintf(f, "%s", qPrintable(roomAttrs));
 
-        fprintf(f, "    <roomname>%s</roomname>\n", (const char *)p->getName());
-        fprintf(f, "    <desc>%s</desc>\n", (const char *)p->getDesc());
-        fprintf(f, "    <note color=\"%s\">%s</note>\n", (const char *)p->getNoteColor(), (const char *)p->getNote());
+        fprintf(f, "    <roomname>%s</roomname>\n", qPrintable(xmlEscape(p->getName())));
+        fprintf(f, "    <desc>%s</desc>\n", qPrintable(xmlEscape(p->getDesc())));
+        fprintf(f, "    <note color=\"%s\">%s</note>\n", qPrintable(xmlEscape(p->getNoteColor())),
+                qPrintable(xmlEscape(p->getNote())));
 
         // Save contents if present
         if (!p->getContents().isEmpty()) {
-            fprintf(f, "    <contents>%s</contents>\n", (const char *)p->getContents());
+            fprintf(f, "    <contents>%s</contents>\n", qPrintable(xmlEscape(p->getContents())));
         }
 
         fprintf(f, "    <exits>\n");
@@ -480,7 +628,12 @@ void CRoomManager::saveMap(QString filename)
         for (i = 0; i <= 5; i++) {
             if (p->isExitPresent(i) == true) {
                 if (p->isExitNormal(i) == true) {
-                    tmp = QString::number(p->exits[i]->id);
+                    if (p->exits[i] == nullptr) {
+                        print_debug(DEBUG_XML, "ERROR: Room %d exit %d is normal but nullptr!", p->id, i);
+                        tmp = QStringLiteral("UNDEFINED");
+                    } else {
+                        tmp = QString::number(p->exits[i]->id);
+                    }
                 } else {
                     if (p->isExitUndefined(i) == true)
                         tmp = QStringLiteral("UNDEFINED");
@@ -492,7 +645,7 @@ void CRoomManager::saveMap(QString filename)
                 QString exitLine = QString("      <exit dir=\"%1\" to=\"%2\" door=\"%3\"")
                                        .arg(QChar(exitnames[i][0]))
                                        .arg(tmp)
-                                       .arg((const char *)p->getDoor(i));
+                                       .arg(xmlEscape(p->getDoor(i)));
 
                 // Add MMapper exit flags only if non-zero
                 if (p->getMMExitFlags(i) != 0)
@@ -509,6 +662,8 @@ void CRoomManager::saveMap(QString filename)
         fprintf(f, "  </room>\n");
     }
     progress.setValue(size());
+
+    print_debug(DEBUG_XML, "Saved %d rooms to XML (loop ended at z=%d)", z, z);
 
     fprintf(f, "</map>\r\n");
     fflush(f);

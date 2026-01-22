@@ -322,7 +322,7 @@ void RendererWidget::updateEffectiveScale()
     float target = 1.0f;
     const float maxZoom = 3.0f;
     const float innerRadius = 0.0f;
-    const float outerRadius = 8.0f;
+    const float outerRadius = 6.0f;
 
     if (stacker.amount() > 0) {
         CRoom *current = stacker.first();

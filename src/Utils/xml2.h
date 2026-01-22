@@ -45,18 +45,33 @@ class StructureParser
     bool startElement(const QString &qName, const QXmlStreamAttributes &attributes);
     bool endElement(const QString &qName);
     bool isAborted() const;
+    bool hasError() const { return parseError; }
+    QString errorMessage() const { return errorMsg; }
+    int errorLine() const { return errorLineNumber; }
+    int errorColumn() const { return errorColumnNumber; }
+    QString errorTag() const { return errorTagName; }
+    int errorRoomId() const { return errorRoom; }
 
   private:
     /* some flags */
     int flag;
     bool readingRegion;
     bool abortLoading;
+    bool parseError;
     CRoomManager *parent;
 
     QProgressDialog *progress;
     unsigned int currentMaximum;
 
     QString s;
+    QString currentTag;
+    int currentRoomId;
+    QString errorMsg;
+    QString errorTagName;
+    int errorLineNumber;
+    int errorColumnNumber;
+    int errorRoom;
+    QString textBuffer;  // Accumulates text content between start/end tags
 
     int i;
     CRoom *r;
