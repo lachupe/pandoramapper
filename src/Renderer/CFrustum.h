@@ -55,6 +55,7 @@ class CFrustum
   public:
     void calculateFrustum(float cx, float cy, float cz);
     bool isPointInFrustum(float x, float y, float z);
+    bool isSphereInFrustum(float x, float y, float z, float radius);
     bool isSquareInFrustum(CSquare *p);
     float distance(float x, float y, float z);
 };

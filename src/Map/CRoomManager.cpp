@@ -285,36 +285,12 @@ void CRoomManager::addRoom(CRoom *room)
 /*------------- Constructor of the room manager ---------------*/
 CRoomManager::CRoomManager()
 {
-    init();
-    blocked = false;
-}
-
-void CRoomManager::init()
-{
-    //    QWriteLocker locker(&mapLock);
-
-    print_debug(DEBUG_ROOMS, "Roommanager INIT.\r\n");
-
-    next_free = 1;
-    nextLocalSpaceId = 1;
-
-    print_debug(DEBUG_ROOMS, "In roomer.init()");
-
-    /* adding first (empty) root elements to the lists */
-    rooms.clear();
-    regions.clear();
-    localSpaces.clear();
-
-    CRegion *region = new CRegion;
-    region->setName("default");
-
-    regions.push_back(region);
-
-    // Clear entire ids array to prevent garbage pointers
-    memset(ids, 0, MAX_ROOMS * sizeof(CRoom *));
+    // Initialize pointers to safe values before reinit() tries to delete them
     planes = nullptr;
-}
+    blocked = false;
 
+    reinit();
+}
 /*------------- Constructor of the room manager ENDS  ---------------*/
 
 CRegion *CRoomManager::getRegionByName(QByteArray name)
@@ -488,16 +464,23 @@ QList<CRegion *> CRoomManager::getAllRegions()
 }
 
 /* -------------- reinit ---------------*/
+/* Clears all map data and resets to initial empty state.
+ * Safe to call from constructor or at runtime.
+ * NOTE: Callers should clear stacker, selections, and engine->addedroom
+ * BEFORE calling this function to avoid dangling pointer issues. */
 void CRoomManager::reinit()
 {
-    //    unlock();
-    //    QWriteLocker locker(&mapLock);
+    print_debug(DEBUG_ROOMS, "CRoomManager::reinit() - clearing %d rooms, %d regions\r\n",
+                rooms.size(), regions.size());
 
+    // Reset counters
     next_free = 1;
     nextLocalSpaceId = 1;
+
+    // Clear local spaces
     localSpaces.clear();
 
-    // Clear regions and create fresh default region
+    // Delete and clear all regions, then create fresh default region
     for (int i = 0; i < regions.size(); i++) {
         delete regions[i];
     }
@@ -506,24 +489,29 @@ void CRoomManager::reinit()
     defaultRegion->setName("default");
     regions.push_back(defaultRegion);
 
-    {
-        CPlane *p, *next;
-
-        print_debug(DEBUG_ROOMS, "Resetting Cplane structures ... \r\n");
-        p = planes;
-        while (p) {
-            next = p->next;
-            delete p;
-            p = next;
-        }
-        planes = nullptr;
+    // Delete all planes (linked list)
+    CPlane *p = planes;
+    while (p) {
+        CPlane *next = p->next;
+        delete p;
+        p = next;
     }
+    planes = nullptr;
 
-    memset(ids, 0, MAX_ROOMS * sizeof(CRoom *));
+    // Delete all room objects
+    for (int i = 0; i < rooms.size(); i++) {
+        delete rooms[i];
+    }
     rooms.clear();
-    NameMap.reinit();
-}
 
+    // Clear the ID lookup array
+    memset(ids, 0, MAX_ROOMS * sizeof(CRoom *));
+
+    // Reset the name search tree
+    NameMap.reinit();
+
+    print_debug(DEBUG_ROOMS, "CRoomManager::reinit() complete\r\n");
+}
 /* -------------- reinit ENDS --------- */
 
 /* ------------ delete_room --------- */

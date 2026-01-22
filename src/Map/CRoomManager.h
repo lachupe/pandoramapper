@@ -73,8 +73,7 @@ class CRoomManager : public QObject
   public:
     CRoomManager();
     virtual ~CRoomManager();
-    void init();
-    void reinit(); /* reinitializer/utilizer */
+    void reinit(); /* clears all data and resets to initial state */
 
     QVector<CRoom *> getRooms() { return rooms; }
     CPlane *getPlanes() { return planes; }

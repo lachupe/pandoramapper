@@ -144,6 +144,23 @@ bool CFrustum::isPointInFrustum(float x, float y, float z)
     return true;
 }
 
+bool CFrustum::isSphereInFrustum(float x, float y, float z, float radius)
+{
+    // Go through all the sides of the frustum
+    for (int i = 0; i < 6; i++) {
+        // Calculate signed distance from sphere center to plane
+        // If distance < -radius, the sphere is completely behind this plane
+        float distance = m_Frustum[i][A] * x + m_Frustum[i][B] * y + m_Frustum[i][C] * z + m_Frustum[i][D];
+        if (distance < -radius) {
+            // The sphere is completely behind this plane, so it's outside the frustum
+            return false;
+        }
+    }
+
+    // The sphere is at least partially inside the frustum
+    return true;
+}
+
 bool CFrustum::isSquareInFrustum(CSquare *p)
 {
     float x, y, z, size;
@@ -167,27 +184,35 @@ bool CFrustum::isSquareInFrustum(CSquare *p)
     x = p->centerx - curx;
     y = p->centery - cury;
     z = (renderer_window->renderer->current_plane_z - curz) /* * DIST_Z */;
-    size = ((p->rightx - p->leftx) / 2 /*- curz */) /* * DIST_Z */;
+
+    // Add margin to account for geometry extending beyond room centers:
+    // walls (WALL_HEIGHT), markers, notes/billboards, etc.
+    size = ((p->rightx - p->leftx) / 2) + FRUSTUM_MARGIN;
+
+    // Test the 8 corners of the 3D bounding box (accounting for Z-extent from walls)
+    float zMin = z - FRUSTUM_MARGIN;
+    float zMax = z + FRUSTUM_MARGIN;
 
     for (int i = 0; i < 6; i++) {
-        if (m_Frustum[i][A] * (x - size) + m_Frustum[i][B] * (y - size) + m_Frustum[i][C] * (float)z +
-                m_Frustum[i][D] >=
-            0)
+        // Test all 8 corners of the bounding box - if all are outside one plane, reject
+        if (m_Frustum[i][A] * (x - size) + m_Frustum[i][B] * (y - size) + m_Frustum[i][C] * zMin + m_Frustum[i][D] >= 0)
             continue;
-        if (m_Frustum[i][A] * (x + size) + m_Frustum[i][B] * (y - size) + m_Frustum[i][C] * (float)z +
-                m_Frustum[i][D] >=
-            0)
+        if (m_Frustum[i][A] * (x + size) + m_Frustum[i][B] * (y - size) + m_Frustum[i][C] * zMin + m_Frustum[i][D] >= 0)
             continue;
-        if (m_Frustum[i][A] * (x - size) + m_Frustum[i][B] * (y + size) + m_Frustum[i][C] * (float)z +
-                m_Frustum[i][D] >=
-            0)
+        if (m_Frustum[i][A] * (x - size) + m_Frustum[i][B] * (y + size) + m_Frustum[i][C] * zMin + m_Frustum[i][D] >= 0)
             continue;
-        if (m_Frustum[i][A] * (x + size) + m_Frustum[i][B] * (y + size) + m_Frustum[i][C] * (float)z +
-                m_Frustum[i][D] >=
-            0)
+        if (m_Frustum[i][A] * (x + size) + m_Frustum[i][B] * (y + size) + m_Frustum[i][C] * zMin + m_Frustum[i][D] >= 0)
+            continue;
+        if (m_Frustum[i][A] * (x - size) + m_Frustum[i][B] * (y - size) + m_Frustum[i][C] * zMax + m_Frustum[i][D] >= 0)
+            continue;
+        if (m_Frustum[i][A] * (x + size) + m_Frustum[i][B] * (y - size) + m_Frustum[i][C] * zMax + m_Frustum[i][D] >= 0)
+            continue;
+        if (m_Frustum[i][A] * (x - size) + m_Frustum[i][B] * (y + size) + m_Frustum[i][C] * zMax + m_Frustum[i][D] >= 0)
+            continue;
+        if (m_Frustum[i][A] * (x + size) + m_Frustum[i][B] * (y + size) + m_Frustum[i][C] * zMax + m_Frustum[i][D] >= 0)
             continue;
 
-        // If we get here, it isn't in the frustum
+        // If we get here, all 8 corners are behind this plane - not in frustum
         return false;
     }
 

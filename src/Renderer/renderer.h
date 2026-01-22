@@ -46,6 +46,12 @@ class QFont;
 #define WALL_HEIGHT (ROOM_SIZE * 0.8f)
 #define WALL_THICKNESS (ROOM_SIZE * 0.15f)
 #define DOOR_WIDTH (ROOM_SIZE * 0.7f)
+#define NEAR_CLIP_PLANE 0.01f /* near clipping plane distance - very close to allow deep zoom */
+// Margin for frustum culling to account for walls, markers, notes extending beyond room center
+// Needs to be generous to prevent border rooms from popping in/out
+#define FRUSTUM_MARGIN 5.0f
+// Radius for per-room sphere culling test (accounts for room size + walls + markers)
+#define ROOM_CULL_RADIUS (ROOM_SIZE * 2.0f + WALL_HEIGHT)
 #define MOB_FLAG_COUNT 19
 #define LOAD_FLAG_COUNT 25
 

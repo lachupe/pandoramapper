@@ -491,7 +491,7 @@ void RendererWidget::initializeGL()
 
 void RendererWidget::setupViewingModel(int width, int height)
 {
-    gluPerspective(60.0f, (GLfloat)width / (GLfloat)height, 1.0f, conf->getDetailsVisibility() * 1.1f);
+    gluPerspective(60.0f, (GLfloat)width / (GLfloat)height, NEAR_CLIP_PLANE, conf->getDetailsVisibility() * 1.1f);
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -505,7 +505,7 @@ void RendererWidget::resizeGL(int width, int height)
 
     setupViewingModel(width, height);
     projectionMatrix.setToIdentity();
-    projectionMatrix.perspective(60.0f, static_cast<float>(width) / static_cast<float>(height), 1.0f,
+    projectionMatrix.perspective(60.0f, static_cast<float>(width) / static_cast<float>(height), NEAR_CLIP_PLANE,
                                  conf->getDetailsVisibility() * 1.1f);
 
     redraw = true;
@@ -1535,7 +1535,8 @@ void RendererWidget::appendSquareGeometry(CSquare *square)
         float dy = t.pos.y() - cury;
         float dz = t.pos.z() - curz;
         if (std::abs(effectiveScale - 1.0f) < 0.001f) {
-            if (!frustum.isPointInFrustum(dx, dy, dz))
+            // Use sphere test to account for room geometry extending beyond center
+            if (!frustum.isSphereInFrustum(dx, dy, dz, ROOM_CULL_RADIUS * t.scale))
                 continue;
         }
         appendRoomGeometry(room);
@@ -1901,7 +1902,8 @@ void RendererWidget::renderPickupRoom(CRoom *p)
     // if (p->id == 20989 || p->id == 20973)
     //   printf("preparing to render the room in pickup mode! id %i\r\n", p->id);
 
-    if (frustum.isPointInFrustum(dx, dy, dz) != true)
+    // Use sphere test to account for room geometry extending beyond center
+    if (!frustum.isSphereInFrustum(dx, dy, dz, ROOM_CULL_RADIUS * t.scale))
         return;
 
     // printf("Rendering the pickup room %i\r\n", p->id);
@@ -2073,7 +2075,8 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
                 float dx = t.pos.x() - curx;
                 float dy = t.pos.y() - cury;
                 float dz = t.pos.z() - curz;
-                if (frustum.isPointInFrustum(dx, dy, dz) != true)
+                // Use sphere test to account for room geometry extending beyond center
+                if (!frustum.isSphereInFrustum(dx, dy, dz, ROOM_CULL_RADIUS * t.scale))
                     continue;
 
                 GLfloat pickColor[4];
