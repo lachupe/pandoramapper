@@ -21,7 +21,9 @@
 #ifndef USERLAND_H
 #define USERLAND_H
 
-#define USERCMD(name) int name(int cmd, int subcmd, char *line, char *original)
+#define USERCMD(name)                                                                 \
+    int name([[maybe_unused]] int cmd, [[maybe_unused]] int subcmd, [[maybe_unused]] char *line, \
+             [[maybe_unused]] char *original)
 #include <deque>
 #include <QMutex>
 #include <QByteArray>
@@ -60,6 +62,8 @@ USERCMD(usercmd_maddroom);
 USERCMD(usercmd_mnote);
 USERCMD(usercmd_mnotecolor);
 USERCMD(usercmd_mregion);
+USERCMD(usercmd_mlocalspace);
+USERCMD(usercmd_mportal);
 USERCMD(usercmd_mtimer);
 
 struct user_command_type

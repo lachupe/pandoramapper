@@ -556,7 +556,7 @@ void CMainWindow::createContextMenu(QMouseEvent *e)
     else
         actionManager->bindRoomsAct->setEnabled(false);
 
-    menu.exec(e->globalPos());
+    menu.exec(e->globalPosition().toPoint());
 }
 
 QPoint CMainWindow::mousePosInRenderer(QPoint pos)
@@ -687,42 +687,32 @@ void CMainWindow::setToolMode(ToolMode mode)
 void CMainWindow::closeEvent(QCloseEvent *event)
 {
     if (conf->isDatabaseModified()) {
-        switch (QMessageBox::information(this, "Pandora",
-                                         "The map contains unsaved changes\n"
-                                         "Do you want to save the changes before exiting?",
-                                         "&Save", "&Discard", "Cancel",
-                                         0,     // Enter == button 0
-                                         2)) {  // Escape == button 2
-        case 0:                                 // Save clicked or Alt+S pressed or Enter pressed.
+        QMessageBox::StandardButton reply = QMessageBox::information(
+            this, "Pandora",
+            "The map contains unsaved changes\n"
+            "Do you want to save the changes before exiting?",
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+            QMessageBox::Save);
+        if (reply == QMessageBox::Save) {
             actionManager->save();
-            break;
-        case 1:  // Discard clicked or Alt+D pressed
-            // don't save but exit
-            break;
-        case 2:  // Cancel clicked or Escape pressed
+        } else if (reply == QMessageBox::Cancel) {
             event->ignore();
-            return;  // don't exit
-            break;
+            return;
         }
     }
 
     if (conf->isConfigModified()) {
-        switch (QMessageBox::information(this, "Pandora",
-                                         "The configuration was changed\n"
-                                         "Do you want to write it down on disc before exiting?",
-                                         "&Save", "&Discard", "Cancel",
-                                         0,     // Enter == button 0
-                                         2)) {  // Escape == button 2
-        case 0:                                 // Save clicked or Alt+S pressed or Enter pressed.
+        QMessageBox::StandardButton reply = QMessageBox::information(
+            this, "Pandora",
+            "The configuration was changed\n"
+            "Do you want to write it down on disc before exiting?",
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+            QMessageBox::Save);
+        if (reply == QMessageBox::Save) {
             conf->saveConfig();
-            break;
-        case 1:  // Discard clicked or Alt+D pressed
-            // don't save but exit
-            break;
-        case 2:  // Cancel clicked or Escape pressed
+        } else if (reply == QMessageBox::Cancel) {
             event->ignore();
-            return;  // don't exit
-            break;
+            return;
         }
     }
 

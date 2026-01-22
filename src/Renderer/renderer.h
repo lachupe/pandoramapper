@@ -40,12 +40,17 @@
 
 class QFont;
 
-// #define DIST_Z    2    /* the distance between 2 rooms */
 #define BASE_Z -12      /* the distance to the "camera" */
 #define ROOM_SIZE 1.0f /* the size of the rooms walls */
-#define WALL_HEIGHT (ROOM_SIZE * 0.8f)
-#define WALL_THICKNESS (ROOM_SIZE * 0.15f)
+#define WALL_HEIGHT (ROOM_SIZE * 0.6f)
+#define WALL_THICKNESS (ROOM_SIZE * 0.10f)
 #define DOOR_WIDTH (ROOM_SIZE * 0.7f)
+#define NEAR_CLIP_PLANE 0.01f /* near clipping plane distance - very close to allow deep zoom */
+// Margin for frustum culling to account for walls, markers, notes extending beyond room center
+// Needs to be generous to prevent border rooms from popping in/out
+#define FRUSTUM_MARGIN 5.0f
+// Radius for per-room sphere culling test (accounts for room size + walls + markers)
+#define ROOM_CULL_RADIUS (ROOM_SIZE * 2.0f + WALL_HEIGHT)
 #define MOB_FLAG_COUNT 19
 #define LOAD_FLAG_COUNT 25
 
@@ -80,9 +85,12 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
 
     GLfloat colour[4];
     GLuint global_list;
-    int curx;
-    int cury;
-    int curz;
+    float curx;
+    float cury;
+    float curz;
+    CRoom *baseRoom;
+    float effectiveScale;
+    float targetEffectiveScale;
     CFrustum frustum;
     int lowerZ;
     int upperZ;
@@ -108,6 +116,12 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     QVector<RenderCommand> renderCommands;
     QVector<TextBillboard> textBillboards;
 
+    struct RenderTransform
+    {
+        QVector3D pos;
+        float scale;
+    };
+
     void glDrawGroupMarkers();
     void glDrawPrespamLine();
     void glDrawMarkers();
@@ -115,6 +129,8 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     void setupViewingModel(int width, int height);
     void renderPickupObjects();
     void renderPickupRoom(CRoom *p);
+    RenderTransform getRenderTransform(CRoom *room);
+    void updateEffectiveScale();
     void setupNewBaseCoordinates();
     void draw();
     void rebuildSquareBillboards(CSquare *square);
@@ -137,8 +153,9 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     void appendWallPrism(float x0, float x1, float y0, float y1, float z0, float z1,
                          const GLfloat *color, GLuint texture);
     void appendLine(const QVector3D &a, const QVector3D &b, const GLfloat *color);
-    void appendMarkerGeometry(float dx, float dy, float dz, int mode, const GLfloat *color);
-    void appendConeGeometry(float dx, float dy, float dz, float rotX, float rotY, const GLfloat *color);
+    void appendMarkerGeometry(float dx, float dy, float dz, int mode, const GLfloat *color, float scaleFactor);
+    void appendConeGeometry(float dx, float dy, float dz, float rotX, float rotY, const GLfloat *color,
+                            float scaleFactor);
     void renderBatch(const QVector<RenderVertex> &vertices, const QVector<RenderCommand> &commands,
                      const QMatrix4x4 &mvp);
     void drawTextOverlay();
@@ -148,8 +165,12 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     GLuint basic_gllist;
     bool redraw;
     unsigned int deletedRoom;
-    GLuint wall_textures[4];
-    GLuint door_textures[4];
+    GLuint wall_texture_default;
+    GLuint wall_texture_forest;
+    GLuint wall_texture_cave;
+    GLuint wall_texture_city;
+    GLuint door_texture_normal;
+    GLuint door_texture_secret;
     GLuint road_textures[16];
     GLuint trail_textures[16];
     GLuint mob_textures[MOB_FLAG_COUNT];
@@ -193,6 +214,7 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     float getUserY() const { return userY; }
 
     float getUserZ() const { return userZ; }
+    float getEffectiveScale() const { return effectiveScale; }
 
     void setAngleX(GLfloat angleX, bool dontsave = false)
     {

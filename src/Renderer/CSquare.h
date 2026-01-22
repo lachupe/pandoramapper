@@ -31,12 +31,16 @@ class Billboard
 {
   public:
     Billboard() {}
-    Billboard(double _x, double _y, double _z, QString _text, QColor _col)
-        : x(_x), y(_y), z(_z), color(_col), text(_text)
+    Billboard(CRoom *_room, double _ox, double _oy, double _oz, QString _text, QColor _col)
+        : room(_room), offsetX(_ox), offsetY(_oy), offsetZ(_oz), x(0.0), y(0.0), z(0.0), color(_col), text(_text)
     {
     }
     ~Billboard() { text.clear(); }
 
+    CRoom *room;
+    double offsetX;
+    double offsetY;
+    double offsetZ;
     double x;
     double y;
     double z;

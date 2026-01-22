@@ -33,6 +33,9 @@
 
 #include "Map/CRoom.h"
 #include "Map/CRoomManager.h"
+#include "Engine/CStacksManager.h"
+#include "Renderer/renderer.h"
+#include "Gui/mainwindow.h"
 
 QString MMapperImport::s_lastError;
 
@@ -376,15 +379,23 @@ bool MMapperImport::importFile(const QString &filename, CRoomManager *roomManage
                 room->setMMExitFlags(pandoraDir, exitFlags);
                 room->setMMDoorFlags(pandoraDir, doorFlags);
 
+                bool hasExitFlag = (exitFlags & (MM_EXIT_EXIT | MM_EXIT_STUB)) != 0;
+                bool hasDoorInfo = (doorFlags != 0) || !doorName.isEmpty();
+
                 // Store first outbound connection (MMapper ID - will be remapped later)
                 if (outbound != 0xFFFFFFFF) {
                     exitData.mmapperExitIds[pandoraDir] = outbound;
                     exitData.exitPresent[pandoraDir] = true;
+                } else if (hasExitFlag || hasDoorInfo) {
+                    // Exit exists but has no known target in MMapper data
+                    // Mark as undefined immediately; don't set exitPresent since there's
+                    // nothing to resolve (avoids accidental resolution to room with ID 0)
+                    room->setExitUndefined(pandoraDir);
+                }
 
-                    // Set door if present
-                    if (!doorName.isEmpty()) {
-                        room->setDoor(pandoraDir, doorName.toLocal8Bit());
-                    }
+                // Set door if present (even on undefined exits)
+                if (!doorName.isEmpty()) {
+                    room->setDoor(pandoraDir, doorName.toLocal8Bit());
                 }
 
                 // Skip remaining outbound connections (MMapper supports multiple, Pandora doesn't)
@@ -466,6 +477,22 @@ bool MMapperImport::importFile(const QString &filename, CRoomManager *roomManage
     progress.setValue(progress.maximum());
 
     print_debug(DEBUG_XML, "MMapper import complete: %d rooms imported", roomData.size());
+
+    // Focus view on room 1 or first available room
+    CRoom *focusRoom = roomManager->getRoom(1);
+    if (focusRoom == nullptr && roomManager->size() > 0) {
+        focusRoom = roomManager->getRooms()[0];
+    }
+    if (focusRoom != nullptr) {
+        stacker.reset();
+        stacker.put(focusRoom);
+        stacker.swap();
+        // Reset camera offset
+        if (renderer_window && renderer_window->renderer) {
+            renderer_window->renderer->setUserX(0, true);
+            renderer_window->renderer->setUserY(0, true);
+        }
+    }
 
     return true;
 }

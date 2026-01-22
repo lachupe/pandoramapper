@@ -159,8 +159,9 @@ void CTree::deleteItem(const char *name, unsigned int id)
     for (int i = 0; i < p->ids.size(); i++) {
         if (p->ids[i] == id) {
             if (divingDelete(root, hash, id) == 1) {
-                /* meaning - occasioanly freed our ROOT element */
-                CTree(); /* reinit */
+                /* meaning - occasionally freed our ROOT element */
+                root = new TTree;
+                resetTTree(root);
                 return;
             } else
                 break;

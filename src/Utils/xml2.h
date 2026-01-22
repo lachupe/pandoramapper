@@ -2,6 +2,7 @@
  *  Pandora MUME mapper
  *
  *  Copyright (C) 2000-2009  Azazello
+ *  Copyright (C) 2025       PandoraMapper Contributors
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -20,12 +21,6 @@
 
 #ifndef XML2_H
 #define XML2_H
-/* buffered reading from file */
-
-// void xmlWriteMap(QString filename);
-
-/* Loads a char, returns char struct or nullptr */
-// void xmlReadMap(QString filename);
 
 #include <QString>
 #include <QXmlStreamReader>
@@ -35,32 +30,54 @@ class CRoomManager;
 class CRoom;
 class CRegion;
 
+/**
+ * XML Parser for PandoraMapper map files.
+ *
+ * Parses the XML format and builds the room database.
+ * Uses a two-pass approach:
+ *   1. Parse all rooms (storing exit target IDs temporarily)
+ *   2. Resolve exit pointers after all rooms are loaded
+ */
 class StructureParser
 {
-  public:
+public:
     StructureParser(QProgressDialog *progress, unsigned int &currentMaximum, CRoomManager *parent);
-    bool parse(QXmlStreamReader &reader);
-    bool characters(const QString &ch);
 
-    bool startElement(const QString &qName, const QXmlStreamAttributes &attributes);
-    bool endElement(const QString &qName);
+    bool parse(QXmlStreamReader &reader);
     bool isAborted() const;
 
-  private:
-    /* some flags */
-    int flag;
-    bool readingRegion;
-    bool abortLoading;
+    // Error information
+    bool hasError() const { return parseError; }
+    QString errorMessage() const { return errorMsg; }
+    int errorLine() const { return errorLineNumber; }
+    int errorColumn() const { return errorColumnNumber; }
+
+private:
+    bool startElement(const QString &qName, const QXmlStreamAttributes &attributes);
+    bool endElement(const QString &qName);
+    bool characters(const QString &ch);
+
+    // Parent and progress
     CRoomManager *parent;
-
     QProgressDialog *progress;
-    unsigned int currentMaximum;
+    unsigned int &currentMaximum;
 
-    QString s;
+    // Parser state
+    int flag;                   // Current text content type being parsed
+    bool readingRegion;         // Inside a <region> element
+    bool abortLoading;          // User canceled loading
 
-    int i;
-    CRoom *r;
-    CRegion *region;
+    // Current objects being parsed
+    CRoom *currentRoom;         // Room currently being parsed
+    CRegion *currentRegion;     // Region currently being parsed
+    int currentRoomId;          // ID of room being parsed (for error messages)
+    QString textBuffer;         // Accumulated text content
+
+    // Error state
+    bool parseError;
+    QString errorMsg;
+    int errorLineNumber;
+    int errorColumnNumber;
 };
 
-#endif
+#endif // XML2_H

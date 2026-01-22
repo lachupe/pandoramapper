@@ -160,6 +160,7 @@ class Proxy : public QThread
     void sendCharStateUpdatedEvent(int state) { emit sendCharStateUpdate(state); }
 
     void sendLog(const QString &message) { emit log("Network", message); }
+    void sendLog(const QString &module, const QString &message) { emit log(module, message); }
 
   signals:
     void connectionEstablished();

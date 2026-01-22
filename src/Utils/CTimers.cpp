@@ -13,6 +13,7 @@
 
 CTimers::CTimers(QObject *parent)
 {
+    (void)parent;
     m_nextId = 1;
 }
 

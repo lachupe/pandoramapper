@@ -38,6 +38,7 @@ CRegion::CRegion()
 {
     name.clear();
     doors.clear();
+    localSpaceId = 0;
 }
 
 CRegion::~CRegion()

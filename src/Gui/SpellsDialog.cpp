@@ -95,7 +95,7 @@ void SpellsDialog::redraw()
 
 void SpellsDialog::save_clicked()
 {
-    TSpell p;
+    TSpell p{};
 
     disableFrame();
 

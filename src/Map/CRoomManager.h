@@ -37,6 +37,25 @@
 class CPlane;
 class CSquare;
 
+struct LocalSpace
+{
+    int id;
+    QByteArray name;
+    float portalX;
+    float portalY;
+    float portalZ;
+    float portalW;
+    float portalH;
+    bool hasPortal;
+    bool hasBounds;
+    float minX;
+    float maxX;
+    float minY;
+    float maxY;
+    float minZ;
+    float maxZ;
+};
+
 class CRoomManager : public QObject
 {
     Q_OBJECT
@@ -44,6 +63,8 @@ class CRoomManager : public QObject
     QList<CRegion *> regions;
     QVector<CRoom *> rooms; /* rooms */
     CRoom *ids[MAX_ROOMS];  /* array of pointers */
+    QVector<LocalSpace> localSpaces;
+    int nextLocalSpaceId;
 
     CPlane *planes; /* planes/levels of the map, sorted by the Z coordinate, lower at first */
 
@@ -52,8 +73,7 @@ class CRoomManager : public QObject
   public:
     CRoomManager();
     virtual ~CRoomManager();
-    void init();
-    void reinit(); /* reinitializer/utilizer */
+    void reinit(); /* clears all data and resets to initial state */
 
     QVector<CRoom *> getRooms() { return rooms; }
     CPlane *getPlanes() { return planes; }
@@ -97,6 +117,13 @@ class CRoomManager : public QObject
     void rebuildRegion(CRegion *reg);
 
     void sendRegionsList();
+    int addLocalSpace(QByteArray name);
+    int addLocalSpaceWithId(QByteArray name, int id);
+    LocalSpace *getLocalSpace(int id);
+    QVector<LocalSpace *> getLocalSpaces();
+    bool setRegionLocalSpace(CRegion *region, int localSpaceId);
+    bool setLocalSpacePortal(int id, float x, float y, float z, float w, float h);
+    void updateLocalSpaceBounds();
 
     QList<CRegion *> getAllRegions();
 

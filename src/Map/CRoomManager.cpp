@@ -263,9 +263,13 @@ void CRoomManager::fixFreeRooms()
 void CRoomManager::addRoom(CRoom *room)
 {
     if (ids[room->id] != nullptr) {
-        print_debug(DEBUG_ROOMS, "Error while adding new element to database! This id already exists!\n");
-        // Whaaaat?
-        // exit(1);
+        print_debug(DEBUG_ROOMS, "Error: Room ID %d already exists! Skipping duplicate.\n", room->id);
+        delete room;  // Clean up the leaked room
+        return;
+    }
+    if (room->id >= MAX_ROOMS) {
+        print_debug(DEBUG_ROOMS, "Error: Room ID %d exceeds MAX_ROOMS (%d)! Skipping.\n", room->id, MAX_ROOMS);
+        delete room;  // Clean up the leaked room
         return;
     }
 
@@ -281,33 +285,12 @@ void CRoomManager::addRoom(CRoom *room)
 /*------------- Constructor of the room manager ---------------*/
 CRoomManager::CRoomManager()
 {
-    init();
-    blocked = false;
-}
-
-void CRoomManager::init()
-{
-    //    QWriteLocker locker(&mapLock);
-
-    print_debug(DEBUG_ROOMS, "Roommanager INIT.\r\n");
-
-    next_free = 1;
-
-    print_debug(DEBUG_ROOMS, "In roomer.init()");
-
-    /* adding first (empty) root elements to the lists */
-    rooms.clear();
-    regions.clear();
-
-    CRegion *region = new CRegion;
-    region->setName("default");
-
-    regions.push_back(region);
-
-    ids[0] = nullptr;
+    // Initialize pointers to safe values before reinit() tries to delete them
     planes = nullptr;
-}
+    blocked = false;
 
+    reinit();
+}
 /*------------- Constructor of the room manager ENDS  ---------------*/
 
 CRegion *CRoomManager::getRegionByName(QByteArray name)
@@ -358,6 +341,122 @@ void CRoomManager::sendRegionsList()
     }
 }
 
+int CRoomManager::addLocalSpace(QByteArray name)
+{
+    return addLocalSpaceWithId(name, nextLocalSpaceId++);
+}
+
+int CRoomManager::addLocalSpaceWithId(QByteArray name, int id)
+{
+    LocalSpace space;
+    space.id = id;
+    space.name = name;
+    space.portalX = 0.0f;
+    space.portalY = 0.0f;
+    space.portalZ = 0.0f;
+    space.portalW = 0.0f;
+    space.portalH = 0.0f;
+    space.hasPortal = false;
+    space.hasBounds = false;
+    space.minX = space.maxX = 0.0f;
+    space.minY = space.maxY = 0.0f;
+    space.minZ = space.maxZ = 0.0f;
+    localSpaces.push_back(space);
+    if (id >= nextLocalSpaceId)
+        nextLocalSpaceId = id + 1;
+    return space.id;
+}
+
+LocalSpace *CRoomManager::getLocalSpace(int id)
+{
+    for (int i = 0; i < localSpaces.size(); i++) {
+        if (localSpaces[i].id == id)
+            return &localSpaces[i];
+    }
+    return nullptr;
+}
+
+QVector<LocalSpace *> CRoomManager::getLocalSpaces()
+{
+    QVector<LocalSpace *> result;
+    result.reserve(localSpaces.size());
+    for (int i = 0; i < localSpaces.size(); i++) {
+        result.append(&localSpaces[i]);
+    }
+    return result;
+}
+
+bool CRoomManager::setRegionLocalSpace(CRegion *region, int localSpaceId)
+{
+    if (!region)
+        return false;
+    if (localSpaceId != 0 && getLocalSpace(localSpaceId) == nullptr)
+        return false;
+    region->setLocalSpaceId(localSpaceId);
+    conf->setDatabaseModified(true);
+    return true;
+}
+
+bool CRoomManager::setLocalSpacePortal(int id, float x, float y, float z, float w, float h)
+{
+    LocalSpace *space = getLocalSpace(id);
+    if (!space)
+        return false;
+    space->portalX = x;
+    space->portalY = y;
+    space->portalZ = z;
+    space->portalW = w;
+    space->portalH = h;
+    space->hasPortal = true;
+    conf->setDatabaseModified(true);
+    return true;
+}
+
+void CRoomManager::updateLocalSpaceBounds()
+{
+    for (int i = 0; i < localSpaces.size(); i++) {
+        localSpaces[i].hasBounds = false;
+    }
+
+    for (int i = 0; i < rooms.size(); i++) {
+        CRoom *room = rooms[i];
+        if (!room)
+            continue;
+        CRegion *region = room->getRegion();
+        if (!region)
+            continue;
+        int localSpaceId = region->getLocalSpaceId();
+        if (localSpaceId <= 0)
+            continue;
+        LocalSpace *space = getLocalSpace(localSpaceId);
+        if (!space)
+            continue;
+
+        float x = static_cast<float>(room->getX());
+        float y = static_cast<float>(room->getY());
+        float z = static_cast<float>(room->getZ());
+        if (!space->hasBounds) {
+            space->minX = space->maxX = x;
+            space->minY = space->maxY = y;
+            space->minZ = space->maxZ = z;
+            space->hasBounds = true;
+        } else {
+            if (x < space->minX)
+                space->minX = x;
+            if (x > space->maxX)
+                space->maxX = x;
+            if (y < space->minY)
+                space->minY = y;
+            if (y > space->maxY)
+                space->maxY = y;
+            if (z < space->minZ)
+                space->minZ = z;
+            if (z > space->maxZ)
+                space->maxZ = z;
+        }
+    }
+}
+
 QList<CRegion *> CRoomManager::getAllRegions()
 {
     // TODO: threadsafety the class regions QMutexLocker locker(mapLock);
@@ -365,30 +464,54 @@ QList<CRegion *> CRoomManager::getAllRegions()
 }
 
 /* -------------- reinit ---------------*/
+/* Clears all map data and resets to initial empty state.
+ * Safe to call from constructor or at runtime.
+ * NOTE: Callers should clear stacker, selections, and engine->addedroom
+ * BEFORE calling this function to avoid dangling pointer issues. */
 void CRoomManager::reinit()
 {
-    //    unlock();
-    //    QWriteLocker locker(&mapLock);
+    print_debug(DEBUG_ROOMS, "CRoomManager::reinit() - clearing %d rooms, %d regions\r\n",
+                rooms.size(), regions.size());
 
+    // Reset counters
     next_free = 1;
-    {
-        CPlane *p, *next;
+    nextLocalSpaceId = 1;
 
-        print_debug(DEBUG_ROOMS, "Resetting Cplane structures ... \r\n");
-        p = planes;
-        while (p) {
-            next = p->next;
-            delete p;
-            p = next;
-        }
-        planes = nullptr;
+    // Clear local spaces
+    localSpaces.clear();
+
+    // Delete and clear all regions, then create fresh default region
+    for (int i = 0; i < regions.size(); i++) {
+        delete regions[i];
     }
+    regions.clear();
+    CRegion *defaultRegion = new CRegion;
+    defaultRegion->setName("default");
+    regions.push_back(defaultRegion);
 
-    memset(ids, 0, MAX_ROOMS * sizeof(CRoom *));
+    // Delete all planes (linked list)
+    CPlane *p = planes;
+    while (p) {
+        CPlane *next = p->next;
+        delete p;
+        p = next;
+    }
+    planes = nullptr;
+
+    // Delete all room objects
+    for (int i = 0; i < rooms.size(); i++) {
+        delete rooms[i];
+    }
     rooms.clear();
-    NameMap.reinit();
-}
 
+    // Clear the ID lookup array
+    memset(ids, 0, MAX_ROOMS * sizeof(CRoom *));
+
+    // Reset the name search tree
+    NameMap.reinit();
+
+    print_debug(DEBUG_ROOMS, "CRoomManager::reinit() complete\r\n");
+}
 /* -------------- reinit ENDS --------- */
 
 /* ------------ delete_room --------- */

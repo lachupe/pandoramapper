@@ -20,6 +20,7 @@
 
 #include <QMutex>
 #include <QMutexLocker>
+#include <algorithm>
 
 #include "defines.h"
 #include "utils.h"
@@ -295,8 +296,18 @@ const struct user_command_type user_commands[] = {
      "    mregion door list                                    list all doors in this region\r\n"
      "    mregion set <name>                                   set current users region\r\n"
      "    mregion list                                         list all regions\r\n"
+     "    mregion show <name>                                  show region info\r\n"
      "    mregion replace                                      replace current rooms region with users region\r\n"
+     "    mregion localspace <region> <id>                     assign region to local space\r\n"
      "    mregion config <autoreplace|render|info>             configuration\r\n\r\n"},
+
+    {"mlocalspace", usercmd_mlocalspace, 0, 0, "Local space tools.",
+     "    Usage: mlocalspace <name>\r\n"
+     "    Usage: mlocalspace list\r\n"
+     "    Example: mlocalspace Moria\r\n\r\n"},
+    {"mportal", usercmd_mportal, 0, USERCMD_FLAG_REDRAW, "Set portal box for a local space.",
+     "    Usage: mportal <localspaceId> <x> <y> <z> <w> <h>\r\n"
+     "    Example: mportal 1 100 200 0 6 6\r\n\r\n"},
 
     {"mtimer", usercmd_mtimer, 0, 0, "Setup and addon timer, additional simple timers and countdown timers",
      "    Usage: mtimer addon <start|stop> <timers-name>\r\n\r\n"
@@ -1677,6 +1688,39 @@ USERCMD(usercmd_mregion)
         return USER_PARSE_SKIP;
     }
 
+    if (is_abbrev(arg, "localspace")) {
+        p = skip_spaces(p);
+        if (!*p) {
+            send_to_user("Missing arguments. Usage: mregion localspace <region> <id>\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        p = one_argument(p, arg, 0);
+        CRegion *reg = Map.getRegionByName(arg);
+        if (!reg) {
+            send_to_user("Failed. No such region!\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        p = skip_spaces(p);
+        if (!*p) {
+            send_to_user("Missing arguments. Usage: mregion localspace <region> <id>\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        p = one_argument(p, arg, 0);
+        int id = 0;
+        if (strcmp(arg, "none") != 0)
+            GET_INT_ARGUMENT(arg, id);
+        if (!Map.setRegionLocalSpace(reg, id)) {
+            send_to_user("Failed. Unknown local space id.\r\n");
+        } else {
+            send_to_user("Ok. Region %s local space set to %d.\r\n", (const char *)reg->getName(), id);
+        }
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
     // -------------------------------------------- DOORS IN REGION
     // ----------------------------------------------------------------------
     if (is_abbrev(arg, "door")) {
@@ -1814,6 +1858,74 @@ USERCMD(usercmd_mregion)
         return USER_PARSE_SKIP;
     }
 
+    if (is_abbrev(arg, "show")) {
+        p = skip_spaces(p);
+        if (!*p) {
+            send_to_user("Missing arguments. Usage: mregion show <name>\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        p = one_argument(p, arg, 0);
+        CRegion *reg = Map.getRegionByName(arg);
+        if (!reg) {
+            send_to_user("Failed. No such region!\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+
+        int roomCount = 0;
+        QVector<CRoom *> rooms = Map.getRooms();
+        for (int i = 0; i < rooms.size(); i++) {
+            CRoom *room = rooms[i];
+            if (room && room->getRegion() == reg)
+                roomCount++;
+        }
+
+        send_to_user("Region %s\r\n", (const char *)reg->getName());
+        send_to_user("  rooms: %d\r\n", roomCount);
+        send_to_user("  localspace: %d\r\n", reg->getLocalSpaceId());
+
+        if (reg->getLocalSpaceId() > 0) {
+            Map.updateLocalSpaceBounds();
+            LocalSpace *space = Map.getLocalSpace(reg->getLocalSpaceId());
+            if (space) {
+            if (space->hasPortal) {
+                send_to_user("  portal: x=%.2f y=%.2f z=%.2f w=%.2f h=%.2f\r\n", space->portalX, space->portalY,
+                             space->portalZ, space->portalW, space->portalH);
+            } else {
+                send_to_user("  portal: <unset>\r\n");
+            }
+                if (space->hasBounds) {
+                    float localW = space->maxX - space->minX;
+                    float localH = space->maxY - space->minY;
+                    float scale = 0.0f;
+                    bool hasW = localW > 0.0f;
+                    bool hasH = localH > 0.0f;
+                    bool hasPortalW = space->portalW > 0.0f;
+                    bool hasPortalH = space->portalH > 0.0f;
+                    if (space->hasPortal) {
+                        if (hasW && hasH && hasPortalW && hasPortalH) {
+                            scale = std::min(space->portalW / localW, space->portalH / localH);
+                        } else if (hasW && hasPortalW) {
+                            scale = space->portalW / localW;
+                        } else if (hasH && hasPortalH) {
+                            scale = space->portalH / localH;
+                        }
+                    }
+                    send_to_user("  bounds: x=%.2f..%.2f y=%.2f..%.2f z=%.2f..%.2f scale=%.4f\r\n", space->minX,
+                                 space->maxX, space->minY, space->maxY, space->minZ, space->maxZ, scale);
+                } else {
+                    send_to_user("  bounds: <unset>\r\n");
+                }
+            } else {
+                send_to_user("  localspace data: <missing>\r\n");
+            }
+        }
+
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
     // ---------------------------------------------------------------- REPLACE REGION IN THIS ROOM
     // --------------------------------------
     if (is_abbrev(arg, "replace")) {
@@ -1923,6 +2035,162 @@ USERCMD(usercmd_mregion)
         return USER_PARSE_SKIP;
     }
 
+    send_prompt();
+    return USER_PARSE_SKIP;
+}
+
+USERCMD(usercmd_mlocalspace)
+{
+    userfunc_print_debug;
+
+    char arg[MAX_STR_LEN];
+    char *p = skip_spaces(line);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mlocalspace <name>|list\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    if (is_abbrev(arg, "list")) {
+        Map.updateLocalSpaceBounds();
+        QVector<LocalSpace *> spaces = Map.getLocalSpaces();
+        if (spaces.isEmpty()) {
+            send_to_user("No local spaces defined.\r\n");
+            send_prompt();
+            return USER_PARSE_SKIP;
+        }
+        send_to_user("Local spaces:\r\n");
+        for (int i = 0; i < spaces.size(); i++) {
+            LocalSpace *space = spaces[i];
+            if (!space)
+                continue;
+            send_to_user("  id=%d name=%s\r\n", space->id, (const char *)space->name);
+            if (space->hasPortal) {
+                send_to_user("    portal: x=%.2f y=%.2f z=%.2f w=%.2f h=%.2f\r\n", space->portalX, space->portalY,
+                             space->portalZ, space->portalW, space->portalH);
+            } else {
+                send_to_user("    portal: <unset>\r\n");
+            }
+            if (space->hasBounds) {
+                float localW = space->maxX - space->minX;
+                float localH = space->maxY - space->minY;
+                float scale = 0.0f;
+                bool hasW = localW > 0.0f;
+                bool hasH = localH > 0.0f;
+                bool hasPortalW = space->portalW > 0.0f;
+                bool hasPortalH = space->portalH > 0.0f;
+                if (space->hasPortal) {
+                    if (hasW && hasH && hasPortalW && hasPortalH) {
+                        scale = std::min(space->portalW / localW, space->portalH / localH);
+                    } else if (hasW && hasPortalW) {
+                        scale = space->portalW / localW;
+                    } else if (hasH && hasPortalH) {
+                        scale = space->portalH / localH;
+                    }
+                }
+                send_to_user("    bounds: x=%.2f..%.2f y=%.2f..%.2f z=%.2f..%.2f scale=%.4f\r\n", space->minX,
+                             space->maxX, space->minY, space->maxY, space->minZ, space->maxZ, scale);
+            } else {
+                send_to_user("    bounds: <unset>\r\n");
+            }
+        }
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    int id = Map.addLocalSpace(arg);
+    send_to_user("Ok. Local space %s created with id %d.\r\n", arg, id);
+    send_prompt();
+    return USER_PARSE_SKIP;
+}
+
+USERCMD(usercmd_mportal)
+{
+    userfunc_print_debug;
+
+    char arg[MAX_STR_LEN];
+    char *p = skip_spaces(line);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <z> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
+    p = one_argument(p, arg, 0);
+    int id = 0;
+    GET_INT_ARGUMENT(arg, id);
+
+    p = skip_spaces(p);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <z> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    bool ok = false;
+    float x = QString(arg).toFloat(&ok);
+    if (!ok) {
+        send_to_user("Bad x value.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = skip_spaces(p);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <z> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    float y = QString(arg).toFloat(&ok);
+    if (!ok) {
+        send_to_user("Bad y value.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = skip_spaces(p);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <z> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    float z = QString(arg).toFloat(&ok);
+    if (!ok) {
+        send_to_user("Bad z value.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = skip_spaces(p);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <z> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    float w = QString(arg).toFloat(&ok);
+    if (!ok) {
+        send_to_user("Bad w value.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = skip_spaces(p);
+    if (!*p) {
+        send_to_user("Missing arguments. Usage: mportal <localspaceId> <x> <y> <z> <w> <h>\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+    p = one_argument(p, arg, 0);
+    float h = QString(arg).toFloat(&ok);
+    if (!ok) {
+        send_to_user("Bad h value.\r\n");
+        send_prompt();
+        return USER_PARSE_SKIP;
+    }
+
+    if (!Map.setLocalSpacePortal(id, x, y, z, w, h)) {
+        send_to_user("Failed. Unknown local space id.\r\n");
+    } else {
+        send_to_user("Ok. Portal set for local space %d.\r\n", id);
+    }
     send_prompt();
     return USER_PARSE_SKIP;
 }
