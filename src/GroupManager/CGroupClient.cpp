@@ -106,6 +106,7 @@ void CGroupClient::connectionEstablished()
 
 void CGroupClient::errorHandler(QAbstractSocket::SocketError socketError)
 {
+    (void)socketError;
     CGroupCommunicator *comm = (CGroupCommunicator *)parent();
     comm->errorInConnection(this);
 }

@@ -112,7 +112,8 @@ int write_debug(unsigned int flag, const char *format, va_list args)
 
     for (i = 0; debug_data[i].name; i++)
         if (IS_SET(flag, debug_data[i].flag) && debug_data[i].state) {
-            fprintf(logfile, "[%li] %s: %s\r\n", debug_timer.elapsed(), debug_data[i].title, txt);
+            fprintf(logfile, "[%lli] %s: %s\r\n", static_cast<long long>(debug_timer.elapsed()), debug_data[i].title,
+                    txt);
             fflush(logfile);
             if (IS_SET(flag, DEBUG_TOUSER))
                 send_to_user("--[ %s: %s\r\n", debug_data[i].title, txt);

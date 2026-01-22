@@ -368,6 +368,7 @@ void Cdispatcher::dispatchBuffer(ProxySocket &c)
                     STUFFING_CLEANUP;
                 continue;
             }
+            break;
         case TELNET:
             switch (c.subState) {
             case T_NORMAL:

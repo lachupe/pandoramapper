@@ -482,21 +482,16 @@ void CActionManager::newFile()
     // by now - just clears the existing one.
 
     if (conf->isDatabaseModified()) {
-        switch (QMessageBox::information(parent, "Pandora",
-                                         "The map contains unsaved changes\n"
-                                         "Do you want to save the changes before exiting?",
-                                         "&Save", "&Discard", "Cancel",
-                                         0,     // Enter == button 0
-                                         2)) {  // Escape == button 2
-        case 0:                                 // Save clicked or Alt+S pressed or Enter pressed.
+        QMessageBox::StandardButton reply = QMessageBox::information(
+            parent, "Pandora",
+            "The map contains unsaved changes\n"
+            "Do you want to save the changes before exiting?",
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+            QMessageBox::Save);
+        if (reply == QMessageBox::Save) {
             save();
-            break;
-        case 1:  // Discard clicked or Alt+D pressed
-            // don't save but exit
-            break;
-        case 2:      // Cancel clicked or Escape pressed
-            return;  // don't exit
-            break;
+        } else if (reply == QMessageBox::Cancel) {
+            return;
         }
     }
 
@@ -773,7 +768,7 @@ void CActionManager::publish_map()
 
     Map.clearAllSecrets();
 
-    print_debug(DEBUG_INTERFACE && DEBUG_ROOMS, "Finished removing secrets from the map!\r\n");
+    print_debug(DEBUG_INTERFACE | DEBUG_ROOMS, "Finished removing secrets from the map!\r\n");
     //    QMessageBox::information(parent, "Removing secrets...", "Done!\n", QMessageBox::Ok);
 }
 

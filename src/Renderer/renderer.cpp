@@ -1049,7 +1049,6 @@ void RendererWidget::drawTextOverlay()
     viewMatrix.rotate(angleZ, 0.0f, 0.0f, 1.0f);
     viewMatrix.translate(userX, userY, 0.0f);
 
-    QMatrix4x4 mvp = projectionMatrix * viewMatrix;
     const float maxDistance = conf->getNotesVisibilityRange();
     const float fadeStart = maxDistance * 0.7f;
     const float depthEpsilon = 0.002f;
@@ -1245,7 +1244,7 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
 
     bool isRoadTerrain = false;
     int terrainIndex = p->getTerrain();
-    if (terrainIndex >= 0 && terrainIndex < conf->sectors.size()) {
+    if (terrainIndex >= 0 && terrainIndex < static_cast<int>(conf->sectors.size())) {
         QByteArray terrainDesc = conf->sectors[terrainIndex].desc;
         isRoadTerrain = (terrainDesc.toUpper() == "ROAD");
     }
@@ -1707,6 +1706,7 @@ void RendererWidget::centerOnRoom(unsigned int id)
 void RendererWidget::draw(void)
 {
     CPlane *plane;
+    int z = 0;
     // const float alphaChannelTable[] = { 0.95, 0.35, 0.30, 0.28, 0.25, 0.15, 0.15, 0.13, 0.1, 0.1, 0.1};
     const float alphaChannelTable[] = {0.95, 0.25, 0.20, 0.15, 0.10, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
     //                                       0    1     2      3    4      5     6    7    8     9    10
@@ -1718,7 +1718,6 @@ void RendererWidget::draw(void)
     glViewport(0, 0, static_cast<GLint>(width() * dpr), static_cast<GLint>(height() * dpr));
 
     redraw = false;
-    int z = 0;
 
     print_debug(DEBUG_RENDERER, "in draw()");
 
@@ -1832,7 +1831,6 @@ void RendererWidget::draw(void)
 void RendererWidget::renderPickupObjects()
 {
     CPlane *plane;
-    int z = 0;
 
     print_debug(DEBUG_RENDERER, "in Object pickup fake draw()");
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1882,8 +1880,6 @@ void RendererWidget::renderPickupObjects()
             plane = plane->next;
             continue;
         }
-
-        z = plane->z - baseZ;
 
         current_plane_z = plane->z;
 

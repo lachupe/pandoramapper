@@ -495,7 +495,7 @@ void CEngine::angryLinker(CRoom *r)
     if (!conf->getAngrylinker())
         return;
 
-    print_debug(DEBUG_ROOMS && DEBUG_ANALYZER, "in AngryLinker");
+    print_debug(DEBUG_ROOMS | DEBUG_ANALYZER, "in AngryLinker");
 
     if (r == nullptr) {
         print_debug(DEBUG_ROOMS, "given room is nullptr");

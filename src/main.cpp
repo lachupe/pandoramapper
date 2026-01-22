@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
     QRect rect = QGuiApplication::primaryScreen()->availableGeometry();
     if (conf->getWindowRect().x() == 0 || conf->getWindowRect().x() >= rect.width() ||
         conf->getWindowRect().y() >= rect.height()) {
-        print_debug(DEBUG_SYSTEM && DEBUG_INTERFACE, "Autosettings for window size and position");
+        print_debug(DEBUG_SYSTEM | DEBUG_INTERFACE, "Autosettings for window size and position");
         int x, y, height, width;
 
         x = rect.width() / 3 * 2;

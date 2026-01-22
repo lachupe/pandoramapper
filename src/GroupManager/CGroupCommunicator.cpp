@@ -69,6 +69,7 @@ void CGroupCommunicator::connectionStateChanged(CGroupClient *connection)
 
 void CGroupCommunicator::connecting(CGroupClient *connection)
 {
+    (void)connection;
     print_debug(DEBUG_GROUP, "CONNECTING. Type %i", type);
     if (type == Client) {
     } else if (type == Server) {
@@ -156,6 +157,11 @@ void CGroupCommunicator::errorInConnection(CGroupClient *connection)
     case QAbstractSocket::ProxyConnectionTimeoutError:
     case QAbstractSocket::ProxyNotFoundError:
     case QAbstractSocket::ProxyProtocolError:
+        getGroup()->connectionError("Network Error ");
+        break;
+    case QAbstractSocket::SslInternalError:
+    case QAbstractSocket::SslInvalidUserDataError:
+    case QAbstractSocket::TemporaryError:
         getGroup()->connectionError("Network Error ");
         break;
     }
@@ -426,12 +432,14 @@ void CGroupCommunicator::retrieveDataServer(CGroupClient *conn, int message, QDo
 //
 void CGroupCommunicator::userLoggedOn(CGroupClient *conn)
 {
+    (void)conn;
     // TODO: call group-function.
     // TODO: message all other peers on server side
 }
 
 void CGroupCommunicator::userLoggedOff(CGroupClient *conn)
 {
+    (void)conn;
     // TODO: call group-function.
     // TODO: message all other peers on server side
 }
@@ -538,6 +546,8 @@ void CGroupCommunicator::sendGroupInformation(CGroupClient *conn)
 
 void CGroupCommunicator::parseGroupInformation(CGroupClient *conn, QDomNode data)
 {
+    (void)conn;
+    (void)data;
     // temporary
     /*
     print_debug(DEBUG_GROUP, "Group Information arrived %s", (const char *) data);
