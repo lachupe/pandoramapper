@@ -40,11 +40,10 @@
 
 class QFont;
 
-// #define DIST_Z    2    /* the distance between 2 rooms */
 #define BASE_Z -12      /* the distance to the "camera" */
 #define ROOM_SIZE 1.0f /* the size of the rooms walls */
-#define WALL_HEIGHT (ROOM_SIZE * 0.8f)
-#define WALL_THICKNESS (ROOM_SIZE * 0.15f)
+#define WALL_HEIGHT (ROOM_SIZE * 0.6f)
+#define WALL_THICKNESS (ROOM_SIZE * 0.10f)
 #define DOOR_WIDTH (ROOM_SIZE * 0.7f)
 #define NEAR_CLIP_PLANE 0.01f /* near clipping plane distance - very close to allow deep zoom */
 // Margin for frustum culling to account for walls, markers, notes extending beyond room center
@@ -166,8 +165,12 @@ class RendererWidget : public QOpenGLWidget, protected QOpenGLFunctions
     GLuint basic_gllist;
     bool redraw;
     unsigned int deletedRoom;
-    GLuint wall_textures[4];
-    GLuint door_textures[4];
+    GLuint wall_texture_default;
+    GLuint wall_texture_forest;
+    GLuint wall_texture_cave;
+    GLuint wall_texture_city;
+    GLuint door_texture_normal;
+    GLuint door_texture_secret;
     GLuint road_textures[16];
     GLuint trail_textures[16];
     GLuint mob_textures[MOB_FLAG_COUNT];

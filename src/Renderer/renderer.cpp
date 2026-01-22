@@ -244,10 +244,12 @@ RendererWidget::RendererWidget(QWidget *parent)
     last_drawn_marker = 0;
     last_drawn_trail = 0;
 
-    for (int i = 0; i < 4; ++i) {
-        wall_textures[i] = 0;
-        door_textures[i] = 0;
-    }
+    wall_texture_default = 0;
+    wall_texture_forest = 0;
+    wall_texture_cave = 0;
+    wall_texture_city = 0;
+    door_texture_normal = 0;
+    door_texture_secret = 0;
     for (int i = 0; i < 16; ++i) {
         road_textures[i] = 0;
         trail_textures[i] = 0;
@@ -475,6 +477,12 @@ void RendererWidget::initializeGL()
     conf->loadNormalTexture(":/images/exit_door.png", &conf->exit_door_texture);
     conf->loadNormalTexture(":/images/exit_secret.png", &conf->exit_secret_texture);
     conf->loadNormalTexture(":/images/exit_undef.png", &conf->exit_undef_texture);
+    conf->loadNormalTexture(pixmapPath("wall-default"), &wall_texture_default);
+    conf->loadNormalTexture(pixmapPath("wall-forest"), &wall_texture_forest);
+    conf->loadNormalTexture(pixmapPath("wall-cave"), &wall_texture_cave);
+    conf->loadNormalTexture(pixmapPath("wall-city"), &wall_texture_city);
+    conf->loadNormalTexture(pixmapPath("door-normal"), &door_texture_normal);
+    conf->loadNormalTexture(pixmapPath("door-secret"), &door_texture_secret);
     for (int mask = 0; mask < 16; ++mask) {
         conf->loadNormalTexture(pixmapPath(roadMaskToName(mask)), &road_textures[mask]);
         conf->loadNormalTexture(pixmapPath(trailMaskToName(mask)), &trail_textures[mask]);
@@ -1209,6 +1217,7 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
     float z1 = dz + WALL_HEIGHT * t.scale;
     float doorHalf = (DOOR_WIDTH * 0.5f) * t.scale;
     float wallThickness = WALL_THICKNESS * t.scale;
+    float wallOverlap = ROOM_SIZE * 0.05f * t.scale;
 
     if (p->getTerrain()) {
         GLuint texture = conf->sectors[p->getTerrain()].texture;
@@ -1244,9 +1253,10 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
 
     bool isRoadTerrain = false;
     int terrainIndex = p->getTerrain();
+    QByteArray terrainDesc;
     if (terrainIndex >= 0 && terrainIndex < static_cast<int>(conf->sectors.size())) {
-        QByteArray terrainDesc = conf->sectors[terrainIndex].desc;
-        isRoadTerrain = (terrainDesc.toUpper() == "ROAD");
+        terrainDesc = conf->sectors[terrainIndex].desc.toUpper();
+        isRoadTerrain = (terrainDesc == "ROAD");
     }
 
     GLuint overlayTexture = 0;
@@ -1319,51 +1329,69 @@ void RendererWidget::appendRoomGeometry(CRoom *p)
 
     const GLfloat wallColor[4] = {0.45f, 0.45f, 0.45f, colour[3]};
     const GLfloat doorColor[4] = {0.70f, 0.55f, 0.35f, colour[3]};
+    const GLfloat secretDoorColor[4] = {0.85f, 0.20f, 0.20f, colour[3]};
+    GLuint wallTexture = wall_texture_default;
+    if (!terrainDesc.isEmpty()) {
+        if (terrainDesc == "FOREST" || terrainDesc == "BRUSH" || terrainDesc == "FIELD") {
+            wallTexture = wall_texture_forest;
+        } else if (terrainDesc == "CAVERN" || terrainDesc == "TUNNEL" || terrainDesc == "MOUNTAINS" ||
+                   terrainDesc == "HILLS" || terrainDesc == "UNDERWATER") {
+            wallTexture = wall_texture_cave;
+        } else if (terrainDesc == "CITY" || terrainDesc == "INDOORS" || terrainDesc == "ROAD") {
+            wallTexture = wall_texture_city;
+        }
+    }
 
     for (int dir = NORTH; dir <= WEST; ++dir) {
         bool hasExit = p->isExitPresent(dir);
         bool hasDoor = !p->getDoor(dir).isEmpty() || (p->getMMExitFlags(dir) & MM_EXIT_DOOR) ||
                        (p->getMMDoorFlags(dir) != 0);
+        bool secretDoor = hasDoor && p->isDoorSecret(dir);
+        if (wallTexture == 0 && terrainIndex >= 0 && terrainIndex < static_cast<int>(conf->sectors.size())) {
+            wallTexture = conf->sectors[terrainIndex].texture;
+        }
+        GLuint doorTexture = secretDoor ? door_texture_secret : door_texture_normal;
+        const GLfloat *doorTint = secretDoor ? secretDoorColor : doorColor;
 
         if (dir == NORTH) {
-            float wy0 = yMax - wallThickness;
-            float wy1 = yMax;
+            float wy0 = yMax - wallThickness * 0.5f;
+            float wy1 = yMax + wallThickness * 0.5f;
             if (!hasExit) {
-                appendWallPrism(xMin, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(xMin - wallOverlap, xMax + wallOverlap, wy0, wy1, z0, z1, wallColor, wallTexture);
             } else if (hasDoor) {
-                appendWallPrism(xMin, dx - doorHalf, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
-                appendWallPrism(dx + doorHalf, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
-                appendWallPrism(dx - doorHalf, dx + doorHalf, wy0, wy1, z0, z1, doorColor, door_textures[dir]);
+                appendWallPrism(xMin - wallOverlap, dx - doorHalf, wy0, wy1, z0, z1, wallColor, wallTexture);
+                appendWallPrism(dx + doorHalf, xMax + wallOverlap, wy0, wy1, z0, z1, wallColor, wallTexture);
+                appendWallPrism(dx - doorHalf, dx + doorHalf, wy0, wy1, z0, z1, doorTint, doorTexture);
             }
         } else if (dir == SOUTH) {
-            float wy0 = yMin;
-            float wy1 = yMin + wallThickness;
+            float wy0 = yMin - wallThickness * 0.5f;
+            float wy1 = yMin + wallThickness * 0.5f;
             if (!hasExit) {
-                appendWallPrism(xMin, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(xMin - wallOverlap, xMax + wallOverlap, wy0, wy1, z0, z1, wallColor, wallTexture);
             } else if (hasDoor) {
-                appendWallPrism(xMin, dx - doorHalf, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
-                appendWallPrism(dx + doorHalf, xMax, wy0, wy1, z0, z1, wallColor, wall_textures[dir]);
-                appendWallPrism(dx - doorHalf, dx + doorHalf, wy0, wy1, z0, z1, doorColor, door_textures[dir]);
+                appendWallPrism(xMin - wallOverlap, dx - doorHalf, wy0, wy1, z0, z1, wallColor, wallTexture);
+                appendWallPrism(dx + doorHalf, xMax + wallOverlap, wy0, wy1, z0, z1, wallColor, wallTexture);
+                appendWallPrism(dx - doorHalf, dx + doorHalf, wy0, wy1, z0, z1, doorTint, doorTexture);
             }
         } else if (dir == EAST) {
-            float wx0 = xMax - wallThickness;
-            float wx1 = xMax;
+            float wx0 = xMax - wallThickness * 0.5f;
+            float wx1 = xMax + wallThickness * 0.5f;
             if (!hasExit) {
-                appendWallPrism(wx0, wx1, yMin, yMax, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(wx0, wx1, yMin - wallOverlap, yMax + wallOverlap, z0, z1, wallColor, wallTexture);
             } else if (hasDoor) {
-                appendWallPrism(wx0, wx1, yMin, dy - doorHalf, z0, z1, wallColor, wall_textures[dir]);
-                appendWallPrism(wx0, wx1, dy + doorHalf, yMax, z0, z1, wallColor, wall_textures[dir]);
-                appendWallPrism(wx0, wx1, dy - doorHalf, dy + doorHalf, z0, z1, doorColor, door_textures[dir]);
+                appendWallPrism(wx0, wx1, yMin - wallOverlap, dy - doorHalf, z0, z1, wallColor, wallTexture);
+                appendWallPrism(wx0, wx1, dy + doorHalf, yMax + wallOverlap, z0, z1, wallColor, wallTexture);
+                appendWallPrism(wx0, wx1, dy - doorHalf, dy + doorHalf, z0, z1, doorTint, doorTexture);
             }
         } else if (dir == WEST) {
-            float wx0 = xMin;
-            float wx1 = xMin + wallThickness;
+            float wx0 = xMin - wallThickness * 0.5f;
+            float wx1 = xMin + wallThickness * 0.5f;
             if (!hasExit) {
-                appendWallPrism(wx0, wx1, yMin, yMax, z0, z1, wallColor, wall_textures[dir]);
+                appendWallPrism(wx0, wx1, yMin - wallOverlap, yMax + wallOverlap, z0, z1, wallColor, wallTexture);
             } else if (hasDoor) {
-                appendWallPrism(wx0, wx1, yMin, dy - doorHalf, z0, z1, wallColor, wall_textures[dir]);
-                appendWallPrism(wx0, wx1, dy + doorHalf, yMax, z0, z1, wallColor, wall_textures[dir]);
-                appendWallPrism(wx0, wx1, dy - doorHalf, dy + doorHalf, z0, z1, doorColor, door_textures[dir]);
+                appendWallPrism(wx0, wx1, yMin - wallOverlap, dy - doorHalf, z0, z1, wallColor, wallTexture);
+                appendWallPrism(wx0, wx1, dy + doorHalf, yMax + wallOverlap, z0, z1, wallColor, wallTexture);
+                appendWallPrism(wx0, wx1, dy - doorHalf, dy + doorHalf, z0, z1, doorTint, doorTexture);
             }
         }
     }
@@ -1671,12 +1699,6 @@ void RendererWidget::setupNewBaseCoordinates()
         cury = t.pos.y();
         curz = t.pos.z() + userLayerShift;
         baseRoom = newRoom;
-
-        //        printf("Base room: %i\r\n", newRoom->id);
-        //        fflush(stdout);
-    } else {
-        //        printf("No base room for coordinates setup found!\r\n");
-        //        fflush(stdout);
     }
 }
 
@@ -1691,16 +1713,6 @@ void RendererWidget::centerOnRoom(unsigned int id)
     userX = (double)(curx - t.pos.x());
     userY = (double)(cury - t.pos.y());
     changeUserLayerShift(0 - static_cast<int>(std::lround(curz - t.pos.z())));
-
-    /*
-        curx = r->getX();
-        cury = r->getY();
-        curz = r->getZ();
-        userx = 0;
-        usery = 0;
-        userLayerShift = 0;
-    */
-
     toggle_renderer_reaction();
 }
 
@@ -1738,6 +1750,10 @@ void RendererWidget::draw(void)
     glLoadIdentity();
 
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //    glEnable(GL_DEPTH_TEST);
@@ -1839,6 +1855,9 @@ void RendererWidget::renderPickupObjects()
     glLoadIdentity();
 
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
 
     glColor3ub(255, 0, 0);
 
@@ -1970,6 +1989,8 @@ bool RendererWidget::doSelect(QPoint pos, unsigned int &id)
     glViewport(0, 0, fboSize.width(), fboSize.height());
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

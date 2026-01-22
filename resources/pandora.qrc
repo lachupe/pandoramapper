@@ -150,5 +150,11 @@
     <file alias="wall-north.png">pixmaps/wall-north.png</file>
     <file alias="wall-south.png">pixmaps/wall-south.png</file>
     <file alias="wall-west.png">pixmaps/wall-west.png</file>
+    <file alias="wall-default.png">pixmaps/wall-default.png</file>
+    <file alias="wall-forest.png">pixmaps/wall-forest.png</file>
+    <file alias="wall-cave.png">pixmaps/wall-cave.png</file>
+    <file alias="wall-city.png">pixmaps/wall-city.png</file>
+    <file alias="door-normal.png">pixmaps/door-normal.png</file>
+    <file alias="door-secret.png">pixmaps/door-secret.png</file>
   </qresource>
 </RCC>
